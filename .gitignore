@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# Environment
+.env
+
+# Run artifacts (large, reproducible)
+runs/
+
+# IDE
+.vscode/
+.idea/
