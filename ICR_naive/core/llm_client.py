@@ -28,9 +28,14 @@ load_dotenv(Path(__file__).parent.parent.parent / "SAIR_evaluation_pipeline" / "
 load_dotenv(Path(__file__).parent.parent / ".env")
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
-MAX_TOKENS = 16_000  # match SAIR pipeline — reasoning models need space
-MAX_RETRIES = 3
-RETRY_BASE_DELAY = 2.0  # seconds; doubles on each retry
+OPENAI_URL     = "https://api.openai.com/v1/chat/completions"
+MAX_TOKENS     = 16_000
+MAX_RETRIES    = 3
+RETRY_BASE_DELAY = 2.0
+
+# Models whose names start with these prefixes are routed to OpenAI directly
+# when OPENAI_API_KEY is set.
+_OPENAI_PREFIXES = ("gpt-4", "gpt-3", "o1", "o3", "o4")
 
 
 def get_api_key() -> str:
@@ -38,6 +43,22 @@ def get_api_key() -> str:
     if not key:
         raise SystemExit("Error: OPENROUTER_API_KEY environment variable is not set.")
     return key
+
+
+def _resolve_endpoint(model: str) -> tuple[str, str, bool]:
+    """
+    Return (url, api_key, is_openai) for the given model.
+
+    If OPENAI_API_KEY is set and the model name matches an OpenAI prefix,
+    route to the OpenAI endpoint using that key.
+    Otherwise fall back to OpenRouter with OPENROUTER_API_KEY.
+    """
+    openai_key = os.environ.get("OPENAI_API_KEY", "")
+    # Strip "openai/" vendor prefix if present (OpenRouter uses it, OpenAI doesn't)
+    bare = model.removeprefix("openai/")
+    if openai_key and bare.startswith(_OPENAI_PREFIXES):
+        return OPENAI_URL, openai_key, True
+    return OPENROUTER_URL, os.environ.get("OPENROUTER_API_KEY", ""), False
 
 
 # ---------------------------------------------------------------------------
@@ -61,27 +82,29 @@ def call_llm(
       Sent as {"reasoning": {"effort": ...}} for models that support it
       (e.g. gpt-oss-120b, Claude 3.7+). Set to None to omit.
     """
+    url, resolved_key, is_openai = _resolve_endpoint(model)
+    # OpenAI uses the bare model name without vendor prefix
+    model_name = model.removeprefix("openai/") if is_openai else model
+
     payload: dict = {
-        "model": model,
+        "model": model_name,
         "messages": [{"role": "user", "content": prompt}],
         "max_tokens": max_tokens,
         "temperature": temperature,
     }
-    if reasoning_effort is not None:
+    # reasoning effort is OpenRouter-only; OpenAI uses its own parameter style
+    if reasoning_effort is not None and not is_openai:
         payload["reasoning"] = {"effort": reasoning_effort}
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {api_key}",
-        "HTTP-Referer": "https://github.com/sair-evaluation",
-        "X-Title": "SAIR ICRefine",
-    }
+
+    headers = {"Content-Type": "application/json", "Authorization": f"Bearer {resolved_key}"}
+    if not is_openai:
+        headers["HTTP-Referer"] = "https://github.com/sair-evaluation"
+        headers["X-Title"]      = "SAIR ICRefine"
 
     delay = RETRY_BASE_DELAY
     for attempt in range(1, MAX_RETRIES + 1):
         try:
-            resp = requests.post(
-                OPENROUTER_URL, json=payload, headers=headers, timeout=120
-            )
+            resp = requests.post(url, json=payload, headers=headers, timeout=120)
             if resp.status_code in (429,) or resp.status_code >= 500:
                 if attempt < MAX_RETRIES:
                     time.sleep(delay)

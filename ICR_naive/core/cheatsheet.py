@@ -124,6 +124,26 @@ class Cheatsheet:
                 file=sys.stderr,
             )
 
+    def patch_decision_tree(self, patch_text: str) -> None:
+        """
+        Append a DT patch block produced by the reasoning-aware case study generator.
+
+        Patches are appended after the existing decision tree text.  If the combined
+        length exceeds DECISION_TREE_MAX_CHARS, render() will truncate the oldest
+        content (from the beginning of the DT), so newly added rules survive.
+        """
+        patch_text = patch_text.strip()
+        if not patch_text:
+            return
+        self.decision_tree = self.decision_tree.rstrip() + "\n\n" + patch_text
+        dt_len = len(self.decision_tree)
+        if dt_len > DECISION_TREE_MAX_CHARS:
+            print(
+                f"  [cheatsheet] decision_tree is {dt_len:,} chars after patch — "
+                f"oldest DT content will be truncated in render (cap={DECISION_TREE_MAX_CHARS}).",
+                file=sys.stderr,
+            )
+
     # ------------------------------------------------------------------
     # Persistence
     # ------------------------------------------------------------------

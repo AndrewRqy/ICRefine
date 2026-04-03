@@ -10,13 +10,26 @@ Uses call_llm_batch() so all items are scored in parallel.
 
 from __future__ import annotations
 
-import re
 import sys
+import os as _os
 from dataclasses import dataclass, field
 
 from ..core.data import _is_true
 from ..core.llm_client import call_llm_batch
 from ..prompts.templates import SCORING_PROMPT, SCORING_MAX_TOKENS
+
+# Re-use SAIR's battle-tested parser so verdict extraction is consistent
+# across ICRefine and the SAIR evaluation pipeline.
+import re as _re
+_sair_path = str(_os.path.join(_os.path.dirname(__file__), "..", "..", "..", "SAIR_evaluation_pipeline"))
+if _sair_path not in sys.path:
+    sys.path.insert(0, _sair_path)
+from pipeline.parser import parse_response as _sair_parse
+
+_MD_BOLD_RE = _re.compile(r"\*{1,2}(VERDICT|REASONING|PROOF|COUNTEREXAMPLE):\*{0,2}", _re.IGNORECASE)
+
+def _normalize(text: str) -> str:
+    return _MD_BOLD_RE.sub(lambda m: m.group(1).upper() + ":", text)
 
 
 # ---------------------------------------------------------------------------
@@ -32,18 +45,14 @@ def _build_scoring_prompt(cheatsheet_text: str, item: dict) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Verdict parsing
+# Verdict parsing — delegates to SAIR's anchored multiline parser
 # ---------------------------------------------------------------------------
-
-_VERDICT_RE = re.compile(r"VERDICT\s*:\s*(TRUE|FALSE)", re.IGNORECASE)
-
 
 def _parse_verdict(text: str | None) -> str | None:
     """Return 'TRUE', 'FALSE', or None if the response cannot be parsed."""
     if not text:
         return None
-    m = _VERDICT_RE.search(text)
-    return m.group(1).upper() if m else None
+    return _sair_parse(_normalize(text))["verdict"]
 
 
 # ---------------------------------------------------------------------------

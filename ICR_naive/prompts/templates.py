@@ -180,3 +180,23 @@ REASONING: must be non-empty.
 PROOF: if VERDICT is TRUE, provide a proof; otherwise leave empty.
 COUNTEREXAMPLE: if VERDICT is FALSE, provide a counterexample magma; otherwise leave empty.\
 """
+
+# Variant: reasoning written BEFORE the verdict so the model cannot anchor on a
+# verdict first and reverse-engineer justification. This forces a genuine reasoning
+# trace that is available as post_think for the case study generator.
+SCORING_PROMPT_COT_FIRST = """\
+You are a mathematician specializing in equational theories of magmas.
+Your task is to determine whether Equation 1 ({equation1}) implies Equation 2 \
+({equation2}) over all magmas.
+
+Use the following decision guide to inform your determination:
+
+{cheatsheet}
+
+Work through your reasoning step by step BEFORE stating your verdict.
+Output format (use exact headers in this exact order, no extra text):
+REASONING: apply the decision guide step by step; explain which rule fires and why.
+VERDICT: must be exactly TRUE or FALSE (in the same line, after REASONING).
+PROOF: if VERDICT is TRUE, provide a proof; otherwise leave empty.
+COUNTEREXAMPLE: if VERDICT is FALSE, provide a counterexample magma; otherwise leave empty.\
+"""
