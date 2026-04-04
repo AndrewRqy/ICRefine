@@ -87,7 +87,7 @@ def score_batch(
     model: str,
     api_key: str,
     concurrency: int = 10,
-    temperature: float = 1.0,
+    temperature: float = 0.0,
     progress_label: str = "scoring",
     reasoning_effort: str | None = "low",
 ) -> tuple[list[dict], list[dict]]:
@@ -133,7 +133,7 @@ def test_cheatsheet(
     model: str,
     api_key: str,
     concurrency: int = 10,
-    temperature: float = 1.0,
+    temperature: float = 0.0,
     reasoning_effort: str | None = "low",
 ) -> TestResult:
     """

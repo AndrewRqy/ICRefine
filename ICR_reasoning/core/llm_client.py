@@ -105,7 +105,7 @@ def call_llm(
     delay = RETRY_BASE_DELAY
     for attempt in range(1, MAX_RETRIES + 1):
         try:
-            resp = requests.post(url, json=payload, headers=headers, timeout=180)
+            resp = requests.post(url, json=payload, headers=headers, timeout=(10, 90))
             if resp.status_code == 429 or resp.status_code >= 500:
                 if attempt < MAX_RETRIES:
                     print(

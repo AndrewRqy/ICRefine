@@ -84,8 +84,8 @@ def _build_parser() -> argparse.ArgumentParser:
     g.add_argument("--no-flush-remainder",     action="store_true")
     g.add_argument("--no-dt-patch",            action="store_true",
                    help="Skip applying decision tree patches (case studies only).")
-    g.add_argument("--cot-first",              action="store_true",
-                   help="Put REASONING before VERDICT in scoring prompt so the model reasons before committing.")
+    g.add_argument("--cot-first",              action="store_true", default=False,
+                   help="Put REASONING before VERDICT in scoring prompt (default: off, matches SAIR eval).")
     g.add_argument("--no-analysis",            action="store_true",
                    help="Skip the final reasoning analysis stage.")
     g.add_argument("--reasoning-effort", default="low",
