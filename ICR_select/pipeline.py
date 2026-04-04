@@ -87,6 +87,9 @@ def _build_parser() -> argparse.ArgumentParser:
                    help="Maximum fraction of correct-pool items a candidate may break.")
     g.add_argument("--no-similarity-gate", action="store_true",
                    help="Skip LLM similarity/dedup check (faster, less selective).")
+    g.add_argument("--validate-merge", action="store_true",
+                   help="Before committing a merge, verify the merged entry fixes at least as "
+                        "many failures as the existing one. If not, add as a new entry instead.")
 
     g = p.add_argument_group("Maintenance")
     g.add_argument("--ablation-every", type=int, default=5, metavar="N",
@@ -222,6 +225,7 @@ def main() -> None:
         fix_rate_threshold=args.fix_rate_threshold,
         regress_threshold=args.regress_threshold,
         similarity_gate=not args.no_similarity_gate,
+        validate_merge=args.validate_merge,
         ablation_every=args.ablation_every,
         condense_at=args.condense_at,
         flush_remainder=not args.no_flush_remainder,

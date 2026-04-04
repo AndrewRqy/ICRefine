@@ -114,7 +114,7 @@ The full quality-gated pipeline. Every candidate case study must pass four gates
 1. **Candidate competition** — generate N candidates, pick the best
 2. **Fix-rate gate** — best candidate must fix ≥ `fix-rate-threshold` of the failure batch
 3. **Regression gate** — must not break > `regress-threshold` of previously-correct items
-4. **Similarity gate** — LLM dedup: skip if duplicate, merge if overlapping, add if genuinely new
+4. **Similarity gate** — LLM dedup: skip if duplicate, merge if overlapping, add if genuinely new. With `--validate-merge`, a merge is only committed if the merged entry fixes at least as many failures as the existing one — otherwise the candidate is added as a new entry instead
 
 Periodic maintenance:
 - **Ablation pruning** — every N flushes, remove case studies with zero marginal contribution
@@ -163,6 +163,7 @@ python -m ICR_select.pipeline \
 | `--fix-rate-threshold F` | `0.5` | Min fraction of failures a candidate must fix |
 | `--regress-threshold F` | `0.1` | Max fraction of correct-pool items a candidate may break |
 | `--no-similarity-gate` | off | Skip LLM dedup check (faster, less selective) |
+| `--validate-merge` | off | Before committing a merge, verify the merged entry fixes at least as many failures as the existing one. If not, add the candidate as a new entry instead |
 
 **Maintenance**
 

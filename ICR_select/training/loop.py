@@ -114,6 +114,32 @@ def _mini_eval(
     return len(correct) / len(failures) if failures else 0.0
 
 
+def _replace_eval(
+    merged_cs: str,
+    merge_idx: int,
+    failures: list[dict],
+    cheatsheet: Cheatsheet,
+    model_score: str,
+    api_key: str,
+    concurrency: int,
+    reasoning_effort: str | None,
+    cot_first: bool,
+) -> float:
+    """Score the failure batch with CS at merge_idx replaced by merged_cs. Returns fix_rate."""
+    new_studies = cheatsheet.case_studies[:]
+    new_studies[merge_idx] = merged_cs
+    temp = Cheatsheet(
+        decision_tree=cheatsheet.decision_tree,
+        case_studies=new_studies,
+    )
+    correct, _ = score_batch(
+        failures, temp.render(), model_score, api_key,
+        concurrency=concurrency, reasoning_effort=reasoning_effort, cot_first=cot_first,
+        progress_label="merge-eval-merged",
+    )
+    return len(correct) / len(failures) if failures else 0.0
+
+
 def _regression_check(
     candidate_cs: str,
     correct_pool: list[dict],
@@ -385,6 +411,7 @@ def run_training_loop(
     fix_rate_threshold: float = 0.5,
     regress_threshold: float = 0.1,
     similarity_gate: bool = True,
+    validate_merge: bool = False,
     # Maintenance
     ablation_every: int = 5,
     condense_at: int = 6,
@@ -423,7 +450,8 @@ def run_training_loop(
         f"  items={len(train_items)}  batch={batch_size}  bin={bin_threshold}\n"
         f"  n_candidates={n_candidates}  fix_rate≥{fix_rate_threshold}  "
         f"regress≤{regress_threshold}\n"
-        f"  ablation_every={ablation_every}  condense_at={condense_at}\n"
+        f"  validate_merge={validate_merge}  "
+        f"ablation_every={ablation_every}  condense_at={condense_at}\n"
         f"  model_score={model_score}\n"
         f"  model_casestudy={model_casestudy}\n"
         f"{'='*60}"
@@ -512,16 +540,67 @@ def run_training_loop(
             if action == "MERGE" and merge_idx is not None:
                 existing = cheatsheet.case_studies[merge_idx]
                 merged   = _merge_case_studies(existing, best_cand, model_casestudy, api_key)
-                cheatsheet.case_studies[merge_idx] = merged
-                n_merges += 1
-                flush_count += 1
-                _log(f"  [merge] updated CS {merge_idx+1} in-place.")
-                update_log.append({
-                    "event": "bin_merged", "batch": batch_num,
-                    "merged_into": merge_idx + 1,
-                    "fix_rate": best_fix_rate, "regression_rate": reg_rate,
-                })
-                return
+
+                if validate_merge:
+                    # Score failures with existing CS in place (baseline)
+                    correct_base, _ = score_batch(
+                        failures, cheatsheet.render(), model_score, api_key,
+                        concurrency=concurrency, reasoning_effort=reasoning_effort,
+                        cot_first=cot_first, progress_label="merge-eval-baseline",
+                    )
+                    existing_fix_rate = len(correct_base) / len(failures) if failures else 0.0
+
+                    # Score failures with merged CS replacing the existing entry
+                    merged_fix_rate = _replace_eval(
+                        merged, merge_idx, failures, cheatsheet, model_score, api_key,
+                        concurrency, reasoning_effort, cot_first,
+                    )
+                    _log(
+                        f"  [gate:merge_validate] existing_fix_rate={existing_fix_rate:.0%}  "
+                        f"merged_fix_rate={merged_fix_rate:.0%}"
+                    )
+
+                    if merged_fix_rate < existing_fix_rate:
+                        # Merge would hurt — fall through to ADD instead
+                        _log(
+                            f"  [gate:merge_validate] merged ({merged_fix_rate:.0%}) < "
+                            f"existing ({existing_fix_rate:.0%}) — rejecting merge, "
+                            f"adding candidate as new entry."
+                        )
+                        update_log.append({
+                            "event": "merge_rejected", "batch": batch_num,
+                            "merge_idx": merge_idx + 1,
+                            "existing_fix_rate": existing_fix_rate,
+                            "merged_fix_rate": merged_fix_rate,
+                        })
+                        # Fall through to ADD below
+                    else:
+                        cheatsheet.case_studies[merge_idx] = merged
+                        n_merges += 1
+                        flush_count += 1
+                        _log(
+                            f"  [merge] validated and updated CS {merge_idx+1} in-place "
+                            f"({existing_fix_rate:.0%} → {merged_fix_rate:.0%})."
+                        )
+                        update_log.append({
+                            "event": "bin_merged", "batch": batch_num,
+                            "merged_into": merge_idx + 1,
+                            "fix_rate": best_fix_rate, "regression_rate": reg_rate,
+                            "existing_fix_rate": existing_fix_rate,
+                            "merged_fix_rate": merged_fix_rate,
+                        })
+                        return
+                else:
+                    cheatsheet.case_studies[merge_idx] = merged
+                    n_merges += 1
+                    flush_count += 1
+                    _log(f"  [merge] updated CS {merge_idx+1} in-place.")
+                    update_log.append({
+                        "event": "bin_merged", "batch": batch_num,
+                        "merged_into": merge_idx + 1,
+                        "fix_rate": best_fix_rate, "regression_rate": reg_rate,
+                    })
+                    return
 
         # ── ADD ─────────────────────────────────────────────────────────────
         cheatsheet.add_case_study(best_cand)
