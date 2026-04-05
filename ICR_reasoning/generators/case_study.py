@@ -25,6 +25,7 @@ from dataclasses import dataclass
 from ICR_naive.core.cheatsheet import Cheatsheet
 from ICR_naive.core.data import _is_true
 from ..core.llm_client import call_llm
+from ..core.oracle import OracleDict
 from ..prompts.templates import CASE_STUDY_WITH_REASONING_PROMPT, FLUSH_MAX_TOKENS
 
 
@@ -42,21 +43,35 @@ class CaseStudyResult:
 # Failure formatting — includes post_think
 # ---------------------------------------------------------------------------
 
-def _format_failures_with_reasoning(failures: list[dict]) -> str:
+def _format_failures_with_reasoning(
+    failures: list[dict],
+    oracle: OracleDict | None = None,
+) -> str:
     lines = []
     for i, it in enumerate(failures, 1):
         expected   = "TRUE" if _is_true(it["answer"]) else "FALSE"
         predicted  = it.get("predicted", "?")
         post_think = it.get("post_think", "").strip()
 
-        lines.append(
+        block = (
             f"--- Failure {i} ---\n"
             f"  E1 = {it['equation1']}\n"
             f"  E2 = {it['equation2']}\n"
             f"  expected={expected}  predicted={predicted}\n"
-            f"  Model's reasoning (post-think):\n"
+            f"  WRONG reasoning (model's post-think):\n"
             f"    {post_think if post_think else '(not captured)'}"
         )
+
+        if oracle:
+            key = (it["equation1"].strip(), it["equation2"].strip())
+            correct_reasoning = oracle.get(key, "")
+            if correct_reasoning:
+                block += (
+                    f"\n  CORRECT reasoning (oracle):\n"
+                    f"    {correct_reasoning}"
+                )
+
+        lines.append(block)
     return "\n\n".join(lines)
 
 
@@ -113,6 +128,7 @@ def generate_case_study_with_reasoning(
     model: str,
     api_key: str,
     temperature: float = 0.3,
+    oracle: OracleDict | None = None,
 ) -> CaseStudyResult:
     """
     Generate a new case study AND a decision tree patch using each failure's
@@ -127,6 +143,9 @@ def generate_case_study_with_reasoning(
     model      : model ID for case study generation
     api_key    : API key
     temperature: generation temperature
+    oracle     : optional dict mapping (eq1, eq2) -> correct reasoning text;
+                 when provided, the correct reasoning is shown alongside the
+                 wrong model reasoning as a contrast signal
 
     Returns
     -------
@@ -136,16 +155,21 @@ def generate_case_study_with_reasoning(
     if not failures:
         raise ValueError("generate_case_study_with_reasoning called with empty failures list.")
 
+    n_with_oracle = sum(
+        1 for it in failures
+        if oracle and (it["equation1"].strip(), it["equation2"].strip()) in oracle
+    ) if oracle else 0
     print(
         f"  [bin flush] Generating reasoning-aware case study + DT patch "
-        f"from {len(failures)} failures with {model} ...",
+        f"from {len(failures)} failures with {model} "
+        f"({n_with_oracle} have oracle contrast) ...",
         file=sys.stderr,
     )
 
     prompt = CASE_STUDY_WITH_REASONING_PROMPT.format(
         decision_tree=cheatsheet.decision_tree.strip(),
         case_studies=_render_case_studies_text(cheatsheet),
-        failure_lines=_format_failures_with_reasoning(failures),
+        failure_lines=_format_failures_with_reasoning(failures, oracle=oracle),
     )
 
     resp = call_llm(

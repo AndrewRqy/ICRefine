@@ -29,6 +29,7 @@ from ICR_naive.core.cheatsheet import Cheatsheet
 from ICR_naive.core.data import load_jsonl, split_dataset
 from ICR_naive.generators.initial import DEFAULT_MODEL, generate_initial_cheatsheet
 from ICR_reasoning.core.llm_client import get_api_key
+from ICR_reasoning.core.oracle import load_oracle_csv
 from .training.loop import run_training_loop
 from .training.outer_loop import run_outer_loop
 from .prompts.templates import N_CANDIDATES
@@ -58,6 +59,10 @@ def _build_parser() -> argparse.ArgumentParser:
     g.add_argument("--seed",        type=int,   default=42,   metavar="SEED")
     g.add_argument("--limit",       type=int,   default=None, metavar="N",
                    help="Cap training items to first N.")
+    g.add_argument("--oracle-csv",  default=None,  metavar="FILE",
+                   help="Path to GPT-5.4 oracle CSV (gpt5.4_normal_default.csv). "
+                        "When provided, correct oracle reasoning is injected into "
+                        "the case study generation prompt as a contrast signal.")
 
     g = p.add_argument_group("Init (mutually exclusive modes)")
     mx = g.add_mutually_exclusive_group()
@@ -135,6 +140,13 @@ def main() -> None:
     # Load dataset
     # ------------------------------------------------------------------
     all_items = load_jsonl(Path(args.dataset))
+
+    # ------------------------------------------------------------------
+    # Load oracle (optional)
+    # ------------------------------------------------------------------
+    oracle = load_oracle_csv(Path(args.oracle_csv)) if args.oracle_csv else None
+    if oracle:
+        _log(f"\n[Oracle] {len(oracle)} correct reasoning traces loaded.")
 
     if args.val_dataset:
         val_items = load_jsonl(Path(args.val_dataset))
@@ -222,6 +234,7 @@ def main() -> None:
         batch_size=args.batch_size,
         concurrency=args.concurrency,
         n_candidates=args.n_candidates,
+        oracle=oracle,
         fix_rate_threshold=args.fix_rate_threshold,
         regress_threshold=args.regress_threshold,
         similarity_gate=not args.no_similarity_gate,

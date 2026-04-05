@@ -46,14 +46,17 @@ equation implication decisions.
 === NEW CANDIDATE ===
 {candidate}
 
-Does the new candidate cover substantially the same structural pattern as any \
-existing case study?
+Compare the IDENTIFY conditions of the new candidate against each existing entry.
+Two case studies are duplicates if their IDENTIFY conditions would fire on the
+same set of equation pairs — even if they are worded differently or have different
+titles. Focus on the structural conditions (equation forms, variable counts,
+nesting patterns), not the surface text.
 
 Reply with EXACTLY one of the following — no explanation, no extra text:
-  ADD       — genuinely new pattern not covered by any existing entry
-  SKIP      — an existing entry already covers this pattern well enough
-  MERGE:N   — the new candidate should be merged INTO existing case study N \
-(replace N with the integer number shown above)\
+  ADD       — the IDENTIFY conditions are genuinely distinct from all existing entries
+  SKIP      — an existing entry has IDENTIFY conditions that cover the same cases
+  MERGE:N   — the new candidate's IDENTIFY conditions overlap with entry N and \
+should be merged into it (replace N with the integer number shown above)\
 """
 
 SIMILARITY_MAX_TOKENS = 12   # only needs "ADD", "SKIP", or "MERGE:3"
@@ -66,10 +69,12 @@ MERGE_PROMPT = """\
 Merge these two case studies about magma equation implication into ONE combined entry.
 
 Rules:
-- Keep all DISTINCT rules, examples, and exceptions from both.
-- Eliminate redundant or duplicate examples.
+- Combine the IDENTIFY conditions from both: the merged entry should fire when
+  either set of conditions is met. If the conditions overlap, write the tightest
+  combined checklist that covers both without becoming too broad.
+- Keep the most informative example from each.
 - The merged result must fit within 600 characters total.
-- Reference the specific decision tree step that applies.
+- The DOES NOT APPLY TO section must cover the boundary cases from both originals.
 
 === CASE STUDY A ===
 {cs_a}
@@ -78,13 +83,13 @@ Rules:
 {cs_b}
 
 Output ONLY the merged case study using this exact format:
-=== CASE STUDY: [short descriptive title] ===
-PATTERN: [one sentence — the structural feature that identifies this class]
-RULE: IF [condition] THEN [TRUE / FALSE / lean TRUE / lean FALSE]
+=== CASE STUDY: [short specific title] ===
+IDENTIFY: [combined checklist of conditions — all must be true for this to fire]
+ACTION: [what to conclude]
 WHY: [1-2 sentence mathematical justification]
 EXAMPLES:
   • E1 = ...  |  E2 = ...  |  Answer: TRUE/FALSE  — [brief reason]
-EXCEPTIONS: [one sentence or "None"]\
+DOES NOT APPLY TO: [boundary cases where this should not fire]\
 """
 
 MERGE_MAX_TOKENS = CS_MAX_TOKENS   # same budget as a regular case study

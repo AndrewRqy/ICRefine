@@ -14,6 +14,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from ICR_naive.core.cheatsheet import Cheatsheet
 from ICR_naive.core.data import _is_true
 from ICR_reasoning.core.llm_client import call_llm
+from ICR_reasoning.core.oracle import OracleDict
 from ICR_reasoning.generators.case_study import _format_failures_with_reasoning, _parse_response, _render_case_studies_text
 from ..prompts.templates import (
     CASE_STUDY_WITH_REASONING_PROMPT,
@@ -30,6 +31,7 @@ def generate_candidates(
     api_key: str,
     n: int = N_CANDIDATES,
     temperatures: list[float] | None = None,
+    oracle: OracleDict | None = None,
 ) -> list[str]:
     """
     Generate *n* candidate case study strings in parallel at different temperatures.
@@ -38,12 +40,16 @@ def generate_candidates(
     the DT patch), ordered by temperature ascending.  Failures are silently
     dropped — a failed generation produces an empty string, which the caller
     filters out.
+
+    oracle: optional (eq1, eq2) -> correct_reasoning dict; when provided, each
+            failure that has a matching oracle entry will show the correct
+            reasoning as a contrast signal alongside the wrong model reasoning.
     """
     temps = (temperatures or CANDIDATE_TEMPS)[:n]
     prompt = CASE_STUDY_WITH_REASONING_PROMPT.format(
         decision_tree=cheatsheet.decision_tree.strip(),
         case_studies=_render_case_studies_text(cheatsheet),
-        failure_lines=_format_failures_with_reasoning(failures),
+        failure_lines=_format_failures_with_reasoning(failures, oracle=oracle),
     )
 
     def _call(temp: float) -> str:

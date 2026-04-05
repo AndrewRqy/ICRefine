@@ -28,12 +28,14 @@ import json
 import random
 import re
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from ICR_naive.core.cheatsheet import Cheatsheet
 from ICR_naive.generators.initial import _split_case_studies
 from ICR_reasoning.core.llm_client import call_llm
+from ICR_reasoning.core.oracle import OracleDict
 from ICR_reasoning.training.scorer import score_batch, test_cheatsheet
 from ..generators.case_study import generate_candidates
 from ..prompts.templates import (
@@ -270,9 +272,7 @@ def _ablation_prune(
     )
     base_acc = len(correct_base) / len(sample)
 
-    to_keep = []
-    n_pruned = 0
-    for i, cs in enumerate(cheatsheet.case_studies):
+    def _score_without(i):
         temp = Cheatsheet(
             decision_tree=cheatsheet.decision_tree,
             case_studies=[c for j, c in enumerate(cheatsheet.case_studies) if j != i],
@@ -282,8 +282,19 @@ def _ablation_prune(
             concurrency=concurrency, reasoning_effort=reasoning_effort, cot_first=cot_first,
             progress_label=f"ablation-CS{i+1}",
         )
-        acc_without = len(correct_without) / len(sample)
-        contribution = base_acc - acc_without
+        return i, len(correct_without) / len(sample)
+
+    contributions = {}
+    with ThreadPoolExecutor(max_workers=len(cheatsheet.case_studies)) as ex:
+        futures = {ex.submit(_score_without, i): i for i in range(len(cheatsheet.case_studies))}
+        for fut in as_completed(futures):
+            i, acc_without = fut.result()
+            contributions[i] = base_acc - acc_without
+
+    to_keep = []
+    n_pruned = 0
+    for i, cs in enumerate(cheatsheet.case_studies):
+        contribution = contributions[i]
         if contribution > 0:
             to_keep.append(cs)
             log_fn(f"  [ablation] CS {i+1}: contribution={contribution:+.1%} — KEPT")
@@ -340,17 +351,24 @@ def _condense(
         sample = train_seen
         if len(train_seen) > ABLATION_SAMPLE_MAX:
             sample = random.sample(train_seen, ABLATION_SAMPLE_MAX)
-        correct_new, _ = score_batch(
-            sample, condensed_cs.render(), model_score, api_key,
-            concurrency=concurrency, reasoning_effort=reasoning_effort, cot_first=cot_first,
-            progress_label="condense-validate-new",
-        )
-        correct_old, _ = score_batch(
-            sample, cheatsheet.render(), model_score, api_key,
-            concurrency=concurrency, reasoning_effort=reasoning_effort, cot_first=cot_first,
-            progress_label="condense-validate-old",
-        )
-        delta = len(correct_new) - len(correct_old)
+
+        def _score_version(args):
+            label, cs = args
+            correct, _ = score_batch(
+                sample, cs.render(), model_score, api_key,
+                concurrency=concurrency, reasoning_effort=reasoning_effort, cot_first=cot_first,
+                progress_label=label,
+            )
+            return label, len(correct)
+
+        results = {}
+        with ThreadPoolExecutor(max_workers=2) as ex:
+            for label, n in ex.map(_score_version, [
+                ("condense-validate-new", condensed_cs),
+                ("condense-validate-old", cheatsheet),
+            ]):
+                results[label] = n
+        delta = results["condense-validate-new"] - results["condense-validate-old"]
         if delta >= -1:   # allow at most 1-item regression
             log_fn(
                 f"  [condense] validated: {len(condensed)} entries, "
@@ -407,6 +425,7 @@ def run_training_loop(
     concurrency: int = 10,
     # Candidate generation
     n_candidates: int = 3,
+    oracle: OracleDict | None = None,
     # Gates
     fix_rate_threshold: float = 0.5,
     regress_threshold: float = 0.1,
@@ -465,23 +484,32 @@ def run_training_loop(
         # ── Step 1: candidate competition ──────────────────────────────────
         try:
             candidates = generate_candidates(
-                failures, cheatsheet, model_casestudy, api_key, n=n_candidates,
+                failures, cheatsheet, model_casestudy, api_key,
+                n=n_candidates, oracle=oracle,
             )
         except RuntimeError as exc:
             _log(f"  [flush] candidate generation failed: {exc} — discarding bin.")
             n_discarded += 1
             return
 
-        # ── Step 2: mini-eval each candidate, pick best ────────────────────
-        scored = []
-        for i, cand in enumerate(candidates):
+        # ── Step 2: mini-eval all candidates in parallel, pick best ──────────
+        scored = [None] * len(candidates)
+
+        def _eval_candidate(args):
+            i, cand = args
             fix_rate = _mini_eval(
                 cand, failures, cheatsheet, model_score, api_key,
                 concurrency, reasoning_effort, cot_first,
                 label=f"mini-eval cand {i+1}/{len(candidates)}",
             )
-            scored.append((fix_rate, cand))
-            _log(f"  [mini-eval] candidate {i+1}: fix_rate={fix_rate:.0%}")
+            return i, fix_rate, cand
+
+        with ThreadPoolExecutor(max_workers=len(candidates)) as ex:
+            futures = {ex.submit(_eval_candidate, (i, c)): i for i, c in enumerate(candidates)}
+            for fut in as_completed(futures):
+                i, fix_rate, cand = fut.result()
+                scored[i] = (fix_rate, cand)
+                _log(f"  [mini-eval] candidate {i+1}: fix_rate={fix_rate:.0%}")
 
         scored.sort(key=lambda x: x[0], reverse=True)
         best_fix_rate, best_cand = scored[0]
