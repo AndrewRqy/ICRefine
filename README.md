@@ -165,6 +165,14 @@ python -m ICR_select.pipeline \
 | `--no-similarity-gate` | off | Skip LLM dedup check (faster, less selective) |
 | `--validate-merge` | off | Before committing a merge, verify the merged entry fixes at least as many failures as the existing one. If not, add the candidate as a new entry instead |
 
+**Oracle reasoning injection**
+
+| Flag | Default | Description |
+|---|---|---|
+| `--oracle-csv FILE` | off | Path to a GPT-5.4 oracle CSV (`gpt5.4_normal_default.csv`). When provided, each failure item that has a matching entry in the CSV gets the correct oracle reasoning appended alongside the wrong model reasoning in the case study generation prompt, giving the generator a contrast signal |
+
+The oracle CSV must have columns `equation1`, `equation2`, `response` (VERDICT/REASONING/PROOF format), and `correct`. Only rows where `correct == True` are loaded.
+
 **Maintenance**
 
 | Flag | Default | Description |
@@ -273,7 +281,7 @@ ICRefine/
 ├── ICR_reasoning/       # Post-think aware loop
 │   ├── pipeline.py      # CLI entry point
 │   ├── analysis/        # Reasoning analysis report
-│   ├── core/            # LLM client (reasoning-aware)
+│   ├── core/            # LLM client, oracle loader (oracle.py)
 │   ├── generators/      # Case study generation with COT context
 │   ├── prompts/
 │   └── training/        # Training loop + scorer
@@ -288,7 +296,10 @@ ICRefine/
 │       ├── outer_loop.py # Outer DT revision loop
 │       └── dt_reviser.py # Validated decision tree revision
 │
-├── compare_modes.sh     # Baseline → train → eval comparison script
+├── eval_oracle_quality.py  # Compare case study quality with vs without oracle injection
+├── compare_modes.sh        # Baseline → train → eval comparison script
+├── CHANGELOG.md
+├── TODO.md
 ├── requirements.txt
 └── .env.example
 ```
