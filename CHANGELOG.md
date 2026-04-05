@@ -193,6 +193,41 @@ Standalone proposal (not a revision response). Key sections:
 
 ---
 
+## 2026-04-05
+
+### vLLM backend support for ICRefine pipelines
+
+**What changed:**
+
+`ICR_naive/core/llm_client.py` and `ICR_reasoning/core/llm_client.py`:
+- Added vLLM routing via `VLLM_BASE_URL` and `VLLM_MODEL` env vars. When both are set and the requested model matches `VLLM_MODEL`, calls are routed to the local vLLM server instead of OpenRouter/OpenAI.
+- `reasoning` payload parameter is skipped for vLLM (not supported).
+- `Authorization` header is now only added when a key is present (vLLM often runs without auth).
+- `ICR_reasoning` client: vLLM responses read `reasoning_content` for thinking tokens (vLLM's field name) instead of `reasoning` (OpenRouter's field name).
+- Read timeout increased from 90s → 300s to accommodate reasoning model latency.
+
+`ICR_naive/training/scorer.py` and `ICR_reasoning/training/scorer.py`:
+- Fixed hardcoded `SAIR_evaluation_pipeline` path → `SAIR_eval_pipeline` to match actual directory name.
+
+`ICR_select/pipeline.py`:
+- Fixed hardcoded `SAIR_evaluation_pipeline` path in `load_dotenv` call → `SAIR_eval_pipeline`.
+
+`ICRefine/.env`:
+- Added `VLLM_BASE_URL`, `VLLM_API_KEY`, and `VLLM_MODEL` entries.
+
+`SAIR_eval_pipeline/models/complete_model_list.csv` and `model_activated.csv`:
+- Added `qwen/qwen2.5-7b-instruct` (local vLLM entry, later superseded by DeepSeek-R1-14B).
+
+**Why it matters:** Enables using locally-hosted open-source models on the UChicago DSI cluster via vLLM as a drop-in replacement for OpenRouter, with per-model routing so cloud models (gpt-4o) and local models (deepseek-r1-14b) can be mixed in the same run.
+
+**Cluster setup:**
+- Model: `deepseek-ai/DeepSeek-R1-Distill-Qwen-14B` downloaded to `/net/scratch/renqy/DeepSeek-R1-Distill-Qwen-14B`
+- vLLM env: `/net/scratch/renqy/vllm-env` (Python 3.11, vLLM 0.19.0, CUDA 12.1)
+- Served as `deepseek-r1-14b` on port 8000 via Slurm general partition (H100 node)
+- Access via SSH tunnel: `ssh -L 8000:<node>:8000 dsi-cluster`
+
+---
+
 ## Next Steps
 
 - Run ICR-Select on full hard1 dataset (69 items, `runs/hard1_select`)

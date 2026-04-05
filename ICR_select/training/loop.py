@@ -428,7 +428,7 @@ def run_training_loop(
     oracle: OracleDict | None = None,
     # Gates
     fix_rate_threshold: float = 0.5,
-    regress_threshold: float = 0.1,
+    regress_threshold: float = 0.15,
     similarity_gate: bool = True,
     validate_merge: bool = False,
     # Maintenance

@@ -29,19 +29,24 @@ load_dotenv(Path(__file__).parent.parent.parent / ".env")
 
 OPENROUTER_URL   = "https://openrouter.ai/api/v1/chat/completions"
 OPENAI_URL       = "https://api.openai.com/v1/chat/completions"
-MAX_TOKENS       = 16_000
-MAX_RETRIES      = 3
-RETRY_BASE_DELAY = 2.0
+MAX_TOKENS        = 16_000
+MAX_RETRIES       = 3
+RETRY_BASE_DELAY  = 2.0
+VLLM_READ_TIMEOUT = 600   # local inference can be slow — 10 min per request
 
 _OPENAI_PREFIXES = ("gpt-4", "gpt-3", "o1", "o3", "o4")
 
 
-def _resolve_endpoint(model: str) -> tuple[str, str, bool]:
+def _resolve_endpoint(model: str) -> tuple[str, str, bool, bool]:
+    vllm_url = os.environ.get("VLLM_BASE_URL", "")
+    vllm_model = os.environ.get("VLLM_MODEL", "")
+    if vllm_url and vllm_model and model == vllm_model:
+        return vllm_url, os.environ.get("VLLM_API_KEY", ""), False, True
     openai_key = os.environ.get("OPENAI_API_KEY", "")
     bare = model.removeprefix("openai/")
     if openai_key and bare.startswith(_OPENAI_PREFIXES):
-        return OPENAI_URL, openai_key, True
-    return OPENROUTER_URL, os.environ.get("OPENROUTER_API_KEY", ""), False
+        return OPENAI_URL, openai_key, True, False
+    return OPENROUTER_URL, os.environ.get("OPENROUTER_API_KEY", ""), False, False
 
 
 # ---------------------------------------------------------------------------
@@ -85,7 +90,7 @@ def call_llm(
 
     For models that don't expose reasoning (e.g. gpt-4o), thinking will be "".
     """
-    url, resolved_key, is_openai = _resolve_endpoint(model)
+    url, resolved_key, is_openai, is_vllm = _resolve_endpoint(model)
     model_name = model.removeprefix("openai/") if is_openai else model
 
     payload: dict = {
@@ -94,18 +99,21 @@ def call_llm(
         "max_tokens": max_tokens,
         "temperature": temperature,
     }
-    if reasoning_effort is not None and not is_openai:
+    if reasoning_effort is not None and not is_openai and not is_vllm:
         payload["reasoning"] = {"effort": reasoning_effort}
 
-    headers = {"Content-Type": "application/json", "Authorization": f"Bearer {resolved_key}"}
-    if not is_openai:
+    headers = {"Content-Type": "application/json"}
+    if resolved_key:
+        headers["Authorization"] = f"Bearer {resolved_key}"
+    if not is_openai and not is_vllm:
         headers["HTTP-Referer"] = "https://github.com/sair-evaluation"
         headers["X-Title"]      = "SAIR ICR-Reasoning"
 
     delay = RETRY_BASE_DELAY
     for attempt in range(1, MAX_RETRIES + 1):
         try:
-            resp = requests.post(url, json=payload, headers=headers, timeout=(10, 90))
+            read_timeout = VLLM_READ_TIMEOUT if is_vllm else 300
+            resp = requests.post(url, json=payload, headers=headers, timeout=(10, read_timeout))
             if resp.status_code == 429 or resp.status_code >= 500:
                 if attempt < MAX_RETRIES:
                     print(
@@ -118,14 +126,18 @@ def call_llm(
             resp.raise_for_status()
 
             message  = resp.json()["choices"][0]["message"]
-            content  = (message.get("content")   or "").strip()
-            thinking = (message.get("reasoning") or "").strip()
+            content  = (message.get("content") or "").strip()
 
-            # gpt-oss-120b via OpenRouter sometimes puts everything in "reasoning"
-            # when content is null — treat that whole response as content (post-think)
-            if not content and thinking:
-                content  = thinking
-                thinking = ""
+            if is_vllm:
+                # vLLM reasoning models expose internal CoT in "reasoning_content"
+                thinking = (message.get("reasoning_content") or "").strip()
+            else:
+                thinking = (message.get("reasoning") or "").strip()
+                # gpt-oss-120b via OpenRouter sometimes puts everything in "reasoning"
+                # when content is null — treat that whole response as content (post-think)
+                if not content and thinking:
+                    content  = thinking
+                    thinking = ""
 
             return LLMResponse(content=content, thinking=thinking)
 

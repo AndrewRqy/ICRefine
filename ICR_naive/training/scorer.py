@@ -21,7 +21,7 @@ from ..prompts.templates import SCORING_PROMPT, SCORING_MAX_TOKENS
 # Re-use SAIR's battle-tested parser so verdict extraction is consistent
 # across ICRefine and the SAIR evaluation pipeline.
 import re as _re
-_sair_path = str(_os.path.join(_os.path.dirname(__file__), "..", "..", "..", "SAIR_evaluation_pipeline"))
+_sair_path = str(_os.path.join(_os.path.dirname(__file__), "..", "..", "..", "SAIR_eval_pipeline"))
 if _sair_path not in sys.path:
     sys.path.insert(0, _sair_path)
 from pipeline.parser import parse_response as _sair_parse

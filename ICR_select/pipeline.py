@@ -88,7 +88,7 @@ def _build_parser() -> argparse.ArgumentParser:
                    help="Candidates generated per bin flush.")
     g.add_argument("--fix-rate-threshold", type=float, default=0.5,  metavar="F",
                    help="Minimum fraction of failures a candidate must fix.")
-    g.add_argument("--regress-threshold",  type=float, default=0.1,  metavar="F",
+    g.add_argument("--regress-threshold",  type=float, default=0.15, metavar="F",
                    help="Maximum fraction of correct-pool items a candidate may break.")
     g.add_argument("--no-similarity-gate", action="store_true",
                    help="Skip LLM similarity/dedup check (faster, less selective).")

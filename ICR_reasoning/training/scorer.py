@@ -26,7 +26,7 @@ from ..prompts.templates import SCORING_PROMPT, SCORING_PROMPT_COT_FIRST, SCORIN
 import re as _re
 import sys as _sys
 import os as _os
-_sair_path = str(_os.path.join(_os.path.dirname(__file__), "..", "..", "..", "SAIR_evaluation_pipeline"))
+_sair_path = str(_os.path.join(_os.path.dirname(__file__), "..", "..", "..", "SAIR_eval_pipeline"))
 if _sair_path not in _sys.path:
     _sys.path.insert(0, _sair_path)
 from pipeline.parser import parse_response as _sair_parse
