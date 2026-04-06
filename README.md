@@ -24,6 +24,17 @@ OPENROUTER_API_KEY=sk-or-v1-xxxxxxxxxxxxxxxx
 
 The pipeline loads this automatically — no `export` needed.
 
+### 3. (Optional) vLLM local model
+
+To use a locally-hosted model (e.g. DeepSeek-R1-14B on the DSI cluster) for scoring, add to `.env`:
+
+```
+VLLM_BASE_URL=http://localhost:8000/v1/chat/completions
+VLLM_MODEL=deepseek-r1-14b
+```
+
+When both are set and `--model-score` matches `VLLM_MODEL`, scoring calls are routed to the local vLLM server instead of OpenRouter.
+
 ---
 
 ## Modes
@@ -161,7 +172,7 @@ python -m ICR_select.pipeline \
 |---|---|---|
 | `--n-candidates N` | `3` | Candidates generated per bin flush |
 | `--fix-rate-threshold F` | `0.5` | Min fraction of failures a candidate must fix |
-| `--regress-threshold F` | `0.1` | Max fraction of correct-pool items a candidate may break |
+| `--regress-threshold F` | `0.15` | Max fraction of correct-pool items a candidate may break |
 | `--no-similarity-gate` | off | Skip LLM dedup check (faster, less selective) |
 | `--validate-merge` | off | Before committing a merge, verify the merged entry fixes at least as many failures as the existing one. If not, add the candidate as a new entry instead |
 
@@ -170,6 +181,7 @@ python -m ICR_select.pipeline \
 | Flag | Default | Description |
 |---|---|---|
 | `--oracle-csv FILE` | off | Path to a GPT-5.4 oracle CSV (`gpt5.4_normal_default.csv`). When provided, each failure item that has a matching entry in the CSV gets the correct oracle reasoning appended alongside the wrong model reasoning in the case study generation prompt, giving the generator a contrast signal |
+| `--prescore-file FILE` | off | JSON dict of pre-computed scores `{id: {predicted, correct, post_think, thinking, raw_response}}`. When provided, the initial scoring pass is skipped — items are split into correct/wrong from this file instead. Used by the SAIR recursive refinement pipeline to reuse SAIR eval results and avoid a redundant scoring pass |
 
 The oracle CSV must have columns `equation1`, `equation2`, `response` (VERDICT/REASONING/PROOF format), and `correct`. Only rows where `correct == True` are loaded.
 

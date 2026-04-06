@@ -228,9 +228,35 @@ Standalone proposal (not a revision response). Key sections:
 
 ---
 
+## 2026-04-06
+
+### ICR_select: Prescore reuse, vLLM parse fix, scoring token cap, similarity gate guard
+
+**What changed:**
+
+`ICR_select/training/loop.py`:
+- Added `_apply_prescore()` — splits a batch into correct/wrong using pre-computed SAIR eval scores instead of calling the model, avoiding a redundant scoring pass when running inside the recursive refinement pipeline.
+- Added `prescore_map: dict | None = None` parameter to `run_training_loop()`. When provided, the first pass uses prescore results; subsequent passes (after cheatsheet updates) still call the model.
+- Added `_MIN_CS_FOR_SIMILARITY = 3` guard — similarity gate now skips until at least 3 case studies exist. Previously it fired on iterations 1–2 when the cheatsheet had 0–1 case studies, wasting an API call.
+
+`ICR_select/pipeline.py`:
+- Added `--prescore-file FILE` CLI argument. Loads a JSON dict of `{id: {predicted, correct, post_think, thinking, raw_response}}` and passes it to `run_training_loop` as `prescore_map`.
+
+`ICR_reasoning/core/llm_client.py`:
+- Added vLLM fallback: if `content` is empty but `reasoning_content` has data, use reasoning_content as content. Prevents parse errors when DeepSeek-R1-14B exhausts its token budget in the thinking pass before writing the structured `VERDICT:` line.
+
+`ICR_naive/prompts/templates.py`:
+- Reduced `SCORING_MAX_TOKENS` from 16K → 8K. 16K was enough for DeepSeek-R1-14B to think exhaustively and then run out of budget before writing the answer. 8K is sufficient for both thinking and structured output.
+
+`.gitignore`:
+- Added `restart_vllm.sh` — local cluster script, not tracked.
+
+**Why it matters:** When running ICR_select inside the SAIR recursive refinement loop, the initial SAIR eval already scores all 200 items. Feeding those results as a prescore map eliminates the duplicate scoring pass (~40 min saved per iteration at concurrency=8). The parse fix and token cap address DeepSeek-R1-14B's tendency to use all tokens for thinking.
+
+---
+
 ## Next Steps
 
-- Run ICR-Select on full hard1 dataset (69 items, `runs/hard1_select`)
+- Run full recursive refinement pipeline (5 iterations, 200 items, eval-first-and-last) with oracle CSV
 - Fix similarity gate to catch semantic duplicates with different wording
-- Run ICR-Select on full normal dataset (1000 items) once hard1 results are in
 - Consider tighter DT revision prompt that makes substantive changes rather than adding clarifying notes

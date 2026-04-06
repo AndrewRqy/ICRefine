@@ -1,6 +1,6 @@
 # ICRefine — Research Directions & TODO
 
-Last updated: 2026-04-04 (session 2)
+Last updated: 2026-04-06
 
 ---
 
@@ -151,3 +151,9 @@ Need level 2 to confirm this translates to better pipeline metrics.
 - [x] Write ICR_proposal_v5.tex
 - [x] Oracle reasoning injection: load GPT-5.4 traces, inject as contrast signal into case study generation prompt
 - [x] eval_oracle_quality.py: qualitative + quantitative comparison tool with --from-bin replay
+- [x] vLLM backend support: routing, reasoning_content parsing, timeout tuning
+- [x] Prescore reuse: feed SAIR eval results into ICR_select to skip redundant scoring pass
+- [x] vLLM parse fix: fallback to reasoning_content when content is empty
+- [x] Scoring token cap: 16K → 8K to prevent DeepSeek exhausting budget before VERDICT
+- [x] Similarity gate guard: skip until ≥3 case studies exist
+- [x] Integrate ICR_select into SAIR recursive refinement pipeline (icr_select updater)
