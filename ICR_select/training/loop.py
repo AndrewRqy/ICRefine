@@ -167,6 +167,49 @@ def _regression_check(
     return len(wrong) / len(correct_pool)
 
 
+_MIN_CS_FOR_SIMILARITY = 3   # skip similarity gate until this many CSes exist
+
+
+def _apply_prescore(
+    batch: list[dict],
+    prescore_map: dict[str, dict],
+) -> tuple[list[dict], list[dict]]:
+    """
+    Split a batch into (correct, wrong) using pre-computed SAIR eval scores,
+    avoiding a redundant vLLM scoring pass for the initial training items.
+
+    Items not found in prescore_map fall back to being treated as wrong so
+    they surface in the failure bin and can be addressed.
+    """
+    from ICR_naive.core.data import _is_true
+    correct, wrong = [], []
+    for item in batch:
+        pre = prescore_map.get(item.get("id", ""))
+        if pre is None:
+            wrong.append({
+                **item,
+                "predicted":    None,
+                "expected":     "TRUE" if _is_true(item["answer"]) else "FALSE",
+                "post_think":   "",
+                "thinking":     "",
+                "raw_response": "",
+            })
+            continue
+        annotated = {
+            **item,
+            "predicted":    pre.get("predicted"),
+            "expected":     "TRUE" if _is_true(item["answer"]) else "FALSE",
+            "post_think":   pre.get("post_think", ""),
+            "thinking":     pre.get("thinking", ""),
+            "raw_response": pre.get("raw_response", ""),
+        }
+        if pre.get("correct"):
+            correct.append(annotated)
+        else:
+            wrong.append(annotated)
+    return correct, wrong
+
+
 def _format_existing(case_studies: list[str]) -> str:
     parts = []
     for i, cs in enumerate(case_studies, 1):
@@ -426,6 +469,7 @@ def run_training_loop(
     # Candidate generation
     n_candidates: int = 3,
     oracle: OracleDict | None = None,
+    prescore_map: dict | None = None,   # pre-computed scores from SAIR eval (id → result dict)
     # Gates
     fix_rate_threshold: float = 0.5,
     regress_threshold: float = 0.15,
@@ -551,7 +595,7 @@ def run_training_loop(
             reg_rate = 0.0
 
         # ── Step 5: similarity gate (optional) ─────────────────────────────
-        if similarity_gate and cheatsheet.case_studies:
+        if similarity_gate and len(cheatsheet.case_studies) >= _MIN_CS_FOR_SIMILARITY:
             action, merge_idx = _similarity_gate(
                 best_cand, cheatsheet, model_casestudy, api_key,
             )
@@ -694,10 +738,14 @@ def run_training_loop(
             f"bin={len(bin_)}/{bin_threshold}"
         )
 
-        correct, wrong = score_batch(
-            batch, cheatsheet.render(), model_score, api_key, concurrency,
-            reasoning_effort=reasoning_effort, cot_first=cot_first,
-        )
+        if prescore_map is not None:
+            correct, wrong = _apply_prescore(batch, prescore_map)
+            _log(f"  [prescore] {len(correct)} correct  {len(wrong)} wrong  (no API call)")
+        else:
+            correct, wrong = score_batch(
+                batch, cheatsheet.render(), model_score, api_key, concurrency,
+                reasoning_effort=reasoning_effort, cot_first=cot_first,
+            )
         total_correct += len(correct)
         total_scored  += len(batch)
         train_seen    += batch

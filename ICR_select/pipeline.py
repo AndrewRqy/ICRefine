@@ -63,6 +63,10 @@ def _build_parser() -> argparse.ArgumentParser:
                    help="Path to GPT-5.4 oracle CSV (gpt5.4_normal_default.csv). "
                         "When provided, correct oracle reasoning is injected into "
                         "the case study generation prompt as a contrast signal.")
+    g.add_argument("--prescore-file", default=None, metavar="FILE",
+                   help="JSON file of pre-computed SAIR eval scores (id → result). "
+                        "When provided, the initial scoring pass is skipped — "
+                        "items are split into correct/wrong from this file instead.")
 
     g = p.add_argument_group("Init (mutually exclusive modes)")
     mx = g.add_mutually_exclusive_group()
@@ -147,6 +151,15 @@ def main() -> None:
     oracle = load_oracle_csv(Path(args.oracle_csv)) if args.oracle_csv else None
     if oracle:
         _log(f"\n[Oracle] {len(oracle)} correct reasoning traces loaded.")
+
+    # ------------------------------------------------------------------
+    # Load prescore map (optional) — avoids redundant initial scoring pass
+    # ------------------------------------------------------------------
+    import json as _json
+    prescore_map: dict | None = None
+    if args.prescore_file:
+        prescore_map = _json.loads(Path(args.prescore_file).read_text(encoding="utf-8"))
+        _log(f"\n[Prescore] {len(prescore_map)} pre-scored items loaded — skipping initial scoring pass.")
 
     if args.val_dataset:
         val_items = load_jsonl(Path(args.val_dataset))
@@ -235,6 +248,7 @@ def main() -> None:
         concurrency=args.concurrency,
         n_candidates=args.n_candidates,
         oracle=oracle,
+        prescore_map=prescore_map,
         fix_rate_threshold=args.fix_rate_threshold,
         regress_threshold=args.regress_threshold,
         similarity_gate=not args.no_similarity_gate,

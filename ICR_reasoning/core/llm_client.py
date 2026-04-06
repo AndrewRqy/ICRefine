@@ -131,6 +131,11 @@ def call_llm(
             if is_vllm:
                 # vLLM reasoning models expose internal CoT in "reasoning_content"
                 thinking = (message.get("reasoning_content") or "").strip()
+                # If content is empty (thinking used all tokens before structured output),
+                # fall back to thinking so the VERDICT parser has something to work with
+                if not content and thinking:
+                    content  = thinking
+                    thinking = ""
             else:
                 thinking = (message.get("reasoning") or "").strip()
                 # gpt-oss-120b via OpenRouter sometimes puts everything in "reasoning"

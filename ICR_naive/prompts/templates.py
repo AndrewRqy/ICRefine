@@ -27,7 +27,7 @@ from ..core.cheatsheet import CASE_STUDY_MAX_CHARS, DECISION_TREE_MAX_CHARS
 # the hard char cap in cheatsheet.py will truncate the rest.
 DT_MAX_TOKENS      = int(DECISION_TREE_MAX_CHARS / 4 * 1.2)
 CS_MAX_TOKENS      = int(CASE_STUDY_MAX_CHARS    / 4 * 1.2)
-SCORING_MAX_TOKENS = 16_000  # match SAIR pipeline — reasoning models need space for CoT + structured output
+SCORING_MAX_TOKENS = 8_000   # 8K is enough for DeepSeek-R1-14B think + structured output; 16K lets it exhaust the budget mid-think
 
 
 # ---------------------------------------------------------------------------
