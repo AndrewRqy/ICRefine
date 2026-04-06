@@ -18,6 +18,7 @@ from ICR_reasoning.core.oracle import OracleDict
 from ICR_reasoning.generators.case_study import _format_failures_with_reasoning, _parse_response, _render_case_studies_text
 from ..prompts.templates import (
     CASE_STUDY_WITH_REASONING_PROMPT,
+    RETRY_CONTEXT_TEMPLATE,
     FLUSH_MAX_TOKENS,
     N_CANDIDATES,
     CANDIDATE_TEMPS,
@@ -32,6 +33,7 @@ def generate_candidates(
     n: int = N_CANDIDATES,
     temperatures: list[float] | None = None,
     oracle: OracleDict | None = None,
+    prev_attempt: dict | None = None,
 ) -> list[str]:
     """
     Generate *n* candidate case study strings in parallel at different temperatures.
@@ -44,12 +46,35 @@ def generate_candidates(
     oracle: optional (eq1, eq2) -> correct_reasoning dict; when provided, each
             failure that has a matching oracle entry will show the correct
             reasoning as a contrast signal alongside the wrong model reasoning.
+
+    prev_attempt: optional dict with keys "candidate" (str), "still_wrong" (list[dict]),
+            and "reason" (str — "fix_rate" or "regression"). When provided (retry
+            flush strategy), the previous candidate and its still-wrong items are
+            appended to the prompt so the model knows what was tried and what failed.
     """
     temps = (temperatures or CANDIDATE_TEMPS)[:n]
+
+    failure_lines = _format_failures_with_reasoning(failures, oracle=oracle)
+    if prev_attempt:
+        reason_desc = (
+            "it fixed too few failures (fix-rate gate)"
+            if prev_attempt["reason"] == "fix_rate"
+            else "it broke too many previously-correct items (regression gate)"
+        )
+        still_wrong = prev_attempt["still_wrong"]
+        still_wrong_lines = _format_failures_with_reasoning(still_wrong)
+        prev_section = RETRY_CONTEXT_TEMPLATE.format(
+            reason_desc=reason_desc,
+            prev_candidate=prev_attempt["candidate"].strip(),
+            n_still_wrong=len(still_wrong),
+            still_wrong_lines=still_wrong_lines,
+        )
+        failure_lines = failure_lines + "\n\n" + prev_section
+
     prompt = CASE_STUDY_WITH_REASONING_PROMPT.format(
         decision_tree=cheatsheet.decision_tree.strip(),
         case_studies=_render_case_studies_text(cheatsheet),
-        failure_lines=_format_failures_with_reasoning(failures, oracle=oracle),
+        failure_lines=failure_lines,
     )
 
     def _call(temp: float) -> str:

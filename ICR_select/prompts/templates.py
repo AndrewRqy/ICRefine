@@ -33,6 +33,27 @@ CANDIDATE_TEMPS     = [0.3, 0.6, 0.9]   # one per candidate — diversity via te
 CORRECT_POOL_MAX    = 40      # max items kept in correct pool for regression check
 
 # ---------------------------------------------------------------------------
+# Retry context — appended to generation prompt when flush_strategy="retry"
+# ---------------------------------------------------------------------------
+
+RETRY_CONTEXT_TEMPLATE = """\
+=== PREVIOUS ATTEMPT (REJECTED: {reason_desc}) ===
+The following case study was generated but rejected because {reason_desc}:
+
+{prev_candidate}
+
+Items STILL WRONG after applying it ({n_still_wrong} items):
+{still_wrong_lines}
+
+Your new case study MUST:
+- Use DIFFERENT IDENTIFY conditions than the rejected attempt above.
+- Directly address what the previous attempt missed — focus on the patterns \
+shared by the still-wrong items.
+- NOT copy the ACTION or WHY from the rejected attempt verbatim.\
+"""
+
+# Note: {n_still_wrong} is filled by generate_candidates before formatting
+# ---------------------------------------------------------------------------
 # Similarity gate — deduplicate before adding
 # ---------------------------------------------------------------------------
 

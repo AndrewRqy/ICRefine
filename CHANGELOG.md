@@ -255,6 +255,33 @@ Standalone proposal (not a revision response). Key sections:
 
 ---
 
+## 2026-04-06 (continued)
+
+### ICR_select: Retry flush strategy with previous candidate context
+
+**What changed:**
+
+`ICR_select/training/loop.py`:
+- Added `_mini_eval_full()` — same as `_mini_eval` but returns `(fix_rate, still_wrong_items)`. Used by the retry path to get the still-wrong items for free without an extra API call.
+- Added `_process_flush_retry()` — a new flush function that retries up to `candidate_rounds` times before discarding a bin. On each retry, the previous candidate text and its still-wrong items are passed to `generate_candidates` as context so the model knows what was tried and what it missed. SKIP from the similarity gate still causes an immediate discard (retrying a duplicate is pointless).
+- Added `candidate_rounds: int = 3` and `flush_strategy: str = "default"` parameters to `run_training_loop()`. The existing `_process_flush` (default path) is completely untouched.
+
+`ICR_select/generators/case_study.py`:
+- Added `prev_attempt: dict | None = None` parameter to `generate_candidates()`. When provided, appends a `RETRY_CONTEXT_TEMPLATE` section to the prompt with the rejected candidate, why it failed, and the items still wrong after applying it.
+
+`ICR_select/prompts/templates.py`:
+- Added `RETRY_CONTEXT_TEMPLATE` — injected on retries to tell the model what was tried, why it failed, and what items remain wrong.
+
+`ICR_select/pipeline.py`:
+- Added `--flush-strategy {default,retry}` and `--candidate-rounds N` CLI flags, wired into `inner_kwargs`.
+
+`SAIR_eval_pipeline/recursive_refine/config.py`, `run_recursive_refine.py`, `updater.py`:
+- Added `--icr-flush-strategy` CLI arg that forwards to `ICR_SELECT_FLUSH_STRATEGY` env var, picked up by the updater and passed to ICR_select.
+
+**Why it matters:** Previously, if all N candidates failed any gate, the entire failure bin was discarded. With `--flush-strategy retry`, the pipeline tries up to 3 rounds of fresh candidates, each time showing the model what the previous attempt got wrong — giving it a direct signal to write a narrower or different rule.
+
+---
+
 ## Next Steps
 
 - Run full recursive refinement pipeline (5 iterations, 200 items, eval-first-and-last) with oracle CSV

@@ -90,6 +90,12 @@ def _build_parser() -> argparse.ArgumentParser:
     g = p.add_argument_group("Quality gates")
     g.add_argument("--n-candidates",       type=int,   default=N_CANDIDATES, metavar="N",
                    help="Candidates generated per bin flush.")
+    g.add_argument("--flush-strategy",    default="default", choices=["default", "retry"],
+                   help="'default': discard bin on gate failure. "
+                        "'retry': retry up to --candidate-rounds times, passing the "
+                        "previous candidate's still-wrong items as context each round.")
+    g.add_argument("--candidate-rounds",  type=int,   default=3, metavar="N",
+                   help="Max retry rounds per bin flush when --flush-strategy retry (default: 3).")
     g.add_argument("--fix-rate-threshold", type=float, default=0.5,  metavar="F",
                    help="Minimum fraction of failures a candidate must fix.")
     g.add_argument("--regress-threshold",  type=float, default=0.15, metavar="F",
@@ -191,6 +197,8 @@ def main() -> None:
         f"  reasoning-effort: {reasoning_effort}\n"
         f"  cot-first      : {args.cot_first}\n"
         f"  n-candidates   : {args.n_candidates}\n"
+        f"  flush-strategy : {args.flush_strategy}"
+        + (f" (rounds={args.candidate_rounds})" if args.flush_strategy == "retry" else "") + "\n"
         f"  fix-rate-gate  : ≥{args.fix_rate_threshold:.0%}\n"
         f"  regress-gate   : ≤{args.regress_threshold:.0%}\n"
         f"  similarity-gate: {'off' if args.no_similarity_gate else 'on'}\n"
@@ -247,6 +255,8 @@ def main() -> None:
         batch_size=args.batch_size,
         concurrency=args.concurrency,
         n_candidates=args.n_candidates,
+        candidate_rounds=args.candidate_rounds,
+        flush_strategy=args.flush_strategy,
         oracle=oracle,
         prescore_map=prescore_map,
         fix_rate_threshold=args.fix_rate_threshold,

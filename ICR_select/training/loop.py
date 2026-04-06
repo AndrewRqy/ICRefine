@@ -116,6 +116,31 @@ def _mini_eval(
     return len(correct) / len(failures) if failures else 0.0
 
 
+def _mini_eval_full(
+    candidate_cs: str,
+    failures: list[dict],
+    cheatsheet: Cheatsheet,
+    model_score: str,
+    api_key: str,
+    concurrency: int,
+    reasoning_effort: str | None,
+    cot_first: bool,
+    label: str = "mini-eval",
+) -> tuple[float, list[dict]]:
+    """Score the failure batch with candidate injected. Returns (fix_rate, still_wrong)."""
+    temp = Cheatsheet(
+        decision_tree=cheatsheet.decision_tree,
+        case_studies=cheatsheet.case_studies + [candidate_cs],
+    )
+    correct, wrong = score_batch(
+        failures, temp.render(), model_score, api_key,
+        concurrency=concurrency, reasoning_effort=reasoning_effort, cot_first=cot_first,
+        progress_label=label,
+    )
+    fix_rate = len(correct) / len(failures) if failures else 0.0
+    return fix_rate, wrong
+
+
 def _replace_eval(
     merged_cs: str,
     merge_idx: int,
@@ -468,6 +493,8 @@ def run_training_loop(
     concurrency: int = 10,
     # Candidate generation
     n_candidates: int = 3,
+    candidate_rounds: int = 3,          # retry rounds for "retry" flush strategy
+    flush_strategy: str = "default",    # "default": discard on gate failure; "retry": retry with prev attempt context
     oracle: OracleDict | None = None,
     prescore_map: dict | None = None,   # pre-computed scores from SAIR eval (id → result dict)
     # Gates
@@ -688,6 +715,137 @@ def run_training_loop(
             "n_case_studies_total": len(cheatsheet.case_studies),
         })
 
+    def _process_flush_retry(failures: list[dict], batch_num: int) -> None:
+        """
+        Retry flush strategy — like _process_flush but retries up to `candidate_rounds`
+        times on fix-rate or regression gate failure.  On each retry the previous
+        candidate text and its still-wrong items are passed to generate_candidates so
+        the model knows what was tried and what it missed.  SKIP from the similarity
+        gate still causes an immediate discard (retrying a duplicate is pointless).
+        """
+        nonlocal n_added, n_discarded, n_skipped, n_merges, flush_count
+
+        prev_attempt: dict | None = None  # {"candidate": str, "still_wrong": list, "reason": str}
+
+        for attempt in range(1, candidate_rounds + 1):
+            if attempt == 1:
+                _log(f"\n  [flush/retry] {len(failures)} failures → generating {n_candidates} candidates ...")
+            else:
+                _log(f"\n  [flush/retry] attempt {attempt}/{candidate_rounds} (prev failed: {prev_attempt['reason']}) ...")
+
+            # ── Step 1: candidate competition ──────────────────────────────
+            try:
+                candidates = generate_candidates(
+                    failures, cheatsheet, model_casestudy, api_key,
+                    n=n_candidates, oracle=oracle, prev_attempt=prev_attempt,
+                )
+            except RuntimeError as exc:
+                _log(f"  [flush/retry] candidate generation failed: {exc} — {'retrying' if attempt < candidate_rounds else 'discarding'}.")
+                continue
+
+            # ── Step 2: mini-eval all candidates in parallel, pick best ────
+            scored = [None] * len(candidates)
+
+            def _eval_candidate_full(args):
+                i, cand = args
+                fix_rate, still_wrong = _mini_eval_full(
+                    cand, failures, cheatsheet, model_score, api_key,
+                    concurrency, reasoning_effort, cot_first,
+                    label=f"mini-eval cand {i+1}/{len(candidates)}",
+                )
+                return i, fix_rate, still_wrong, cand
+
+            with ThreadPoolExecutor(max_workers=len(candidates)) as ex:
+                futures = {ex.submit(_eval_candidate_full, (i, c)): i for i, c in enumerate(candidates)}
+                for fut in as_completed(futures):
+                    i, fix_rate, still_wrong, cand = fut.result()
+                    scored[i] = (fix_rate, still_wrong, cand)
+                    _log(f"  [mini-eval] candidate {i+1}: fix_rate={fix_rate:.0%}")
+
+            scored.sort(key=lambda x: x[0], reverse=True)
+            best_fix_rate, best_still_wrong, best_cand = scored[0]
+
+            # ── Step 3: fix-rate gate ───────────────────────────────────────
+            if best_fix_rate < fix_rate_threshold:
+                _log(
+                    f"  [gate:fix_rate] best={best_fix_rate:.0%} < "
+                    f"threshold={fix_rate_threshold:.0%} — "
+                    f"{'retrying' if attempt < candidate_rounds else 'discarding'}."
+                )
+                prev_attempt = {"candidate": best_cand, "still_wrong": best_still_wrong, "reason": "fix_rate"}
+                continue
+
+            # ── Step 4: regression gate ─────────────────────────────────────
+            reg_rate = 0.0
+            if correct_pool:
+                reg_rate = _regression_check(
+                    best_cand, correct_pool, cheatsheet, model_score, api_key,
+                    concurrency, reasoning_effort, cot_first,
+                )
+                _log(f"  [gate:regression] regression_rate={reg_rate:.0%}")
+                if reg_rate > regress_threshold:
+                    _log(
+                        f"  [gate:regression] {reg_rate:.0%} > "
+                        f"threshold={regress_threshold:.0%} — "
+                        f"{'retrying' if attempt < candidate_rounds else 'discarding'}."
+                    )
+                    prev_attempt = {"candidate": best_cand, "still_wrong": best_still_wrong, "reason": "regression"}
+                    continue
+
+            # ── Step 5: similarity gate (optional) ─────────────────────────
+            if similarity_gate and len(cheatsheet.case_studies) >= _MIN_CS_FOR_SIMILARITY:
+                action, merge_idx = _similarity_gate(
+                    best_cand, cheatsheet, model_casestudy, api_key,
+                )
+                _log(f"  [gate:similarity] action={action}" +
+                     (f" (merge into CS {merge_idx+1})" if merge_idx is not None else ""))
+
+                if action == "SKIP":
+                    # No point retrying — pattern already covered
+                    n_skipped += 1
+                    update_log.append({"event": "bin_skipped", "batch": batch_num, "reason": "duplicate"})
+                    return
+
+                if action == "MERGE" and merge_idx is not None:
+                    existing = cheatsheet.case_studies[merge_idx]
+                    merged   = _merge_case_studies(existing, best_cand, model_casestudy, api_key)
+                    cheatsheet.case_studies[merge_idx] = merged
+                    n_merges += 1
+                    flush_count += 1
+                    _log(f"  [merge] updated CS {merge_idx+1} in-place.")
+                    update_log.append({
+                        "event": "bin_merged", "batch": batch_num,
+                        "merged_into": merge_idx + 1,
+                        "fix_rate": best_fix_rate, "regression_rate": reg_rate,
+                        "attempt": attempt,
+                    })
+                    return
+
+            # ── ADD ─────────────────────────────────────────────────────────
+            cheatsheet.add_case_study(best_cand)
+            n_added += 1
+            flush_count += 1
+            _log(
+                f"  [added] CS {len(cheatsheet.case_studies)} — "
+                f"fix_rate={best_fix_rate:.0%}  regress={reg_rate:.0%}  attempt={attempt}"
+            )
+            update_log.append({
+                "event": "bin_added", "batch": batch_num,
+                "fix_rate": best_fix_rate, "regression_rate": reg_rate,
+                "n_case_studies_total": len(cheatsheet.case_studies),
+                "attempt": attempt,
+            })
+            return
+
+        # All candidate_rounds exhausted without passing gates
+        n_discarded += 1
+        _log(f"  [flush/retry] all {candidate_rounds} rounds failed — discarding bin.")
+        update_log.append({
+            "event": "bin_discarded", "batch": batch_num,
+            "reason": f"all_{candidate_rounds}_rounds_failed",
+            "last_reason": prev_attempt["reason"] if prev_attempt else None,
+        })
+
     def _maybe_maintain(batch_num: int) -> None:
         nonlocal n_pruned_total, n_condensed
 
@@ -768,9 +926,11 @@ def run_training_loop(
         for item in wrong:
             bin_.add(item)
 
+        _flush_fn = _process_flush_retry if flush_strategy == "retry" else _process_flush
+
         while bin_.is_full():
             failures = bin_.flush()
-            _process_flush(failures, batch_num)
+            _flush_fn(failures, batch_num)
             _maybe_maintain(batch_num)
             if output_dir:
                 _save_checkpoint(cheatsheet, update_log, output_dir, n_added)
@@ -780,7 +940,7 @@ def run_training_loop(
     if flush_remainder and len(bin_) > 0:
         _log(f"\n[remainder] flushing {len(bin_)} remaining failures ...")
         failures = bin_.flush()
-        _process_flush(failures, batch_num=-1)
+        _flush_fn(failures, batch_num=-1)
         _maybe_maintain(batch_num=-1)
         if output_dir:
             _save_checkpoint(cheatsheet, update_log, output_dir, "remainder")
