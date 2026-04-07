@@ -42,10 +42,17 @@ CASE_STUDY_DIVIDER   = "--- Case Study {n}: {title} ---"
 # Dataclass
 # ---------------------------------------------------------------------------
 
+PRIOR_KNOWLEDGE_HEADER = "=== PRIOR KNOWLEDGE ==="
+ROADMAP_HEADER         = "=== REASONING ROADMAP ==="
+
+
 @dataclass
 class Cheatsheet:
     decision_tree: str
     case_studies: list[str] = field(default_factory=list)
+    # Optional frozen prior knowledge (e.g. NeuriCo prompt).
+    # Rendered before the decision tree / roadmap and never modified by ICR.
+    prior_knowledge: str = ""
 
     # ------------------------------------------------------------------
     # Rendering
@@ -71,8 +78,13 @@ class Cheatsheet:
             <case study body>
             ...
         """
+        parts = []
+        if self.prior_knowledge.strip():
+            parts += [PRIOR_KNOWLEDGE_HEADER, "", self.prior_knowledge.strip(), ""]
+
+        header = ROADMAP_HEADER if self.decision_tree.lstrip().startswith("ASPECT") else DECISION_TREE_HEADER
         dt = _truncate(self.decision_tree.strip(), DECISION_TREE_MAX_CHARS)
-        parts = [DECISION_TREE_HEADER, "", dt]
+        parts += [header, "", dt]
         budget = TOTAL_RENDER_MAX_CHARS - len("\n".join(parts))
 
         if self.case_studies:
@@ -161,8 +173,9 @@ class Cheatsheet:
         path.with_suffix(".json").write_text(
             json.dumps(
                 {
-                    "decision_tree": self.decision_tree,
-                    "case_studies": self.case_studies,
+                    "decision_tree":  self.decision_tree,
+                    "case_studies":   self.case_studies,
+                    "prior_knowledge": self.prior_knowledge,
                 },
                 indent=2,
                 ensure_ascii=False,
@@ -178,6 +191,7 @@ class Cheatsheet:
         return cls(
             decision_tree=data["decision_tree"],
             case_studies=data.get("case_studies", []),
+            prior_knowledge=data.get("prior_knowledge", ""),
         )
 
     # ------------------------------------------------------------------

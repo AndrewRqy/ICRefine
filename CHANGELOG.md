@@ -282,6 +282,63 @@ Standalone proposal (not a revision response). Key sections:
 
 ---
 
+## 2026-04-07
+
+### ICR_select: Reasoning roadmap synthesizer + prior_knowledge architecture
+
+**What changed:**
+
+`ICR_naive/core/cheatsheet.py`:
+- Added `prior_knowledge: str = ""` field to `Cheatsheet`. Rendered before the DT/roadmap section under `=== PRIOR KNOWLEDGE ===` header.
+- Added `PRIOR_KNOWLEDGE_HEADER` and `ROADMAP_HEADER` constants.
+- `render()` detects roadmap vs DT header and prepends prior_knowledge section if non-empty.
+- `save()` / `load()` persist `prior_knowledge` in the JSON sidecar.
+
+`ICR_select/pipeline.py`:
+- Renamed `--init-txt` → `--init-roadmap` (clearer intent: initializes the trainable roadmap/DT).
+- Added `--prior-knowledge FILE` argument: loads frozen content (e.g. NeuriCo prompt) into `Cheatsheet.prior_knowledge`.
+- Added `elif prior_knowledge:` init branch: when only `--prior-knowledge` is given (no `--init-roadmap`), starts with an empty trainable roadmap.
+
+`ICR_select/prompts/templates.py`:
+- Added `ROADMAP_SYNTHESIS_PROMPT` and `ROADMAP_SYNTHESIS_MAX_TOKENS = 1_500`.
+- Synthesis prompt uses ASPECTS structure with mechanical checkpoints: each CHECK must be answerable by direct inspection (counting, string matching, set membership) — no reasoning or judgment allowed.
+
+`ICR_select/training/roadmap_synthesizer.py` (new):
+- `run_roadmap_synthesis()`: absorbs accumulated case studies into a structured REASONING ROADMAP.
+- Validates by re-scoring `train_seen` before/after; accepts if `delta >= -regress_tolerance` (default 10%).
+- Returns `RoadmapSynthesisResult(accepted, roadmap, accuracy_before, accuracy_after, n_case_studies_used)`.
+
+`ICR_select/training/dt_reviser.py`:
+- Changed fixed `-1 item` acceptance threshold to percentage-based: `delta >= -regress_tolerance` (default `regress_tolerance=0.10`). More consistent across different training set sizes.
+
+`SAIR_eval_pipeline/recursive_refine/updater.py`:
+- Added `@register("icr_roadmap")` updater: Phase 1 = ICR_select (collect case studies), Phase 2 = roadmap synthesis (absorb into roadmap, clear case studies).
+- Fixed cheatsheet routing: **JSON cheatsheet** → `--init-cheatsheet`; **plain-text cheatsheet** (e.g. NeuriCo on iteration 0) → `--prior-knowledge` (frozen, trainable roadmap starts empty). Previously plain text was passed as `--init-txt` which put all NeuriCo content into the trainable `decision_tree`.
+- Fixed truncation: reads `cheatsheet_final.json` instead of `cheatsheet_refined.txt` (render() is capped at 2,500 chars).
+- Fixed prescore carry-forward: when eval is skipped (`eval_first_and_last`), loads prescore from `_last_eval_run_dir` in stats_doc to avoid falling back to the full 1,000-item dataset.
+- Added `--limit` forwarding to ICR_select subprocess.
+- Always passes `--flush-strategy` explicitly.
+
+`SAIR_eval_pipeline/recursive_refine/runner.py`:
+- Tracks `last_eval_run_dir` per iteration; injects `_last_eval_run_dir` into stats_doc when eval is skipped.
+- Resume (`_resume()`) restores `last_eval_run_dir`; prefers `cheatsheet_final.json` over `cheatsheet_refined.txt` when loading the checkpoint cheatsheet.
+
+`SAIR_eval_pipeline/recursive_refine/config.py`:
+- `--icr-regress-threshold` default: 0.15 → 0.20 (less aggressive rejection when correct pool is small).
+- `--icr-flush-strategy` default: `"default"` → `"retry"`.
+
+`SAIR_eval_pipeline/run_recursive_refine.py`:
+- Sets `ICR_SELECT_REGRESS_THRESHOLD`, `ICR_SELECT_MAX_ITERATIONS`, `ICR_SELECT_FLUSH_STRATEGY`, `ICR_SELECT_LIMIT` env vars from CLI args.
+
+**Why it matters:** Addresses the three main ICR inefficiency problems identified from the cluster runs:
+1. Truncation between iterations caused case studies to be silently dropped.
+2. Skipped-eval iterations fell back to 1,000 items instead of the ~200-item prescore set.
+3. The regression gate was rejecting nearly all candidates because 15% of a 40-item pool is only 6 items — one flip over the threshold killed the candidate.
+
+The roadmap synthesizer provides an alternative to growing case study lists: after enough evidence accumulates, the pipeline distills it into a structured reasoning guide with mechanical, inspectable checkpoints.
+
+---
+
 ## Next Steps
 
 - Run full recursive refinement pipeline (5 iterations, 200 items, eval-first-and-last) with oracle CSV

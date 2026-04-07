@@ -1,6 +1,6 @@
 # ICRefine — Research Directions & TODO
 
-Last updated: 2026-04-06
+Last updated: 2026-04-07
 
 ---
 
@@ -20,9 +20,10 @@ hard1 with the new prompts and compare regression rates against the previous run
 ### 2. Regression threshold tuning for hard1
 Even with better case studies, the 10% regression threshold may be too strict for
 hard1 given how small the correct pool is early in the run (7–15 items). A single
-wrong item out of 10 is already 10%.
+wrong item out of 10 is already 10%. Default raised to 20% in the recursive pipeline;
+still needs validation on hard1.
 
-- [ ] Try `--regress-threshold 0.2` on hard1
+- [ ] Re-run hard1 with `--regress-threshold 0.2` and check if candidates now pass
 - [ ] Consider making threshold adaptive — stricter when correct pool is large, looser when small
 - [ ] Alternatively: require minimum correct pool size before regression gate fires (e.g. skip regression gate if pool < 20)
 
@@ -136,6 +137,28 @@ Need level 2 to confirm this translates to better pipeline metrics.
 
 ---
 
+## Active Priorities (new)
+
+### 11. Run full recursive refinement with icr_roadmap updater
+First real end-to-end test with all fixes applied (truncation, prescore carry-forward,
+regression gate, retry strategy, prior_knowledge routing).
+
+- [ ] Run 5-iteration recursive refinement: `--updater icr_roadmap --eval-mode eval_first_and_last --sample-k 200 --limit 200`
+- [ ] Check logs for: prescore carry-forward firing on iterations 2–4, roadmap synthesis triggering on final iteration
+- [ ] Compare iteration 0 and iteration 5 accuracy on normal dataset
+
+---
+
+### 12. Validate roadmap synthesis quality
+The synthesis prompt generates mechanical checkpoints but we haven't checked whether
+the output is actually inspectable and non-redundant with the prior_knowledge.
+
+- [ ] After first accepted synthesis, manually read the generated roadmap
+- [ ] Verify CHECKs are mechanical (counting / string matching), not reasoning-dependent
+- [ ] Verify roadmap doesn't repeat NeuriCo content from prior_knowledge
+
+---
+
 ## Completed
 
 - [x] Build ICR_naive baseline loop
@@ -157,3 +180,12 @@ Need level 2 to confirm this translates to better pipeline metrics.
 - [x] Scoring token cap: 16K → 8K to prevent DeepSeek exhausting budget before VERDICT
 - [x] Similarity gate guard: skip until ≥3 case studies exist
 - [x] Integrate ICR_select into SAIR recursive refinement pipeline (icr_select updater)
+- [x] Fix cheatsheet truncation between iterations (read cheatsheet_final.json, not rendered txt)
+- [x] Fix dataset blowup on skipped eval (prescore carry-forward via _last_eval_run_dir)
+- [x] Fix regression gate too tight (20% default, percentage-based in dt_reviser + roadmap_synthesizer)
+- [x] Add retry flush strategy as default (--flush-strategy retry)
+- [x] Add prior_knowledge field to Cheatsheet; render() prepends it as frozen section
+- [x] Rename --init-txt → --init-roadmap in ICR_select/pipeline.py; add --prior-knowledge flag
+- [x] Fix NeuriCo routing in updater: plain-text cheatsheet → --prior-knowledge (frozen), not --init-roadmap (trainable)
+- [x] Build icr_roadmap updater: Phase 1 = ICR_select, Phase 2 = roadmap synthesis
+- [x] Build roadmap_synthesizer.py with percentage-based regression validation

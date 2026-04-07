@@ -201,3 +201,53 @@ Output ONLY the complete revised decision tree — no preamble, no commentary.\
 """
 
 DT_REVISION_MAX_TOKENS = DT_MAX_TOKENS
+
+# ---------------------------------------------------------------------------
+# Roadmap synthesis — build a reasoning roadmap from accumulated case studies
+# ---------------------------------------------------------------------------
+
+ROADMAP_SYNTHESIS_PROMPT = """\
+You are building a REASONING ROADMAP for deciding whether "E1 implies E2 over \
+all magmas" — i.e., every magma satisfying E1 also satisfies E2.
+
+The model already has the following prior knowledge (do NOT repeat or restructure \
+this — it is fixed and working):
+
+=== PRIOR KNOWLEDGE ===
+{prior_knowledge}
+
+=== CASE STUDIES COLLECTED FROM FAILURES ===
+{case_studies}
+
+=== SAMPLE FAILURES WITH REASONING TRACES ===
+{failure_lines}
+
+Your job: synthesise the case studies into a REASONING ROADMAP — a structured \
+guide that tells the model HOW to think, not just which bucket to classify into.
+
+DESIGN CONSTRAINT — every checkpoint in the roadmap must be something the model \
+can execute MECHANICALLY and RELIABLY without deep inference. Each CHECK must be \
+answerable by direct inspection of the equation syntax — counting, string matching, \
+or set membership — with no reasoning or judgment required to produce the answer.
+
+Format each aspect as:
+
+ASPECT N: [short name — what dimension of the problem this probes]
+  CHECK: [the specific mechanical question to ask — binary answer]
+  IF YES: [what to do / what it signals]
+  IF NO:  [what to do / what it signals]
+  GROUNDED IN: [which case studies or prior knowledge steps motivate this]
+  WATCH OUT: [one common misclassification to avoid at this checkpoint]
+
+Rules:
+- 3 to 5 aspects maximum. More aspects = more confusion.
+- Order from most reliable / highest signal to least.
+- Aspects must be INDEPENDENT — do not make aspect N depend on aspect N-1's output.
+- The roadmap supplements prior knowledge — do not restate rules already covered \
+  clearly in the prior.
+- End with a SYNTHESIS note: how to combine aspect signals into a final verdict.
+
+Output ONLY the roadmap starting with ASPECT 1 — no preamble.\
+"""
+
+ROADMAP_SYNTHESIS_MAX_TOKENS = 1_500

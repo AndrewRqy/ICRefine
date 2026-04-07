@@ -8,7 +8,7 @@ Usage
 -----
     python -m ICR_select.pipeline \\
         --dataset ../SAIR_evaluation_pipeline/datasets/normal.jsonl \\
-        --init-txt ../SAIR_evaluation_pipeline/prompts/NeuriCo_cheatsheet.txt \\
+        --prior-knowledge ../SAIR_evaluation_pipeline/prompts/NeuriCo_cheatsheet.txt \\
         --model-score openai/gpt-oss-120b \\
         --model-casestudy openai/gpt-4o \\
         --bin-threshold 3 --batch-size 5 \\
@@ -70,8 +70,15 @@ def _build_parser() -> argparse.ArgumentParser:
 
     g = p.add_argument_group("Init (mutually exclusive modes)")
     mx = g.add_mutually_exclusive_group()
-    mx.add_argument("--init-txt",        default=None, metavar="FILE")
+    mx.add_argument("--init-roadmap",     default=None, metavar="FILE",
+                   help="Plain-text file loaded as the trainable roadmap / decision tree; "
+                        "case studies start empty.")
     mx.add_argument("--init-cheatsheet", default=None, metavar="PATH")
+    g.add_argument("--prior-knowledge",  default=None, metavar="FILE",
+                   help="Plain-text file loaded into the frozen prior_knowledge field "
+                        "(e.g. NeuriCo prompt). Use alone to start with an empty trainable "
+                        "roadmap, or with --init-roadmap / --init-cheatsheet to layer "
+                        "frozen knowledge on top of an existing starting point.")
     g.add_argument("--n-seed-examples",  type=int,   default=30,  metavar="N")
     g.add_argument("--n-seed-studies",   type=int,   default=3,   metavar="N")
     g.add_argument("--init-temperature", type=float, default=0.3, metavar="T")
@@ -182,8 +189,9 @@ def main() -> None:
         )
 
     init_mode = (
-        f"txt ({Path(args.init_txt).name})"    if args.init_txt else
-        f"cheatsheet ({args.init_cheatsheet})" if args.init_cheatsheet else
+        f"roadmap ({Path(args.init_roadmap).name})" if args.init_roadmap else
+        f"cheatsheet ({args.init_cheatsheet})"       if args.init_cheatsheet else
+        f"prior-knowledge only (empty DT)"           if args.prior_knowledge else
         "generate"
     )
     _log(
@@ -211,18 +219,39 @@ def main() -> None:
     # ------------------------------------------------------------------
     # Stage 1: Init
     # ------------------------------------------------------------------
-    if args.init_txt:
-        txt_path = Path(args.init_txt)
+
+    # Load optional frozen prior knowledge (e.g. NeuriCo prompt).
+    prior_knowledge = ""
+    if args.prior_knowledge:
+        pk_path = Path(args.prior_knowledge)
+        if not pk_path.exists():
+            raise SystemExit(f"Error: --prior-knowledge not found: {pk_path}")
+        prior_knowledge = pk_path.read_text(encoding="utf-8").strip()
+        _log(f"\n[Stage 1] Loaded prior knowledge from {pk_path.name} ({len(prior_knowledge)} chars).")
+
+    if args.init_roadmap:
+        txt_path = Path(args.init_roadmap)
         if not txt_path.exists():
-            raise SystemExit(f"Error: --init-txt not found: {txt_path}")
-        cheatsheet  = Cheatsheet(decision_tree=txt_path.read_text(encoding="utf-8").strip())
+            raise SystemExit(f"Error: --init-roadmap not found: {txt_path}")
+        cheatsheet = Cheatsheet(
+            decision_tree=txt_path.read_text(encoding="utf-8").strip(),
+            prior_knowledge=prior_knowledge,
+        )
+        _log(f"\n[Stage 1] Loaded roadmap from {txt_path.name}. Case studies start empty.")
         train_items = seed_items + train_items
-        _log(f"\n[Stage 1] Loaded DT from {txt_path.name}. Case studies start empty.")
 
     elif args.init_cheatsheet:
-        cheatsheet  = Cheatsheet.load(Path(args.init_cheatsheet))
+        cheatsheet = Cheatsheet.load(Path(args.init_cheatsheet))
+        if prior_knowledge:
+            cheatsheet.prior_knowledge = prior_knowledge
         train_items = seed_items + train_items
         _log(f"\n[Stage 1] Loaded cheatsheet: {cheatsheet.summary()}")
+
+    elif prior_knowledge:
+        # Prior knowledge provided alone — start with empty trainable roadmap
+        cheatsheet = Cheatsheet(decision_tree="", prior_knowledge=prior_knowledge)
+        train_items = seed_items + train_items
+        _log(f"\n[Stage 1] Prior knowledge loaded ({len(prior_knowledge)} chars). Roadmap starts empty.")
 
     else:
         _log(f"\n[Stage 1] Generating initial cheatsheet from {len(seed_items)} seed examples ...")

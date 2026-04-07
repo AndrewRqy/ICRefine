@@ -78,6 +78,7 @@ def run_dt_revision(
     reasoning_effort: str | None = "low",
     cot_first: bool = True,
     min_failures: int = 5,
+    regress_tolerance: float = 0.10,   # max allowed accuracy drop (fraction of train_seen)
     log: bool = True,
 ) -> DtRevisionResult:
     """
@@ -200,25 +201,25 @@ def run_dt_revision(
 
     acc_before = len(correct_before) / len(train_seen)
     acc_after  = len(correct_after)  / len(train_seen)
-    delta      = len(correct_after) - len(correct_before)
+    delta      = acc_after - acc_before
 
     _log(
         f"  [dt_revise] accuracy: before={acc_before:.1%}  after={acc_after:.1%}  "
-        f"delta={delta:+d} items"
+        f"delta={delta:+.1%}"
     )
 
-    # Accept if revision matches or improves accuracy (allow 1-item regression)
-    accepted = delta >= -1
+    # Accept if accuracy drop is within tolerance (percentage of train_seen)
+    accepted = delta >= -regress_tolerance
     if accepted:
         _log("  [dt_revise] revision ACCEPTED.")
     else:
-        _log(f"  [dt_revise] revision REJECTED (delta={delta:+d} < -1).")
+        _log(f"  [dt_revise] revision REJECTED (delta={delta:+.1%} < -{regress_tolerance:.1%}).")
 
     return DtRevisionResult(
         accepted=accepted,
         revised_dt=revised_dt if accepted else cheatsheet.decision_tree,
         profile=profile,
         accuracy_before=acc_before,
-        accuracy_after=acc_after if accepted else acc_before,
+        accuracy_after=acc_after,
         step_analysis=step_analysis_text,
     )
