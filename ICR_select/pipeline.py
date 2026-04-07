@@ -25,10 +25,10 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from ICR_naive.core.cheatsheet import Cheatsheet
-from ICR_naive.core.data import load_jsonl, split_dataset
+from utils.cheatsheet import Cheatsheet
+from utils.data import load_jsonl, split_dataset
 from ICR_naive.generators.initial import DEFAULT_MODEL, generate_initial_cheatsheet
-from ICR_reasoning.core.llm_client import get_api_key
+from utils.llm_client import get_api_key
 from ICR_reasoning.core.oracle import load_oracle_csv
 from .training.loop import run_training_loop
 from .training.outer_loop import run_outer_loop

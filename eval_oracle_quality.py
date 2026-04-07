@@ -35,11 +35,11 @@ load_dotenv(Path(".env"))
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from ICR_naive.core.cheatsheet import Cheatsheet
-from ICR_naive.core.data import load_jsonl
-from ICR_reasoning.core.llm_client import get_api_key
+from utils.cheatsheet import Cheatsheet
+from utils.data import load_jsonl
+from utils.llm_client import get_api_key
 from ICR_reasoning.core.oracle import load_oracle_csv
-from ICR_reasoning.training.scorer import score_batch
+from utils.scorer import score_batch
 from ICR_select.generators.case_study import generate_candidates
 
 

@@ -15,9 +15,9 @@ from __future__ import annotations
 import sys
 from dataclasses import dataclass
 
-from ICR_naive.core.cheatsheet import Cheatsheet, DECISION_TREE_MAX_CHARS
-from ICR_reasoning.core.llm_client import call_llm
-from ICR_reasoning.training.scorer import score_batch
+from utils.cheatsheet import Cheatsheet, DECISION_TREE_MAX_CHARS
+from utils.llm_client import call_llm
+from utils.scorer import score_batch
 from ..analysis.step_parser import build_profile, format_profile, MisapplicationProfile
 from ..prompts.templates import (
     DT_STEP_ANALYSIS_PROMPT,

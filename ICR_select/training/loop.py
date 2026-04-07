@@ -33,9 +33,9 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from ICR_naive.core.cheatsheet import Cheatsheet
-from ICR_naive.core.data import FailureBin
-from ICR_reasoning.training.scorer import score_batch, test_cheatsheet
+from utils.cheatsheet import Cheatsheet
+from utils.data import FailureBin
+from utils.scorer import score_batch, test_cheatsheet
 from ICR_reasoning.core.oracle import OracleDict
 from ..generators.case_study import generate_candidates
 from ..prompts.templates import CORRECT_POOL_MAX

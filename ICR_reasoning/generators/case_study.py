@@ -22,8 +22,8 @@ import re
 import sys
 from dataclasses import dataclass
 
-from ICR_naive.core.cheatsheet import Cheatsheet
-from ICR_naive.core.data import is_true
+from utils.cheatsheet import Cheatsheet
+from utils.data import is_true
 from ..core.llm_client import call_llm
 from ..core.oracle import OracleDict
 from ..prompts.templates import CASE_STUDY_WITH_REASONING_PROMPT, FLUSH_MAX_TOKENS

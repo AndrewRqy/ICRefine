@@ -10,10 +10,10 @@ from __future__ import annotations
 import random
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from ICR_naive.core.cheatsheet import Cheatsheet
-from ICR_naive.core.parser import split_case_studies
-from ICR_reasoning.core.llm_client import call_llm
-from ICR_reasoning.training.scorer import score_batch
+from utils.cheatsheet import Cheatsheet
+from utils.parser import split_case_studies
+from utils.llm_client import call_llm
+from utils.scorer import score_batch
 from ..prompts.templates import CONDENSATION_PROMPT, CONDENSATION_MAX_TOKENS
 from .gates import _format_existing
 

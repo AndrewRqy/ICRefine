@@ -25,9 +25,9 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-from ICR_naive.core.cheatsheet import Cheatsheet
-from ICR_reasoning.core.llm_client import call_llm
-from ICR_reasoning.training.scorer import score_batch
+from utils.cheatsheet import Cheatsheet
+from utils.llm_client import call_llm
+from utils.scorer import score_batch
 from ..prompts.templates import (
     ROADMAP_SYNTHESIS_PROMPT,
     ROADMAP_SYNTHESIS_MAX_TOKENS,

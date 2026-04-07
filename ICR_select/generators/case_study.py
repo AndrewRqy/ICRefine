@@ -11,8 +11,8 @@ from __future__ import annotations
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from ICR_naive.core.cheatsheet import Cheatsheet
-from ICR_reasoning.core.llm_client import call_llm
+from utils.cheatsheet import Cheatsheet
+from utils.llm_client import call_llm
 from ICR_reasoning.core.oracle import OracleDict
 from ICR_reasoning.generators.case_study import _format_failures_with_reasoning, _parse_response, _render_case_studies_text
 from ..prompts.templates import (

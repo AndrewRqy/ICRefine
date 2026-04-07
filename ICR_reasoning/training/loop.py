@@ -14,8 +14,8 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-from ICR_naive.core.cheatsheet import Cheatsheet
-from ICR_naive.core.data import FailureBin
+from utils.cheatsheet import Cheatsheet
+from utils.data import FailureBin
 from ..generators.case_study import generate_case_study_with_reasoning
 from .scorer import score_batch, test_cheatsheet
 

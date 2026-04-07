@@ -31,8 +31,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
-from ICR_naive.core.cheatsheet import Cheatsheet
-from ICR_reasoning.training.scorer import score_batch
+from utils.cheatsheet import Cheatsheet
+from utils.scorer import score_batch
 from .dt_reviser import run_dt_revision, DtRevisionResult
 
 

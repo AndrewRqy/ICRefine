@@ -15,10 +15,10 @@ from __future__ import annotations
 
 import re
 
-from ICR_naive.core.cheatsheet import Cheatsheet
-from ICR_naive.core.data import is_true
-from ICR_reasoning.core.llm_client import call_llm
-from ICR_reasoning.training.scorer import score_batch
+from utils.cheatsheet import Cheatsheet
+from utils.data import is_true
+from utils.llm_client import call_llm
+from utils.scorer import score_batch
 from ..prompts.templates import (
     SIMILARITY_CHECK_PROMPT, SIMILARITY_MAX_TOKENS,
     MERGE_PROMPT, MERGE_MAX_TOKENS,
