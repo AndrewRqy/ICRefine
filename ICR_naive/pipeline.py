@@ -16,20 +16,19 @@ Stages
 
 Usage
 -----
-    # Generate initial cheatsheet, then train on normal.jsonl
-    python -m iterative_cheatsheet_refine.pipeline \\
-        --dataset ../../SAIR_evaluation_pipeline/datasets/normal.jsonl \\
+    python -m ICR_naive.pipeline \\
+        --dataset path/to/dataset.jsonl \\
         --output-dir runs/run_001
 
-    # Use NeuriCo cheatsheet as starting point, train on hard1
-    python -m iterative_cheatsheet_refine.pipeline \\
-        --dataset ../../SAIR_evaluation_pipeline/datasets/hard1.jsonl \\
-        --init-txt ../../SAIR_evaluation_pipeline/prompts/NeuriCo_cheatsheet.txt \\
+    # Use an existing cheatsheet as starting point
+    python -m ICR_naive.pipeline \\
+        --dataset path/to/dataset.jsonl \\
+        --init-txt path/to/prior_knowledge.txt \\
         --model-score openai/gpt-oss-120b \\
         --model-casestudy openai/gpt-4o \\
         --bin-threshold 3 --batch-size 10 \\
-        --output-dir runs/neurico_hard1 \\
-        --cheatsheet-out ../../SAIR_evaluation_pipeline/prompts/NeuriCo_cheatsheet.txt
+        --output-dir runs/naive_run \\
+        --cheatsheet-out path/to/output_cheatsheet.txt
 """
 
 from __future__ import annotations
@@ -46,7 +45,6 @@ from .core.llm_client import get_api_key
 from .generators.initial import DEFAULT_MODEL, generate_initial_cheatsheet
 from .training.loop import run_training_loop
 
-load_dotenv(Path(__file__).parent.parent / "SAIR_evaluation_pipeline" / ".env")
 load_dotenv(Path(__file__).parent / ".env")
 
 

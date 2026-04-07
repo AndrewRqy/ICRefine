@@ -24,7 +24,6 @@ from pathlib import Path
 import requests
 from dotenv import load_dotenv
 
-load_dotenv(Path(__file__).parent.parent.parent.parent / "SAIR_evaluation_pipeline" / ".env")
 load_dotenv(Path(__file__).parent.parent.parent / ".env")
 
 OPENROUTER_URL   = "https://openrouter.ai/api/v1/chat/completions"

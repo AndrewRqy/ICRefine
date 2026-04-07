@@ -18,18 +18,7 @@ from ..core.data import _is_true
 from ..core.llm_client import call_llm_batch
 from ..prompts.templates import SCORING_PROMPT, SCORING_MAX_TOKENS
 
-# Re-use SAIR's battle-tested parser so verdict extraction is consistent
-# across ICRefine and the SAIR evaluation pipeline.
-import re as _re
-_sair_path = str(_os.path.join(_os.path.dirname(__file__), "..", "..", "..", "SAIR_eval_pipeline"))
-if _sair_path not in sys.path:
-    sys.path.insert(0, _sair_path)
-from pipeline.parser import parse_response as _sair_parse
-
-_MD_BOLD_RE = _re.compile(r"\*{1,2}(VERDICT|REASONING|PROOF|COUNTEREXAMPLE):\*{0,2}", _re.IGNORECASE)
-
-def _normalize(text: str) -> str:
-    return _MD_BOLD_RE.sub(lambda m: m.group(1).upper() + ":", text)
+from ..core.parser import parse_response as _sair_parse, normalize as _normalize
 
 
 # ---------------------------------------------------------------------------

@@ -13,15 +13,14 @@ summaries, making it a better teaching signal for corrective case studies.
 
 Usage
 -----
-    # Start from NeuriCo cheatsheet, train on hard1 with reasoning-aware case studies
     python -m ICR_reasoning.pipeline \\
-        --dataset ../SAIR_evaluation_pipeline/datasets/hard1.jsonl \\
-        --init-txt ../SAIR_evaluation_pipeline/prompts/NeuriCo_cheatsheet.txt \\
+        --dataset path/to/dataset.jsonl \\
+        --init-txt path/to/prior_knowledge.txt \\
         --model-score openai/gpt-oss-120b \\
         --model-casestudy openai/gpt-4o \\
         --bin-threshold 3 --batch-size 10 \\
-        --output-dir runs/reasoning_hard1 \\
-        --cheatsheet-out ../SAIR_evaluation_pipeline/prompts/NeuriCo_cheatsheet_reasoning.txt
+        --output-dir runs/reasoning_run \\
+        --cheatsheet-out path/to/output_cheatsheet.txt
 """
 
 from __future__ import annotations
@@ -40,7 +39,6 @@ from .training.loop import run_training_loop
 from .training.scorer import score_batch
 from .analysis.reasoning_analyzer import analyze_items, print_report, save_report
 
-load_dotenv(Path(__file__).parent.parent / "SAIR_evaluation_pipeline" / ".env")
 load_dotenv(Path(__file__).parent / ".env")
 
 

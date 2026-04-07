@@ -7,14 +7,14 @@ cheatsheet, and the cheatsheet is periodically pruned and condensed.
 Usage
 -----
     python -m ICR_select.pipeline \\
-        --dataset ../SAIR_evaluation_pipeline/datasets/normal.jsonl \\
-        --prior-knowledge ../SAIR_evaluation_pipeline/prompts/NeuriCo_cheatsheet.txt \\
+        --dataset path/to/dataset.jsonl \\
+        --prior-knowledge path/to/prior_knowledge.txt \\
         --model-score openai/gpt-oss-120b \\
         --model-casestudy openai/gpt-4o \\
         --bin-threshold 3 --batch-size 5 \\
         --val-split 0.0 \\
-        --output-dir runs/select_normal \\
-        --cheatsheet-out ../SAIR_evaluation_pipeline/prompts/NeuriCo_cheatsheet_select.txt
+        --output-dir runs/select_run \\
+        --cheatsheet-out path/to/output_cheatsheet.txt
 """
 
 from __future__ import annotations
@@ -34,7 +34,6 @@ from .training.loop import run_training_loop
 from .training.outer_loop import run_outer_loop
 from .prompts.templates import N_CANDIDATES
 
-load_dotenv(Path(__file__).parent.parent / "SAIR_evaluation_pipeline" / ".env")
 load_dotenv(Path(__file__).parent / ".env")
 
 

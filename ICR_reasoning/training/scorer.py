@@ -21,24 +21,7 @@ from ICR_naive.core.data import _is_true
 from ..core.llm_client import LLMResponse, call_llm_batch
 from ..prompts.templates import SCORING_PROMPT, SCORING_PROMPT_COT_FIRST, SCORING_MAX_TOKENS
 
-# Re-use SAIR's battle-tested parser: anchored ^VERDICT: with re.MULTILINE,
-# multi-line _extract_section for REASONING, and None for unparseable verdicts.
-import re as _re
-import sys as _sys
-import os as _os
-_sair_path = str(_os.path.join(_os.path.dirname(__file__), "..", "..", "..", "SAIR_eval_pipeline"))
-if _sair_path not in _sys.path:
-    _sys.path.insert(0, _sair_path)
-from pipeline.parser import parse_response as _sair_parse
-
-# Strips markdown bold/italic markers that some models wrap around headers,
-# e.g. "**VERDICT:** TRUE" → "VERDICT: TRUE"
-_MD_BOLD_RE = _re.compile(r"\*{1,2}(VERDICT|REASONING|PROOF|COUNTEREXAMPLE):\*{0,2}", _re.IGNORECASE)
-
-
-def _normalize(content: str) -> str:
-    """Remove markdown bold/italic from section headers so the SAIR parser can find them."""
-    return _MD_BOLD_RE.sub(lambda m: m.group(1).upper() + ":", content)
+from ICR_naive.core.parser import parse_response as _sair_parse, normalize as _normalize
 
 
 # ---------------------------------------------------------------------------

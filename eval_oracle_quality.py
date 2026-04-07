@@ -8,9 +8,9 @@ you can judge whether the oracle-guided output is more specific.
 Usage (from ICRefine/):
     # Full run — score items, generate, evaluate, save state
     python eval_oracle_quality.py \
-        --dataset ../SAIR_evaluation_pipeline/datasets/normal.jsonl \
-        --cheatsheet ../SAIR_evaluation_pipeline/prompts/NeuriCo_cheatsheet.txt \
-        --oracle-csv ../SAIR_benchmark_results/gpt5.4_normal_default.csv \
+        --dataset path/to/dataset.jsonl \
+        --cheatsheet path/to/prior_knowledge.txt \
+        --oracle-csv path/to/oracle.csv \
         --model-score openai/gpt-oss-120b \
         --model-casestudy openai/gpt-4o \
         --n-items 40
@@ -18,7 +18,7 @@ Usage (from ICRefine/):
     # Re-evaluate only — skip scoring + generation, use saved state
     python eval_oracle_quality.py \
         --from-bin runs/oracle_eval/bin_state.json \
-        --cheatsheet ../SAIR_evaluation_pipeline/prompts/NeuriCo_cheatsheet.txt \
+        --cheatsheet path/to/prior_knowledge.txt \
         --model-score openai/gpt-oss-120b
 """
 
@@ -31,7 +31,6 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv(Path("SAIR_evaluation_pipeline") / ".env")
 load_dotenv(Path(".env"))
 
 sys.path.insert(0, str(Path(__file__).parent))

@@ -1,14 +1,7 @@
 # ICRefine — Iterative Cheatsheet Refinement
 
 Automatically improves a cheatsheet used to prompt LLMs on **magma equation implication** tasks.
-
-ICRefine works alongside `SAIR_eval_pipeline/` — both repos must be set up. They are expected to sit next to each other:
-
-```
-CHAI Project/
-├── SAIR_eval_pipeline/
-└── ICRefine/
-```
+ICRefine is a standalone project — it only needs a dataset (`.jsonl`) and an optional starting cheatsheet/prior-knowledge file.
 
 ---
 
@@ -53,16 +46,7 @@ VLLM_API_KEY=                        # usually empty
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-**2. Set up SAIR_eval_pipeline first** (if you haven't already)
-
-```bash
-cd ../SAIR_eval_pipeline
-uv sync
-cp .env.example .env   # then add your OPENROUTER_API_KEY
-cd ../ICRefine
-```
-
-**3. Install ICRefine dependencies and activate the environment**
+**2. Install ICRefine dependencies**
 
 ```bash
 uv sync
@@ -71,10 +55,11 @@ source .venv/bin/activate
 
 All subsequent `python` commands assume the venv is active. Alternatively, prefix any command with `uv run` (e.g. `uv run python -m ICR_select.pipeline ...`).
 
-**4. Configure your backend**
+**3. Configure your backend**
 
 ```bash
 cp .env.example .env
+# Edit .env and add your API keys
 ```
 
 *OpenRouter (cloud models):*
@@ -88,15 +73,13 @@ VLLM_BASE_URL=http://localhost:8000/v1/chat/completions
 VLLM_MODEL=deepseek-r1-14b
 ```
 
-When both `VLLM_BASE_URL` and `VLLM_MODEL` are set and `--model-score` matches `VLLM_MODEL`, scoring calls route to the local vLLM server automatically. See `SAIR_eval_pipeline/README.md` for cluster setup instructions.
-
-**5. Run a smoke test**
+**4. Run a smoke test**
 
 *OpenRouter only:*
 ```bash
 python -m ICR_select.pipeline \
-    --dataset ../SAIR_eval_pipeline/datasets/normal.jsonl \
-    --prior-knowledge ../SAIR_eval_pipeline/prompts/NeuriCo_cheatsheet.txt \
+    --dataset path/to/dataset.jsonl \
+    --prior-knowledge path/to/prior_knowledge.txt \
     --model-score openai/gpt-oss-120b \
     --model-casestudy openai/gpt-4o \
     --limit 20 \
@@ -106,8 +89,8 @@ python -m ICR_select.pipeline \
 *vLLM for scoring + OpenRouter for case studies (recommended on cluster):*
 ```bash
 python -m ICR_select.pipeline \
-    --dataset ../SAIR_eval_pipeline/datasets/normal.jsonl \
-    --prior-knowledge ../SAIR_eval_pipeline/prompts/NeuriCo_cheatsheet.txt \
+    --dataset path/to/dataset.jsonl \
+    --prior-knowledge path/to/prior_knowledge.txt \
     --model-score deepseek-r1-14b \
     --model-casestudy openai/gpt-4o \
     --limit 20 \
@@ -116,21 +99,19 @@ python -m ICR_select.pipeline \
 
 This runs 20 items and exits. Check `runs/smoke/` for output artifacts.
 
-**6. Run the full pipeline**
+**5. Run the full pipeline**
 
 ```bash
 python -m ICR_select.pipeline \
-    --dataset ../SAIR_eval_pipeline/datasets/normal.jsonl \
-    --prior-knowledge ../SAIR_eval_pipeline/prompts/NeuriCo_cheatsheet.txt \
+    --dataset path/to/dataset.jsonl \
+    --prior-knowledge path/to/prior_knowledge.txt \
     --model-score deepseek-r1-14b \
     --model-casestudy openai/gpt-4o \
     --bin-threshold 5 --batch-size 10 \
     --n-candidates 3 \
-    --output-dir runs/select_normal \
-    --cheatsheet-out ../SAIR_eval_pipeline/prompts/NeuriCo_cheatsheet_refined.txt
+    --output-dir runs/select_run \
+    --cheatsheet-out path/to/output_cheatsheet.txt
 ```
-
-The refined cheatsheet is written to `--cheatsheet-out` and can be passed directly to `SAIR_eval_pipeline/run_evaluation.py --cheatsheet`.
 
 ---
 
@@ -155,9 +136,7 @@ All pipelines support these initialisation options (mutually exclusive except `-
 | _(none)_ | LLM generates a decision tree from seed examples |
 | `--init-roadmap FILE` | Load a plain `.txt` as the trainable roadmap; case studies start empty |
 | `--init-cheatsheet PATH` | Load a previously saved cheatsheet (`.json` sidecar); full state restored |
-| `--prior-knowledge FILE` | Load a frozen plain-text file (e.g. NeuriCo prompt) into the `prior_knowledge` field — can be combined with any option above, or used alone to start with an empty trainable roadmap |
-
-The recommended starting point is `--prior-knowledge ../SAIR_eval_pipeline/prompts/NeuriCo_cheatsheet.txt`.
+| `--prior-knowledge FILE` | Load a frozen plain-text file into the `prior_knowledge` field — can be combined with any option above, or used alone to start with an empty trainable roadmap |
 
 ---
 
@@ -165,13 +144,13 @@ The recommended starting point is `--prior-knowledge ../SAIR_eval_pipeline/promp
 
 ```bash
 python -m ICR_naive.pipeline \
-    --dataset ../SAIR_eval_pipeline/datasets/normal.jsonl \
-    --init-txt ../SAIR_eval_pipeline/prompts/NeuriCo_cheatsheet.txt \
+    --dataset path/to/dataset.jsonl \
+    --init-txt path/to/prior_knowledge.txt \
     --model-score openai/gpt-oss-120b \
     --model-casestudy openai/gpt-4o \
     --bin-threshold 5 --batch-size 20 \
-    --output-dir runs/naive_normal \
-    --cheatsheet-out ../SAIR_eval_pipeline/prompts/NeuriCo_cheatsheet_naive.txt
+    --output-dir runs/naive_run \
+    --cheatsheet-out path/to/output_cheatsheet.txt
 ```
 
 | Flag | Default | Description |
@@ -187,13 +166,13 @@ python -m ICR_naive.pipeline \
 
 ```bash
 python -m ICR_reasoning.pipeline \
-    --dataset ../SAIR_eval_pipeline/datasets/hard1.jsonl \
-    --init-txt ../SAIR_eval_pipeline/prompts/NeuriCo_cheatsheet.txt \
+    --dataset path/to/dataset.jsonl \
+    --init-txt path/to/prior_knowledge.txt \
     --model-score openai/gpt-oss-120b \
     --model-casestudy openai/gpt-4o \
     --bin-threshold 3 --batch-size 10 \
-    --output-dir runs/reasoning_hard1 \
-    --cheatsheet-out ../SAIR_eval_pipeline/prompts/NeuriCo_cheatsheet_reasoning.txt
+    --output-dir runs/reasoning_run \
+    --cheatsheet-out path/to/output_cheatsheet.txt
 ```
 
 Additional flags beyond ICR_naive:
@@ -222,29 +201,29 @@ Periodic maintenance: **ablation pruning** (remove zero-contribution case studie
 
 ```bash
 python -m ICR_select.pipeline \
-    --dataset ../SAIR_eval_pipeline/datasets/normal.jsonl \
-    --prior-knowledge ../SAIR_eval_pipeline/prompts/NeuriCo_cheatsheet.txt \
+    --dataset path/to/dataset.jsonl \
+    --prior-knowledge path/to/prior_knowledge.txt \
     --model-score openai/gpt-oss-120b \
     --model-casestudy openai/gpt-4o \
     --bin-threshold 3 --batch-size 5 \
     --n-candidates 3 \
-    --output-dir runs/select_normal \
-    --cheatsheet-out ../SAIR_eval_pipeline/prompts/NeuriCo_cheatsheet_select.txt
+    --output-dir runs/select_run \
+    --cheatsheet-out path/to/output_cheatsheet.txt
 ```
 
 ### With DT revision (harder datasets)
 
 ```bash
 python -m ICR_select.pipeline \
-    --dataset ../SAIR_eval_pipeline/datasets/hard1.jsonl \
-    --prior-knowledge ../SAIR_eval_pipeline/prompts/NeuriCo_cheatsheet.txt \
+    --dataset path/to/dataset.jsonl \
+    --prior-knowledge path/to/prior_knowledge.txt \
     --model-score openai/gpt-oss-120b \
     --model-casestudy openai/gpt-4o \
     --bin-threshold 3 --batch-size 5 \
     --n-candidates 3 \
     --dt-rounds 3 \
-    --output-dir runs/select_dt_hard1 \
-    --cheatsheet-out ../SAIR_eval_pipeline/prompts/NeuriCo_cheatsheet_select_dt.txt
+    --output-dir runs/select_dt_run \
+    --cheatsheet-out path/to/output_cheatsheet.txt
 ```
 
 ### All options
@@ -265,8 +244,8 @@ python -m ICR_select.pipeline \
 
 | Flag | Default | Description |
 |---|---|---|
-| `--oracle-csv FILE` | off | GPT-5.4 oracle CSV (`gpt5.4_normal_default.csv`) — appends correct reasoning as a contrast signal in case study generation |
-| `--prescore-file FILE` | off | Pre-computed score map `{id: {predicted, correct, ...}}` — skips the initial scoring pass. Used automatically by the SAIR refinement pipeline |
+| `--oracle-csv FILE` | off | Oracle CSV — appends correct reasoning as a contrast signal in case study generation |
+| `--prescore-file FILE` | off | Pre-computed score map `{id: {predicted, correct, ...}}` — skips the initial scoring pass |
 
 **Maintenance**
 
@@ -313,7 +292,7 @@ All pipelines accept per-stage model overrides:
 ## Output
 
 ```
-runs/select_normal/
+runs/select_run/
 ├── cheatsheet_init.txt        # starting cheatsheet
 ├── cheatsheet_update_01.txt   # checkpoint after each addition
 ├── cheatsheet_final.txt       # final cheatsheet (plain text)
@@ -393,7 +372,7 @@ if __name__ == "__main__":
 
 **3.** Run it:
 ```bash
-python -m ICR_mymode.pipeline --dataset ../SAIR_eval_pipeline/datasets/normal.jsonl
+python -m ICR_mymode.pipeline --dataset path/to/dataset.jsonl
 ```
 
 Key building blocks already available to reuse:
@@ -411,12 +390,12 @@ Key building blocks already available to reuse:
 
 ## Comparing Modes
 
-`compare_modes.sh` runs baseline → train → eval for all three modes:
+`compare_modes.sh` trains all three modes on the same dataset for a side-by-side comparison:
 
 ```bash
-bash compare_modes.sh         # full comparison (100 training items, 150 eval items)
+# Edit DATASET and BASE_CHEATSHEET at the top of compare_modes.sh first
+bash compare_modes.sh         # full comparison (100 training items)
 bash compare_modes.sh smoke   # quick smoke test — verifies all gates fire without errors
-bash compare_modes.sh eval    # eval only — re-evaluate already-generated cheatsheets
 ```
 
 ---

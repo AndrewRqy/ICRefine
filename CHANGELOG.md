@@ -339,6 +339,45 @@ The roadmap synthesizer provides an alternative to growing case study lists: aft
 
 ---
 
+## 2026-04-07 (continued)
+
+### ICRefine: Standalone project — removed runtime dependency on SAIR_eval_pipeline
+
+**What changed:**
+
+`ICR_naive/core/parser.py` (new):
+- Self-contained copy of the response parser previously imported from `SAIR_eval_pipeline/pipeline/parser.py`.
+- Exports: `parse_response()`, `compute_correct()`, `normalize()`, `_extract_section()`.
+- `normalize()` strips markdown bold/italic (`**text**`, `*text*`) from headers before parsing — previously `_normalize()` in each scorer.
+
+`ICR_naive/training/scorer.py` and `ICR_reasoning/training/scorer.py`:
+- Replaced `sys.path` hack that pointed at `SAIR_eval_pipeline/` with a direct import: `from ..core.parser import parse_response as _sair_parse, normalize as _normalize` (naive) and `from ICR_naive.core.parser import ...` (reasoning).
+- Removed the `_MD_BOLD_RE` regex and `_normalize()` definition from both files (now in parser.py).
+
+`ICR_naive/core/llm_client.py` and `ICR_reasoning/core/llm_client.py`:
+- Removed `load_dotenv(... / "SAIR_evaluation_pipeline" / ".env")` fallback. Each client now loads only its own `.env` file.
+
+`ICR_naive/pipeline.py`, `ICR_reasoning/pipeline.py`, `ICR_select/pipeline.py`, `ICR_naive/generators/initial.py`, `eval_oracle_quality.py`:
+- Removed `load_dotenv` calls that referenced `SAIR_evaluation_pipeline/` paths.
+
+`compare_modes.sh`:
+- Removed `SAIR_DIR` variable and the `run_eval()` function (which called `SAIR_eval_pipeline/run_evaluation.py`).
+- `DATASET` and `BASE_CHEATSHEET` are now top-level config variables with placeholder values.
+- Output cheatsheets written to `runs/compare_*/cheatsheet_final.txt` instead of `SAIR_eval_pipeline/prompts/`.
+- Removed `eval` mode (evaluation is external to ICRefine).
+
+`README.md`:
+- Removed "must sit next to SAIR_eval_pipeline" requirement from the intro.
+- Removed "Set up SAIR_eval_pipeline first" from Quick Start.
+- All dataset/cheatsheet path examples use generic `path/to/dataset.jsonl` and `path/to/prior_knowledge.txt`.
+- Removed references to `SAIR_eval_pipeline/` throughout modes, examples, and Comparing Modes section.
+
+All pipeline docstrings updated to use generic paths.
+
+**Why it matters:** ICRefine can now be cloned and used independently. The only inputs are a dataset (`.jsonl`) and an optional prior-knowledge file; no sibling repository is required.
+
+---
+
 ## Next Steps
 
 - Run full recursive refinement pipeline (5 iterations, 200 items, eval-first-and-last) with oracle CSV

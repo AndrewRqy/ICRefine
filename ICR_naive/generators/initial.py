@@ -12,8 +12,8 @@ this point; case studies continue to accumulate during training.
 
 Standalone usage
 ----------------
-    python -m iterative_cheatsheet_refine.generators.initial \\
-        --dataset ../../SAIR_evaluation_pipeline/datasets/normal.jsonl \\
+    python -m ICR_naive.generators.initial \\
+        --dataset path/to/dataset.jsonl \\
         --n-seed 30 --output-dir runs/init
 """
 
@@ -36,7 +36,6 @@ from ..prompts.templates import (
     DT_MAX_TOKENS,
 )
 
-load_dotenv(Path(__file__).parent.parent.parent.parent / "SAIR_evaluation_pipeline" / ".env")
 load_dotenv(Path(__file__).parent.parent.parent / ".env")
 
 DEFAULT_MODEL = "openai/gpt-4o"
