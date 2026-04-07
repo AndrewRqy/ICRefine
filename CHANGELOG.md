@@ -378,6 +378,51 @@ All pipeline docstrings updated to use generic paths.
 
 ---
 
+## 2026-04-07 (continued)
+
+### SAIR_eval_pipeline: Dead-code cleanup
+
+**What changed:**
+
+`pipeline/config.py`:
+- Removed `VLLM_DEFAULT_BASE_URL` constant — defined but never read (actual URL comes from `VLLM_BASE_URL` env var).
+- Changed hardcoded `choices=["low", "medium", "high"]` in `build_parser()` → `choices=list(REASONING_EFFORT_LEVELS)` so the constant is the single source of truth.
+
+`pipeline/results.py`:
+- Removed `result_path()` and `is_done()` — both defined but never called anywhere in the project.
+- Fixed return type annotation on `write_run_summary()`: `-> tuple[Path, Path]` → `-> tuple[Path, Path, dict]` (the function already returned 3 values).
+- Removed stale `is_done(...)` line from module docstring.
+
+`recursive_refine/updater.py`:
+- Removed dead `from ICR_reasoning.core.llm_client import call_llm` import in `_icr_roadmap_updater` — imported but never called directly (used only inside `run_roadmap_synthesis`).
+- Updated `ICR_SELECT_DATASET` docstring entry to accurately describe its fallback-only behavior.
+
+---
+
+## 2026-04-07 (continued)
+
+### ICRefine: Shared modules moved to `utils/`
+
+**What changed:**
+
+`utils/` (new package):
+- `utils/cheatsheet.py` — canonical home for the `Cheatsheet` dataclass and associated constants.
+- `utils/data.py` — canonical home for `is_true`, `FailureBin`, `load_jsonl`, `sample_instances`, `split_dataset`.
+- `utils/parser.py` — canonical home for `parse_response`, `split_case_studies`, `normalize`, `compute_correct`.
+- `utils/llm_client.py` — canonical home for `LLMResponse`, `call_llm`, `call_llm_batch`, `get_api_key`. `load_dotenv` path adjusted for new depth (`parent.parent` instead of `parent.parent.parent`).
+- `utils/scorer.py` — canonical home for `score_batch`, `test_cheatsheet`, `TestResult`. Internal imports converted to relative (`.data`, `.llm_client`, `.parser`).
+
+Old locations (`ICR_naive/core/{cheatsheet,data,parser,llm_client}.py`, `ICR_naive/training/scorer.py`, `ICR_reasoning/core/llm_client.py`, `ICR_reasoning/training/scorer.py`) reduced to one-line shims that re-export from `utils.*` — backward compatibility for SAIR and any external callers is preserved.
+
+All cross-package imports updated to use `utils.*` directly:
+- `ICR_reasoning/generators/case_study.py`, `training/loop.py`, `pipeline.py`
+- `ICR_select/pipeline.py`, `generators/case_study.py`, `training/loop.py`, `gates.py`, `maintenance.py`, `dt_reviser.py`, `outer_loop.py`, `roadmap_synthesizer.py`
+- `eval_oracle_quality.py`
+
+**Why it matters:** Five modules were shared across all three ICR packages but lived inside `ICR_naive/`, making cross-package imports confusing (`ICR_select` importing from `ICR_naive`). Moving them to a neutral `utils/` package makes the dependency direction explicit and eliminates the chain of shims from `ICR_reasoning` → `ICR_naive`.
+
+---
+
 ## Next Steps
 
 - Run full recursive refinement pipeline (5 iterations, 200 items, eval-first-and-last) with oracle CSV

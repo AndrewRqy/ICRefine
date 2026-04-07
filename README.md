@@ -343,9 +343,9 @@ ICRefine/
 # ICR_mymode/pipeline.py
 import argparse
 from pathlib import Path
-from ICR_naive.core.cheatsheet import Cheatsheet
-from ICR_naive.core.data import load_jsonl
-from ICR_reasoning.core.llm_client import get_api_key
+from utils.cheatsheet import Cheatsheet
+from utils.data import load_jsonl
+from utils.llm_client import get_api_key
 
 def main():
     p = argparse.ArgumentParser()
@@ -379,10 +379,10 @@ Key building blocks already available to reuse:
 
 | Import | What it provides |
 |---|---|
-| `ICR_naive.core.cheatsheet.Cheatsheet` | Cheatsheet dataclass with `render()`, `save()`, `load()`, `prior_knowledge` |
-| `ICR_naive.core.data.load_jsonl` | Load a `.jsonl` dataset |
-| `ICR_reasoning.core.llm_client.call_llm` | Single synchronous LLM call (routes to vLLM or OpenRouter automatically) |
-| `ICR_reasoning.training.scorer.score_batch` | Score a batch of items against a cheatsheet, returns per-item verdicts + post-think |
+| `utils.cheatsheet.Cheatsheet` | Cheatsheet dataclass with `render()`, `save()`, `load()`, `prior_knowledge` |
+| `utils.data.load_jsonl` | Load a `.jsonl` dataset |
+| `utils.llm_client.call_llm` | Single synchronous LLM call (routes to vLLM or OpenRouter automatically) |
+| `utils.scorer.score_batch` | Score a batch of items against a cheatsheet, returns per-item verdicts + post-think |
 | `ICR_select.generators.case_study.generate_candidates` | Generate N candidate case studies from a failure bin |
 | `ICR_select.training.loop.run_training_loop` | Full inner CS loop with all four gates — use this to avoid reimplementing gating logic |
 
@@ -404,6 +404,12 @@ bash compare_modes.sh smoke   # quick smoke test — verifies all gates fire wit
 
 ```
 ICRefine/
+├── utils/               # Shared utilities (used by all three ICR packages)
+│   ├── cheatsheet.py    # Cheatsheet dataclass — render, save, load
+│   ├── data.py          # Dataset loading, splitting, FailureBin, is_true
+│   ├── parser.py        # Parse VERDICT / REASONING / PROOF / COUNTEREXAMPLE
+│   ├── llm_client.py    # Unified LLM client — vLLM / OpenAI / OpenRouter routing
+│   └── scorer.py        # score_batch, test_cheatsheet, TestResult
 ├── ICR_naive/           # Basic HypoGenic-style loop
 ├── ICR_reasoning/       # Post-think aware loop
 ├── ICR_select/          # Selective quality-gated loop (recommended)
