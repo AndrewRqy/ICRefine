@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import sys
 
-from ..core.data import _is_true
+from ..core.data import is_true
 from ..core.llm_client import call_llm
 from ..prompts.templates import CASE_STUDY_PROMPT, CS_MAX_TOKENS
 
@@ -22,7 +22,7 @@ from ..prompts.templates import CASE_STUDY_PROMPT, CS_MAX_TOKENS
 def _format_failures(failures: list[dict]) -> str:
     lines = []
     for i, it in enumerate(failures, 1):
-        expected  = "TRUE" if _is_true(it["answer"]) else "FALSE"
+        expected  = "TRUE" if is_true(it["answer"]) else "FALSE"
         predicted = it.get("predicted", "?")
         lines.append(
             f"  {i:3d}. E1 = {it['equation1']}"
@@ -67,7 +67,7 @@ def generate_case_study(
         f"with {model} ...",
         file=sys.stderr,
     )
-    return call_llm(
+    resp = call_llm(
         CASE_STUDY_PROMPT.format(
             cheatsheet=cheatsheet_text,
             failure_lines=_format_failures(failures),
@@ -76,3 +76,4 @@ def generate_case_study(
         temperature=temperature,
         max_tokens=CS_MAX_TOKENS,
     )
+    return resp.content

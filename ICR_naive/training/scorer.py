@@ -1,32 +1,36 @@
 """
-training/scorer.py — Score a cheatsheet against a set of labeled items.
+training/scorer.py — Unified scorer for all ICRefine pipelines.
 
-For each (equation1, equation2) item, the LLM is shown the rendered cheatsheet
-and asked to predict TRUE/FALSE.  The prediction is compared to the ground-truth
-answer to produce an accuracy score and per-item breakdowns.
+Each scored item carries:
+  predicted    : "TRUE" | "FALSE" | None
+  expected     : "TRUE" | "FALSE"
+  post_think   : REASONING section extracted from the model's structured output
+  thinking     : full internal CoT trace (empty for non-reasoning models)
+  raw_response : the full content string
 
-Uses call_llm_batch() so all items are scored in parallel.
+Per Heddaya et al. (ACL 2026), post_think preserves deductive markers at
+25× higher density than externally prompted summaries — it is the right
+signal for identifying what went wrong in a failure.
 """
 
 from __future__ import annotations
 
 import sys
-import os as _os
 from dataclasses import dataclass, field
 
-from ..core.data import _is_true
-from ..core.llm_client import call_llm_batch
-from ..prompts.templates import SCORING_PROMPT, SCORING_MAX_TOKENS
-
-from ..core.parser import parse_response as _sair_parse, normalize as _normalize
+from ..core.data import is_true
+from ..core.llm_client import LLMResponse, call_llm_batch
+from ..core.parser import parse_response as _parse, normalize as _normalize
+from ..prompts.templates import SCORING_PROMPT, SCORING_PROMPT_COT_FIRST, SCORING_MAX_TOKENS
 
 
 # ---------------------------------------------------------------------------
 # Prompt builder
 # ---------------------------------------------------------------------------
 
-def _build_scoring_prompt(cheatsheet_text: str, item: dict) -> str:
-    return SCORING_PROMPT.format(
+def _build_scoring_prompt(cheatsheet_text: str, item: dict, cot_first: bool = False) -> str:
+    template = SCORING_PROMPT_COT_FIRST if cot_first else SCORING_PROMPT
+    return template.format(
         cheatsheet=cheatsheet_text,
         equation1=item["equation1"],
         equation2=item["equation2"],
@@ -34,14 +38,17 @@ def _build_scoring_prompt(cheatsheet_text: str, item: dict) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Verdict parsing — delegates to SAIR's anchored multiline parser
+# Verdict + post-think extraction
 # ---------------------------------------------------------------------------
 
-def _parse_verdict(text: str | None) -> str | None:
-    """Return 'TRUE', 'FALSE', or None if the response cannot be parsed."""
-    if not text:
-        return None
-    return _sair_parse(_normalize(text))["verdict"]
+def _parse_verdict(content: str) -> str | None:
+    return _parse(_normalize(content))["verdict"]
+
+
+def _extract_post_think(content: str) -> str:
+    """Extract REASONING section. Falls back to full content if absent."""
+    parsed = _parse(_normalize(content))
+    return parsed["reasoning"] or content.strip()
 
 
 # ---------------------------------------------------------------------------
@@ -67,7 +74,7 @@ class TestResult:
 
 
 # ---------------------------------------------------------------------------
-# Scoring functions
+# Scoring
 # ---------------------------------------------------------------------------
 
 def score_batch(
@@ -79,14 +86,19 @@ def score_batch(
     temperature: float = 0.0,
     progress_label: str = "scoring",
     reasoning_effort: str | None = "low",
+    cot_first: bool = False,
 ) -> tuple[list[dict], list[dict]]:
     """
-    Score a list of items against the current cheatsheet in parallel.
+    Score items against the current cheatsheet in parallel.
 
-    Returns (correct_items, wrong_items) — both annotated with 'predicted'.
+    Returns (correct_items, wrong_items) — both annotated with predicted,
+    expected, post_think, thinking, and raw_response.
     Parse errors are counted as wrong.
+
+    cot_first: use SCORING_PROMPT_COT_FIRST (REASONING before VERDICT) to
+               force a genuine reasoning trace before the verdict is stated.
     """
-    prompts = [_build_scoring_prompt(cheatsheet_text, item) for item in items]
+    prompts   = [_build_scoring_prompt(cheatsheet_text, item, cot_first) for item in items]
     responses = call_llm_batch(
         prompts,
         model=model,
@@ -99,19 +111,50 @@ def score_batch(
     )
 
     correct, wrong = [], []
-    for item, response in zip(items, responses):
-        predicted    = _parse_verdict(response)
-        ground_truth = _is_true(item["answer"])
+    n_parse_errors = 0
+
+    for item, resp in zip(items, responses):
+        ground_truth = is_true(item["answer"])
+
+        if resp is None:
+            annotated = {
+                **item,
+                "predicted":    None,
+                "expected":     "TRUE" if ground_truth else "FALSE",
+                "post_think":   "",
+                "thinking":     "",
+                "raw_response": "",
+            }
+            wrong.append(annotated)
+            n_parse_errors += 1
+            continue
+
+        predicted  = _parse_verdict(resp.content)
+        post_think = _extract_post_think(resp.content)
+
         annotated = {
             **item,
             "predicted":    predicted,
             "expected":     "TRUE" if ground_truth else "FALSE",
-            "raw_response": response or "",
+            "post_think":   post_think,
+            "thinking":     resp.thinking,
+            "raw_response": resp.content,
         }
-        if predicted is None or (predicted == "TRUE") != ground_truth:
+
+        if predicted is None:
+            n_parse_errors += 1
+            wrong.append(annotated)
+        elif (predicted == "TRUE") != ground_truth:
             wrong.append(annotated)
         else:
             correct.append(annotated)
+
+    if n_parse_errors:
+        print(
+            f"\n  [scorer] {n_parse_errors} parse errors (no VERDICT: line) — "
+            f"counted as wrong.",
+            file=sys.stderr,
+        )
 
     return correct, wrong
 
@@ -124,24 +167,15 @@ def test_cheatsheet(
     concurrency: int = 10,
     temperature: float = 0.0,
     reasoning_effort: str | None = "low",
+    cot_first: bool = False,
 ) -> TestResult:
-    """
-    Score *cheatsheet_text* on the full *val_items* set.
-    Returns a TestResult with accuracy and per-item breakdowns.
-    """
-    print(
-        f"  Testing on {len(val_items)} items with {model} ...",
-        file=sys.stderr,
-    )
+    """Score cheatsheet_text on the full val_items set. Returns a TestResult."""
+    print(f"  Testing on {len(val_items)} items with {model} ...", file=sys.stderr)
     correct, wrong = score_batch(
-        val_items, cheatsheet_text, model, api_key, concurrency, temperature,
-        reasoning_effort=reasoning_effort,
+        val_items, cheatsheet_text, model, api_key,
+        concurrency, temperature,
+        reasoning_effort=reasoning_effort, cot_first=cot_first,
     )
     scored   = len(correct) + len(wrong)
     accuracy = len(correct) / scored if scored > 0 else 0.0
-    return TestResult(
-        accuracy=accuracy,
-        correct=correct,
-        wrong=wrong,
-        n_total=len(val_items),
-    )
+    return TestResult(accuracy=accuracy, correct=correct, wrong=wrong, n_total=len(val_items))

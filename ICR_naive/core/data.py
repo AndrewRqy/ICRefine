@@ -1,8 +1,5 @@
 """
-core/data.py — Dataset loading, sampling, and splitting utilities.
-
-All functions that touch .jsonl files or partition items live here.
-Import _is_true from here rather than defining it locally in each module.
+core/data.py — Dataset loading, sampling, splitting utilities, and shared training primitives.
 """
 
 from __future__ import annotations
@@ -10,6 +7,7 @@ from __future__ import annotations
 import json
 import random
 import sys
+from dataclasses import dataclass, field
 from pathlib import Path
 
 
@@ -17,11 +15,39 @@ from pathlib import Path
 # Label normalisation
 # ---------------------------------------------------------------------------
 
-def _is_true(answer) -> bool:
+def is_true(answer) -> bool:
     """Normalise a JSON bool or string answer to Python bool."""
     if isinstance(answer, bool):
         return answer
     return str(answer).strip().upper() == "TRUE"
+
+# Backward-compatible alias — prefer is_true in new code.
+_is_true = is_true
+
+
+# ---------------------------------------------------------------------------
+# Shared training primitive
+# ---------------------------------------------------------------------------
+
+@dataclass
+class FailureBin:
+    """Accumulates wrong items until the threshold is reached, then flushes."""
+    threshold: int
+    _items: list[dict] = field(default_factory=list, init=False)
+
+    def add(self, item: dict) -> None:
+        self._items.append(item)
+
+    def is_full(self) -> bool:
+        return len(self._items) >= self.threshold
+
+    def flush(self) -> list[dict]:
+        items = self._items[:]
+        self._items.clear()
+        return items
+
+    def __len__(self) -> int:
+        return len(self._items)
 
 
 # ---------------------------------------------------------------------------
@@ -54,8 +80,8 @@ def sample_instances(
     Prints a warning to stderr if the dataset has fewer examples than requested.
     """
     rng = random.Random(seed)
-    true_items  = [it for it in items if _is_true(it["answer"])]
-    false_items = [it for it in items if not _is_true(it["answer"])]
+    true_items  = [it for it in items if is_true(it["answer"])]
+    false_items = [it for it in items if not is_true(it["answer"])]
 
     actual_true  = min(n_true,  len(true_items))
     actual_false = min(n_false, len(false_items))
@@ -97,8 +123,8 @@ def split_dataset(
     """
     rng = random.Random(seed)
 
-    true_items  = [it for it in items if _is_true(it["answer"])]
-    false_items = [it for it in items if not _is_true(it["answer"])]
+    true_items  = [it for it in items if is_true(it["answer"])]
+    false_items = [it for it in items if not is_true(it["answer"])]
 
     def _split_one(lst: list) -> tuple[list, list, list]:
         shuffled = lst[:]

@@ -23,7 +23,7 @@ import sys
 from dataclasses import dataclass
 
 from ICR_naive.core.cheatsheet import Cheatsheet
-from ICR_naive.core.data import _is_true
+from ICR_naive.core.data import is_true
 from ..core.llm_client import call_llm
 from ..core.oracle import OracleDict
 from ..prompts.templates import CASE_STUDY_WITH_REASONING_PROMPT, FLUSH_MAX_TOKENS
@@ -49,7 +49,7 @@ def _format_failures_with_reasoning(
 ) -> str:
     lines = []
     for i, it in enumerate(failures, 1):
-        expected   = "TRUE" if _is_true(it["answer"]) else "FALSE"
+        expected   = "TRUE" if is_true(it["answer"]) else "FALSE"
         predicted  = it.get("predicted", "?")
         post_think = it.get("post_think", "").strip()
 

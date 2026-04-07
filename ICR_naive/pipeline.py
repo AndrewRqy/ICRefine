@@ -40,7 +40,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from .core.cheatsheet import Cheatsheet
-from .core.data import _is_true, load_jsonl, split_dataset
+from .core.data import load_jsonl, split_dataset
 from .core.llm_client import get_api_key
 from .generators.initial import DEFAULT_MODEL, generate_initial_cheatsheet
 from .training.loop import run_training_loop

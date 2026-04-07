@@ -95,3 +95,10 @@ def compute_correct(parsed: dict, item: dict) -> bool | None:
     if parsed["verdict"] is None:
         return None
     return (parsed["verdict"] == "TRUE") == (str(item["answer"]).strip().upper() == "TRUE")
+
+
+def split_case_studies(text: str) -> list[str]:
+    """Split LLM output containing multiple case studies into individual strings."""
+    # Lookahead for === (3 equals) so the delimiter itself stays in each part.
+    parts = re.split(r"(?====\s*CASE STUDY:)", text, flags=re.IGNORECASE)
+    return [p.strip() for p in parts if p.strip()]

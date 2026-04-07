@@ -20,15 +20,15 @@ Standalone usage
 from __future__ import annotations
 
 import argparse
-import re
 import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
 
 from ..core.cheatsheet import CASE_STUDY_MAX_CHARS, Cheatsheet
-from ..core.data import _is_true, load_jsonl, sample_instances
+from ..core.data import is_true, load_jsonl, sample_instances
 from ..core.llm_client import call_llm, get_api_key
+from ..core.parser import split_case_studies
 from ..prompts.templates import (
     CASE_STUDIES_PROMPT,
     DECISION_TREE_PROMPT,
@@ -48,19 +48,13 @@ DEFAULT_MODEL = "openai/gpt-4o"
 def _format_examples(instances: list[dict]) -> str:
     lines = []
     for i, it in enumerate(instances, 1):
-        label = "TRUE" if _is_true(it["answer"]) else "FALSE"
+        label = "TRUE" if is_true(it["answer"]) else "FALSE"
         lines.append(
             f"  {i:3d}. E1 = {it['equation1']}"
             f"  |  E2 = {it['equation2']}"
             f"  |  implies: {label}"
         )
     return "\n".join(lines)
-
-
-def _split_case_studies(text: str) -> list[str]:
-    """Split LLM output into individual case study strings."""
-    parts = re.split(r"(?===\s*CASE STUDY:)", text, flags=re.IGNORECASE)
-    return [p.strip() for p in parts if p.strip()]
 
 
 # ---------------------------------------------------------------------------
@@ -112,7 +106,7 @@ def generate_initial_cheatsheet(
         max_tokens=cs_max_tokens,
     )
 
-    case_studies = _split_case_studies(cs_text)
+    case_studies = split_case_studies(cs_text)
     if not case_studies:
         case_studies = [cs_text.strip()]
 

@@ -1,8 +1,8 @@
 """
-ICR_select/training/loop.py — Selective training loop with five quality gates.
+ICR_select/training/loop.py — Selective training loop with quality gates.
 
 Every candidate case study must pass all active gates before entering the
-cheatsheet.  Useless entries are pruned periodically.  The cheatsheet is
+cheatsheet. Useless entries are pruned periodically, and the cheatsheet is
 condensed when it grows too large.
 
 Gates (in order):
@@ -15,59 +15,41 @@ Gates (in order):
   4. Similarity gate        — LLM dedup: skip if duplicate, merge if overlap,
                               add if genuinely new.
 
-Periodic maintenance:
+Periodic maintenance (see maintenance.py):
   5. Ablation pruning       — every ablation_every flushes, remove case studies
                               with zero contribution.
-  6. Condensation           — when len(case_studies) >= condense_at, rewrite to
-                              a denser set and validate before swapping.
+  6. Condensation           — when len(case_studies) >= condense_at, rewrite
+                              to a denser set and validate before swapping.
+
+Gate helpers live in gates.py; maintenance functions in maintenance.py.
 """
 
 from __future__ import annotations
 
 import json
 import random
-import re
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from ICR_naive.core.cheatsheet import Cheatsheet
-from ICR_naive.generators.initial import _split_case_studies
-from ICR_reasoning.core.llm_client import call_llm
-from ICR_reasoning.core.oracle import OracleDict
+from ICR_naive.core.data import FailureBin
 from ICR_reasoning.training.scorer import score_batch, test_cheatsheet
+from ICR_reasoning.core.oracle import OracleDict
 from ..generators.case_study import generate_candidates
-from ..prompts.templates import (
-    SIMILARITY_CHECK_PROMPT, SIMILARITY_MAX_TOKENS,
-    MERGE_PROMPT, MERGE_MAX_TOKENS,
-    CONDENSATION_PROMPT, CONDENSATION_MAX_TOKENS,
-    CORRECT_POOL_MAX,
+from ..prompts.templates import CORRECT_POOL_MAX
+from .gates import (
+    _MIN_CS_FOR_SIMILARITY,
+    _apply_prescore,
+    _mini_eval,
+    _mini_eval_full,
+    _regression_check,
+    _replace_eval,
+    _similarity_gate,
+    _merge_case_studies,
 )
-
-
-# ---------------------------------------------------------------------------
-# Failure bin (same as ICR_naive/reasoning)
-# ---------------------------------------------------------------------------
-
-@dataclass
-class FailureBin:
-    threshold: int
-    _items: list[dict] = field(default_factory=list, init=False)
-
-    def add(self, item: dict) -> None:
-        self._items.append(item)
-
-    def is_full(self) -> bool:
-        return len(self._items) >= self.threshold
-
-    def flush(self) -> list[dict]:
-        items = self._items[:]
-        self._items.clear()
-        return items
-
-    def __len__(self) -> int:
-        return len(self._items)
+from .maintenance import _ablation_prune, _condense
 
 
 # ---------------------------------------------------------------------------
@@ -86,372 +68,6 @@ class TrainingResult:
     train_accuracy: float
     val_accuracy: float | None
     update_log: list[dict]
-
-
-# ---------------------------------------------------------------------------
-# Gate helpers
-# ---------------------------------------------------------------------------
-
-def _mini_eval(
-    candidate_cs: str,
-    failures: list[dict],
-    cheatsheet: Cheatsheet,
-    model_score: str,
-    api_key: str,
-    concurrency: int,
-    reasoning_effort: str | None,
-    cot_first: bool,
-    label: str = "mini-eval",
-) -> float:
-    """Score the failure batch with candidate injected. Returns fix_rate."""
-    temp = Cheatsheet(
-        decision_tree=cheatsheet.decision_tree,
-        case_studies=cheatsheet.case_studies + [candidate_cs],
-    )
-    correct, _ = score_batch(
-        failures, temp.render(), model_score, api_key,
-        concurrency=concurrency, reasoning_effort=reasoning_effort, cot_first=cot_first,
-        progress_label=label,
-    )
-    return len(correct) / len(failures) if failures else 0.0
-
-
-def _mini_eval_full(
-    candidate_cs: str,
-    failures: list[dict],
-    cheatsheet: Cheatsheet,
-    model_score: str,
-    api_key: str,
-    concurrency: int,
-    reasoning_effort: str | None,
-    cot_first: bool,
-    label: str = "mini-eval",
-) -> tuple[float, list[dict]]:
-    """Score the failure batch with candidate injected. Returns (fix_rate, still_wrong)."""
-    temp = Cheatsheet(
-        decision_tree=cheatsheet.decision_tree,
-        case_studies=cheatsheet.case_studies + [candidate_cs],
-    )
-    correct, wrong = score_batch(
-        failures, temp.render(), model_score, api_key,
-        concurrency=concurrency, reasoning_effort=reasoning_effort, cot_first=cot_first,
-        progress_label=label,
-    )
-    fix_rate = len(correct) / len(failures) if failures else 0.0
-    return fix_rate, wrong
-
-
-def _replace_eval(
-    merged_cs: str,
-    merge_idx: int,
-    failures: list[dict],
-    cheatsheet: Cheatsheet,
-    model_score: str,
-    api_key: str,
-    concurrency: int,
-    reasoning_effort: str | None,
-    cot_first: bool,
-) -> float:
-    """Score the failure batch with CS at merge_idx replaced by merged_cs. Returns fix_rate."""
-    new_studies = cheatsheet.case_studies[:]
-    new_studies[merge_idx] = merged_cs
-    temp = Cheatsheet(
-        decision_tree=cheatsheet.decision_tree,
-        case_studies=new_studies,
-    )
-    correct, _ = score_batch(
-        failures, temp.render(), model_score, api_key,
-        concurrency=concurrency, reasoning_effort=reasoning_effort, cot_first=cot_first,
-        progress_label="merge-eval-merged",
-    )
-    return len(correct) / len(failures) if failures else 0.0
-
-
-def _regression_check(
-    candidate_cs: str,
-    correct_pool: list[dict],
-    cheatsheet: Cheatsheet,
-    model_score: str,
-    api_key: str,
-    concurrency: int,
-    reasoning_effort: str | None,
-    cot_first: bool,
-) -> float:
-    """Score the correct pool with candidate injected. Returns regression_rate."""
-    if not correct_pool:
-        return 0.0
-    temp = Cheatsheet(
-        decision_tree=cheatsheet.decision_tree,
-        case_studies=cheatsheet.case_studies + [candidate_cs],
-    )
-    _, wrong = score_batch(
-        correct_pool, temp.render(), model_score, api_key,
-        concurrency=concurrency, reasoning_effort=reasoning_effort, cot_first=cot_first,
-        progress_label="regression-check",
-    )
-    return len(wrong) / len(correct_pool)
-
-
-_MIN_CS_FOR_SIMILARITY = 3   # skip similarity gate until this many CSes exist
-
-
-def _apply_prescore(
-    batch: list[dict],
-    prescore_map: dict[str, dict],
-) -> tuple[list[dict], list[dict]]:
-    """
-    Split a batch into (correct, wrong) using pre-computed SAIR eval scores,
-    avoiding a redundant vLLM scoring pass for the initial training items.
-
-    Items not found in prescore_map fall back to being treated as wrong so
-    they surface in the failure bin and can be addressed.
-    """
-    from ICR_naive.core.data import _is_true
-    correct, wrong = [], []
-    for item in batch:
-        pre = prescore_map.get(item.get("id", ""))
-        if pre is None:
-            wrong.append({
-                **item,
-                "predicted":    None,
-                "expected":     "TRUE" if _is_true(item["answer"]) else "FALSE",
-                "post_think":   "",
-                "thinking":     "",
-                "raw_response": "",
-            })
-            continue
-        annotated = {
-            **item,
-            "predicted":    pre.get("predicted"),
-            "expected":     "TRUE" if _is_true(item["answer"]) else "FALSE",
-            "post_think":   pre.get("post_think", ""),
-            "thinking":     pre.get("thinking", ""),
-            "raw_response": pre.get("raw_response", ""),
-        }
-        if pre.get("correct"):
-            correct.append(annotated)
-        else:
-            wrong.append(annotated)
-    return correct, wrong
-
-
-def _format_existing(case_studies: list[str]) -> str:
-    parts = []
-    for i, cs in enumerate(case_studies, 1):
-        parts.append(f"[{i}]\n{cs.strip()}")
-    return "\n\n".join(parts) if parts else "(none yet)"
-
-
-def _similarity_gate(
-    candidate_cs: str,
-    cheatsheet: Cheatsheet,
-    model_casestudy: str,
-    api_key: str,
-) -> tuple[str, int | None]:
-    """
-    Check if candidate duplicates an existing case study.
-
-    Returns:
-        ('ADD',   None)  — new pattern, add it
-        ('SKIP',  None)  — duplicate, discard
-        ('MERGE', N)     — merge into case study at index N (0-based)
-    """
-    if not cheatsheet.case_studies:
-        return "ADD", None
-
-    resp = call_llm(
-        SIMILARITY_CHECK_PROMPT.format(
-            existing=_format_existing(cheatsheet.case_studies),
-            candidate=candidate_cs,
-        ),
-        model_casestudy, api_key,
-        temperature=0.0,
-        max_tokens=SIMILARITY_MAX_TOKENS,
-        reasoning_effort=None,
-    )
-    raw = resp.content.strip().upper()
-
-    if raw.startswith("SKIP"):
-        return "SKIP", None
-    if raw.startswith("MERGE"):
-        m = re.search(r"\d+", raw)
-        if m:
-            idx = int(m.group()) - 1   # prompt uses 1-based numbering
-            if 0 <= idx < len(cheatsheet.case_studies):
-                return "MERGE", idx
-    return "ADD", None
-
-
-def _merge_case_studies(
-    cs_a: str,
-    cs_b: str,
-    model_casestudy: str,
-    api_key: str,
-) -> str:
-    """Merge two case studies into one via LLM."""
-    resp = call_llm(
-        MERGE_PROMPT.format(cs_a=cs_a, cs_b=cs_b),
-        model_casestudy, api_key,
-        temperature=0.2,
-        max_tokens=MERGE_MAX_TOKENS,
-        reasoning_effort=None,
-    )
-    return resp.content.strip()
-
-
-# ---------------------------------------------------------------------------
-# Periodic maintenance
-# ---------------------------------------------------------------------------
-
-ABLATION_SAMPLE_MAX = 40   # cap ablation scoring to this many items
-
-
-def _ablation_prune(
-    cheatsheet: Cheatsheet,
-    train_seen: list[dict],
-    model_score: str,
-    api_key: str,
-    concurrency: int,
-    reasoning_effort: str | None,
-    cot_first: bool,
-    log_fn,
-) -> tuple[Cheatsheet, int]:
-    """
-    Remove case studies with zero contribution to train accuracy.
-    Uses a random sample of seen items (capped at ABLATION_SAMPLE_MAX) so the
-    ablation pass stays fast regardless of how many items have been scored.
-    Returns (pruned_cheatsheet, n_pruned).
-    """
-    if len(cheatsheet.case_studies) <= 1:
-        return cheatsheet, 0
-
-    sample = train_seen
-    if len(train_seen) > ABLATION_SAMPLE_MAX:
-        sample = random.sample(train_seen, ABLATION_SAMPLE_MAX)
-
-    log_fn(
-        f"  [ablation] scoring baseline on {len(sample)} items "
-        f"(sampled from {len(train_seen)} seen) ..."
-    )
-    correct_base, _ = score_batch(
-        sample, cheatsheet.render(), model_score, api_key,
-        concurrency=concurrency, reasoning_effort=reasoning_effort, cot_first=cot_first,
-        progress_label="ablation-baseline",
-    )
-    base_acc = len(correct_base) / len(sample)
-
-    def _score_without(i):
-        temp = Cheatsheet(
-            decision_tree=cheatsheet.decision_tree,
-            case_studies=[c for j, c in enumerate(cheatsheet.case_studies) if j != i],
-        )
-        correct_without, _ = score_batch(
-            sample, temp.render(), model_score, api_key,
-            concurrency=concurrency, reasoning_effort=reasoning_effort, cot_first=cot_first,
-            progress_label=f"ablation-CS{i+1}",
-        )
-        return i, len(correct_without) / len(sample)
-
-    contributions = {}
-    with ThreadPoolExecutor(max_workers=len(cheatsheet.case_studies)) as ex:
-        futures = {ex.submit(_score_without, i): i for i in range(len(cheatsheet.case_studies))}
-        for fut in as_completed(futures):
-            i, acc_without = fut.result()
-            contributions[i] = base_acc - acc_without
-
-    to_keep = []
-    n_pruned = 0
-    for i, cs in enumerate(cheatsheet.case_studies):
-        contribution = contributions[i]
-        if contribution > 0:
-            to_keep.append(cs)
-            log_fn(f"  [ablation] CS {i+1}: contribution={contribution:+.1%} — KEPT")
-        else:
-            n_pruned += 1
-            log_fn(f"  [ablation] CS {i+1}: contribution={contribution:+.1%} — PRUNED")
-
-    return Cheatsheet(decision_tree=cheatsheet.decision_tree, case_studies=to_keep), n_pruned
-
-
-def _condense(
-    cheatsheet: Cheatsheet,
-    train_seen: list[dict],
-    model_casestudy: str,
-    model_score: str,
-    api_key: str,
-    concurrency: int,
-    reasoning_effort: str | None,
-    cot_first: bool,
-    log_fn,
-) -> Cheatsheet:
-    """
-    Condense case studies into a denser set. Validates before swapping:
-    only replaces if condensed version doesn't hurt train accuracy.
-    """
-    n_current = len(cheatsheet.case_studies)
-    n_target  = max(2, n_current // 2)
-    log_fn(f"  [condense] rewriting {n_current} case studies → {n_target} ...")
-
-    resp = call_llm(
-        CONDENSATION_PROMPT.format(
-            decision_tree=cheatsheet.decision_tree.strip(),
-            case_studies=_format_existing(cheatsheet.case_studies),
-            n_current=n_current,
-            n_target=n_target,
-        ),
-        model_casestudy, api_key,
-        temperature=0.2,
-        max_tokens=CONDENSATION_MAX_TOKENS,
-        reasoning_effort=None,
-    )
-    condensed = _split_case_studies(resp.content)
-    if not condensed:
-        log_fn("  [condense] parse failed — keeping original.")
-        return cheatsheet
-
-    condensed_cs = Cheatsheet(
-        decision_tree=cheatsheet.decision_tree,
-        case_studies=condensed,
-    )
-
-    # Validate: condensed must match or beat current accuracy on seen items
-    if train_seen:
-        sample = train_seen
-        if len(train_seen) > ABLATION_SAMPLE_MAX:
-            sample = random.sample(train_seen, ABLATION_SAMPLE_MAX)
-
-        def _score_version(args):
-            label, cs = args
-            correct, _ = score_batch(
-                sample, cs.render(), model_score, api_key,
-                concurrency=concurrency, reasoning_effort=reasoning_effort, cot_first=cot_first,
-                progress_label=label,
-            )
-            return label, len(correct)
-
-        results = {}
-        with ThreadPoolExecutor(max_workers=2) as ex:
-            for label, n in ex.map(_score_version, [
-                ("condense-validate-new", condensed_cs),
-                ("condense-validate-old", cheatsheet),
-            ]):
-                results[label] = n
-        delta = results["condense-validate-new"] - results["condense-validate-old"]
-        if delta >= -1:   # allow at most 1-item regression
-            log_fn(
-                f"  [condense] validated: {len(condensed)} entries, "
-                f"delta={delta:+d} items. Swapping in condensed version."
-            )
-            return condensed_cs
-        else:
-            log_fn(
-                f"  [condense] validation failed (delta={delta:+d}). "
-                f"Keeping original {n_current} entries."
-            )
-            return cheatsheet
-    else:
-        log_fn("  [condense] no training items seen yet — accepting condensed without validation.")
-        return condensed_cs
 
 
 # ---------------------------------------------------------------------------
@@ -493,10 +109,10 @@ def run_training_loop(
     concurrency: int = 10,
     # Candidate generation
     n_candidates: int = 3,
-    candidate_rounds: int = 3,          # retry rounds for "retry" flush strategy
-    flush_strategy: str = "default",    # "default": discard on gate failure; "retry": retry with prev attempt context
+    candidate_rounds: int = 3,
+    flush_strategy: str = "default",   # "default" | "retry"
     oracle: OracleDict | None = None,
-    prescore_map: dict | None = None,   # pre-computed scores from SAIR eval (id → result dict)
+    prescore_map: dict | None = None,
     # Gates
     fix_rate_threshold: float = 0.5,
     regress_threshold: float = 0.15,
@@ -518,8 +134,8 @@ def run_training_loop(
             print(msg, file=sys.stderr, flush=True)
 
     bin_           = FailureBin(threshold=bin_threshold)
-    correct_pool   : list[dict] = []   # rolling window of correct items for regression
-    train_seen     : list[dict] = []   # all scored items for ablation
+    correct_pool   : list[dict] = []
+    train_seen     : list[dict] = []
     update_log     : list[dict] = []
 
     n_added        = 0
@@ -547,12 +163,18 @@ def run_training_loop(
         f"{'='*60}"
     )
 
+    # ---- shared gate kwargs ------------------------------------------------
+    _gkw = dict(
+        model_score=model_score, api_key=api_key,
+        concurrency=concurrency, reasoning_effort=reasoning_effort, cot_first=cot_first,
+    )
+
     def _process_flush(failures: list[dict], batch_num: int) -> None:
         nonlocal n_added, n_discarded, n_skipped, n_merges, flush_count
 
         _log(f"\n  [flush] {len(failures)} failures → generating {n_candidates} candidates ...")
 
-        # ── Step 1: candidate competition ──────────────────────────────────
+        # Step 1: candidate competition
         try:
             candidates = generate_candidates(
                 failures, cheatsheet, model_casestudy, api_key,
@@ -563,15 +185,14 @@ def run_training_loop(
             n_discarded += 1
             return
 
-        # ── Step 2: mini-eval all candidates in parallel, pick best ──────────
-        scored = [None] * len(candidates)
+        # Step 2: mini-eval all candidates in parallel, pick best
+        scored: list[tuple[float, str] | None] = [None] * len(candidates)
 
-        def _eval_candidate(args):
+        def _eval_candidate(args: tuple[int, str]) -> tuple[int, float, str]:
             i, cand = args
             fix_rate = _mini_eval(
-                cand, failures, cheatsheet, model_score, api_key,
-                concurrency, reasoning_effort, cot_first,
-                label=f"mini-eval cand {i+1}/{len(candidates)}",
+                cand, failures, cheatsheet,
+                label=f"mini-eval cand {i+1}/{len(candidates)}", **_gkw,
             )
             return i, fix_rate, cand
 
@@ -582,10 +203,11 @@ def run_training_loop(
                 scored[i] = (fix_rate, cand)
                 _log(f"  [mini-eval] candidate {i+1}: fix_rate={fix_rate:.0%}")
 
-        scored.sort(key=lambda x: x[0], reverse=True)
-        best_fix_rate, best_cand = scored[0]
+        scored_valid = [s for s in scored if s is not None]
+        scored_valid.sort(key=lambda x: x[0], reverse=True)
+        best_fix_rate, best_cand = scored_valid[0]
 
-        # ── Step 3: fix-rate gate ───────────────────────────────────────────
+        # Step 3: fix-rate gate
         if best_fix_rate < fix_rate_threshold:
             _log(
                 f"  [gate:fix_rate] best={best_fix_rate:.0%} < "
@@ -599,12 +221,10 @@ def run_training_loop(
             })
             return
 
-        # ── Step 4: regression gate ─────────────────────────────────────────
+        # Step 4: regression gate
+        reg_rate = 0.0
         if correct_pool:
-            reg_rate = _regression_check(
-                best_cand, correct_pool, cheatsheet, model_score, api_key,
-                concurrency, reasoning_effort, cot_first,
-            )
+            reg_rate = _regression_check(best_cand, correct_pool, cheatsheet, **_gkw)
             _log(f"  [gate:regression] regression_rate={reg_rate:.0%}")
             if reg_rate > regress_threshold:
                 _log(
@@ -618,22 +238,16 @@ def run_training_loop(
                     "regression_rate": reg_rate,
                 })
                 return
-        else:
-            reg_rate = 0.0
 
-        # ── Step 5: similarity gate (optional) ─────────────────────────────
+        # Step 5: similarity gate (optional)
         if similarity_gate and len(cheatsheet.case_studies) >= _MIN_CS_FOR_SIMILARITY:
-            action, merge_idx = _similarity_gate(
-                best_cand, cheatsheet, model_casestudy, api_key,
-            )
+            action, merge_idx = _similarity_gate(best_cand, cheatsheet, model_casestudy, api_key)
             _log(f"  [gate:similarity] action={action}" +
                  (f" (merge into CS {merge_idx+1})" if merge_idx is not None else ""))
 
             if action == "SKIP":
                 n_skipped += 1
-                update_log.append({
-                    "event": "bin_skipped", "batch": batch_num, "reason": "duplicate",
-                })
+                update_log.append({"event": "bin_skipped", "batch": batch_num, "reason": "duplicate"})
                 return
 
             if action == "MERGE" and merge_idx is not None:
@@ -641,52 +255,35 @@ def run_training_loop(
                 merged   = _merge_case_studies(existing, best_cand, model_casestudy, api_key)
 
                 if validate_merge:
-                    # Score failures with existing CS in place (baseline)
                     correct_base, _ = score_batch(
                         failures, cheatsheet.render(), model_score, api_key,
                         concurrency=concurrency, reasoning_effort=reasoning_effort,
                         cot_first=cot_first, progress_label="merge-eval-baseline",
                     )
                     existing_fix_rate = len(correct_base) / len(failures) if failures else 0.0
-
-                    # Score failures with merged CS replacing the existing entry
-                    merged_fix_rate = _replace_eval(
-                        merged, merge_idx, failures, cheatsheet, model_score, api_key,
-                        concurrency, reasoning_effort, cot_first,
-                    )
+                    merged_fix_rate   = _replace_eval(merged, merge_idx, failures, cheatsheet, **_gkw)
                     _log(
-                        f"  [gate:merge_validate] existing_fix_rate={existing_fix_rate:.0%}  "
-                        f"merged_fix_rate={merged_fix_rate:.0%}"
+                        f"  [gate:merge_validate] existing={existing_fix_rate:.0%}  "
+                        f"merged={merged_fix_rate:.0%}"
                     )
-
                     if merged_fix_rate < existing_fix_rate:
-                        # Merge would hurt — fall through to ADD instead
-                        _log(
-                            f"  [gate:merge_validate] merged ({merged_fix_rate:.0%}) < "
-                            f"existing ({existing_fix_rate:.0%}) — rejecting merge, "
-                            f"adding candidate as new entry."
-                        )
+                        _log("  [gate:merge_validate] merged worse — adding as new entry.")
                         update_log.append({
                             "event": "merge_rejected", "batch": batch_num,
                             "merge_idx": merge_idx + 1,
                             "existing_fix_rate": existing_fix_rate,
                             "merged_fix_rate": merged_fix_rate,
                         })
-                        # Fall through to ADD below
+                        # fall through to ADD
                     else:
                         cheatsheet.case_studies[merge_idx] = merged
                         n_merges += 1
                         flush_count += 1
-                        _log(
-                            f"  [merge] validated and updated CS {merge_idx+1} in-place "
-                            f"({existing_fix_rate:.0%} → {merged_fix_rate:.0%})."
-                        )
+                        _log(f"  [merge] validated and updated CS {merge_idx+1}.")
                         update_log.append({
                             "event": "bin_merged", "batch": batch_num,
                             "merged_into": merge_idx + 1,
                             "fix_rate": best_fix_rate, "regression_rate": reg_rate,
-                            "existing_fix_rate": existing_fix_rate,
-                            "merged_fix_rate": merged_fix_rate,
                         })
                         return
                 else:
@@ -701,9 +298,9 @@ def run_training_loop(
                     })
                     return
 
-        # ── ADD ─────────────────────────────────────────────────────────────
+        # ADD
         cheatsheet.add_case_study(best_cand)
-        n_added   += 1
+        n_added     += 1
         flush_count += 1
         _log(
             f"  [added] CS {len(cheatsheet.case_studies)} — "
@@ -716,16 +313,10 @@ def run_training_loop(
         })
 
     def _process_flush_retry(failures: list[dict], batch_num: int) -> None:
-        """
-        Retry flush strategy — like _process_flush but retries up to `candidate_rounds`
-        times on fix-rate or regression gate failure.  On each retry the previous
-        candidate text and its still-wrong items are passed to generate_candidates so
-        the model knows what was tried and what it missed.  SKIP from the similarity
-        gate still causes an immediate discard (retrying a duplicate is pointless).
-        """
+        """Retry flush — like _process_flush but retries up to candidate_rounds times."""
         nonlocal n_added, n_discarded, n_skipped, n_merges, flush_count
 
-        prev_attempt: dict | None = None  # {"candidate": str, "still_wrong": list, "reason": str}
+        prev_attempt: dict | None = None
 
         for attempt in range(1, candidate_rounds + 1):
             if attempt == 1:
@@ -733,75 +324,62 @@ def run_training_loop(
             else:
                 _log(f"\n  [flush/retry] attempt {attempt}/{candidate_rounds} (prev failed: {prev_attempt['reason']}) ...")
 
-            # ── Step 1: candidate competition ──────────────────────────────
             try:
                 candidates = generate_candidates(
                     failures, cheatsheet, model_casestudy, api_key,
                     n=n_candidates, oracle=oracle, prev_attempt=prev_attempt,
                 )
             except RuntimeError as exc:
-                _log(f"  [flush/retry] candidate generation failed: {exc} — {'retrying' if attempt < candidate_rounds else 'discarding'}.")
+                _log(f"  [flush/retry] generation failed: {exc} — {'retrying' if attempt < candidate_rounds else 'discarding'}.")
                 continue
 
-            # ── Step 2: mini-eval all candidates in parallel, pick best ────
-            scored = [None] * len(candidates)
+            scored: list[tuple[float, list[dict], str] | None] = [None] * len(candidates)
 
-            def _eval_candidate_full(args):
+            def _eval_full(args: tuple[int, str]) -> tuple[int, float, list[dict], str]:
                 i, cand = args
                 fix_rate, still_wrong = _mini_eval_full(
-                    cand, failures, cheatsheet, model_score, api_key,
-                    concurrency, reasoning_effort, cot_first,
-                    label=f"mini-eval cand {i+1}/{len(candidates)}",
+                    cand, failures, cheatsheet,
+                    label=f"mini-eval cand {i+1}/{len(candidates)}", **_gkw,
                 )
                 return i, fix_rate, still_wrong, cand
 
             with ThreadPoolExecutor(max_workers=len(candidates)) as ex:
-                futures = {ex.submit(_eval_candidate_full, (i, c)): i for i, c in enumerate(candidates)}
+                futures = {ex.submit(_eval_full, (i, c)): i for i, c in enumerate(candidates)}
                 for fut in as_completed(futures):
                     i, fix_rate, still_wrong, cand = fut.result()
                     scored[i] = (fix_rate, still_wrong, cand)
                     _log(f"  [mini-eval] candidate {i+1}: fix_rate={fix_rate:.0%}")
 
-            scored.sort(key=lambda x: x[0], reverse=True)
-            best_fix_rate, best_still_wrong, best_cand = scored[0]
+            scored_valid = [s for s in scored if s is not None]
+            scored_valid.sort(key=lambda x: x[0], reverse=True)
+            best_fix_rate, best_still_wrong, best_cand = scored_valid[0]
 
-            # ── Step 3: fix-rate gate ───────────────────────────────────────
             if best_fix_rate < fix_rate_threshold:
                 _log(
-                    f"  [gate:fix_rate] best={best_fix_rate:.0%} < "
-                    f"threshold={fix_rate_threshold:.0%} — "
+                    f"  [gate:fix_rate] best={best_fix_rate:.0%} < threshold={fix_rate_threshold:.0%} — "
                     f"{'retrying' if attempt < candidate_rounds else 'discarding'}."
                 )
                 prev_attempt = {"candidate": best_cand, "still_wrong": best_still_wrong, "reason": "fix_rate"}
                 continue
 
-            # ── Step 4: regression gate ─────────────────────────────────────
             reg_rate = 0.0
             if correct_pool:
-                reg_rate = _regression_check(
-                    best_cand, correct_pool, cheatsheet, model_score, api_key,
-                    concurrency, reasoning_effort, cot_first,
-                )
+                reg_rate = _regression_check(best_cand, correct_pool, cheatsheet, **_gkw)
                 _log(f"  [gate:regression] regression_rate={reg_rate:.0%}")
                 if reg_rate > regress_threshold:
                     _log(
-                        f"  [gate:regression] {reg_rate:.0%} > "
-                        f"threshold={regress_threshold:.0%} — "
+                        f"  [gate:regression] {reg_rate:.0%} > threshold={regress_threshold:.0%} — "
                         f"{'retrying' if attempt < candidate_rounds else 'discarding'}."
                     )
                     prev_attempt = {"candidate": best_cand, "still_wrong": best_still_wrong, "reason": "regression"}
                     continue
 
-            # ── Step 5: similarity gate (optional) ─────────────────────────
             if similarity_gate and len(cheatsheet.case_studies) >= _MIN_CS_FOR_SIMILARITY:
-                action, merge_idx = _similarity_gate(
-                    best_cand, cheatsheet, model_casestudy, api_key,
-                )
+                action, merge_idx = _similarity_gate(best_cand, cheatsheet, model_casestudy, api_key)
                 _log(f"  [gate:similarity] action={action}" +
                      (f" (merge into CS {merge_idx+1})" if merge_idx is not None else ""))
 
                 if action == "SKIP":
-                    # No point retrying — pattern already covered
                     n_skipped += 1
                     update_log.append({"event": "bin_skipped", "batch": batch_num, "reason": "duplicate"})
                     return
@@ -821,9 +399,9 @@ def run_training_loop(
                     })
                     return
 
-            # ── ADD ─────────────────────────────────────────────────────────
+            # ADD
             cheatsheet.add_case_study(best_cand)
-            n_added += 1
+            n_added     += 1
             flush_count += 1
             _log(
                 f"  [added] CS {len(cheatsheet.case_studies)} — "
@@ -837,7 +415,7 @@ def run_training_loop(
             })
             return
 
-        # All candidate_rounds exhausted without passing gates
+        # All rounds exhausted
         n_discarded += 1
         _log(f"  [flush/retry] all {candidate_rounds} rounds failed — discarding bin.")
         update_log.append({
@@ -849,7 +427,6 @@ def run_training_loop(
     def _maybe_maintain(batch_num: int) -> None:
         nonlocal n_pruned_total, n_condensed
 
-        # Ablation
         if flush_count > 0 and flush_count % ablation_every == 0 and train_seen:
             _log(f"\n  [ablation] running after flush #{flush_count} ...")
             pruned_cs, n_pruned = _ablation_prune(
@@ -865,12 +442,8 @@ def run_training_loop(
                 "n_remaining": len(cheatsheet.case_studies),
             })
 
-        # Condensation
         if len(cheatsheet.case_studies) >= condense_at:
-            _log(
-                f"\n  [condense] {len(cheatsheet.case_studies)} case studies "
-                f"≥ condense_at={condense_at} ..."
-            )
+            _log(f"\n  [condense] {len(cheatsheet.case_studies)} case studies ≥ condense_at={condense_at} ...")
             condensed = _condense(
                 cheatsheet, train_seen, model_casestudy, model_score, api_key,
                 concurrency, reasoning_effort, cot_first, _log,
@@ -909,12 +482,10 @@ def run_training_loop(
         train_seen    += batch
         running_acc    = total_correct / total_scored
 
-        # Update correct pool (reservoir — keep up to CORRECT_POOL_MAX)
         for item in correct:
             if len(correct_pool) < CORRECT_POOL_MAX:
                 correct_pool.append(item)
             else:
-                # Replace random element to avoid staleness
                 correct_pool[random.randrange(CORRECT_POOL_MAX)] = item
 
         _log(

@@ -32,7 +32,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from ICR_naive.core.cheatsheet import Cheatsheet
-from ICR_naive.core.data import _is_true, load_jsonl, split_dataset
+from ICR_naive.core.data import load_jsonl, split_dataset
 from ICR_naive.generators.initial import DEFAULT_MODEL, generate_initial_cheatsheet
 from .core.llm_client import get_api_key
 from .training.loop import run_training_loop

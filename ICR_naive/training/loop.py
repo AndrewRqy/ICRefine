@@ -18,36 +18,13 @@ from __future__ import annotations
 
 import json
 import sys
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 
 from ..core.cheatsheet import Cheatsheet
+from ..core.data import FailureBin
 from ..generators.case_study import generate_case_study
 from .scorer import score_batch, test_cheatsheet
-
-
-# ---------------------------------------------------------------------------
-# Failure bin
-# ---------------------------------------------------------------------------
-
-@dataclass
-class FailureBin:
-    threshold: int
-    _items: list[dict] = field(default_factory=list, init=False)
-
-    def add(self, item: dict) -> None:
-        self._items.append(item)
-
-    def is_full(self) -> bool:
-        return len(self._items) >= self.threshold
-
-    def flush(self) -> list[dict]:
-        items = self._items[:]
-        self._items.clear()
-        return items
-
-    def __len__(self) -> int:
-        return len(self._items)
 
 
 # ---------------------------------------------------------------------------
