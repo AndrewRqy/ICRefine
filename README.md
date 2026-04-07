@@ -53,15 +53,16 @@ There are three refinement modes. Each is a self-contained Python package with i
 
 ## Cheatsheet Init Modes
 
-All three pipelines support the same three ways to initialise the cheatsheet:
+All three pipelines support the following ways to initialise the cheatsheet (mutually exclusive except `--prior-knowledge`):
 
 | Flag | Behaviour |
 |---|---|
 | _(none)_ | LLM generates a decision tree from seed examples |
-| `--init-txt FILE` | Load a plain `.txt` file as the decision tree; case studies start empty |
-| `--init-cheatsheet PATH` | Load a previously saved cheatsheet (`.json` sidecar) |
+| `--init-roadmap FILE` | Load a plain `.txt` file as the trainable roadmap/decision tree; case studies start empty |
+| `--init-cheatsheet PATH` | Load a previously saved cheatsheet (`.json` sidecar); full state restored |
+| `--prior-knowledge FILE` | Load a frozen plain-text file (e.g. NeuriCo prompt) into the `prior_knowledge` field. Combined with any of the above, or alone to start with an empty trainable roadmap |
 
-The most common starting point is `--init-txt` with `NeuriCo_cheatsheet.txt`.
+The most common starting point is `--prior-knowledge NeuriCo_cheatsheet.txt`, which freezes the NeuriCo content and lets the pipeline build a fresh trainable roadmap on top of it.
 
 ---
 
@@ -136,7 +137,7 @@ Periodic maintenance:
 ```bash
 python -m ICR_select.pipeline \
     --dataset ../SAIR_evaluation_pipeline/datasets/normal.jsonl \
-    --init-txt ../SAIR_evaluation_pipeline/prompts/NeuriCo_cheatsheet.txt \
+    --prior-knowledge ../SAIR_evaluation_pipeline/prompts/NeuriCo_cheatsheet.txt \
     --model-score openai/gpt-oss-120b \
     --model-casestudy openai/gpt-4o \
     --bin-threshold 3 --batch-size 5 \
@@ -146,14 +147,14 @@ python -m ICR_select.pipeline \
     --cheatsheet-out ../SAIR_evaluation_pipeline/prompts/NeuriCo_cheatsheet_select.txt
 ```
 
-### With DT revision (recommended for harder datasets)
+### With DT revision (optional, harder datasets)
 
 Wraps the CS loop in an outer round structure. After each round, the pipeline analyses which decision tree steps are most commonly misapplied, rewrites those steps, and validates the revision before accepting it. Starts the next round from the improved DT with a fresh set of case studies.
 
 ```bash
 python -m ICR_select.pipeline \
     --dataset ../SAIR_evaluation_pipeline/datasets/hard1.jsonl \
-    --init-txt ../SAIR_evaluation_pipeline/prompts/NeuriCo_cheatsheet.txt \
+    --prior-knowledge ../SAIR_evaluation_pipeline/prompts/NeuriCo_cheatsheet.txt \
     --model-score openai/gpt-oss-120b \
     --model-casestudy openai/gpt-4o \
     --bin-threshold 3 --batch-size 5 \
@@ -171,6 +172,8 @@ python -m ICR_select.pipeline \
 | Flag | Default | Description |
 |---|---|---|
 | `--n-candidates N` | `3` | Candidates generated per bin flush |
+| `--flush-strategy` | `default` | `default`: discard bin on gate failure. `retry`: retry up to `--candidate-rounds` times, passing the previous candidate's still-wrong items as context |
+| `--candidate-rounds N` | `3` | Max retry rounds per bin flush when `--flush-strategy retry` |
 | `--fix-rate-threshold F` | `0.5` | Min fraction of failures a candidate must fix |
 | `--regress-threshold F` | `0.15` | Max fraction of correct-pool items a candidate may break |
 | `--no-similarity-gate` | off | Skip LLM dedup check (faster, less selective) |
@@ -304,9 +307,10 @@ ICRefine/
 │   ├── generators/      # Candidate case study generation
 │   ├── prompts/
 │   └── training/
-│       ├── loop.py      # Inner CS loop (4 gates + pruning + condensation)
-│       ├── outer_loop.py # Outer DT revision loop
-│       └── dt_reviser.py # Validated decision tree revision
+│       ├── loop.py           # Inner CS loop (4 gates + pruning + condensation)
+│       ├── outer_loop.py     # Outer DT revision loop
+│       ├── dt_reviser.py     # Validated decision tree revision
+│       └── roadmap_synthesizer.py  # Absorbs case studies into a structured reasoning roadmap
 │
 ├── eval_oracle_quality.py  # Compare case study quality with vs without oracle injection
 ├── compare_modes.sh        # Baseline → train → eval comparison script
