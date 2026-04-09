@@ -71,7 +71,6 @@ def run_training_loop(
     concurrency: int = 10,
     casestudy_temperature: float = 0.3,
     flush_remainder: bool = True,
-    apply_dt_patch: bool = True,
     cot_first: bool = False,
     output_dir: Path | None = None,
     log: bool = True,
@@ -126,7 +125,7 @@ def run_training_loop(
 
         while bin_.is_full():
             failures = bin_.flush()
-            _log(f"  [bin full] {len(failures)} failures → reasoning-aware case study + DT patch")
+            _log(f"  [bin full] {len(failures)} failures → reasoning-aware case study + roadmap patch")
             result = generate_case_study_with_reasoning(
                 failures=failures,
                 cheatsheet=cheatsheet,
@@ -137,15 +136,15 @@ def run_training_loop(
             cheatsheet.add_case_study(result.case_study)
             n_added += 1
             patched = False
-            if apply_dt_patch and result.dt_patch:
-                cheatsheet.patch_decision_tree(result.dt_patch)
+            if result.roadmap_patch:
+                cheatsheet.patch_roadmap(result.roadmap_patch)
                 patched = True
                 _log(
-                    f"  → DT patched ({len(result.dt_patch)} chars).  "
+                    f"  → roadmap patched ({len(result.roadmap_patch)} chars).  "
                     f"cheatsheet now has {len(cheatsheet.case_studies)} case study(ies)."
                 )
             else:
-                _log(f"  → cheatsheet now has {len(cheatsheet.case_studies)} case study(ies) (no DT patch).")
+                _log(f"  → cheatsheet now has {len(cheatsheet.case_studies)} case study(ies) (no roadmap patch).")
 
             update_log.append({
                 "event": "bin_flush",
@@ -153,7 +152,7 @@ def run_training_loop(
                 "items_processed": total_scored,
                 "n_failures": len(failures),
                 "n_case_studies_total": len(cheatsheet.case_studies),
-                "dt_patch_applied": patched,
+                "roadmap_patch_applied": patched,
                 "running_train_accuracy": running_acc,
             })
             if output_dir:
@@ -161,7 +160,7 @@ def run_training_loop(
 
     if flush_remainder and len(bin_) > 0:
         failures = bin_.flush()
-        _log(f"\n[remainder] {len(failures)} failures → reasoning-aware case study + DT patch")
+        _log(f"\n[remainder] {len(failures)} failures → reasoning-aware case study + roadmap patch")
         result = generate_case_study_with_reasoning(
             failures=failures,
             cheatsheet=cheatsheet,
@@ -172,15 +171,15 @@ def run_training_loop(
         cheatsheet.add_case_study(result.case_study)
         n_added += 1
         patched = False
-        if apply_dt_patch and result.dt_patch:
-            cheatsheet.patch_decision_tree(result.dt_patch)
+        if result.roadmap_patch:
+            cheatsheet.patch_roadmap(result.roadmap_patch)
             patched = True
-            _log(f"  → DT patched ({len(result.dt_patch)} chars).")
+            _log(f"  → roadmap patched ({len(result.roadmap_patch)} chars).")
         update_log.append({
             "event": "remainder_flush",
             "n_failures": len(failures),
             "n_case_studies_total": len(cheatsheet.case_studies),
-            "dt_patch_applied": patched,
+            "roadmap_patch_applied": patched,
         })
         if output_dir:
             _save_checkpoint(cheatsheet, update_log, output_dir, "final_remainder")

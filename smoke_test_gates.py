@@ -12,6 +12,7 @@ to return deterministic results, then runs run_training_loop and checks:
   5. fix_rate=0.30 accepts candidates that 0.50 would block
   6. best_fix_rate recorded in retry-path discard log
   7. CLI --min-pool-for-regression flag exists in --help
+  8. render_for_query returns top-k most relevant case studies
 """
 
 from __future__ import annotations
@@ -139,7 +140,7 @@ def test_regression_gate_skipped_when_pool_small():
          patch(_PATCH_SIMGATE, return_value=("ADD", None)):
 
         run_training_loop(
-            cheatsheet=Cheatsheet(decision_tree="", case_studies=[]),
+            cheatsheet=Cheatsheet(roadmap="", case_studies=[]),
             train_items=items, val_items=None,
             model_score="dummy", model_casestudy="dummy", api_key="dummy",
             bin_threshold=3, batch_size=5, concurrency=1,
@@ -177,7 +178,7 @@ def test_regression_gate_runs_when_pool_large():
          patch(_PATCH_SIMGATE, return_value=("ADD", None)):
 
         run_training_loop(
-            cheatsheet=Cheatsheet(decision_tree="", case_studies=[]),
+            cheatsheet=Cheatsheet(roadmap="", case_studies=[]),
             train_items=items, val_items=None,
             model_score="dummy", model_casestudy="dummy", api_key="dummy",
             bin_threshold=3, batch_size=5, concurrency=1,
@@ -209,7 +210,7 @@ def test_fix_rate_30_accepts_partial_fix():
          patch(_PATCH_SIMGATE, return_value=("ADD", None)):
 
         result = run_training_loop(
-            cheatsheet=Cheatsheet(decision_tree="", case_studies=[]),
+            cheatsheet=Cheatsheet(roadmap="", case_studies=[]),
             train_items=items, val_items=None,
             model_score="dummy", model_casestudy="dummy", api_key="dummy",
             bin_threshold=5, batch_size=10, concurrency=1,
@@ -242,7 +243,7 @@ def test_fix_rate_50_blocks_partial_fix():
          patch(_PATCH_SIMGATE, return_value=("ADD", None)):
 
         result = run_training_loop(
-            cheatsheet=Cheatsheet(decision_tree="", case_studies=[]),
+            cheatsheet=Cheatsheet(roadmap="", case_studies=[]),
             train_items=items, val_items=None,
             model_score="dummy", model_casestudy="dummy", api_key="dummy",
             bin_threshold=5, batch_size=10, concurrency=1,
@@ -274,7 +275,7 @@ def test_best_fix_rate_in_discard_log():
          patch(_PATCH_GEN, side_effect=_gen_one):
 
         result = run_training_loop(
-            cheatsheet=Cheatsheet(decision_tree="", case_studies=[]),
+            cheatsheet=Cheatsheet(roadmap="", case_studies=[]),
             train_items=items, val_items=None,
             model_score="dummy", model_casestudy="dummy", api_key="dummy",
             bin_threshold=3, batch_size=5, concurrency=1,
@@ -317,6 +318,122 @@ def test_pipeline_cli_arg():
 
 
 # ---------------------------------------------------------------------------
+# Test 9: render_for_query routes to top-k most relevant case studies
+# ---------------------------------------------------------------------------
+def test_render_for_query():
+    from utils.cheatsheet import Cheatsheet, extract_query_features
+    from utils.case_study import CaseStudy
+
+    # Build a cheatsheet with 4 case studies of varying relevance
+    cs_absorbing = CaseStudy(
+        title="Absorbing E1 implies anything",
+        activate_if=["E1 is absorbing (x = y * x form)"],
+        action="TRUE",
+        feature_signature="absorbing→general_L0",
+        creation_fix_rate=0.70,
+        historical_fix_rate=0.70,
+    )
+    cs_singleton = CaseStudy(
+        title="Singleton E1 implies everything",
+        activate_if=["E1 is singleton (x = y form)"],
+        action="TRUE",
+        feature_signature="singleton→standard_L0",
+        creation_fix_rate=0.55,
+        historical_fix_rate=0.55,
+    )
+    cs_standard_trivial = CaseStudy(
+        title="Standard E1 implies trivial E2",
+        activate_if=["E1 is standard", "E2 is trivial (x = x form)"],
+        action="FALSE",
+        feature_signature="standard→trivial_L0",
+        creation_fix_rate=0.60,
+        historical_fix_rate=0.60,
+    )
+    cs_general = CaseStudy(
+        title="General E1 with absorbing subterm",
+        activate_if=["E1 is general", "E2 involves absorbing structure"],
+        action="FALSE",
+        feature_signature="general→absorbing_L1",
+        creation_fix_rate=0.50,
+        historical_fix_rate=0.50,
+    )
+
+    cheatsheet = Cheatsheet(
+        roadmap="STEP 1: Check if E1 is trivial.",
+        case_studies=[cs_absorbing, cs_singleton, cs_standard_trivial, cs_general],
+    )
+
+    # Query: absorbing E1 → general E2
+    # E1: "x * y = z" — rhs is a bare var (z) not present in lhs → ABSORBING
+    # E2: "x * y = z * w" — neither side is a bare var → GENERAL
+    item_absorbing_general = {
+        "equation1": "x * y = z",      # absorbing: rhs var z absent from lhs
+        "equation2": "x * y = z * w",  # general: neither side bare var
+        "answer": True,
+    }
+
+    qf = extract_query_features(item_absorbing_general)
+    check(
+        "extract_query_features: form_e1 == ABSORBING",
+        qf.form_e1 == "ABSORBING",
+        f"got {qf.form_e1}",
+    )
+    check(
+        "extract_query_features: form_e2 == GENERAL",
+        qf.form_e2 == "GENERAL",
+        f"got {qf.form_e2}",
+    )
+
+    rendered = cheatsheet.render_for_query(item_absorbing_general, top_k=2)
+
+    # The absorbing case must be included (highest relevance — direct sig match)
+    check(
+        "render_for_query top-2: absorbing case included",
+        "Absorbing E1 implies anything" in rendered,
+        "absorbing case missing from rendered output",
+    )
+
+    # Singleton (singleton→standard) shares no form tokens with absorbing/general
+    # and has lower fix_rate than absorbing — must be excluded
+    check(
+        "render_for_query top-2: singleton case excluded",
+        "Singleton E1 implies everything" not in rendered,
+        "low-relevance singleton case appeared in top-2",
+    )
+
+    # Standard→trivial shares no form tokens with absorbing/general — must be excluded
+    check(
+        "render_for_query top-2: standard_trivial case excluded",
+        "Standard E1 implies trivial E2" not in rendered,
+        "low-relevance standard_trivial case appeared in top-2",
+    )
+
+    # Decision tree must always appear
+    check(
+        "render_for_query: decision tree always present",
+        "STEP 1: Check if E1 is trivial." in rendered,
+        "decision tree missing from routed render",
+    )
+
+    # With top_k=4 all cases should appear
+    rendered_all = cheatsheet.render_for_query(item_absorbing_general, top_k=4)
+    all_titles_present = all(
+        title in rendered_all
+        for title in [
+            "Absorbing E1 implies anything",
+            "Singleton E1 implies everything",
+            "Standard E1 implies trivial E2",
+            "General E1 with absorbing subterm",
+        ]
+    )
+    check(
+        "render_for_query top-4: all 4 cases present",
+        all_titles_present,
+        "one or more cases missing when top_k=4",
+    )
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
@@ -345,6 +462,9 @@ if __name__ == "__main__":
 
     print("Test 8: pipeline CLI --min-pool-for-regression")
     test_pipeline_cli_arg()
+
+    print("Test 9: render_for_query routes to top-k relevant cases")
+    test_render_for_query()
 
     print()
     if _failures:

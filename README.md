@@ -133,7 +133,7 @@ All pipelines support these initialisation options (mutually exclusive except `-
 
 | Flag | Behaviour |
 |---|---|
-| _(none)_ | LLM generates a decision tree from seed examples |
+| _(none)_ | LLM generates a reasoning roadmap from seed examples |
 | `--init-roadmap FILE` | Load a plain `.txt` as the trainable roadmap; case studies start empty |
 | `--init-cheatsheet PATH` | Load a previously saved cheatsheet (`.json` sidecar); full state restored |
 | `--prior-knowledge FILE` | Load a frozen plain-text file into the `prior_knowledge` field — can be combined with any option above, or used alone to start with an empty trainable roadmap |
@@ -180,7 +180,6 @@ Additional flags beyond ICR_naive:
 | Flag | Default | Description |
 |---|---|---|
 | `--cot-first` | off | Put REASONING before VERDICT in the scoring prompt |
-| `--no-dt-patch` | off | Skip decision tree patching; only add case studies |
 | `--no-analysis` | off | Skip the final reasoning analysis stage |
 | `--limit N` | off | Cap training items to the first N |
 
@@ -197,8 +196,6 @@ The full quality-gated pipeline. Every candidate case study must pass four gates
 
 Periodic maintenance: **ablation pruning** (remove zero-contribution case studies) and **condensation** (rewrite when cheatsheet grows too large).
 
-### CS-only run (no DT revision)
-
 ```bash
 python -m ICR_select.pipeline \
     --dataset path/to/dataset.jsonl \
@@ -208,21 +205,6 @@ python -m ICR_select.pipeline \
     --bin-threshold 3 --batch-size 5 \
     --n-candidates 3 \
     --output-dir runs/select_run \
-    --cheatsheet-out path/to/output_cheatsheet.txt
-```
-
-### With DT revision (harder datasets)
-
-```bash
-python -m ICR_select.pipeline \
-    --dataset path/to/dataset.jsonl \
-    --prior-knowledge path/to/prior_knowledge.txt \
-    --model-score openai/gpt-oss-120b \
-    --model-casestudy openai/gpt-4o \
-    --bin-threshold 3 --batch-size 5 \
-    --n-candidates 3 \
-    --dt-rounds 3 \
-    --output-dir runs/select_dt_run \
     --cheatsheet-out path/to/output_cheatsheet.txt
 ```
 
@@ -255,15 +237,6 @@ python -m ICR_select.pipeline \
 | `--ablation-every N` | `5` | Run ablation pruning every N flushes |
 | `--condense-at N` | `6` | Run condensation when case study count reaches this |
 
-**DT revision outer loop**
-
-| Flag | Default | Description |
-|---|---|---|
-| `--dt-rounds N` | `1` | Outer DT revision rounds (1 = no DT revision) |
-| `--plateau-threshold F` | `0.02` | Stop outer loop if round-on-round improvement < F |
-| `--keep-case-studies` | off | Carry case studies between DT revision rounds |
-| `--min-failures-for-dt N` | `5` | Min failures needed to attempt DT revision |
-
 **Shared**
 
 | Flag | Default | Description |
@@ -284,7 +257,7 @@ All pipelines accept per-stage model overrides:
 | Flag | Stage |
 |---|---|
 | `--model-score MODEL_ID` | Scoring items during training |
-| `--model-casestudy MODEL_ID` | Case study and DT revision generation |
+| `--model-casestudy MODEL_ID` | Case study generation |
 | `--model-init MODEL_ID` | Initial cheatsheet generation (if not using `--prior-knowledge`) |
 | `--model MODEL_ID` | Default for all stages |
 
@@ -302,8 +275,6 @@ runs/select_run/
 ```
 
 The `.json` sidecar stores each case study as a **structured record** — not a flat string. Each entry contains all parsed fields (`activate_if`, `action`, `why_this_check_works`, `support_examples`, `feature_signature`, etc.) alongside running statistics (`creation_fix_rate`, `historical_fix_rate`, `n_activations`, `n_fixes`). The `.txt` is the human-readable render used in prompts.
-
-For DT revision runs, each round gets a subfolder with `cheatsheet_end_of_round.txt` and `dt_revision.json` (accepted/rejected, accuracy before/after).
 
 ---
 
@@ -420,8 +391,6 @@ ICRefine/
 ├── ICR_select/          # Selective quality-gated loop (recommended)
 │   └── training/
 │       ├── loop.py                # Inner CS loop (4 gates + pruning + condensation)
-│       ├── outer_loop.py          # Outer DT revision loop
-│       ├── dt_reviser.py          # Validated decision tree revision
 │       └── roadmap_synthesizer.py # Absorbs case studies into a structured reasoning roadmap
 ├── smoke_test_gates.py     # Gate threshold smoke tests (no live LLM required)
 ├── eval_oracle_quality.py  # Compare case study quality with vs without oracle injection

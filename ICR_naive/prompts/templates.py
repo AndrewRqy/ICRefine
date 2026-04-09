@@ -7,34 +7,34 @@ the cheatsheet size constants so they stay in sync automatically.
 
 Templates
 ---------
-DECISION_TREE_PROMPT   — initial generation: ask LLM to write a decision tree
+ROADMAP_PROMPT         — initial generation: ask LLM to write a reasoning roadmap
 CASE_STUDIES_PROMPT    — initial generation: ask LLM to write seed case studies
 CASE_STUDY_PROMPT      — training loop: ask LLM to write a case study from failures
 SCORING_PROMPT         — training/eval: ask LLM to predict TRUE/FALSE for one pair
 
 Token budgets
 -------------
-DT_MAX_TOKENS          — max tokens for a decision tree response
+DT_MAX_TOKENS          — max tokens for a roadmap response
 CS_MAX_TOKENS          — max tokens for a single case study response
 SCORING_MAX_TOKENS     — max tokens for a scoring response (short)
 """
 
 from __future__ import annotations
 
-from ..core.cheatsheet import CASE_STUDY_MAX_CHARS, DECISION_TREE_MAX_CHARS
+from ..core.cheatsheet import CASE_STUDY_MAX_CHARS, ROADMAP_MAX_CHARS
 
 # ~4 chars/token; 1.2× headroom so the LLM can overshoot slightly —
 # the hard char cap in cheatsheet.py will truncate the rest.
-DT_MAX_TOKENS      = int(DECISION_TREE_MAX_CHARS / 4 * 1.2)
-CS_MAX_TOKENS      = int(CASE_STUDY_MAX_CHARS    / 4 * 1.2)
+DT_MAX_TOKENS      = int(ROADMAP_MAX_CHARS    / 4 * 1.2)
+CS_MAX_TOKENS      = int(CASE_STUDY_MAX_CHARS / 4 * 1.2)
 SCORING_MAX_TOKENS = 8_000   # 8K is enough for DeepSeek-R1-14B think + structured output; 16K lets it exhaust the budget mid-think
 
 
 # ---------------------------------------------------------------------------
-# Initial cheatsheet generation — decision tree
+# Initial cheatsheet generation — reasoning roadmap
 # ---------------------------------------------------------------------------
 
-DECISION_TREE_PROMPT = """\
+ROADMAP_PROMPT = """\
 You are an expert in universal algebra, specifically in equational theories of magmas.
 A magma is a set with a single binary operation * and no other axioms.
 "E1 implies E2" means every magma satisfying E1 also satisfies E2.
@@ -47,28 +47,33 @@ Below are labeled examples showing whether E1 implies E2.
 
 === YOUR TASK ===
 
-Design a DECISION TREE — a numbered, step-by-step procedure that a reader \
-can mechanically follow to determine whether E1 implies E2.
+Design a REASONING ROADMAP — a structured guide that tells the model HOW to think
+about whether E1 implies E2, not just which bucket to classify into.
 
 Requirements:
-- Each step must have a clear structural CHECK (something you can compute by \
-  inspecting the equations, no proof required) and a definitive outcome: \
-  TRUE, FALSE, or "continue to next step".
-- Steps should be ordered from most decisive to least decisive.
+- Each aspect must have a clear structural CHECK (something you can compute by \
+  inspecting the equations, no proof required) with a definitive IF YES / IF NO outcome.
+- Aspects should be ordered from most reliable / highest signal to least.
 - Cover at least: trivial/singleton/absorbing/standard/general form detection, \
   variable count comparison, left-side operation count comparison, \
   substitution instance check, and a default fallback.
-- Ground every step in evidence from the examples above.
+- Ground every aspect in evidence from the examples above.
 - Write for an LLM reader: be explicit, use examples inline, avoid vague language.
 
-LENGTH CONSTRAINT: The entire decision tree must fit in 2,500 characters.
-Be dense and precise — one or two lines per step, inline examples in brackets.
+LENGTH CONSTRAINT: The entire roadmap must fit in 2,500 characters.
+Be dense and precise — one or two lines per aspect, inline examples in brackets.
 Do not pad with filler; every sentence must be actionable.
 
-Output ONLY the decision tree text — no preamble.
-Start with the line:  DECISION TREE: Magma Equation Implication
-Then number the steps: STEP 1, STEP 2, ...\
+Output ONLY the roadmap text — no preamble.
+Format each aspect as:
+  ASPECT N: [short name]
+  CHECK: [the specific mechanical question]
+  IF YES: [what to conclude or do next]
+  IF NO: [what to conclude or do next]\
 """
+
+# Backward-compat alias
+DECISION_TREE_PROMPT = ROADMAP_PROMPT
 
 
 # ---------------------------------------------------------------------------
@@ -78,9 +83,9 @@ Then number the steps: STEP 1, STEP 2, ...\
 CASE_STUDIES_PROMPT = """\
 You are an expert in universal algebra, specifically in equational theories of magmas.
 
-Here is a decision tree for determining whether E1 implies E2 over all magmas:
+Here is a reasoning roadmap for determining whether E1 implies E2 over all magmas:
 
-{decision_tree}
+{roadmap}
 
 Below are additional labeled examples that illustrate specific patterns:
 

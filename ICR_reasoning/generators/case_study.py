@@ -12,8 +12,8 @@ summaries, making it a better signal for identifying and correcting reasoning fl
 
 The model is asked to produce TWO sections:
   1. A CASE STUDY for the cheatsheet (appended to case_studies list).
-  2. A DECISION TREE PATCH with targeted corrections to the DT (appended to
-     decision_tree via Cheatsheet.patch_decision_tree()).
+  2. A ROADMAP PATCH with targeted corrections to the roadmap (appended to
+     roadmap via Cheatsheet.patch_roadmap()).
 """
 
 from __future__ import annotations
@@ -36,8 +36,9 @@ from ..prompts.templates import CASE_STUDY_WITH_REASONING_PROMPT, FLUSH_MAX_TOKE
 
 @dataclass
 class CaseStudyResult:
-    case_study: CaseStudy   # structured record, ready for add_case_study()
-    dt_patch:   str         # the === DECISION TREE PATCH === body (may be empty)
+    case_study:    CaseStudy   # structured record, ready for add_case_study()
+    dt_patch:      str         # backward-compat alias — same as roadmap_patch
+    roadmap_patch: str         # the === ROADMAP PATCH === body (may be empty)
 
 
 # ---------------------------------------------------------------------------
@@ -92,36 +93,39 @@ def _render_case_studies_text(cheatsheet: Cheatsheet) -> str:
 
 def _parse_response(text: str) -> CaseStudyResult:
     """
-    Split the LLM response into a structured CaseStudy and the DECISION TREE PATCH.
+    Split the LLM response into a structured CaseStudy and the ROADMAP PATCH.
 
     Expected format:
         === CASE STUDY: <title> ===
-        IDENTIFY: ...
-        ACTION: ...
-        WHY: ...
-        EXAMPLES: ...
-        DOES NOT APPLY TO: ...
+        ACTIVATE IF: ...
+        DO NOT ACTIVATE IF: ...
+        COMMON WRONG MOVE: ...
+        NEXT CHECK: ...
+        WHY THIS WORKS: ...
+        SUPPORT: ...
         FEATURE_SIGNATURE: ...
-        COMMON_WRONG_MOVE: ...
         TARGET_STEP: ...
-        NEXT_CHECK: ...
-        === DECISION TREE PATCH ===
+        === ROADMAP PATCH ===
         ...
         === END PATCH ===
     """
-    # Extract DECISION TREE PATCH body (between header and END PATCH)
-    dt_match = re.search(
-        r"=== DECISION TREE PATCH ===\s*\n(.*?)=== END PATCH ===",
+    # Accept both new ("ROADMAP PATCH") and old ("DECISION TREE PATCH") headers
+    patch_match = re.search(
+        r"=== (?:ROADMAP PATCH|DECISION TREE PATCH) ===\s*\n(.*?)=== END PATCH ===",
         text, re.DOTALL | re.IGNORECASE,
     )
-    dt_patch = dt_match.group(1).strip() if dt_match else ""
+    roadmap_patch = patch_match.group(1).strip() if patch_match else ""
 
-    # Extract CASE STUDY block — everything up to (but not including) the DT patch section
-    cs_end = dt_match.start() if dt_match else len(text)
+    # Extract CASE STUDY block — everything up to (but not including) the patch section
+    cs_end = patch_match.start() if patch_match else len(text)
     cs_text = text[:cs_end].strip() or text.strip()
 
     case_study = CaseStudy.from_text(cs_text)
-    return CaseStudyResult(case_study=case_study, dt_patch=dt_patch)
+    return CaseStudyResult(
+        case_study=case_study,
+        dt_patch=roadmap_patch,       # backward-compat alias
+        roadmap_patch=roadmap_patch,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -137,14 +141,14 @@ def generate_case_study_with_reasoning(
     oracle: OracleDict | None = None,
 ) -> CaseStudyResult:
     """
-    Generate a new case study AND a decision tree patch using each failure's
+    Generate a new case study AND a roadmap patch using each failure's
     post-think as the teaching signal.
 
     Parameters
     ----------
     failures   : items the cheatsheet predicted incorrectly;
                  each must have post_think (from scorer.py)
-    cheatsheet : current Cheatsheet object (used to extract DT and case studies
+    cheatsheet : current Cheatsheet object (used to extract roadmap and case studies
                  separately for the prompt)
     model      : model ID for case study generation
     api_key    : API key
@@ -155,8 +159,8 @@ def generate_case_study_with_reasoning(
 
     Returns
     -------
-    CaseStudyResult with case_study (for add_case_study) and dt_patch (for
-    patch_decision_tree).
+    CaseStudyResult with case_study (for add_case_study) and roadmap_patch (for
+    patch_roadmap).
     """
     if not failures:
         raise ValueError("generate_case_study_with_reasoning called with empty failures list.")
@@ -173,7 +177,7 @@ def generate_case_study_with_reasoning(
     )
 
     prompt = CASE_STUDY_WITH_REASONING_PROMPT.format(
-        decision_tree=cheatsheet.decision_tree.strip(),
+        roadmap=cheatsheet.roadmap.strip(),
         case_studies=_render_case_studies_text(cheatsheet),
         failure_lines=_format_failures_with_reasoning(failures, oracle=oracle),
     )

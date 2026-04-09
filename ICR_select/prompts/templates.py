@@ -11,7 +11,8 @@ mechanism prompts:
 from __future__ import annotations
 
 from ICR_naive.prompts.templates import (
-    DECISION_TREE_PROMPT,
+    ROADMAP_PROMPT,
+    DECISION_TREE_PROMPT,  # backward-compat alias
     CASE_STUDIES_PROMPT,
     SCORING_PROMPT,
     SCORING_PROMPT_COT_FIRST,
@@ -124,8 +125,8 @@ You are condensing a growing list of case studies in a cheatsheet for magma \
 equation implication. The cheatsheet is getting large; your job is to rewrite \
 the case studies as fewer, denser entries that preserve all useful information.
 
-=== DECISION TREE (for context) ===
-{decision_tree}
+=== REASONING ROADMAP (for context) ===
+{roadmap}
 
 === CURRENT CASE STUDIES ({n_current} entries) ===
 {case_studies}
@@ -134,7 +135,7 @@ Rewrite these as exactly {n_target} condensed case studies that:
 1. Cover all distinct structural patterns from the originals.
 2. Eliminate redundant examples — keep the most informative one per pattern.
 3. Each entry fits within 600 characters.
-4. Each entry references the specific decision tree step it corrects.
+4. Each entry references the specific roadmap aspect it corrects.
 5. Are ordered from most-common failure pattern to least-common.
 
 Output ONLY the case studies, each starting with:
@@ -155,13 +156,13 @@ using a decision tree for magma equation implication.
 Below are failures with the model's actual reasoning trace (what it wrote \
 step-by-step before giving a wrong verdict).
 
-=== DECISION TREE (what the model was following) ===
-{decision_tree}
+=== REASONING ROADMAP (what the model was following) ===
+{roadmap}
 
 === FAILURES WITH REASONING TRACES ({n_failures} items) ===
 {failure_lines}
 
-For each decision tree step or rule, identify:
+For each roadmap aspect or rule, identify:
   1. Was it misapplied in any failure? (wrong classification, wrong rule fired, etc.)
   2. How many failures involved this step?
   3. What exactly went wrong — quote the model's own words.
@@ -179,25 +180,25 @@ DONE\
 DT_STEP_ANALYSIS_MAX_TOKENS = 1_200
 
 DT_REVISION_PROMPT = """\
-You are rewriting specific broken steps in a decision tree for magma equation \
-implication.  The model has been systematically misapplying the steps listed \
-below.  Rewrite ONLY those steps to fix the identified problems.  Leave all \
-other steps exactly as written.
+You are rewriting specific broken aspects in a reasoning roadmap for magma equation \
+implication.  The model has been systematically misapplying the aspects listed \
+below.  Rewrite ONLY those aspects to fix the identified problems.  Leave all \
+other aspects exactly as written.
 
 === STEP ANALYSIS (what is broken and why) ===
 {step_analysis}
 
-=== CURRENT DECISION TREE ===
-{decision_tree}
+=== CURRENT REASONING ROADMAP ===
+{roadmap}
 
 Requirements for the revised tree:
 - Fix only the broken steps — do not restructure or rename working steps.
 - Make the fix concrete and mechanical: add explicit checks, worked examples \
   inline, or clarifying sub-rules so the same mistake cannot recur.
-- The entire revised tree must fit within 2,500 characters.
-- Preserve the existing step numbering and headers.
+- The entire revised roadmap must fit within 2,500 characters.
+- Preserve the existing aspect numbering and headers.
 
-Output ONLY the complete revised decision tree — no preamble, no commentary.\
+Output ONLY the complete revised reasoning roadmap — no preamble, no commentary.\
 """
 
 DT_REVISION_MAX_TOKENS = DT_MAX_TOKENS

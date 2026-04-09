@@ -1,7 +1,7 @@
 """
 ICR_reasoning/prompts/templates.py — Prompt templates for the reasoning-aware pipeline.
 
-Shared templates (DECISION_TREE_PROMPT, CASE_STUDIES_PROMPT, SCORING_PROMPT)
+Shared templates (ROADMAP_PROMPT, CASE_STUDIES_PROMPT, SCORING_PROMPT)
 are imported directly from ICR_naive — they are identical.
 
 The key addition is CASE_STUDY_WITH_REASONING_PROMPT, which extends the naive
@@ -15,7 +15,8 @@ from __future__ import annotations
 
 # Re-use all shared templates from ICR_naive unchanged
 from ICR_naive.prompts.templates import (
-    DECISION_TREE_PROMPT,
+    ROADMAP_PROMPT,
+    DECISION_TREE_PROMPT,  # backward-compat alias
     CASE_STUDIES_PROMPT,
     SCORING_PROMPT,
     SCORING_PROMPT_COT_FIRST,
@@ -25,6 +26,7 @@ from ICR_naive.prompts.templates import (
 )
 
 __all__ = [
+    "ROADMAP_PROMPT",
     "DECISION_TREE_PROMPT",
     "CASE_STUDIES_PROMPT",
     "SCORING_PROMPT",
@@ -37,10 +39,9 @@ __all__ = [
 ]
 
 # Token budget for the combined case study + DT patch response.
-# Core fields (IDENTIFY/ACTION/WHY/EXAMPLES/DOES NOT APPLY TO): ~600 chars = ~150 tokens
-# New structured fields (FEATURE_SIGNATURE/COMMON_WRONG_MOVE/TARGET_STEP/NEXT_CHECK): ~200 chars
+# Case study (all fields): ~900 chars = ~225 tokens
 # DT patch: ~800 chars = ~200 tokens
-# 1.3× headroom → ~715 tokens; round up.
+# 1.3× headroom → ~550 tokens; round up to give the model room.
 FLUSH_MAX_TOKENS = 900
 
 
@@ -52,24 +53,24 @@ CASE_STUDY_WITH_REASONING_PROMPT = """\
 You are an expert in universal algebra working on equational theories of magmas.
 A magma is a set with a single binary operation * and no other axioms.
 
-You are improving a cheatsheet that an LLM uses to decide whether E1 implies E2.
-The cheatsheet has two parts:
+You are writing a TEACHING NOTE for a weaker reasoning model that keeps making \
+the same mistake. Your job is not to classify a pattern — it is to teach a \
+reasoning move: tell the model exactly what shortcut it is tempted to take, \
+why that shortcut is wrong here, and what it should do instead.
 
-=== DECISION TREE ===
-{decision_tree}
-=== END DECISION TREE ===
+The cheatsheet the model uses has two parts:
+
+=== REASONING ROADMAP ===
+{roadmap}
+=== END REASONING ROADMAP ===
 
 === EXISTING CASE STUDIES ===
 {case_studies}
 === END CASE STUDIES ===
 
 The following examples were ALL predicted INCORRECTLY by the model.
-The ground-truth verdict is shown. The model's post-think reasoning is also shown —
-this reasoning IS WRONG and led to the wrong verdict.
-
-Where available, a CORRECT reasoning trace from a high-accuracy oracle model is also
-shown for contrast. Use this to understand not just what the model did wrong, but what
-the right approach looks like for this structural case.
+The ground-truth verdict and the model's actual (wrong) reasoning are shown.
+Where available, a correct oracle reasoning trace is also shown for contrast.
 
 === FAILURES WITH INCORRECT MODEL REASONING ===
 
@@ -77,51 +78,52 @@ the right approach looks like for this structural case.
 
 === YOUR TASK ===
 
-For each failure, the WRONG reasoning is a flawed argument — do not follow it.
-Where a CORRECT reasoning (oracle) is shown, use it to understand the right approach.
-Identify the EXACT structural feature shared by these specific failures that the
-decision tree does not currently handle correctly. Be as specific as possible —
-do NOT write a general rule about broad categories like "GENERAL implies GENERAL".
-Instead, describe the precise structural fingerprint that these equations share:
-  - What is the exact form of E1 (nesting depth, variable pattern, left/right structure)?
-  - What is the exact form of E2?
-  - What specific feature of this pair causes the model to go wrong?
-  - What concrete check would have given the right answer for these cases?
+Step 1 — Read the wrong reasoning traces carefully. Find the MISTAKEN SHORTCUT:
+  the one move the model consistently makes that is wrong for this structural case.
+  It might be: applying a rule to the wrong form, stopping too early, ignoring a
+  key variable, mis-classifying the equation type, or skipping a necessary check.
+  Be concrete — quote or paraphrase what the model actually does.
 
-The IDENTIFY section is the most important part. A case study that fires on too
-many cases is worse than useless — it will cause regressions. It is better to
-write a very narrow rule that only fires on 2-3 cases correctly than a broad
-rule that fires on 10 cases but gets half of them wrong.
+Step 2 — Find the CORRECT MOVE: the specific mechanical check that produces the
+  right answer. It must be something the model can execute by direct inspection
+  of the equation syntax — no proof, no judgment, just structural reading.
 
-Produce TWO outputs:
+Step 3 — Find the TRIGGER: the precise structural conditions that distinguish these
+  equations from superficially similar ones where the same shortcut would be fine.
+  Be narrow. A trigger that fires on too many cases causes regressions and is worse
+  than no case study at all. Prefer a trigger that fires on 2–3 cases correctly
+  over one that fires on 10 cases and gets half wrong.
 
-OUTPUT 1 — CASE STUDY (max 800 chars)
-Format your response EXACTLY as:
+Step 4 — Find the ANTI-TRIGGER: 1–2 structurally similar cases where this teaching
+  note should NOT fire (the model's shortcut is actually fine there).
 
-=== CASE STUDY: [short specific title — name the structural feature, not just the error type] ===
-IDENTIFY: [precise checklist of conditions that must ALL be true before this fires —
-           be specific about equation structure, variable counts, nesting, form types.
-           Use one bullet per condition. If any condition is not met, this does NOT apply.]
-ACTION: [exactly what to conclude when IDENTIFY conditions are met]
-WHY: [1-2 sentences — the mathematical reason this specific structure leads to this verdict]
-EXAMPLES:
-  • E1 = ...  |  E2 = ...  |  Answer: TRUE/FALSE  — [what structural feature matches]
-  • ...
-DOES NOT APPLY TO: [1-2 sentence description of similar-looking cases where this rule
-                    should NOT fire — the boundary condition]
-FEATURE_SIGNATURE: [one compact tag summarising the structural pattern, e.g. "absorbing→general_L0" or "standard_3var_implies_standard_1var"]
-COMMON_WRONG_MOVE: [one sentence — what the model typically does wrong in these cases]
-TARGET_STEP: [the decision tree step or rule this case study corrects, e.g. "STEP 4" or "RULE 5"]
-NEXT_CHECK: [what to do after this fires — either "DONE: TRUE", "DONE: FALSE", or "PROCEED TO: STEP N"]
+Now produce TWO outputs:
 
-OUTPUT 2 — DECISION TREE PATCH (max 800 chars)
-One or more targeted corrections to the decision tree that would have prevented
-these failures. Write only the steps that need to be ADDED or MODIFIED — do not
-rewrite the whole tree. Each patch item should name the original step it refines
-(e.g. "STEP 4 EXCEPTION" or "INSERT AFTER STEP 3") and state the corrected rule.
+OUTPUT 1 — CASE STUDY (max 900 chars)
+Write the teaching note in EXACTLY this format, with these exact field names:
 
-=== DECISION TREE PATCH ===
-[STEP X EXCEPTION / INSERT AFTER STEP Y / NEW STEP Z]
+=== CASE STUDY: [short title — name the mistaken shortcut or the structural trap, not just the equation type] ===
+ACTIVATE IF:
+  - [condition 1 — one structural fact about E1 or E2 that must be true]
+  - [condition 2 — ...]
+  (All conditions must hold. If any is false, do not use this note.)
+DO NOT ACTIVATE IF: [1 sentence — the closest structural case where the shortcut is actually correct]
+COMMON WRONG MOVE: [1 sentence — the specific mistaken step the model takes, starting with a verb: "Applies...", "Stops at...", "Treats...", "Ignores..."]
+NEXT CHECK: [the one mechanical thing to verify instead — must be answerable by direct inspection; end with what it means: "If yes → TRUE. If no → FALSE." or "If yes → proceed to STEP N."]
+WHY THIS WORKS: [1–2 sentences — the compact mathematical reason the correct move works and the wrong move fails]
+SUPPORT:
+  • E1 = ...  |  E2 = ...  |  Answer: TRUE/FALSE  — [one phrase: what structural fact the trigger catches]
+  • E1 = ...  |  E2 = ...  |  Answer: TRUE/FALSE  — [one phrase]
+FEATURE_SIGNATURE: [compact tag, e.g. "standard_L0_vars3→general_symmetric"]
+TARGET_STEP: [roadmap aspect this corrects, e.g. "ASPECT 2" or "ASPECT 4"]
+
+OUTPUT 2 — ROADMAP PATCH (max 800 chars)
+One or more targeted corrections to the reasoning roadmap that would have prevented
+these failures. Write only aspects that need to be ADDED or MODIFIED — do not
+rewrite the whole roadmap. Name the aspect being refined.
+
+=== ROADMAP PATCH ===
+[ASPECT X EXCEPTION / INSERT AFTER ASPECT Y / NEW ASPECT Z]
 [corrected or new rule text]
 ...
 === END PATCH ===

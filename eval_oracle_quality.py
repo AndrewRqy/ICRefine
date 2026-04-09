@@ -63,7 +63,7 @@ def main() -> None:
     api_key = get_api_key()
 
     cheatsheet = Cheatsheet(
-        decision_tree=Path(args.cheatsheet).read_text(encoding="utf-8").strip()
+        roadmap=Path(args.cheatsheet).read_text(encoding="utf-8").strip()
     )
 
     # ── Load from saved state OR run full pipeline ────────────────────────────
@@ -140,7 +140,7 @@ def main() -> None:
     def _eval_cs(cs: str, label: str) -> tuple[int, int]:
         """Score failures with this CS appended. Returns (n_fixed, n_total)."""
         updated = Cheatsheet(
-            decision_tree=cheatsheet.decision_tree,
+            roadmap=cheatsheet.roadmap,
             case_studies=cheatsheet.case_studies + [cs],
         )
         correct, _ = score_batch(

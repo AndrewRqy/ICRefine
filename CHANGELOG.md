@@ -107,6 +107,171 @@ Both options remain fully tunable via CLI/env — they are not hardcoded.
 
 ---
 
+## 2026-04-08 (continued)
+
+### Rename: decision_tree → roadmap throughout the codebase
+
+**Motivation:** The internal field and all user-facing strings still called the structured
+reasoning guide a "decision tree", which conflicted with the `roadmap_synthesizer.py`
+vocabulary and with the new ASPECT-based format. Unified everything under "roadmap".
+
+**Scope:**
+
+`utils/cheatsheet.py`:
+- Field `decision_tree` → `roadmap` on the `Cheatsheet` dataclass.
+- `DECISION_TREE_MAX_CHARS` → `ROADMAP_MAX_CHARS` (old name kept as backward-compat alias).
+- `DECISION_TREE_HEADER` removed; render always uses `ROADMAP_HEADER = "=== REASONING ROADMAP ==="`.
+  The fragile `if lstrip().startswith("ASPECT")` heuristic is gone.
+- `patch_decision_tree` → `patch_roadmap` (old name kept as alias).
+- JSON sidecar key `"decision_tree"` → `"roadmap"`; `load()` falls back to `"decision_tree"`
+  for backward compatibility with old saved checkpoints.
+
+`ICR_naive/prompts/templates.py`:
+- `DECISION_TREE_PROMPT` renamed to `ROADMAP_PROMPT`; old name kept as alias.
+- Prompt text changed from "Design a DECISION TREE … STEP 1, STEP 2" to
+  "Design a REASONING ROADMAP … ASPECT N: / CHECK: / IF YES: / IF NO:" format.
+- `{decision_tree}` template variable → `{roadmap}` in `CASE_STUDIES_PROMPT`.
+
+`ICR_reasoning/prompts/templates.py`:
+- `=== DECISION TREE ===` → `=== REASONING ROADMAP ===` in `CASE_STUDY_WITH_REASONING_PROMPT`.
+- OUTPUT 2 renamed from "DECISION TREE PATCH" to "ROADMAP PATCH".
+- `TARGET_STEP` description updated to reference "roadmap aspect" instead of "decision tree step".
+- Patch block header regex updated to accept both old and new header names.
+
+`ICR_select/prompts/templates.py`:
+- All `{decision_tree}` template vars → `{roadmap}` in `CONDENSATION_PROMPT`,
+  `DT_STEP_ANALYSIS_PROMPT`, `DT_REVISION_PROMPT`.
+- Section headers updated to "REASONING ROADMAP".
+
+All pipeline, generator, and training files: `Cheatsheet(decision_tree=...)` →
+`Cheatsheet(roadmap=...)`, `cheatsheet.decision_tree` → `cheatsheet.roadmap`,
+`.format(decision_tree=...)` → `.format(roadmap=...)`.
+
+---
+
+### Remove: DT update loop; keep roadmap construction loop
+
+**Motivation:** The codebase had two separate mechanisms for updating the roadmap:
+1. **DT revision outer loop** (`outer_loop.py` + `dt_reviser.py`) — a multi-round wrapper
+   that re-scored the full training set after each inner loop run, analysed which roadmap
+   steps were broken, and rewrote them via `DT_STEP_ANALYSIS_PROMPT` + `DT_REVISION_PROMPT`.
+2. **Roadmap construction** (`roadmap_synthesizer.py`) — synthesises accumulated case
+   studies into a new structured reasoning roadmap via `ROADMAP_SYNTHESIS_PROMPT`.
+
+The DT revision loop added complexity and a separate update path that diverged from the
+roadmap vocabulary. The roadmap synthesizer is the correct abstraction going forward.
+
+**Deleted:**
+- `ICR_select/training/dt_reviser.py` — DT step analysis + revision logic.
+- `ICR_select/training/outer_loop.py` — multi-round DT revision outer loop.
+
+**Removed from `ICR_select/pipeline.py`:**
+- `from .training.outer_loop import run_outer_loop` import.
+- CLI argument group "DT revision outer loop": `--dt-rounds`, `--plateau-threshold`,
+  `--keep-case-studies`, `--min-failures-for-dt`.
+- The `if args.dt_rounds > 1: … else: …` dispatch — Stage 2 is now always a single
+  case study accumulation loop (`run_training_loop`).
+
+**Removed from `ICR_reasoning/training/loop.py`:**
+- `apply_dt_patch: bool = True` parameter.
+- All `if apply_dt_patch and …` branches.
+- Log messages cleaned up: "DT patch" → "roadmap patch".
+
+**Kept:** `ICR_select/training/roadmap_synthesizer.py` (field access updated to `.roadmap`).
+
+---
+
+### Case study generation prompt reframed as reasoning-move teaching
+
+**Motivation:** The old `CASE_STUDY_WITH_REASONING_PROMPT` asked the model to
+"identify the structural feature" — a classification framing that produced verdict rules
+("If E1 is absorbing → TRUE") without explaining *why the model gets it wrong* or
+*what the correct mechanical move is*. Case studies gave answers, not teaching.
+
+**Changes (`ICR_reasoning/prompts/templates.py`):**
+
+- `CASE_STUDY_WITH_REASONING_PROMPT` completely rewritten with a **four-step generation
+  scaffolding** for the producing model:
+  1. **MISTAKEN SHORTCUT** — find the specific wrong reasoning move the model consistently
+     makes (quote or paraphrase from the failure traces).
+  2. **CORRECT MOVE** — the exact mechanical check that produces the right answer.
+  3. **TRIGGER** — narrow structural conditions distinguishing these equations from
+     ones where the shortcut is actually fine. Prompt explicitly warns: "A trigger that
+     fires on too many cases causes regressions."
+  4. **ANTI-TRIGGER** — 1–2 similar cases where this note should NOT fire.
+
+- Output format uses the **teaching-move field order** (pedagogically motivated):
+  `ACTIVATE IF` → `DO NOT ACTIVATE IF` → `COMMON WRONG MOVE` → `NEXT CHECK` →
+  `WHY THIS WORKS` → `SUPPORT`
+
+  `COMMON WRONG MOVE` is now the **third field** (immediately after the trigger), not an
+  afterthought at the bottom. This is the most important signal for the weaker scoring
+  model — it should appear before the correct answer.
+
+- Task reframed in the preamble: *"tell the model exactly what shortcut it is tempted to
+  take, why that shortcut is wrong here, and what it should do instead"* (was: *"identify
+  the structural feature"*).
+
+- Title instruction: *"name the mistaken shortcut or the structural trap, not just the
+  equation type"* — prevents generic titles like "Absorbing Case" in favour of
+  "Stops at Depth-1 When E1 Has a Fresh Variable".
+
+- `FLUSH_MAX_TOKENS` raised **600 → 900** to accommodate the richer teaching-note format
+  (all 8 fields + support examples).
+
+`utils/case_study.py` — parser updated with the new field names as first-priority
+alternatives: `ACTIVATE IF` (before `IDENTIFY`), `DO NOT ACTIVATE IF` (before
+`DOES NOT APPLY TO`), `COMMON WRONG MOVE` / `NEXT CHECK` / `WHY THIS WORKS` / `SUPPORT`.
+Both old and new format are accepted for backward compatibility.
+
+---
+
+### Cheatsheet: query-routed render via `render_for_query(item, top_k)`
+
+**Motivation:** `render()` dumps all recent case studies globally into every prompt —
+the same set regardless of what equation pair is being scored. A case study about
+singleton absorbing patterns is noise when scoring a deep general equation. Budget is
+wasted on irrelevant cases; the relevant ones may not even appear if the list is long.
+
+**Changes (`utils/cheatsheet.py`):**
+
+New method `render_for_query(item, top_k=3)`:
+- Extracts structural features from `item["equation1"]` / `item["equation2"]` via pure
+  string parsing (no LLM).
+- Ranks every case study by a blended relevance score:
+  `0.7 × structural_similarity + 0.3 × historical_fix_rate`
+  - Structural similarity = token Jaccard on `feature_signature` strings + keyword bonus
+    from `activate_if` text (caps at 0.4, prevents keyword-only cases from dominating).
+- Renders only the top-k highest-scoring case studies within the standard character budget.
+- Decision tree and prior knowledge sections are identical to `render()` — drop-in
+  replacement for the scorer.
+
+New supporting code (all in `utils/cheatsheet.py`):
+- `QueryFeatures` NamedTuple — `form_e1/e2`, `l_e1/e2`, `vars_e1/e2`, `depth_e1/e2`.
+  `.signature()` produces the same compact tag format as `CaseStudy.feature_signature`.
+  `.tokens()` returns the frozenset used for Jaccard comparison.
+- `extract_query_features(item)` — public entry point; calls `_features_from_pair`.
+- `_features_from_pair(e1_raw, e2_raw)` — classifies each equation as TRIVIAL /
+  SINGLETON / ABSORBING / STANDARD / GENERAL using the paren-depth-aware `_split_eq`
+  helper. ABSORBING = bare-var side does **not** appear in the other side.
+- `_sig_tokens(sig)` — tokenises `feature_signature` strings by splitting on
+  non-alphanumeric characters.
+- `_relevance_score(cs, qf)` — the scoring function.
+- `_select_top_k(qf, top_k)` — returns sorted `(original_index, CaseStudy)` pairs;
+  original index preserved so Case Study N display numbers stay stable.
+- `_render_with_selection(selected)` — shared render core used by both `render()` and
+  `render_for_query()`; `render()` refactored to call this.
+
+**Smoke test (`smoke_test_gates.py`) — Test 9 added (7 checks):**
+- `extract_query_features` correctly identifies ABSORBING / GENERAL for `x*y=z` / `x*y=z*w`.
+  Key edge case surfaced: `x*y=x` is STANDARD (rhs var `x` appears in lhs), not ABSORBING;
+  ABSORBING requires the bare-var side to be entirely absent from the other expression.
+- top-2 routing includes the absorbing case study, excludes singleton and standard_trivial.
+- Decision tree always present in routed output.
+- top-4 returns all 4 cases.
+
+---
+
 ## 2026-04-04 (commit fe6480b — pulled)
 
 ### ICR_select: Merge validation gate (loop.py, pipeline.py)

@@ -32,7 +32,7 @@ from ..core.parser import split_case_studies
 from utils.case_study import CaseStudy
 from ..prompts.templates import (
     CASE_STUDIES_PROMPT,
-    DECISION_TREE_PROMPT,
+    ROADMAP_PROMPT,
     CS_MAX_TOKENS,
     DT_MAX_TOKENS,
 )
@@ -84,10 +84,10 @@ def generate_initial_cheatsheet(
     instances = sample_instances(items, n_seed_true, n_seed_false, seed)
     example_lines = _format_examples(instances)
 
-    # Step 1: decision tree
-    print("  [init] Generating decision tree ...", file=sys.stderr)
-    decision_tree = call_llm(
-        DECISION_TREE_PROMPT.format(example_lines=example_lines),
+    # Step 1: reasoning roadmap
+    print("  [init] Generating reasoning roadmap ...", file=sys.stderr)
+    roadmap = call_llm(
+        ROADMAP_PROMPT.format(example_lines=example_lines),
         model, api_key,
         temperature=temperature,
         max_tokens=DT_MAX_TOKENS,
@@ -98,7 +98,7 @@ def generate_initial_cheatsheet(
     cs_max_tokens = int(n_studies * CASE_STUDY_MAX_CHARS / 4 * 1.2)
     cs_text = call_llm(
         CASE_STUDIES_PROMPT.format(
-            decision_tree=decision_tree,
+            roadmap=roadmap,
             example_lines=example_lines,
             n_studies=n_studies,
         ),
@@ -111,7 +111,7 @@ def generate_initial_cheatsheet(
     if not case_studies:
         case_studies = [CaseStudy.from_text(cs_text.strip())]
 
-    return Cheatsheet(decision_tree=decision_tree, case_studies=case_studies)
+    return Cheatsheet(roadmap=roadmap, case_studies=case_studies)
 
 
 # ---------------------------------------------------------------------------

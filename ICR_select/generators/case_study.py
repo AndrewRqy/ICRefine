@@ -75,7 +75,7 @@ def generate_candidates(
         failure_lines = failure_lines + "\n\n" + prev_section
 
     prompt = CASE_STUDY_WITH_REASONING_PROMPT.format(
-        decision_tree=cheatsheet.decision_tree.strip(),
+        roadmap=cheatsheet.roadmap.strip(),
         case_studies=_render_case_studies_text(cheatsheet),
         failure_lines=failure_lines,
     )

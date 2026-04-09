@@ -56,7 +56,7 @@ def _ablation_prune(
 
     def _score_without(i: int) -> tuple[int, float]:
         temp = Cheatsheet(
-            decision_tree=cheatsheet.decision_tree,
+            roadmap=cheatsheet.roadmap,
             case_studies=[c for j, c in enumerate(cheatsheet.case_studies) if j != i],
         )
         correct_without, _ = score_batch(
@@ -81,7 +81,7 @@ def _ablation_prune(
             n_pruned += 1
             log_fn(f"  [ablation] CS {i+1}: contribution={contributions[i]:+.1%} — PRUNED")
 
-    return Cheatsheet(decision_tree=cheatsheet.decision_tree, case_studies=to_keep), n_pruned
+    return Cheatsheet(roadmap=cheatsheet.roadmap, case_studies=to_keep), n_pruned
 
 
 def _condense(
@@ -105,7 +105,7 @@ def _condense(
 
     resp = call_llm(
         CONDENSATION_PROMPT.format(
-            decision_tree=cheatsheet.decision_tree.strip(),
+            roadmap=cheatsheet.roadmap.strip(),
             case_studies=_format_existing(cheatsheet.case_studies),
             n_current=n_current,
             n_target=n_target,
@@ -121,7 +121,7 @@ def _condense(
         return cheatsheet
 
     condensed_cs = Cheatsheet(
-        decision_tree=cheatsheet.decision_tree,
+        roadmap=cheatsheet.roadmap,
         case_studies=condensed_list,
     )
 

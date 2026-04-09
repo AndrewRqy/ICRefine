@@ -31,7 +31,6 @@ from ICR_naive.generators.initial import DEFAULT_MODEL, generate_initial_cheatsh
 from utils.llm_client import get_api_key
 from ICR_reasoning.core.oracle import load_oracle_csv
 from .training.loop import run_training_loop
-from .training.outer_loop import run_outer_loop
 from .prompts.templates import N_CANDIDATES
 
 load_dotenv(Path(__file__).parent / ".env")
@@ -120,16 +119,6 @@ def _build_parser() -> argparse.ArgumentParser:
                    help="Run ablation pruning every N flushes.")
     g.add_argument("--condense-at",    type=int, default=6, metavar="N",
                    help="Run condensation when case_studies reaches this count.")
-
-    g = p.add_argument_group("DT revision outer loop")
-    g.add_argument("--dt-rounds",         type=int,   default=1,    metavar="N",
-                   help="Number of outer DT revision rounds (1 = no DT revision, just CS loop).")
-    g.add_argument("--plateau-threshold", type=float, default=0.02, metavar="F",
-                   help="Stop outer loop if round-on-round accuracy improvement < F.")
-    g.add_argument("--keep-case-studies", action="store_true",
-                   help="Carry case studies over between DT revision rounds (default: reset).")
-    g.add_argument("--min-failures-for-dt", type=int, default=5, metavar="N",
-                   help="Minimum failures needed to attempt DT revision.")
 
     g = p.add_argument_group("Models")
     g.add_argument("--model",           default=DEFAULT_MODEL, metavar="MODEL_ID")
@@ -236,7 +225,7 @@ def main() -> None:
         if not txt_path.exists():
             raise SystemExit(f"Error: --init-roadmap not found: {txt_path}")
         cheatsheet = Cheatsheet(
-            decision_tree=txt_path.read_text(encoding="utf-8").strip(),
+            roadmap=txt_path.read_text(encoding="utf-8").strip(),
             prior_knowledge=prior_knowledge,
         )
         _log(f"\n[Stage 1] Loaded roadmap from {txt_path.name}. Case studies start empty.")
@@ -251,7 +240,7 @@ def main() -> None:
 
     elif prior_knowledge:
         # Prior knowledge provided alone — start with empty trainable roadmap
-        cheatsheet = Cheatsheet(decision_tree="", prior_knowledge=prior_knowledge)
+        cheatsheet = Cheatsheet(roadmap="", prior_knowledge=prior_knowledge)
         train_items = seed_items + train_items
         _log(f"\n[Stage 1] Prior knowledge loaded ({len(prior_knowledge)} chars). Roadmap starts empty.")
 
@@ -303,58 +292,25 @@ def main() -> None:
         log=True,
     )
 
-    if args.dt_rounds > 1:
-        _log(f"\n[Stage 2] Outer DT revision loop — {args.dt_rounds} round(s) max ...")
-        outer = run_outer_loop(
-            initial_cheatsheet=cheatsheet,
-            train_items=train_items,
-            val_items=val_items or None,
-            inner_loop_fn=run_training_loop,
-            inner_loop_kwargs=inner_kwargs,
-            model_score=model_score,
-            model_casestudy=model_casestudy,
-            api_key=api_key,
-            max_rounds=args.dt_rounds,
-            plateau_threshold=args.plateau_threshold,
-            keep_case_studies=args.keep_case_studies,
-            min_failures_for_dt=args.min_failures_for_dt,
-            concurrency=args.concurrency,
-            reasoning_effort=reasoning_effort,
-            cot_first=args.cot_first,
-            output_dir=output_dir,
-            log=True,
-        )
-        final_cheatsheet  = outer.final_cheatsheet
-        final_train_acc   = outer.best_train_accuracy
-        final_val_acc     = outer.best_val_accuracy
-        extra_stats: dict = {
-            "dt_rounds_run": len(outer.rounds),
-            "rounds": [
-                {"round": r.round_num, "train_acc": r.train_accuracy,
-                 "dt_revised": r.dt_revised}
-                for r in outer.rounds
-            ],
-        }
-    else:
-        _log(f"\n[Stage 2] Single CS loop (--dt-rounds=1, no DT revision) ...")
-        result = run_training_loop(
-            cheatsheet=cheatsheet,
-            train_items=train_items,
-            val_items=val_items or None,
-            output_dir=output_dir,
-            **inner_kwargs,
-        )
-        final_cheatsheet = result.cheatsheet
-        final_train_acc  = result.train_accuracy
-        final_val_acc    = result.val_accuracy
-        extra_stats = {
-            "case_studies_added": result.n_case_studies_added,
-            "merges": result.n_merges,
-            "bins_discarded": result.n_bins_discarded,
-            "bins_skipped": result.n_bins_skipped,
-            "ablation_pruned": result.n_ablation_pruned,
-            "condensations": result.n_condensations,
-        }
+    _log(f"\n[Stage 2] Case study accumulation loop ...")
+    result = run_training_loop(
+        cheatsheet=cheatsheet,
+        train_items=train_items,
+        val_items=val_items or None,
+        output_dir=output_dir,
+        **inner_kwargs,
+    )
+    final_cheatsheet = result.cheatsheet
+    final_train_acc  = result.train_accuracy
+    final_val_acc    = result.val_accuracy
+    extra_stats: dict = {
+        "case_studies_added": result.n_case_studies_added,
+        "merges": result.n_merges,
+        "bins_discarded": result.n_bins_discarded,
+        "bins_skipped": result.n_bins_skipped,
+        "ablation_pruned": result.n_ablation_pruned,
+        "condensations": result.n_condensations,
+    }
 
     # ------------------------------------------------------------------
     # Stage 3: Report & save

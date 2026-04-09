@@ -45,7 +45,7 @@ def _mini_eval(
 ) -> float:
     """Score the failure batch with candidate injected. Returns fix_rate."""
     temp = Cheatsheet(
-        decision_tree=cheatsheet.decision_tree,
+        roadmap=cheatsheet.roadmap,
         case_studies=cheatsheet.case_studies + [candidate_cs],
     )
     correct, _ = score_batch(
@@ -69,7 +69,7 @@ def _mini_eval_full(
 ) -> tuple[float, list[dict]]:
     """Score the failure batch with candidate injected. Returns (fix_rate, still_wrong)."""
     temp = Cheatsheet(
-        decision_tree=cheatsheet.decision_tree,
+        roadmap=cheatsheet.roadmap,
         case_studies=cheatsheet.case_studies + [candidate_cs],
     )
     correct, wrong = score_batch(
@@ -94,7 +94,7 @@ def _replace_eval(
     """Score failures with CS at merge_idx replaced by merged_cs. Returns fix_rate."""
     new_studies = cheatsheet.case_studies[:]
     new_studies[merge_idx] = merged_cs
-    temp = Cheatsheet(decision_tree=cheatsheet.decision_tree, case_studies=new_studies)
+    temp = Cheatsheet(roadmap=cheatsheet.roadmap, case_studies=new_studies)
     correct, _ = score_batch(
         failures, temp.render(), model_score, api_key,
         concurrency=concurrency, reasoning_effort=reasoning_effort, cot_first=cot_first,
@@ -117,7 +117,7 @@ def _regression_check(
     if not correct_pool:
         return 0.0
     temp = Cheatsheet(
-        decision_tree=cheatsheet.decision_tree,
+        roadmap=cheatsheet.roadmap,
         case_studies=cheatsheet.case_studies + [candidate_cs],
     )
     _, wrong = score_batch(

@@ -105,7 +105,7 @@ def run_roadmap_synthesis(
 
     Returns
     -------
-    RoadmapSynthesisResult — if accepted, cheatsheet.decision_tree should be
+    RoadmapSynthesisResult — if accepted, cheatsheet.roadmap should be
     replaced with result.roadmap and case_studies cleared by the caller.
     """
     def _log(msg: str) -> None:
@@ -167,13 +167,13 @@ def run_roadmap_synthesis(
     _log(f"  [roadmap] validating on {len(train_seen)} items ...")
 
     cs_before = Cheatsheet(
-        decision_tree=cheatsheet.decision_tree,
+        roadmap=cheatsheet.roadmap,
         case_studies=cheatsheet.case_studies,
         prior_knowledge=cheatsheet.prior_knowledge,
     )
     # Roadmap replaces decision_tree; case studies are absorbed (cleared)
     cs_after = Cheatsheet(
-        decision_tree=roadmap,
+        roadmap=roadmap,
         case_studies=[],
         prior_knowledge=cheatsheet.prior_knowledge,
     )

@@ -186,12 +186,12 @@ def main() -> None:
         txt_path = Path(args.init_txt)
         if not txt_path.exists():
             raise SystemExit(f"Error: --init-txt file not found: {txt_path}")
-        decision_tree = txt_path.read_text(encoding="utf-8").strip()
-        cheatsheet    = Cheatsheet(decision_tree=decision_tree)
-        train_items   = seed_items + train_items
+        roadmap    = txt_path.read_text(encoding="utf-8").strip()
+        cheatsheet = Cheatsheet(roadmap=roadmap)
+        train_items = seed_items + train_items
         _log(
-            f"\n[Stage 1] Loaded decision tree from {txt_path.name} "
-            f"({len(decision_tree):,} chars). Case studies start empty."
+            f"\n[Stage 1] Loaded roadmap from {txt_path.name} "
+            f"({len(roadmap):,} chars). Case studies start empty."
         )
 
     elif args.init_cheatsheet:

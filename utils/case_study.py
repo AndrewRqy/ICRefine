@@ -209,20 +209,48 @@ class CaseStudy:
         title   = _extract_title_from_text(text)
         raw     = text
 
-        activate_if        = _parse_list_field(text, "IDENTIFY")
-        do_not_apply       = _parse_scalar_field(text, "DOES NOT APPLY TO")
-        # Do-not-apply is often a sentence, not a list — wrap it
+        # --- Trigger fields: new names take priority over old ---
+        activate_if = (
+            _parse_list_field(text, "ACTIVATE IF")
+            or _parse_list_field(text, "IDENTIFY")
+        )
+        do_not_apply = (
+            _parse_scalar_field(text, "DO NOT ACTIVATE IF")
+            or _parse_scalar_field(text, "DOES NOT APPLY TO")
+        )
         do_not_activate_if = [do_not_apply] if do_not_apply else []
 
-        action               = _parse_scalar_field(text, "ACTION")
-        why                  = _parse_scalar_field(text, "WHY")
-        next_check           = _parse_scalar_field(text, "NEXT_CHECK") or _parse_scalar_field(text, "NEXT CHECK IF FIRES")
-        common_wrong_move    = _parse_scalar_field(text, "COMMON_WRONG_MOVE") or _parse_scalar_field(text, "COMMON WRONG MOVE")
-        feature_signature    = _parse_scalar_field(text, "FEATURE_SIGNATURE") or _parse_scalar_field(text, "FEATURE SIGNATURE")
-        target_roadmap_aspect = _parse_scalar_field(text, "TARGET_STEP") or _parse_scalar_field(text, "TARGET STEP")
-        support_examples     = _parse_examples(text)
+        # --- Reasoning-move fields: new names take priority over old ---
+        common_wrong_move = (
+            _parse_scalar_field(text, "COMMON WRONG MOVE")
+            or _parse_scalar_field(text, "COMMON_WRONG_MOVE")
+        )
+        next_check = (
+            _parse_scalar_field(text, "NEXT CHECK")
+            or _parse_scalar_field(text, "NEXT_CHECK")
+            or _parse_scalar_field(text, "NEXT CHECK IF FIRES")
+        )
+        why = (
+            _parse_scalar_field(text, "WHY THIS WORKS")
+            or _parse_scalar_field(text, "WHY")
+        )
+        # SUPPORT is the new name for EXAMPLES; both parsed as structured examples
+        support_examples = _parse_examples_from_field(text, "SUPPORT") or _parse_examples(text)
 
-        # Legacy formats: PATTERN/RULE map onto activate_if/action
+        # ACTION is the old classification verdict — kept for backward compat
+        action = _parse_scalar_field(text, "ACTION")
+
+        # Metadata fields
+        feature_signature     = (
+            _parse_scalar_field(text, "FEATURE_SIGNATURE")
+            or _parse_scalar_field(text, "FEATURE SIGNATURE")
+        )
+        target_roadmap_aspect = (
+            _parse_scalar_field(text, "TARGET_STEP")
+            or _parse_scalar_field(text, "TARGET STEP")
+        )
+
+        # Legacy fallbacks: PATTERN/RULE map onto activate_if/action
         if not activate_if:
             pattern = _parse_scalar_field(text, "PATTERN")
             if pattern:
@@ -268,12 +296,17 @@ class CaseStudy:
 
 # Headers that delimit fields within a case study block
 _FIELD_HEADERS = [
+    # New vocabulary (teaching-move format)
+    "ACTIVATE IF", "DO NOT ACTIVATE IF",
+    "COMMON WRONG MOVE", "NEXT CHECK", "WHY THIS WORKS", "SUPPORT",
+    # Old vocabulary (classification format) — kept for backward compat
     "IDENTIFY", "ACTION", "WHY", "EXAMPLES", "DOES NOT APPLY TO",
+    # Metadata fields (both formats)
     "FEATURE_SIGNATURE", "FEATURE SIGNATURE",
     "COMMON_WRONG_MOVE", "COMMON WRONG MOVE",
     "TARGET_STEP", "TARGET STEP",
     "NEXT_CHECK", "NEXT CHECK IF FIRES",
-    # Legacy
+    # Legacy (ICR_naive / ICR_reasoning old format)
     "PATTERN", "RULE", "EXCEPTIONS",
 ]
 
@@ -341,15 +374,15 @@ def _parse_list_field(text: str, field_name: str) -> list[str]:
     return items
 
 
-def _parse_examples(text: str) -> list[dict]:
+def _parse_examples_from_field(text: str, field_name: str) -> list[dict]:
     """
-    Parse EXAMPLES section into a list of dicts {e1, e2, answer, note}.
+    Parse bullet-pointed examples from a named field into list[{e1, e2, answer, note}].
 
     Handles formats:
       • E1 = ...  |  E2 = ...  |  Answer: TRUE/FALSE  — optional note
       • E1 = ...  |  E2 = ...  |  TRUE — optional note  (no "Answer:" prefix)
     """
-    body = _parse_scalar_field(text, "EXAMPLES")
+    body = _parse_scalar_field(text, field_name)
     if not body:
         return []
 
@@ -358,7 +391,6 @@ def _parse_examples(text: str) -> list[dict]:
         line = line.strip().lstrip("•-* ").strip()
         if not line:
             continue
-        # Split on pipe characters
         parts = [p.strip() for p in line.split("|")]
         if len(parts) < 2:
             continue
@@ -369,8 +401,7 @@ def _parse_examples(text: str) -> list[dict]:
         note   = ""
 
         if len(parts) >= 3:
-            ans_raw = parts[2]
-            # Extract answer and optional note separated by " — " or " - "
+            ans_raw  = parts[2]
             ans_note = re.split(r"\s+[—–-]\s+", ans_raw, maxsplit=1)
             ans_str  = re.sub(r"^Answer\s*:\s*", "", ans_note[0], flags=re.IGNORECASE).strip()
             answer   = ans_str.upper() if ans_str.upper() in ("TRUE", "FALSE") else ans_str
@@ -379,3 +410,8 @@ def _parse_examples(text: str) -> list[dict]:
         examples.append({"e1": e1, "e2": e2, "answer": answer, "note": note})
 
     return examples
+
+
+def _parse_examples(text: str) -> list[dict]:
+    """Parse EXAMPLES field (old format). Falls back to empty list."""
+    return _parse_examples_from_field(text, "EXAMPLES")

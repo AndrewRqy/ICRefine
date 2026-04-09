@@ -451,7 +451,7 @@ def run_training_loop(
                 cheatsheet, train_seen, model_score, api_key,
                 concurrency, reasoning_effort, cot_first, _log,
             )
-            cheatsheet.decision_tree = pruned_cs.decision_tree
+            cheatsheet.roadmap = pruned_cs.roadmap
             cheatsheet.case_studies  = pruned_cs.case_studies
             n_pruned_total += n_pruned
             update_log.append({
@@ -467,7 +467,7 @@ def run_training_loop(
                 concurrency, reasoning_effort, cot_first, _log,
             )
             if condensed.case_studies != cheatsheet.case_studies:
-                cheatsheet.decision_tree = condensed.decision_tree
+                cheatsheet.roadmap = condensed.roadmap
                 cheatsheet.case_studies  = condensed.case_studies
                 n_condensed += 1
                 update_log.append({
