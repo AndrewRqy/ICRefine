@@ -272,6 +272,42 @@ New supporting code (all in `utils/cheatsheet.py`):
 
 ---
 
+### Cluster-aware failure bins keyed by E1 structural form
+
+**Problem:** Both `disagree_bin` and `both_wrong_bin` were single FIFO queues. When
+they filled, the batch sent to case study generation was a structurally mixed bag —
+absorbing-form failures alongside trivial-form and standard-form failures. The LLM then
+had to find one pattern that explained a heterogeneous set, producing overly broad case
+studies with wide trigger conditions. Those wide triggers then regressed on structural
+sub-cases the case study was never meant to cover.
+
+**Fix:** Replace each single bin with a `dict[str, Bin]` keyed by the E1 structural
+form of the failing item (`TRIVIAL`, `SINGLETON`, `ABSORBING`, `STANDARD`, `GENERAL`).
+Each cluster flushes independently, so the generator always receives a homogeneous batch
+and can write a narrow, precise case study.
+
+**Changes (`ICR_select/training/loop.py`):**
+- `extract_query_features` added to the `utils.cheatsheet` import.
+- `_cluster_key(item)` helper: calls `extract_query_features(item).form_e1`; falls back
+  to `"GENERAL"` on parse error.
+- `disagree_bin = DisagreementBin(...)` → `disagree_bins: dict[str, DisagreementBin] = {}`.
+- `both_wrong_bin = FailureBin(...)` → `both_wrong_bins: dict[str, FailureBin] = {}`.
+- Routing loop: `disagree_bins.setdefault(key, DisagreementBin(threshold)).add(item)`
+  and equivalent for `both_wrong_bins`. Cluster key computed once per item.
+- Per-batch flush loop: iterates `sorted(disagree_bins)` first (all full clusters), then
+  `sorted(both_wrong_bins)` — but only when no disagree cluster is full (preserving the
+  existing priority invariant across clusters).
+- Remainder flush: each non-empty cluster flushed as its own homogeneous batch, disagree
+  clusters before both-wrong clusters. No cross-cluster combining.
+- Batch log line updated to show total disagree/both-wrong item counts and active cluster
+  counts (`clusters=Nd+Mbw`).
+- Routing log line shows the sorted cluster keys for each bin type.
+
+No new CLI flags — clustering is always active and uses zero additional API calls
+(`extract_query_features` is pure structural string parsing).
+
+---
+
 ### Step parser: literal regex → structured checkpoint ID matching
 
 **Problem:** `ICR_select/analysis/step_parser.py` detected which roadmap aspects a

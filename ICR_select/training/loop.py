@@ -33,7 +33,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from utils.cheatsheet import Cheatsheet
+from utils.cheatsheet import Cheatsheet, extract_query_features
 from utils.data import DisagreementBin, FailureBin
 from utils.oracle_index import OracleIndex
 from utils.scorer import score_batch, test_cheatsheet
@@ -156,10 +156,19 @@ def run_training_loop(
     if oracle:
         oracle_index = OracleIndex(oracle, min_similarity=oracle_min_similarity)
 
-    # Two failure bins: disagreement items (teacher✓ / student✗) have priority;
-    # both-wrong items are flushed only when the disagreement bin is insufficient.
-    disagree_bin   = DisagreementBin(threshold=bin_threshold)
-    both_wrong_bin = FailureBin(threshold=bin_threshold)
+    # Cluster-aware bins keyed by E1 structural form (TRIVIAL / SINGLETON /
+    # ABSORBING / STANDARD / GENERAL).  Each cluster flushes independently so
+    # the case study generator always receives a structurally homogeneous batch.
+    # Disagreement clusters (teacher✓ / student✗) have priority over both-wrong.
+    disagree_bins:   dict[str, DisagreementBin] = {}
+    both_wrong_bins: dict[str, FailureBin]      = {}
+
+    def _cluster_key(item: dict) -> str:
+        """Coarse structural key for bin routing: E1 equation form."""
+        try:
+            return extract_query_features(item).form_e1
+        except Exception:
+            return "GENERAL"  # safe fallback for malformed items
     correct_pool   : list[dict] = []
     train_seen     : list[dict] = []
     update_log     : list[dict] = []
@@ -681,11 +690,13 @@ def run_training_loop(
         batch     = train_items[batch_start : batch_start + batch_size]
         batch_num = batch_start // batch_size + 1
 
+        _total_dis = sum(len(b) for b in disagree_bins.values())
+        _total_bw  = sum(len(b) for b in both_wrong_bins.values())
         _log(
             f"\n[batch {batch_num}/{total_batches}]  "
             f"items {batch_start+1}–{min(batch_start+len(batch), len(train_items))}  "
-            f"disagree_bin={len(disagree_bin)}/{bin_threshold}  "
-            f"both_wrong_bin={len(both_wrong_bin)}/{bin_threshold}"
+            f"disagree={_total_dis}  both_wrong={_total_bw}  "
+            f"(threshold={bin_threshold}/cluster  clusters={len(disagree_bins)}d+{len(both_wrong_bins)}bw)"
         )
 
         if prescore_map is not None:
@@ -713,9 +724,12 @@ def run_training_loop(
             f"correct_pool={len(correct_pool)}"
         )
 
-        # Route wrong items: disagreement (oracle nearest found) vs both-wrong
+        # Route wrong items into cluster-keyed bins.
+        # Disagreement items (oracle nearest found) go to disagree_bins[key];
+        # both-wrong items go to both_wrong_bins[key].  key = E1 structural form.
         n_dis = n_bw = 0
         for item in wrong:
+            key = _cluster_key(item)
             if oracle_index:
                 match = oracle_index.find_nearest(item)
                 if match:
@@ -723,7 +737,9 @@ def run_training_loop(
                     item = {**item,
                             "oracle_nearest": nearest_entry.to_dict(),
                             "oracle_sim":     round(sim, 3)}
-                    disagree_bin.add(item)
+                    disagree_bins.setdefault(
+                        key, DisagreementBin(threshold=bin_threshold)
+                    ).add(item)
                     n_dis += 1
                     # Reservoir sampling: maintain a rolling Vgap reserve for utility gate
                     vgap_seen_count += 1
@@ -734,11 +750,15 @@ def run_training_loop(
                         if j < VGAP_RESERVE_MAX:
                             vgap_reserve[j] = item
                 else:
-                    both_wrong_bin.add(item)
+                    both_wrong_bins.setdefault(
+                        key, FailureBin(threshold=bin_threshold)
+                    ).add(item)
                     n_bw += 1
             else:
-                # No oracle index — all items go to the both-wrong bin
-                both_wrong_bin.add(item)
+                # No oracle index — all items go to the both-wrong cluster
+                both_wrong_bins.setdefault(
+                    key, FailureBin(threshold=bin_threshold)
+                ).add(item)
                 n_bw += 1
 
         n_disagree_total   += n_dis
@@ -746,49 +766,58 @@ def run_training_loop(
         if oracle_index and (n_dis or n_bw):
             _log(
                 f"  [disagree] routed {n_dis} disagreement / {n_bw} both-wrong  "
-                f"(disagree_bin={len(disagree_bin)}/{bin_threshold}  "
-                f"both_wrong_bin={len(both_wrong_bin)}/{bin_threshold})"
+                f"(clusters: {sorted(disagree_bins)} d / {sorted(both_wrong_bins)} bw)"
             )
 
         _flush_fn = _process_flush_retry if flush_strategy == "retry" else _process_flush
 
-        # Disagreement bin has priority — flush it first
-        while disagree_bin.is_full():
-            failures = disagree_bin.flush()
-            _log(f"  [flush:disagree] {len(failures)} teacher✓/student✗ pairs")
-            _flush_fn(failures, batch_num)
-            _maybe_maintain(batch_num)
-            if output_dir:
-                _save_checkpoint(cheatsheet, update_log, output_dir, n_added)
+        # Flush full disagree clusters first (any key, deterministic order)
+        for _key in sorted(disagree_bins):
+            while disagree_bins[_key].is_full():
+                failures = disagree_bins[_key].flush()
+                _log(f"  [flush:disagree:{_key}] {len(failures)} teacher✓/student✗ pairs")
+                _flush_fn(failures, batch_num)
+                _maybe_maintain(batch_num)
+                if output_dir:
+                    _save_checkpoint(cheatsheet, update_log, output_dir, n_added)
 
-        # Both-wrong bin only flushes when disagree bin is below threshold
-        while both_wrong_bin.is_full() and not disagree_bin.is_full():
-            failures = both_wrong_bin.flush()
-            _log(f"  [flush:both-wrong] {len(failures)} items (no oracle signal)")
-            _flush_fn(failures, batch_num)
-            _maybe_maintain(batch_num)
-            if output_dir:
-                _save_checkpoint(cheatsheet, update_log, output_dir, n_added)
+        # Flush full both-wrong clusters only when no disagree cluster is full
+        if not any(b.is_full() for b in disagree_bins.values()):
+            for _key in sorted(both_wrong_bins):
+                while both_wrong_bins[_key].is_full():
+                    failures = both_wrong_bins[_key].flush()
+                    _log(f"  [flush:both-wrong:{_key}] {len(failures)} items (no oracle signal)")
+                    _flush_fn(failures, batch_num)
+                    _maybe_maintain(batch_num)
+                    if output_dir:
+                        _save_checkpoint(cheatsheet, update_log, output_dir, n_added)
 
     # ── Remainder flush ───────────────────────────────────────────────────
+    # Each non-empty cluster is flushed separately — the batch stays homogeneous.
+    # Disagree clusters first, then both-wrong clusters, both in sorted key order.
 
     if flush_remainder:
-        # Combine remainders: disagreement first, then both-wrong if non-empty
-        remainder: list[dict] = []
-        if len(disagree_bin) > 0:
-            remainder += disagree_bin.flush()
-        if len(both_wrong_bin) > 0:
-            remainder += both_wrong_bin.flush()
-        if remainder:
-            _log(
-                f"\n[remainder] flushing {len(remainder)} remaining failures "
-                f"({sum(1 for it in remainder if 'oracle_nearest' in it)} disagreement, "
-                f"{sum(1 for it in remainder if 'oracle_nearest' not in it)} both-wrong) ..."
-            )
-            _flush_fn(remainder, batch_num=-1)
-            _maybe_maintain(batch_num=-1)
-            if output_dir:
-                _save_checkpoint(cheatsheet, update_log, output_dir, "remainder")
+        for _key in sorted(disagree_bins):
+            if len(disagree_bins[_key]) > 0:
+                failures = disagree_bins[_key].flush()
+                _log(
+                    f"\n[remainder:disagree:{_key}] flushing {len(failures)} failures ..."
+                )
+                _flush_fn(failures, batch_num=-1)
+                _maybe_maintain(batch_num=-1)
+                if output_dir:
+                    _save_checkpoint(cheatsheet, update_log, output_dir, "remainder")
+
+        for _key in sorted(both_wrong_bins):
+            if len(both_wrong_bins[_key]) > 0:
+                failures = both_wrong_bins[_key].flush()
+                _log(
+                    f"\n[remainder:both-wrong:{_key}] flushing {len(failures)} failures ..."
+                )
+                _flush_fn(failures, batch_num=-1)
+                _maybe_maintain(batch_num=-1)
+                if output_dir:
+                    _save_checkpoint(cheatsheet, update_log, output_dir, "remainder")
 
     train_accuracy = total_correct / total_scored if total_scored > 0 else 0.0
     _log(
