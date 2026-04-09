@@ -391,7 +391,7 @@ ICRefine/
 ├── ICR_select/          # Selective quality-gated loop (recommended)
 │   └── training/
 │       ├── loop.py                # Inner CS loop (4 gates + pruning + condensation)
-│       └── roadmap_synthesizer.py # Absorbs case studies into a structured reasoning roadmap
+│       └── roadmap_synthesizer.py # Synthesises a routing controller roadmap over the case bank
 ├── smoke_test_gates.py     # Gate threshold smoke tests (no live LLM required)
 ├── eval_oracle_quality.py  # Compare case study quality with vs without oracle injection
 ├── compare_modes.sh

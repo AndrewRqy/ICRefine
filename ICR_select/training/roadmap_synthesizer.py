@@ -2,21 +2,29 @@
 ICR_select/training/roadmap_synthesizer.py — Reasoning roadmap synthesis.
 
 After ICR_select accumulates case studies from failure bins, this module
-synthesises them into a structured REASONING ROADMAP: a guide that tells the
-model HOW to think about each equation pair, organised as independent aspects
-with mechanical, reliable checkpoints.
+synthesises them into a structured REASONING ROADMAP.  The roadmap acts as a
+CONTROLLER over two sources of guidance:
 
-Design principle:
-    Every checkpoint in the roadmap must be something the model can execute
-    without deep inference (count *, check variable membership, compare counts).
-    Semantic checkpoints ("does this force all elements equal?") are exactly
-    what the prior knowledge handles — the roadmap supplements, not replaces.
+  1. Prior knowledge (frozen) — general rules the model already has.
+  2. Case bank (routed episodic memory) — case studies indexed by structural
+     feature and surfaced per-query via render_for_query().
 
-The NeuriCo / prior-knowledge prompt is passed in as a frozen string and
-injected into the synthesis prompt for context but never modified.
+Design:
+  Roadmap as controller, cases as tools.  Each roadmap aspect runs a mechanical
+  structural check and routes the model to the case bank for the fine-grained
+  reasoning appropriate to that configuration.  Verdicts and detailed reasoning
+  live in the case studies, not the roadmap — this prevents the roadmap from
+  growing monolithic and overriding case-level guidance on every query.
 
-After synthesis the case studies are cleared — they are absorbed into the
-roadmap. The prior_knowledge field on the Cheatsheet is left untouched.
+  Every CHECK must be executable without deep inference (count *, check variable
+  membership, compare set sizes).  The roadmap supplements prior knowledge; it
+  does not re-state it or replace the case bank.
+
+After synthesis:
+  - cheatsheet.roadmap is replaced with the new controller roadmap.
+  - cheatsheet.case_studies is LEFT INTACT — the case bank is not cleared.
+    The caller should NOT clear case studies after a successful synthesis.
+  - cheatsheet.prior_knowledge is never modified.
 """
 
 from __future__ import annotations
@@ -106,7 +114,8 @@ def run_roadmap_synthesis(
     Returns
     -------
     RoadmapSynthesisResult — if accepted, cheatsheet.roadmap should be
-    replaced with result.roadmap and case_studies cleared by the caller.
+    replaced with result.roadmap.  The caller must NOT clear case_studies:
+    the roadmap is a controller over the case bank, not a replacement for it.
     """
     def _log(msg: str) -> None:
         if log:
@@ -171,10 +180,11 @@ def run_roadmap_synthesis(
         case_studies=cheatsheet.case_studies,
         prior_knowledge=cheatsheet.prior_knowledge,
     )
-    # Roadmap replaces decision_tree; case studies are absorbed (cleared)
+    # Roadmap is a controller over the case bank — case studies are kept intact.
+    # We measure whether the new roadmap improves navigation WITH the same case bank.
     cs_after = Cheatsheet(
         roadmap=roadmap,
-        case_studies=[],
+        case_studies=cheatsheet.case_studies,
         prior_knowledge=cheatsheet.prior_knowledge,
     )
 

@@ -204,51 +204,70 @@ Output ONLY the complete revised reasoning roadmap — no preamble, no commentar
 DT_REVISION_MAX_TOKENS = DT_MAX_TOKENS
 
 # ---------------------------------------------------------------------------
-# Roadmap synthesis — build a reasoning roadmap from accumulated case studies
+# Roadmap synthesis — build a routing controller over the case bank
 # ---------------------------------------------------------------------------
 
 ROADMAP_SYNTHESIS_PROMPT = """\
-You are building a REASONING ROADMAP for deciding whether "E1 implies E2 over \
-all magmas" — i.e., every magma satisfying E1 also satisfies E2.
+You are writing a REASONING ROADMAP for the task: does "E1 imply E2 over all \
+magmas"? (Every magma satisfying E1 also satisfies E2.)
 
-The model already has the following prior knowledge (do NOT repeat or restructure \
-this — it is fixed and working):
+The model has two sources of guidance that work together:
+  1. PRIOR KNOWLEDGE — fixed general rules (do NOT restate or restructure these).
+  2. CASE BANK — a set of case studies indexed by structural feature. When the
+     model encounters an equation pair, the most relevant case studies are surfaced
+     automatically based on structural matching. The case studies carry the detailed
+     fine-grained reasoning; the roadmap does not need to repeat it.
 
-=== PRIOR KNOWLEDGE ===
+Your roadmap is the CONTROLLER that bridges these two sources: it tells the model
+which structural dimension to probe first and when to consult the case bank.
+
+=== PRIOR KNOWLEDGE (fixed — do not repeat) ===
 {prior_knowledge}
 
-=== CASE STUDIES COLLECTED FROM FAILURES ===
+=== CASE STUDIES IN THE BANK ===
 {case_studies}
 
 === SAMPLE FAILURES WITH REASONING TRACES ===
 {failure_lines}
 
-Your job: synthesise the case studies into a REASONING ROADMAP — a structured \
-guide that tells the model HOW to think, not just which bucket to classify into.
+DESIGN PRINCIPLES — read carefully before writing:
 
-DESIGN CONSTRAINT — every checkpoint in the roadmap must be something the model \
-can execute MECHANICALLY and RELIABLY without deep inference. Each CHECK must be \
-answerable by direct inspection of the equation syntax — counting, string matching, \
-or set membership — with no reasoning or judgment required to produce the answer.
+1. The roadmap is NAVIGATION, not knowledge.
+   Each aspect identifies a structural dimension and routes the model to the right
+   cases or prior-knowledge rules. Do NOT encode verdicts or detailed reasoning that
+   belongs in the case studies — that would make this prompt monolithic and would
+   override fine-grained case-level guidance on every query.
+
+2. IF YES / IF NO branches name the signal and route — they do NOT give a verdict.
+   Correct: "E1 has a fresh rhs variable — case bank entries for absorbing patterns apply."
+   Wrong:   "E1 is absorbing — therefore E1 implies E2."
+   The case bank, not the roadmap, closes the argument.
+
+3. Every CHECK must be purely mechanical — answerable by counting variables,
+   checking set membership, or inspecting syntax. No semantic inference.
+
+4. Keep it short. The roadmap must fit alongside case bank entries in a single prompt.
+   Verbosity belongs in the case studies, not here.
 
 Format each aspect as:
 
-ASPECT N: [short name — what dimension of the problem this probes]
-  CHECK: [the specific mechanical question to ask — binary answer]
-  IF YES: [what to do / what it signals]
-  IF NO:  [what to do / what it signals]
-  GROUNDED IN: [which case studies or prior knowledge steps motivate this]
-  WATCH OUT: [one common misclassification to avoid at this checkpoint]
+ASPECT N: [what structural dimension this probes]
+  CHECK: [the specific mechanical question — binary, answerable by syntax inspection]
+  IF YES: [one-line structural signal] — consult CASE BANK for [brief pattern description]
+  IF NO:  [one-line structural signal] — consult CASE BANK for [brief pattern description] \
+or proceed to ASPECT N+1
+  WATCH OUT: [one misclassification trap the case bank commonly catches at this checkpoint]
 
 Rules:
-- 3 to 5 aspects maximum. More aspects = more confusion.
-- Order from most reliable / highest signal to least.
-- Aspects must be INDEPENDENT — do not make aspect N depend on aspect N-1's output.
-- The roadmap supplements prior knowledge — do not restate rules already covered \
-  clearly in the prior.
-- End with a SYNTHESIS note: how to combine aspect signals into a final verdict.
+- 3 to 5 aspects. More = confusion.
+- Order from highest-signal / most reliable check to lowest.
+- Aspects are INDEPENDENT — do not chain on each other's output.
+- Do not restate anything already clearly handled by the prior knowledge.
+- End with a SYNTHESIS note (1–2 sentences): how to combine aspect signals and
+  case bank guidance into a final verdict. Do not enumerate structural cases here —
+  that is the case bank's job.
 
 Output ONLY the roadmap starting with ASPECT 1 — no preamble.\
 """
 
-ROADMAP_SYNTHESIS_MAX_TOKENS = 1_500
+ROADMAP_SYNTHESIS_MAX_TOKENS = 1_600
