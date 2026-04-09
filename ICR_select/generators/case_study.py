@@ -12,6 +12,7 @@ import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from utils.cheatsheet import Cheatsheet
+from utils.case_study import CaseStudy
 from utils.llm_client import call_llm
 from ICR_reasoning.core.oracle import OracleDict
 from ICR_reasoning.generators.case_study import _format_failures_with_reasoning, _parse_response, _render_case_studies_text
@@ -33,7 +34,7 @@ def generate_candidates(
     temperatures: list[float] | None = None,
     oracle: OracleDict | None = None,
     prev_attempt: dict | None = None,
-) -> list[str]:
+) -> list[CaseStudy]:
     """
     Generate *n* candidate case study strings in parallel at different temperatures.
 
@@ -62,9 +63,12 @@ def generate_candidates(
         )
         still_wrong = prev_attempt["still_wrong"]
         still_wrong_lines = _format_failures_with_reasoning(still_wrong)
+        # prev_attempt["candidate"] is a CaseStudy — render it for the prompt
+        prev_cand = prev_attempt["candidate"]
+        prev_cand_text = prev_cand.render() if isinstance(prev_cand, CaseStudy) else str(prev_cand).strip()
         prev_section = RETRY_CONTEXT_TEMPLATE.format(
             reason_desc=reason_desc,
-            prev_candidate=prev_attempt["candidate"].strip(),
+            prev_candidate=prev_cand_text,
             n_still_wrong=len(still_wrong),
             still_wrong_lines=still_wrong_lines,
         )
@@ -76,7 +80,7 @@ def generate_candidates(
         failure_lines=failure_lines,
     )
 
-    def _call(temp: float) -> str:
+    def _call(temp: float) -> CaseStudy | None:
         try:
             resp = call_llm(
                 prompt, model, api_key,
@@ -85,18 +89,18 @@ def generate_candidates(
                 reasoning_effort=None,
             )
             result = _parse_response(resp.content)
-            return result.case_study.strip()
+            return result.case_study
         except Exception as exc:
             print(f"  [candidate gen] temp={temp} failed: {exc}", file=sys.stderr)
-            return ""
+            return None
 
-    candidates: list[str] = [""] * len(temps)
+    candidates: list[CaseStudy | None] = [None] * len(temps)
     with ThreadPoolExecutor(max_workers=len(temps)) as pool:
         futures = {pool.submit(_call, t): i for i, t in enumerate(temps)}
         for fut in as_completed(futures):
             candidates[futures[fut]] = fut.result()
 
-    valid = [c for c in candidates if c]
+    valid = [c for c in candidates if c is not None]
     if not valid:
         raise RuntimeError("All candidate generations failed.")
 

@@ -102,10 +102,13 @@ def _build_parser() -> argparse.ArgumentParser:
                         "previous candidate's still-wrong items as context each round.")
     g.add_argument("--candidate-rounds",  type=int,   default=3, metavar="N",
                    help="Max retry rounds per bin flush when --flush-strategy retry (default: 3).")
-    g.add_argument("--fix-rate-threshold", type=float, default=0.5,  metavar="F",
+    g.add_argument("--fix-rate-threshold", type=float, default=0.30, metavar="F",
                    help="Minimum fraction of failures a candidate must fix.")
     g.add_argument("--regress-threshold",  type=float, default=0.15, metavar="F",
                    help="Maximum fraction of correct-pool items a candidate may break.")
+    g.add_argument("--min-pool-for-regression", type=int, default=10, metavar="N",
+                   help="Skip regression gate when correct_pool has fewer than N items "
+                        "(avoids false rejections when pool is too small to be statistically meaningful).")
     g.add_argument("--no-similarity-gate", action="store_true",
                    help="Skip LLM similarity/dedup check (faster, less selective).")
     g.add_argument("--validate-merge", action="store_true",
@@ -207,7 +210,7 @@ def main() -> None:
         f"  flush-strategy : {args.flush_strategy}"
         + (f" (rounds={args.candidate_rounds})" if args.flush_strategy == "retry" else "") + "\n"
         f"  fix-rate-gate  : ≥{args.fix_rate_threshold:.0%}\n"
-        f"  regress-gate   : ≤{args.regress_threshold:.0%}\n"
+        f"  regress-gate   : ≤{args.regress_threshold:.0%}  (min_pool={args.min_pool_for_regression})\n"
         f"  similarity-gate: {'off' if args.no_similarity_gate else 'on'}\n"
         f"  ablation-every : {args.ablation_every}\n"
         f"  condense-at    : {args.condense_at}\n"
@@ -289,6 +292,7 @@ def main() -> None:
         prescore_map=prescore_map,
         fix_rate_threshold=args.fix_rate_threshold,
         regress_threshold=args.regress_threshold,
+        min_pool_for_regression=args.min_pool_for_regression,
         similarity_gate=not args.no_similarity_gate,
         validate_merge=args.validate_merge,
         ablation_every=args.ablation_every,

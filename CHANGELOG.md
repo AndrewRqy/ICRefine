@@ -2,6 +2,111 @@
 
 ---
 
+## 2026-04-08
+
+### Structural: CaseStudy dataclass replaces flat strings
+
+**Motivation:** Case studies were stored as opaque strings. This blocked:
+- Inference-time routing (can't match IDENTIFY conditions without parsing text each time)
+- Per-case precision tracking (can't count activations vs fixes on a string)
+- Machine-readable dedup in the similarity gate (compares raw text instead of structured fields)
+- Budget-aware rendering (must include all cases; can't rank by relevance)
+
+**What changed:**
+
+New file `utils/case_study.py` — `CaseStudy` dataclass with fields:
+- `title`, `activate_if`, `do_not_activate_if`, `action` — core gate fields parsed from IDENTIFY / ACTION / DOES NOT APPLY TO
+- `next_check` — routing: "DONE: TRUE/FALSE" or "PROCEED TO: STEP N"
+- `common_wrong_move` — what the model typically does wrong (machine-readable)
+- `why_this_check_works` — WHY field
+- `support_examples` — EXAMPLES parsed into `list[{e1, e2, answer, note}]`
+- `feature_signature` — compact one-line structural tag
+- `target_roadmap_aspect` — which DT step this corrects
+- `creation_fix_rate`, `historical_fix_rate`, `n_activations`, `n_fixes` — running stats
+- `raw_text` — original LLM output preserved for debugging
+
+`CaseStudy.render()` produces identical human-readable text to the old format — scoring
+prompt is **unchanged**.  `CaseStudy.from_text(s)` parses old-format strings (backward
+compat); `CaseStudy.to_dict()` / `from_dict()` for the JSON sidecar.
+
+`utils/cheatsheet.py` — `case_studies: list[CaseStudy]` (was `list[str]`).  `__post_init__`
+auto-wraps any plain strings.  `save()` writes structured dicts; `load()` is backward
+compatible with old plain-string JSON.
+
+`ICR_reasoning/prompts/templates.py` — generation prompt extended with four new output
+fields: `FEATURE_SIGNATURE`, `COMMON_WRONG_MOVE`, `TARGET_STEP`, `NEXT_CHECK`.
+`FLUSH_MAX_TOKENS` raised 600 → 900 to accommodate them.
+
+`ICR_reasoning/generators/case_study.py` — `_parse_response()` now returns a `CaseStudy`
+(not a plain string). `_render_case_studies_text()` calls `cs.render()`.
+
+`ICR_select/generators/case_study.py` — `generate_candidates()` returns `list[CaseStudy]`.
+`prev_attempt["candidate"]` uses `.render()` in retry context template.
+
+`ICR_select/training/gates.py` — all helpers (`_mini_eval`, `_mini_eval_full`,
+`_replace_eval`, `_regression_check`, `_similarity_gate`, `_merge_case_studies`,
+`_format_existing`) typed to `CaseStudy`. `_merge_case_studies` returns `CaseStudy`
+and carries forward `max(cs_a.creation_fix_rate, cs_b.creation_fix_rate)`.
+
+`ICR_select/training/loop.py` — sets `creation_fix_rate` and `historical_fix_rate` on
+the winning candidate before `add_case_study()`. Logs `title` in added/merged events.
+
+`ICR_select/training/maintenance.py` — condensation wraps `split_case_studies()` output
+in `CaseStudy.from_text()`.
+
+`ICR_naive/generators/initial.py` — seed case studies wrapped in `CaseStudy.from_text()`.
+
+`ICR_naive/core/cheatsheet.py` — re-exports `_extract_title_from_text` as `_extract_title`
+for any external callers.
+
+All existing smoke tests pass unchanged.
+
+---
+
+### ICR_select: Loosen fix-rate gate + min-pool guard on regression gate
+
+**Problem:** Last night's run (`refine_20260408_071258`, 6 iterations) showed flat
+accuracy at 71.72% across all iterations. All 4 candidate batches exhausted all 3
+retry rounds and were discarded with `last_reason: "fix_rate"`. No cheatsheet update
+ever passed the gates, so accuracy never moved.
+
+Two root causes identified:
+1. **fix_rate_threshold=0.50** too strict — failure bins are hard clusters the model
+   consistently botches; no candidate can fix half of them in one shot.
+2. **regression gate with tiny correct_pool** — early in the run the correct pool has
+   only 5–9 items, so a single regression = 10–20% rate, falsely rejecting good candidates.
+
+**Changes (`ICR_select/training/loop.py`, `ICR_select/pipeline.py`):**
+- `fix_rate_threshold` default lowered **0.50 → 0.30**.
+- New parameter `min_pool_for_regression: int = 10` on `run_training_loop()`.
+  Regression gate is now skipped entirely when `len(correct_pool) < min_pool_for_regression`.
+  Logged with a `[gate:regression] skipped — pool too small` message when triggered.
+- Applied to both the `_process_flush` (default strategy) and `_process_flush_retry`
+  (retry strategy) paths.
+- **Diagnostic improvement:** `best_fix_rate` is now recorded in the `update_log`
+  discard entries on the retry path (was missing — made post-mortems hard to read).
+- New CLI flag: `--min-pool-for-regression N` (default: 10).
+- `--fix-rate-threshold` default updated to 0.30 in `--help`.
+
+**Changes (`SAIR_eval_pipeline/recursive_refine/config.py`, `updater.py`, `run_recursive_refine.py`):**
+- `RecursiveConfig` gains `icr_min_pool_for_regression: int`.
+- New CLI flag `--icr-min-pool-for-regression N` (default: 10).
+- Env var `ICR_SELECT_MIN_POOL_FOR_REGRESSION` read by updater and forwarded to the
+  ICR_select subprocess as `--min-pool-for-regression`.
+- Startup banner now prints `min_pool` alongside the regression threshold.
+
+**Smoke test (`smoke_test_gates.py`):** 9 checks, all pass:
+- Correct defaults for both new params
+- Regression gate skipped when pool < min_pool (patched `_regression_check` never called)
+- Regression gate runs when pool ≥ min_pool
+- fix_rate=0.30 accepts a 40%-fixing candidate; fix_rate=0.50 blocks the same candidate
+- `best_fix_rate` present in retry-path discard log
+- CLI `--min-pool-for-regression` and updated default present in `--help`
+
+Both options remain fully tunable via CLI/env — they are not hardcoded.
+
+---
+
 ## 2026-04-04 (commit fe6480b — pulled)
 
 ### ICR_select: Merge validation gate (loop.py, pipeline.py)

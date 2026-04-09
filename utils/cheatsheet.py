@@ -3,18 +3,21 @@ cheatsheet.py — Cheatsheet data structure.
 
 A Cheatsheet has two parts:
   decision_tree  — a structured step-by-step decision procedure (generated once at init)
-  case_studies   — a growing list of case study strings (added during training)
+  case_studies   — a growing list of CaseStudy records (added during training)
 
 render() produces the full text injected into the evaluation prompt, enforcing
 size limits so the total stays within ~10 kb:
   - Decision tree is hard-capped at DECISION_TREE_MAX_CHARS.
-  - Each case study is hard-capped at CASE_STUDY_MAX_CHARS.
+  - Each case study is hard-capped at CASE_STUDY_MAX_CHARS (applied to render()).
   - Case studies are included newest-first (most recent failures are most relevant)
     until TOTAL_RENDER_MAX_CHARS would be exceeded.
 
-The JSON sidecar always stores the full untruncated content so nothing is lost.
+The JSON sidecar always stores the full untruncated structured content so nothing
+is lost.  Each case study is stored as a rich structured dict (see CaseStudy.to_dict()).
 
 Persistence: save() writes <path>.txt (rendered) and <path>.json (full structured).
+Backward compatibility: load() accepts the old format (case_studies as list[str])
+and transparently wraps each string with CaseStudy.from_text().
 """
 
 from __future__ import annotations
@@ -23,6 +26,8 @@ import json
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
+
+from utils.case_study import CaseStudy
 
 
 # ---------------------------------------------------------------------------
@@ -49,10 +54,20 @@ ROADMAP_HEADER         = "=== REASONING ROADMAP ==="
 @dataclass
 class Cheatsheet:
     decision_tree: str
-    case_studies: list[str] = field(default_factory=list)
+    case_studies: list[CaseStudy] = field(default_factory=list)
     # Optional frozen prior knowledge (e.g. NeuriCo prompt).
     # Rendered before the decision tree / roadmap and never modified by ICR.
     prior_knowledge: str = ""
+
+    def __post_init__(self) -> None:
+        # Accept list[str] for backward compatibility — wrap each string.
+        normalized: list[CaseStudy] = []
+        for cs in self.case_studies:
+            if isinstance(cs, str):
+                normalized.append(CaseStudy.from_text(cs))
+            else:
+                normalized.append(cs)
+        self.case_studies = normalized
 
     # ------------------------------------------------------------------
     # Rendering
@@ -64,7 +79,7 @@ class Cheatsheet:
 
         Applies hard size limits:
           - Decision tree capped at DECISION_TREE_MAX_CHARS
-          - Each case study capped at CASE_STUDY_MAX_CHARS
+          - Each case study render() capped at CASE_STUDY_MAX_CHARS
           - Total output capped at TOTAL_RENDER_MAX_CHARS
             (case studies are included newest-first; older ones are dropped
             if they would exceed the budget)
@@ -95,11 +110,10 @@ class Cheatsheet:
             # Newest-first so the most recent failures are always included
             for i, cs in enumerate(reversed(self.case_studies)):
                 display_n = len(self.case_studies) - i   # keep original numbering
-                title = _extract_title(cs)
-                body  = _truncate(cs.strip(), CASE_STUDY_MAX_CHARS)
+                body  = _truncate(cs.render(), CASE_STUDY_MAX_CHARS)
                 block = [
                     "",
-                    CASE_STUDY_DIVIDER.format(n=display_n, title=title),
+                    CASE_STUDY_DIVIDER.format(n=display_n, title=cs.title),
                     body,
                 ]
                 block_size = len("\n".join(block))
@@ -125,9 +139,11 @@ class Cheatsheet:
     # Mutation
     # ------------------------------------------------------------------
 
-    def add_case_study(self, text: str) -> None:
-        """Append a new case study. Called when the failure bin flushes."""
-        self.case_studies.append(text.strip())
+    def add_case_study(self, cs: "CaseStudy | str") -> None:
+        """Append a new case study. Accepts CaseStudy or plain text string."""
+        if isinstance(cs, str):
+            cs = CaseStudy.from_text(cs)
+        self.case_studies.append(cs)
         rendered_size = self.render_size()
         if rendered_size > TOTAL_RENDER_MAX_CHARS:
             print(
@@ -164,7 +180,7 @@ class Cheatsheet:
         """
         Save the cheatsheet.
         <path>.txt  — rendered output (size-limited, what goes into prompts)
-        <path>.json — full structured content (no truncation)
+        <path>.json — full structured content (no truncation; case studies as rich dicts)
         """
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -173,8 +189,8 @@ class Cheatsheet:
         path.with_suffix(".json").write_text(
             json.dumps(
                 {
-                    "decision_tree":  self.decision_tree,
-                    "case_studies":   self.case_studies,
+                    "decision_tree":   self.decision_tree,
+                    "case_studies":    [cs.to_dict() for cs in self.case_studies],
                     "prior_knowledge": self.prior_knowledge,
                 },
                 indent=2,
@@ -185,12 +201,27 @@ class Cheatsheet:
 
     @classmethod
     def load(cls, path: Path) -> "Cheatsheet":
-        """Load from the .json sidecar written by save()."""
+        """
+        Load from the .json sidecar written by save().
+
+        Backward compatible: if case_studies entries are plain strings (old format),
+        each is parsed with CaseStudy.from_text().
+        """
         json_path = Path(path).with_suffix(".json")
         data = json.loads(json_path.read_text(encoding="utf-8"))
+
+        raw_studies = data.get("case_studies", [])
+        case_studies: list[CaseStudy] = []
+        for entry in raw_studies:
+            if isinstance(entry, str):
+                case_studies.append(CaseStudy.from_text(entry))
+            elif isinstance(entry, dict):
+                case_studies.append(CaseStudy.from_dict(entry))
+            # else: skip malformed entries
+
         return cls(
             decision_tree=data["decision_tree"],
-            case_studies=data.get("case_studies", []),
+            case_studies=case_studies,
             prior_knowledge=data.get("prior_knowledge", ""),
         )
 
@@ -230,12 +261,3 @@ def _truncate(text: str, max_chars: int) -> str:
         cut = max_chars
 
     return text[:cut].rstrip() + "\n[truncated]"
-
-
-def _extract_title(case_study_text: str) -> str:
-    """Pull a short title from the first meaningful line of a case study."""
-    for line in case_study_text.splitlines():
-        line = line.strip().lstrip("=- ").rstrip("=- ").strip()
-        if line:
-            return line[:72] + ("..." if len(line) > 72 else "")
-    return "untitled"

@@ -11,6 +11,7 @@ import random
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from utils.cheatsheet import Cheatsheet
+from utils.case_study import CaseStudy
 from utils.parser import split_case_studies
 from utils.llm_client import call_llm
 from utils.scorer import score_batch
@@ -114,7 +115,7 @@ def _condense(
         max_tokens=CONDENSATION_MAX_TOKENS,
         reasoning_effort=None,
     )
-    condensed_list = split_case_studies(resp.content)
+    condensed_list = [CaseStudy.from_text(s) for s in split_case_studies(resp.content)]
     if not condensed_list:
         log_fn("  [condense] parse failed — keeping original.")
         return cheatsheet

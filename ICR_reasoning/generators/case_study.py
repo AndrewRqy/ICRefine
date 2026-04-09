@@ -23,6 +23,7 @@ import sys
 from dataclasses import dataclass
 
 from utils.cheatsheet import Cheatsheet
+from utils.case_study import CaseStudy
 from utils.data import is_true
 from ..core.llm_client import call_llm
 from ..core.oracle import OracleDict
@@ -35,8 +36,8 @@ from ..prompts.templates import CASE_STUDY_WITH_REASONING_PROMPT, FLUSH_MAX_TOKE
 
 @dataclass
 class CaseStudyResult:
-    case_study: str   # the === CASE STUDY === section, ready for add_case_study()
-    dt_patch:   str   # the === DECISION TREE PATCH === body (may be empty)
+    case_study: CaseStudy   # structured record, ready for add_case_study()
+    dt_patch:   str         # the === DECISION TREE PATCH === body (may be empty)
 
 
 # ---------------------------------------------------------------------------
@@ -81,7 +82,7 @@ def _render_case_studies_text(cheatsheet: Cheatsheet) -> str:
         return "(none yet)"
     parts = []
     for i, cs in enumerate(cheatsheet.case_studies, 1):
-        parts.append(f"--- Case Study {i} ---\n{cs.strip()}")
+        parts.append(f"--- Case Study {i} ---\n{cs.render()}")
     return "\n\n".join(parts)
 
 
@@ -91,11 +92,19 @@ def _render_case_studies_text(cheatsheet: Cheatsheet) -> str:
 
 def _parse_response(text: str) -> CaseStudyResult:
     """
-    Split the LLM response into the CASE STUDY block and the DECISION TREE PATCH block.
+    Split the LLM response into a structured CaseStudy and the DECISION TREE PATCH.
 
     Expected format:
         === CASE STUDY: <title> ===
-        ...
+        IDENTIFY: ...
+        ACTION: ...
+        WHY: ...
+        EXAMPLES: ...
+        DOES NOT APPLY TO: ...
+        FEATURE_SIGNATURE: ...
+        COMMON_WRONG_MOVE: ...
+        TARGET_STEP: ...
+        NEXT_CHECK: ...
         === DECISION TREE PATCH ===
         ...
         === END PATCH ===
@@ -109,12 +118,9 @@ def _parse_response(text: str) -> CaseStudyResult:
 
     # Extract CASE STUDY block — everything up to (but not including) the DT patch section
     cs_end = dt_match.start() if dt_match else len(text)
-    case_study = text[:cs_end].strip()
+    cs_text = text[:cs_end].strip() or text.strip()
 
-    # Fallback: if we couldn't identify a case study, use the full response
-    if not case_study:
-        case_study = text.strip()
-
+    case_study = CaseStudy.from_text(cs_text)
     return CaseStudyResult(case_study=case_study, dt_patch=dt_patch)
 
 

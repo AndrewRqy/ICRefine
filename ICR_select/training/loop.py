@@ -114,8 +114,9 @@ def run_training_loop(
     oracle: OracleDict | None = None,
     prescore_map: dict | None = None,
     # Gates
-    fix_rate_threshold: float = 0.5,
+    fix_rate_threshold: float = 0.30,
     regress_threshold: float = 0.15,
+    min_pool_for_regression: int = 10,
     similarity_gate: bool = True,
     validate_merge: bool = False,
     # Maintenance
@@ -155,7 +156,7 @@ def run_training_loop(
         f"ICR_select Training loop\n"
         f"  items={len(train_items)}  batch={batch_size}  bin={bin_threshold}\n"
         f"  n_candidates={n_candidates}  fix_rate≥{fix_rate_threshold}  "
-        f"regress≤{regress_threshold}\n"
+        f"regress≤{regress_threshold}  min_pool={min_pool_for_regression}\n"
         f"  validate_merge={validate_merge}  "
         f"ablation_every={ablation_every}  condense_at={condense_at}\n"
         f"  model_score={model_score}\n"
@@ -223,7 +224,7 @@ def run_training_loop(
 
         # Step 4: regression gate
         reg_rate = 0.0
-        if correct_pool:
+        if correct_pool and len(correct_pool) >= min_pool_for_regression:
             reg_rate = _regression_check(best_cand, correct_pool, cheatsheet, **_gkw)
             _log(f"  [gate:regression] regression_rate={reg_rate:.0%}")
             if reg_rate > regress_threshold:
@@ -238,6 +239,11 @@ def run_training_loop(
                     "regression_rate": reg_rate,
                 })
                 return
+        elif correct_pool:
+            _log(
+                f"  [gate:regression] skipped — pool too small "
+                f"({len(correct_pool)} < min_pool={min_pool_for_regression})"
+            )
 
         # Step 5: similarity gate (optional)
         if similarity_gate and len(cheatsheet.case_studies) >= _MIN_CS_FOR_SIMILARITY:
@@ -299,15 +305,18 @@ def run_training_loop(
                     return
 
         # ADD
+        best_cand.creation_fix_rate  = best_fix_rate
+        best_cand.historical_fix_rate = best_fix_rate
         cheatsheet.add_case_study(best_cand)
         n_added     += 1
         flush_count += 1
         _log(
-            f"  [added] CS {len(cheatsheet.case_studies)} — "
+            f"  [added] CS {len(cheatsheet.case_studies)} '{best_cand.title}' — "
             f"fix_rate={best_fix_rate:.0%}  regress={reg_rate:.0%}"
         )
         update_log.append({
             "event": "bin_added", "batch": batch_num,
+            "title": best_cand.title,
             "fix_rate": best_fix_rate, "regression_rate": reg_rate,
             "n_case_studies_total": len(cheatsheet.case_studies),
         })
@@ -363,7 +372,7 @@ def run_training_loop(
                 continue
 
             reg_rate = 0.0
-            if correct_pool:
+            if correct_pool and len(correct_pool) >= min_pool_for_regression:
                 reg_rate = _regression_check(best_cand, correct_pool, cheatsheet, **_gkw)
                 _log(f"  [gate:regression] regression_rate={reg_rate:.0%}")
                 if reg_rate > regress_threshold:
@@ -373,6 +382,11 @@ def run_training_loop(
                     )
                     prev_attempt = {"candidate": best_cand, "still_wrong": best_still_wrong, "reason": "regression"}
                     continue
+            elif correct_pool:
+                _log(
+                    f"  [gate:regression] skipped — pool too small "
+                    f"({len(correct_pool)} < min_pool={min_pool_for_regression})"
+                )
 
             if similarity_gate and len(cheatsheet.case_studies) >= _MIN_CS_FOR_SIMILARITY:
                 action, merge_idx = _similarity_gate(best_cand, cheatsheet, model_casestudy, api_key)
@@ -400,15 +414,18 @@ def run_training_loop(
                     return
 
             # ADD
+            best_cand.creation_fix_rate   = best_fix_rate
+            best_cand.historical_fix_rate  = best_fix_rate
             cheatsheet.add_case_study(best_cand)
             n_added     += 1
             flush_count += 1
             _log(
-                f"  [added] CS {len(cheatsheet.case_studies)} — "
+                f"  [added] CS {len(cheatsheet.case_studies)} '{best_cand.title}' — "
                 f"fix_rate={best_fix_rate:.0%}  regress={reg_rate:.0%}  attempt={attempt}"
             )
             update_log.append({
                 "event": "bin_added", "batch": batch_num,
+                "title": best_cand.title,
                 "fix_rate": best_fix_rate, "regression_rate": reg_rate,
                 "n_case_studies_total": len(cheatsheet.case_studies),
                 "attempt": attempt,
@@ -422,6 +439,7 @@ def run_training_loop(
             "event": "bin_discarded", "batch": batch_num,
             "reason": f"all_{candidate_rounds}_rounds_failed",
             "last_reason": prev_attempt["reason"] if prev_attempt else None,
+            "best_fix_rate": scored_valid[0][0] if scored_valid else None,
         })
 
     def _maybe_maintain(batch_num: int) -> None:

@@ -37,10 +37,11 @@ __all__ = [
 ]
 
 # Token budget for the combined case study + DT patch response.
-# Case study: ~600 chars = ~150 tokens
-# DT patch:   ~800 chars = ~200 tokens
-# 1.3× headroom → 455 tokens; round up.
-FLUSH_MAX_TOKENS = 600
+# Core fields (IDENTIFY/ACTION/WHY/EXAMPLES/DOES NOT APPLY TO): ~600 chars = ~150 tokens
+# New structured fields (FEATURE_SIGNATURE/COMMON_WRONG_MOVE/TARGET_STEP/NEXT_CHECK): ~200 chars
+# DT patch: ~800 chars = ~200 tokens
+# 1.3× headroom → ~715 tokens; round up.
+FLUSH_MAX_TOKENS = 900
 
 
 # ---------------------------------------------------------------------------
@@ -94,13 +95,13 @@ rule that fires on 10 cases but gets half of them wrong.
 
 Produce TWO outputs:
 
-OUTPUT 1 — CASE STUDY (max 600 chars)
+OUTPUT 1 — CASE STUDY (max 800 chars)
 Format your response EXACTLY as:
 
 === CASE STUDY: [short specific title — name the structural feature, not just the error type] ===
 IDENTIFY: [precise checklist of conditions that must ALL be true before this fires —
            be specific about equation structure, variable counts, nesting, form types.
-           If any condition is not met, this case study does NOT apply.]
+           Use one bullet per condition. If any condition is not met, this does NOT apply.]
 ACTION: [exactly what to conclude when IDENTIFY conditions are met]
 WHY: [1-2 sentences — the mathematical reason this specific structure leads to this verdict]
 EXAMPLES:
@@ -108,6 +109,10 @@ EXAMPLES:
   • ...
 DOES NOT APPLY TO: [1-2 sentence description of similar-looking cases where this rule
                     should NOT fire — the boundary condition]
+FEATURE_SIGNATURE: [one compact tag summarising the structural pattern, e.g. "absorbing→general_L0" or "standard_3var_implies_standard_1var"]
+COMMON_WRONG_MOVE: [one sentence — what the model typically does wrong in these cases]
+TARGET_STEP: [the decision tree step or rule this case study corrects, e.g. "STEP 4" or "RULE 5"]
+NEXT_CHECK: [what to do after this fires — either "DONE: TRUE", "DONE: FALSE", or "PROCEED TO: STEP N"]
 
 OUTPUT 2 — DECISION TREE PATCH (max 800 chars)
 One or more targeted corrections to the decision tree that would have prevented

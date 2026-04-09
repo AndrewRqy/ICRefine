@@ -16,6 +16,7 @@ from __future__ import annotations
 import re
 
 from utils.cheatsheet import Cheatsheet
+from utils.case_study import CaseStudy
 from utils.data import is_true
 from utils.llm_client import call_llm
 from utils.scorer import score_batch
@@ -32,7 +33,7 @@ _MIN_CS_FOR_SIMILARITY = 3   # skip similarity gate until this many CSes exist
 # ---------------------------------------------------------------------------
 
 def _mini_eval(
-    candidate_cs: str,
+    candidate_cs: CaseStudy,
     failures: list[dict],
     cheatsheet: Cheatsheet,
     model_score: str,
@@ -56,7 +57,7 @@ def _mini_eval(
 
 
 def _mini_eval_full(
-    candidate_cs: str,
+    candidate_cs: CaseStudy,
     failures: list[dict],
     cheatsheet: Cheatsheet,
     model_score: str,
@@ -80,7 +81,7 @@ def _mini_eval_full(
 
 
 def _replace_eval(
-    merged_cs: str,
+    merged_cs: CaseStudy,
     merge_idx: int,
     failures: list[dict],
     cheatsheet: Cheatsheet,
@@ -103,7 +104,7 @@ def _replace_eval(
 
 
 def _regression_check(
-    candidate_cs: str,
+    candidate_cs: CaseStudy,
     correct_pool: list[dict],
     cheatsheet: Cheatsheet,
     model_score: str,
@@ -131,13 +132,13 @@ def _regression_check(
 # Similarity gate
 # ---------------------------------------------------------------------------
 
-def _format_existing(case_studies: list[str]) -> str:
-    parts = [f"[{i}]\n{cs.strip()}" for i, cs in enumerate(case_studies, 1)]
+def _format_existing(case_studies: list[CaseStudy]) -> str:
+    parts = [f"[{i}]\n{cs.render()}" for i, cs in enumerate(case_studies, 1)]
     return "\n\n".join(parts) if parts else "(none yet)"
 
 
 def _similarity_gate(
-    candidate_cs: str,
+    candidate_cs: CaseStudy,
     cheatsheet: Cheatsheet,
     model_casestudy: str,
     api_key: str,
@@ -156,7 +157,7 @@ def _similarity_gate(
     resp = call_llm(
         SIMILARITY_CHECK_PROMPT.format(
             existing=_format_existing(cheatsheet.case_studies),
-            candidate=candidate_cs,
+            candidate=candidate_cs.render(),
         ),
         model_casestudy, api_key,
         temperature=0.0,
@@ -176,16 +177,21 @@ def _similarity_gate(
     return "ADD", None
 
 
-def _merge_case_studies(cs_a: str, cs_b: str, model_casestudy: str, api_key: str) -> str:
-    """Merge two case studies into one via LLM."""
+def _merge_case_studies(cs_a: CaseStudy, cs_b: CaseStudy, model_casestudy: str, api_key: str) -> CaseStudy:
+    """Merge two case studies into one via LLM. Returns a new CaseStudy."""
+    from utils.case_study import CaseStudy as _CS
     resp = call_llm(
-        MERGE_PROMPT.format(cs_a=cs_a, cs_b=cs_b),
+        MERGE_PROMPT.format(cs_a=cs_a.render(), cs_b=cs_b.render()),
         model_casestudy, api_key,
         temperature=0.2,
         max_tokens=MERGE_MAX_TOKENS,
         reasoning_effort=None,
     )
-    return resp.content.strip()
+    merged = _CS.from_text(resp.content.strip())
+    # Carry forward the higher fix rate from the two sources
+    merged.creation_fix_rate = max(cs_a.creation_fix_rate, cs_b.creation_fix_rate)
+    merged.historical_fix_rate = merged.creation_fix_rate
+    return merged
 
 
 # ---------------------------------------------------------------------------

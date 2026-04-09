@@ -29,6 +29,7 @@ from ..core.cheatsheet import CASE_STUDY_MAX_CHARS, Cheatsheet
 from ..core.data import is_true, load_jsonl, sample_instances
 from ..core.llm_client import call_llm, get_api_key
 from ..core.parser import split_case_studies
+from utils.case_study import CaseStudy
 from ..prompts.templates import (
     CASE_STUDIES_PROMPT,
     DECISION_TREE_PROMPT,
@@ -106,9 +107,9 @@ def generate_initial_cheatsheet(
         max_tokens=cs_max_tokens,
     )
 
-    case_studies = split_case_studies(cs_text)
+    case_studies = [CaseStudy.from_text(s) for s in split_case_studies(cs_text)]
     if not case_studies:
-        case_studies = [cs_text.strip()]
+        case_studies = [CaseStudy.from_text(cs_text.strip())]
 
     return Cheatsheet(decision_tree=decision_tree, case_studies=case_studies)
 

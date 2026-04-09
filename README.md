@@ -235,8 +235,9 @@ python -m ICR_select.pipeline \
 | `--n-candidates N` | `3` | Candidates generated per bin flush |
 | `--flush-strategy` | `default` | `default`: discard on gate failure. `retry`: retry up to `--candidate-rounds` times with context from the previous attempt |
 | `--candidate-rounds N` | `3` | Max retry rounds when `--flush-strategy retry` |
-| `--fix-rate-threshold F` | `0.5` | Min fraction of failures a candidate must fix |
+| `--fix-rate-threshold F` | `0.30` | Min fraction of failures a candidate must fix |
 | `--regress-threshold F` | `0.15` | Max fraction of correct-pool items a candidate may break |
+| `--min-pool-for-regression N` | `10` | Skip regression gate when the correct pool has fewer than N items (avoids false rejections early in training when the pool is too small) |
 | `--no-similarity-gate` | off | Skip LLM dedup (faster, less selective) |
 | `--validate-merge` | off | Only commit a merge if the merged entry is at least as good as the original |
 
@@ -293,12 +294,14 @@ All pipelines accept per-stage model overrides:
 
 ```
 runs/select_run/
-├── cheatsheet_init.txt        # starting cheatsheet
-├── cheatsheet_update_01.txt   # checkpoint after each addition
-├── cheatsheet_final.txt       # final cheatsheet (plain text)
-├── cheatsheet_final.json      # final cheatsheet (structured, for --init-cheatsheet)
+├── cheatsheet_init.txt        # starting cheatsheet (plain text)
+├── cheatsheet_update_01.txt   # checkpoint after each case study addition
+├── cheatsheet_final.txt       # final cheatsheet (plain text — what goes into prompts)
+├── cheatsheet_final.json      # final cheatsheet (structured JSON — use with --init-cheatsheet)
 └── update_log.json            # event log (adds, merges, discards, ablations, condensations)
 ```
+
+The `.json` sidecar stores each case study as a **structured record** — not a flat string. Each entry contains all parsed fields (`activate_if`, `action`, `why_this_check_works`, `support_examples`, `feature_signature`, etc.) alongside running statistics (`creation_fix_rate`, `historical_fix_rate`, `n_activations`, `n_fixes`). The `.txt` is the human-readable render used in prompts.
 
 For DT revision runs, each round gets a subfolder with `cheatsheet_end_of_round.txt` and `dt_revision.json` (accepted/rejected, accuracy before/after).
 
@@ -380,10 +383,11 @@ Key building blocks already available to reuse:
 | Import | What it provides |
 |---|---|
 | `utils.cheatsheet.Cheatsheet` | Cheatsheet dataclass with `render()`, `save()`, `load()`, `prior_knowledge` |
+| `utils.case_study.CaseStudy` | Structured case study record — `from_text()`, `from_dict()`, `to_dict()`, `render()`, `record_activation()` |
 | `utils.data.load_jsonl` | Load a `.jsonl` dataset |
 | `utils.llm_client.call_llm` | Single synchronous LLM call (routes to vLLM or OpenRouter automatically) |
 | `utils.scorer.score_batch` | Score a batch of items against a cheatsheet, returns per-item verdicts + post-think |
-| `ICR_select.generators.case_study.generate_candidates` | Generate N candidate case studies from a failure bin |
+| `ICR_select.generators.case_study.generate_candidates` | Generate N candidate `CaseStudy` objects from a failure bin |
 | `ICR_select.training.loop.run_training_loop` | Full inner CS loop with all four gates — use this to avoid reimplementing gating logic |
 
 ---
@@ -405,7 +409,8 @@ bash compare_modes.sh smoke   # quick smoke test — verifies all gates fire wit
 ```
 ICRefine/
 ├── utils/               # Shared utilities (used by all three ICR packages)
-│   ├── cheatsheet.py    # Cheatsheet dataclass — render, save, load
+│   ├── case_study.py    # CaseStudy dataclass — structured record with routing metadata
+│   ├── cheatsheet.py    # Cheatsheet dataclass — render, save, load (case_studies: list[CaseStudy])
 │   ├── data.py          # Dataset loading, splitting, FailureBin, is_true
 │   ├── parser.py        # Parse VERDICT / REASONING / PROOF / COUNTEREXAMPLE
 │   ├── llm_client.py    # Unified LLM client — vLLM / OpenAI / OpenRouter routing
@@ -418,8 +423,29 @@ ICRefine/
 │       ├── outer_loop.py          # Outer DT revision loop
 │       ├── dt_reviser.py          # Validated decision tree revision
 │       └── roadmap_synthesizer.py # Absorbs case studies into a structured reasoning roadmap
+├── smoke_test_gates.py     # Gate threshold smoke tests (no live LLM required)
 ├── eval_oracle_quality.py  # Compare case study quality with vs without oracle injection
 ├── compare_modes.sh
 ├── pyproject.toml          # Dependencies (managed by uv)
 └── .env.example
 ```
+
+### CaseStudy structured fields
+
+Each case study stored in the JSON sidecar has these fields:
+
+| Field | Purpose |
+|---|---|
+| `title` | Short descriptive label |
+| `activate_if` | Parsed IDENTIFY conditions — list of strings that must ALL be true |
+| `do_not_activate_if` | Boundary conditions — when NOT to fire |
+| `action` | Conclusion when activated |
+| `next_check` | Routing: `"DONE: TRUE"`, `"DONE: FALSE"`, or `"PROCEED TO: STEP N"` |
+| `common_wrong_move` | What the model typically does wrong in these cases |
+| `why_this_check_works` | Mathematical justification (WHY field) |
+| `support_examples` | List of `{e1, e2, answer, note}` dicts |
+| `feature_signature` | Compact structural tag, e.g. `"absorbing→general_L0"` |
+| `target_roadmap_aspect` | DT step this case study corrects |
+| `creation_fix_rate` | Fix rate on the flush bin that produced this entry |
+| `historical_fix_rate` | Running average updated by ablation / eval passes |
+| `n_activations` / `n_fixes` | Activation and precision counters |
