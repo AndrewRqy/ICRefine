@@ -272,6 +272,91 @@ New supporting code (all in `utils/cheatsheet.py`):
 
 ---
 
+### Step parser: literal regex → structured checkpoint ID matching
+
+**Problem:** `ICR_select/analysis/step_parser.py` detected which roadmap aspects a
+failing model applied by scanning free-form reasoning text for `STEP N` / `RULE N`
+strings. Models almost never write these literally — they write "the absorbing check",
+"following the second aspect", or nothing at all. The regex silently missed all
+paraphrased references, producing empty misapplication profiles and making the revision
+loop unable to identify which aspects to fix.
+
+**Fix — two-part change:**
+
+`ICR_naive/prompts/templates.py` — `SCORING_PROMPT` and `SCORING_PROMPT_COT_FIRST`
+updated to require structured checkpoint tags in the model's REASONING output:
+- When applying ASPECT 1 the model must write `[CK:A1]`, ASPECT 2 → `[CK:A2]`, etc.
+- `SCORING_PROMPT_COT_FIRST` instruction: *"For each ASPECT you consult, begin that
+  clause with its checkpoint tag … This tagging is required — it is used to track
+  which aspects are applied correctly vs. incorrectly."*
+- `SCORING_PROMPT` adds a lighter version of the same instruction in the REASONING
+  field description.
+- The parser now reads tags the model was explicitly asked to emit, not tags it might
+  coincidentally write.
+
+`ICR_select/analysis/step_parser.py` — rewritten around exact tag matching:
+- `extract_checkpoint_ids(roadmap_text)` replaces `extract_step_names`: parses
+  `ASPECT N:` headers from the roadmap and returns `["A1", "A2", …]`. The old
+  `extract_step_names` is kept as an alias.
+- `mentions_in_trace(trace, checkpoint_ids)` now does exact `[CK:AN]` substring
+  search — no regex guessing on free-form text. A paraphrased reference that lacks a
+  tag is correctly reported as 0 matches, not silently missed and not falsely matched.
+- `_best_quote(trace, checkpoint_id)` extracts the clause around the `[CK:AN]` tag
+  using `str.find` instead of a pattern search.
+- `build_profile`: items whose traces contain no checkpoint tags contribute to
+  `n_no_trace` (same as before for empty traces) rather than producing spurious counts.
+- `format_profile`: empty-profile message updated to name the likely cause ("ensure
+  the scoring prompt emits [CK:AN] tags and --cot-first is active").
+- `StepMisapplication.step_name` is now the checkpoint ID (`"A2"`); display label
+  `"ASPECT 2 [A2]"` is constructed at render time.
+
+Old-format roadmaps (STEP N / RULE N headers) return an empty checkpoint list and an
+empty profile — the correct result, since they are not compatible with tag-based tracking.
+
+---
+
+### Roadmap synthesizer: controller over the case bank, not a replacement for it
+
+**Motivation:** The roadmap synthesizer was designed to "absorb case studies into the
+roadmap" — knowledge flowed one-way from the case bank into a monolithic roadmap text,
+and after synthesis the case studies were cleared. This inverted the intended architecture:
+the roadmap should be a lightweight navigation layer, not a knowledge dump. Inlining
+case-level reasoning into the roadmap overrides fine-grained case guidance on every
+query and ignores the routing already done by `render_for_query`.
+
+The correct design: **roadmap as controller, cases as tools.** The roadmap tells the
+student which structural dimension to probe and when to consult the case bank; the case
+studies carry the detailed reasoning for each structural sub-case.
+
+**Changes:**
+
+`ICR_select/prompts/templates.py` — `ROADMAP_SYNTHESIS_PROMPT` rewritten:
+- Framing changed from "synthesise case studies into a roadmap" to "write a routing
+  controller that works alongside the case bank".
+- Explicit anti-pattern example added: IF YES/IF NO branches must NOT give verdicts
+  (`"E1 is absorbing — therefore E1 implies E2"` is wrong); they name the structural
+  signal and route to the case bank (`"E1 has a fresh rhs variable — consult CASE BANK
+  for absorbing patterns"`).
+- `GROUNDED IN` field removed from the ASPECT format — it encouraged inlining case study
+  conclusions into the roadmap. Replaced by `WATCH OUT` (misclassification traps the
+  case bank catches).
+- `ROADMAP_SYNTHESIS_MAX_TOKENS` 1 500 → 1 600.
+
+`ICR_select/training/roadmap_synthesizer.py`:
+- Module docstring updated: "controller over the case bank" architecture explained;
+  explicit note that callers must NOT clear `case_studies` after synthesis.
+- Validation: `cs_after` now keeps `case_studies=cheatsheet.case_studies` (was `[]`).
+  Before/after accuracy comparison now measures whether the new roadmap improves
+  navigation *with the same case bank*, which is the correct null hypothesis.
+  Previously it was testing the roadmap in isolation — a strictly harder and wrong bar.
+- `Returns` docstring updated: "caller must NOT clear case_studies".
+
+`README.md` — project structure comment updated from "Absorbs case studies into a
+structured reasoning roadmap" to "Synthesises a routing controller roadmap over the
+case bank".
+
+---
+
 ### Disagreement bin mining — oracle nearest-neighbour pairing (ICR_select)
 
 **Motivation:** The training loop previously accumulated all student-wrong items into a
