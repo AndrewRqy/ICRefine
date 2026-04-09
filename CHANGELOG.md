@@ -272,6 +272,107 @@ New supporting code (all in `utils/cheatsheet.py`):
 
 ---
 
+### Disagreement bin mining — oracle nearest-neighbour pairing (ICR_select)
+
+**Motivation:** The training loop previously accumulated all student-wrong items into a
+single failure bin with no discrimination. Items where the teacher (oracle) is also wrong
+have no distillable signal — forcing a case study from them produces low-quality output.
+
+**Changes:**
+
+`utils/oracle_index.py` (new):
+- `OracleEntry` NamedTuple: `eq1, eq2, reasoning, features`.
+- `OracleIndex`: pre-computes `QueryFeatures` for every oracle entry at construction.
+  `find_nearest(item)` returns the highest-Jaccard oracle entry whose token set overlaps
+  the item's tokens, excluding exact-key matches (those are handled by the oracle exact
+  lookup in the generator). Returns `None` when no entry exceeds `min_similarity`.
+
+`utils/data.py`:
+- `DisagreementBin` dataclass (mirrors `FailureBin`).  `add()` asserts `oracle_nearest`
+  is present on the item — structural guard.
+
+`ICR_select/training/loop.py`:
+- New parameter `oracle_min_similarity: float = 0.25`.
+- Builds `OracleIndex` at loop start if an oracle dict is provided.
+- Wrong items are routed: if a nearest oracle entry is found → `oracle_nearest` and
+  `oracle_sim` are attached, item goes to `disagree_bin`. Otherwise → `both_wrong_bin`.
+- `disagree_bin` flushes first (teacher-signal priority). `both_wrong_bin` only flushes
+  when `disagree_bin` is below threshold.
+- `TrainingResult` gains `n_disagree` and `n_both_wrong` counters.
+- Batch log updated to show both bin sizes.
+
+`ICR_select/pipeline.py`:
+- `--oracle-min-similarity F` flag added (default: 0.25).
+- Stage 3 report shows `disagree_items` and `both_wrong_items`.
+
+`ICR_reasoning/generators/case_study.py` (`_format_failures_with_reasoning`):
+- Priority 1: exact oracle match — shows `CORRECT reasoning (oracle — exact same pair)`.
+- Priority 2: `oracle_nearest` annotation — shows `STRUCTURALLY SIMILAR correct oracle
+  case (sim=X.XX)` with the neighbour's `E1'`, `E2'`, and correct reasoning.
+
+**Smoke test — Test 10 added (8 checks):** OracleIndex construction, `find_nearest`
+match/similarity/to_dict, exact-key exclusion, no-crash on any input, item annotation,
+CLI flag.
+
+---
+
+### Utility gate — continuous candidate scoring replacing hard thresholds
+
+**Motivation:** The fix-rate and regression gates are binary — they accept or reject a
+candidate by comparing a single scalar to a fixed threshold. This produces high false-reject
+rates early in training (when the correct pool is small and regression estimates are noisy)
+and gives no signal about *how much* a candidate improves things across the full val set.
+
+**Design:** Replace with a continuous utility score per candidate:
+
+```
+U(c) = ΔAccS(Vmatch; c) + λ · ΔAccS(Vgap; c) − μ · RegressS(Veasy; c) − ν · chars(c) / 1000
+```
+
+Slice definitions:
+- **Vmatch** — val items whose structural feature tokens overlap any candidate's
+  `feature_signature` (pure string matching, no API call).
+- **Vgap** — rolling reservoir (max 40) of disagree_bin items that were NOT generated
+  from the current failure batch. Populated via reservoir sampling every time an item is
+  routed to `disagree_bin`.
+- **Veasy** — items from `correct_pool`. Measures stability.
+
+API cost: **N+1** calls per flush (1 shared baseline without any candidate, then N
+parallel with-candidate calls). This halves cost vs. naïve per-candidate scoring.
+
+**New file `ICR_select/training/utility_gate.py`:**
+- `UtilityConfig` dataclass (λ=0.5, μ=1.0, ν=0.1, threshold=0.0, min_slice=5).
+- `UtilityResult` dataclass with all score components plus `fell_back` flag.
+- `VGAP_RESERVE_MAX = 40` constant.
+- `build_vmatch(candidate, val_items)` — pure structural matching, no API.
+- `score_baseline(vmatch, vgap, veasy, ...)` — one shared API call.
+- `score_utility_one(candidate, cheatsheet, ..., baseline, ...)` — one with-candidate call.
+- `score_utility_batch(candidates, ...)` — N+1 calls total; parallel with-calls via
+  `ThreadPoolExecutor`; graceful fallback (`fell_back=True`) when slices < `min_slice`.
+
+**Changes to `ICR_select/training/loop.py`:**
+- New parameters: `utility_gate: bool = False`, `utility_config: UtilityConfig | None`.
+- `vgap_reserve: list[dict]` rolling reservoir; populated with reservoir sampling when
+  items are routed to `disagree_bin`.
+- `_process_flush`: when `utility_gate=True`, replaces mini-eval + fix-rate + regression
+  gates with `score_utility_batch`. Picks best candidate by U; discards if U ≤ threshold.
+  Falls back to classic gates when `fell_back=True`.
+- `_process_flush_retry`: same logic; retry loop continues on utility threshold failures.
+  Similarity gate and add/merge steps are identical on both paths.
+- `TrainingResult` gains `n_utility_accepted` and `n_utility_fallbacks`.
+
+**Changes to `ICR_select/pipeline.py`:**
+- New CLI flags: `--utility-gate`, `--utility-lambda F`, `--utility-mu F`, `--utility-nu F`,
+  `--utility-threshold F`, `--utility-min-slice N`.
+- Constructs `UtilityConfig` and passes it as `utility_config` to `run_training_loop`.
+- Stage 3 report shows `utility_accepted` and `utility_fallbacks`.
+
+**Smoke test — Test 11 added (12 checks):** UtilityConfig defaults, accept when U=0.30 >
+threshold=0.0, discard when U=-0.05 ≤ threshold=0.0, fallback to classic gates when
+`fell_back=True` and `n_utility_fallbacks` incremented, CLI flags in `--help`.
+
+---
+
 ## 2026-04-04 (commit fe6480b — pulled)
 
 ### ICR_select: Merge validation gate (loop.py, pipeline.py)

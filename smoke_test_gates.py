@@ -531,6 +531,182 @@ def test_disagreement_bin_routing():
 
 
 # ---------------------------------------------------------------------------
+# Test 11: Utility gate — accepts when U > threshold, discards when U ≤ threshold
+# ---------------------------------------------------------------------------
+def test_utility_gate():
+    from ICR_select.training.utility_gate import (
+        UtilityConfig, UtilityResult, score_utility_batch,
+    )
+
+    # ---- 11a: UtilityConfig and UtilityResult are importable with correct defaults ---
+    cfg = UtilityConfig()
+    check("UtilityConfig default lam == 0.5",  cfg.lam == 0.5,  f"got {cfg.lam}")
+    check("UtilityConfig default mu  == 1.0",  cfg.mu  == 1.0,  f"got {cfg.mu}")
+    check("UtilityConfig default nu  == 0.1",  cfg.nu  == 0.1,  f"got {cfg.nu}")
+    check("UtilityConfig default threshold == 0.0", cfg.threshold == 0.0, f"got {cfg.threshold}")
+    check("UtilityConfig default min_slice == 5",   cfg.min_slice == 5,   f"got {cfg.min_slice}")
+
+    # ---- 11b: utility gate accepts a good candidate (U > 0) ----------------------
+    # Patch score_utility_batch so it returns a positive utility without API calls.
+    _PATCH_UB = "ICR_select.training.loop.score_utility_batch"
+
+    candidate = CaseStudy(
+        title="Utility Test Candidate",
+        activate_if=["E1 is absorbing"],
+        action="TRUE",
+        feature_signature="absorbing→general_L0",
+    )
+
+    def _good_utility(candidates, cheatsheet, vmatch, vgap, veasy, config, *a, **kw):
+        return [
+            UtilityResult(
+                utility=0.30, delta_vmatch=0.25, delta_vgap=0.10,
+                regress_veasy=0.0, length_penalty=0.05,
+                vmatch_size=10, vgap_size=8, veasy_size=12,
+                fell_back=False,
+            )
+            for _ in candidates
+        ]
+
+    items = _make_items(20)
+    # 10 wrong, 10 correct — one bin flush (bin_threshold=5)
+    ps = _prescore(items, n_correct=10)
+
+    with patch(_PATCH_GEN, return_value=[candidate]), \
+         patch(_PATCH_UB, side_effect=_good_utility), \
+         patch(_PATCH_SIMGATE, return_value=("ADD", None)):
+
+        result = run_training_loop(
+            cheatsheet=Cheatsheet(roadmap="", case_studies=[]),
+            train_items=items, val_items=None,
+            model_score="dummy", model_casestudy="dummy", api_key="dummy",
+            bin_threshold=5, batch_size=10, concurrency=1,
+            n_candidates=1, candidate_rounds=1, flush_strategy="default",
+            prescore_map=ps,
+            fix_rate_threshold=0.30, regress_threshold=0.15,
+            min_pool_for_regression=10,
+            similarity_gate=False,
+            utility_gate=True,
+            utility_config=UtilityConfig(threshold=0.0),
+            log=False,
+        )
+
+    check(
+        "utility gate: U=0.30 > threshold=0.0 → candidate accepted",
+        result.n_case_studies_added >= 1,
+        f"added={result.n_case_studies_added} discarded={result.n_bins_discarded}",
+    )
+    check(
+        "utility gate: n_utility_accepted == 1",
+        result.n_utility_accepted == 1,
+        f"got n_utility_accepted={result.n_utility_accepted}",
+    )
+
+    # ---- 11c: utility gate discards when U ≤ threshold --------------------------
+    def _bad_utility(candidates, cheatsheet, vmatch, vgap, veasy, config, *a, **kw):
+        return [
+            UtilityResult(
+                utility=-0.05, delta_vmatch=-0.05, delta_vgap=0.0,
+                regress_veasy=0.0, length_penalty=0.0,
+                vmatch_size=10, vgap_size=8, veasy_size=12,
+                fell_back=False,
+            )
+            for _ in candidates
+        ]
+
+    with patch(_PATCH_GEN, return_value=[candidate]), \
+         patch(_PATCH_UB, side_effect=_bad_utility), \
+         patch(_PATCH_SIMGATE, return_value=("ADD", None)):
+
+        result_bad = run_training_loop(
+            cheatsheet=Cheatsheet(roadmap="", case_studies=[]),
+            train_items=items, val_items=None,
+            model_score="dummy", model_casestudy="dummy", api_key="dummy",
+            bin_threshold=5, batch_size=10, concurrency=1,
+            n_candidates=1, candidate_rounds=1, flush_strategy="default",
+            prescore_map=ps,
+            fix_rate_threshold=0.30, regress_threshold=0.15,
+            min_pool_for_regression=10,
+            similarity_gate=False,
+            utility_gate=True,
+            utility_config=UtilityConfig(threshold=0.0),
+            log=False,
+        )
+
+    check(
+        "utility gate: U=-0.05 ≤ threshold=0.0 → candidate discarded",
+        result_bad.n_bins_discarded >= 1 and result_bad.n_case_studies_added == 0,
+        f"added={result_bad.n_case_studies_added} discarded={result_bad.n_bins_discarded}",
+    )
+
+    # ---- 11d: fell_back=True → falls back to classic gates (no API for utility) --
+    def _fell_back_utility(candidates, cheatsheet, vmatch, vgap, veasy, config, *a, **kw):
+        return [
+            UtilityResult(
+                utility=0.0, delta_vmatch=0.0, delta_vgap=0.0,
+                regress_veasy=0.0, length_penalty=0.0,
+                vmatch_size=2, vgap_size=1, veasy_size=0,   # too small
+                fell_back=True,
+            )
+            for _ in candidates
+        ]
+
+    _score_calls: list[str] = []
+
+    def _score_fallback(batch, *a, **kw):
+        _score_calls.append("score_batch")
+        correct = [{**item, "predicted": "TRUE"} for item in batch]
+        return correct, []
+
+    with patch(_PATCH_GEN, return_value=[candidate]), \
+         patch(_PATCH_UB, side_effect=_fell_back_utility), \
+         patch(_PATCH_SCORE_LOOP, side_effect=_score_fallback), \
+         patch(_PATCH_SCORE_GATES, side_effect=_score_fallback), \
+         patch(_PATCH_SIMGATE, return_value=("ADD", None)):
+
+        result_fb = run_training_loop(
+            cheatsheet=Cheatsheet(roadmap="", case_studies=[]),
+            train_items=items, val_items=None,
+            model_score="dummy", model_casestudy="dummy", api_key="dummy",
+            bin_threshold=5, batch_size=10, concurrency=1,
+            n_candidates=1, candidate_rounds=1, flush_strategy="default",
+            prescore_map=ps,
+            fix_rate_threshold=0.30, regress_threshold=0.15,
+            min_pool_for_regression=100,   # skip regression (pool too small)
+            similarity_gate=False,
+            utility_gate=True,
+            utility_config=UtilityConfig(threshold=0.0, min_slice=5),
+            log=False,
+        )
+
+    check(
+        "utility gate fell_back=True → classic gates ran (mini-eval called)",
+        len(_score_calls) > 0,
+        f"score_batch called {len(_score_calls)} time(s) — expected > 0",
+    )
+    check(
+        "utility gate fell_back=True → n_utility_fallbacks incremented",
+        result_fb.n_utility_fallbacks >= 1,
+        f"got n_utility_fallbacks={result_fb.n_utility_fallbacks}",
+    )
+
+    # ---- 11e: --utility-gate flag in pipeline --help ----------------------------
+    cli_result = subprocess.run(
+        [sys.executable, "-m", "ICR_select.pipeline", "--help"],
+        capture_output=True, text=True,
+        cwd=str(Path(__file__).parent),
+    )
+    check(
+        "--utility-gate in pipeline --help",
+        "--utility-gate" in cli_result.stdout,
+    )
+    check(
+        "--utility-lambda in pipeline --help",
+        "--utility-lambda" in cli_result.stdout,
+    )
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
@@ -565,6 +741,9 @@ if __name__ == "__main__":
 
     print("Test 10: disagreement bin routing and OracleIndex")
     test_disagreement_bin_routing()
+
+    print("Test 11: utility gate — accept/discard/fallback behaviour")
+    test_utility_gate()
 
     print()
     if _failures:

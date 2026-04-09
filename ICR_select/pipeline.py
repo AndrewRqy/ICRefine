@@ -31,6 +31,7 @@ from ICR_naive.generators.initial import DEFAULT_MODEL, generate_initial_cheatsh
 from utils.llm_client import get_api_key
 from ICR_reasoning.core.oracle import load_oracle_csv
 from .training.loop import run_training_loop
+from .training.utility_gate import UtilityConfig
 from .prompts.templates import N_CANDIDATES
 
 load_dotenv(Path(__file__).parent / ".env")
@@ -116,6 +117,20 @@ def _build_parser() -> argparse.ArgumentParser:
     g.add_argument("--validate-merge", action="store_true",
                    help="Before committing a merge, verify the merged entry fixes at least as "
                         "many failures as the existing one. If not, add as a new entry instead.")
+
+    g = p.add_argument_group("Utility gate (replaces fix-rate + regression when slices are large enough)")
+    g.add_argument("--utility-gate", action="store_true",
+                   help="Enable continuous utility scoring gate U(c) = ΔVmatch + λΔVgap − μRegress − νlen.")
+    g.add_argument("--utility-lambda",    type=float, default=0.5,  metavar="F",
+                   help="λ: Vgap improvement weight (default: 0.5).")
+    g.add_argument("--utility-mu",        type=float, default=1.0,  metavar="F",
+                   help="μ: regression penalty weight (default: 1.0).")
+    g.add_argument("--utility-nu",        type=float, default=0.1,  metavar="F",
+                   help="ν: length penalty per 1 000 chars rendered (default: 0.1).")
+    g.add_argument("--utility-threshold", type=float, default=0.0,  metavar="F",
+                   help="Accept candidate when U > threshold (default: 0.0).")
+    g.add_argument("--utility-min-slice", type=int,   default=5,    metavar="N",
+                   help="Min items per Vmatch/Vgap slice; below this → fall back to classic gates (default: 5).")
 
     g = p.add_argument_group("Maintenance")
     g.add_argument("--ablation-every", type=int, default=5, metavar="N",
@@ -269,6 +284,15 @@ def main() -> None:
         train_items = train_items[: args.limit]
         _log(f"\n[Stage 2] Limited to first {len(train_items)} items.")
 
+    # Build utility config if gate is enabled
+    utility_config = UtilityConfig(
+        lam=args.utility_lambda,
+        mu=args.utility_mu,
+        nu=args.utility_nu,
+        threshold=args.utility_threshold,
+        min_slice=args.utility_min_slice,
+    ) if args.utility_gate else None
+
     # Shared kwargs passed to run_training_loop in every round
     inner_kwargs = dict(
         model_score=model_score,
@@ -288,6 +312,8 @@ def main() -> None:
         min_pool_for_regression=args.min_pool_for_regression,
         similarity_gate=not args.no_similarity_gate,
         validate_merge=args.validate_merge,
+        utility_gate=args.utility_gate,
+        utility_config=utility_config,
         ablation_every=args.ablation_every,
         condense_at=args.condense_at,
         flush_remainder=not args.no_flush_remainder,
@@ -316,6 +342,8 @@ def main() -> None:
         "condensations": result.n_condensations,
         "disagree_items": result.n_disagree,
         "both_wrong_items": result.n_both_wrong,
+        "utility_accepted": result.n_utility_accepted,
+        "utility_fallbacks": result.n_utility_fallbacks,
     }
 
     # ------------------------------------------------------------------

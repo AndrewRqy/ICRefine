@@ -51,6 +51,12 @@ from .gates import (
     _merge_case_studies,
 )
 from .maintenance import _ablation_prune, _condense
+from .utility_gate import (
+    UtilityConfig,
+    VGAP_RESERVE_MAX,
+    build_vmatch,
+    score_utility_batch,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -72,6 +78,9 @@ class TrainingResult:
     # Disagreement mining stats
     n_disagree: int = 0    # wrong items matched to an oracle nearest neighbour
     n_both_wrong: int = 0  # wrong items with no oracle signal
+    # Utility gate stats
+    n_utility_accepted: int = 0   # bins accepted via utility gate
+    n_utility_fallbacks: int = 0  # bins where slices were too small → fell back to old gates
 
 
 # ---------------------------------------------------------------------------
@@ -127,6 +136,9 @@ def run_training_loop(
     # Maintenance
     ablation_every: int = 5,
     condense_at: int = 6,
+    # Utility gate (replaces fix-rate + regression gates when slices are large enough)
+    utility_gate: bool = False,
+    utility_config: UtilityConfig | None = None,
     # Other
     flush_remainder: bool = True,
     cot_first: bool = True,
@@ -160,13 +172,20 @@ def run_training_loop(
     n_condensed    = 0
     flush_count    = 0
 
-    n_disagree_total  = 0   # items routed to disagree_bin across all batches
-    n_both_wrong_total = 0  # items routed to both_wrong_bin
+    # Vgap rolling reservoir for the utility gate (populated from disagree_bin items)
+    vgap_reserve:    list[dict] = []
+    vgap_seen_count: int = 0        # total items ever offered (for reservoir sampling)
+
+    n_disagree_total   = 0   # items routed to disagree_bin across all batches
+    n_both_wrong_total = 0   # items routed to both_wrong_bin
+    n_utility_accepted_total  = 0
+    n_utility_fallbacks_total = 0
 
     total_correct = 0
     total_scored  = 0
     total_batches = (len(train_items) + batch_size - 1) // batch_size
 
+    _cfg = utility_config or UtilityConfig()
     _log(
         f"\n{'='*60}\n"
         f"ICR_select Training loop\n"
@@ -175,6 +194,7 @@ def run_training_loop(
         f"regress≤{regress_threshold}  min_pool={min_pool_for_regression}\n"
         f"  validate_merge={validate_merge}  "
         f"ablation_every={ablation_every}  condense_at={condense_at}\n"
+        f"  utility_gate={'on (λ='+str(_cfg.lam)+' μ='+str(_cfg.mu)+' ν='+str(_cfg.nu)+' thresh='+str(_cfg.threshold)+')' if utility_gate else 'off'}\n"
         f"  oracle_index={'yes ('+str(len(oracle_index))+' entries)' if oracle_index else 'none'}\n"
         f"  model_score={model_score}\n"
         f"  model_casestudy={model_casestudy}\n"
@@ -189,6 +209,7 @@ def run_training_loop(
 
     def _process_flush(failures: list[dict], batch_num: int) -> None:
         nonlocal n_added, n_discarded, n_skipped, n_merges, flush_count
+        nonlocal n_utility_accepted_total, n_utility_fallbacks_total
 
         _log(f"\n  [flush] {len(failures)} failures → generating {n_candidates} candidates ...")
 
@@ -203,64 +224,129 @@ def run_training_loop(
             n_discarded += 1
             return
 
-        # Step 2: mini-eval all candidates in parallel, pick best
-        scored: list[tuple[float, str] | None] = [None] * len(candidates)
+        # Steps 2–4: score candidates and apply quality gates
+        # Two paths: utility gate (continuous score) or classic mini-eval + threshold gates.
+        best_cand  = None
+        best_fix_rate = 0.0
+        reg_rate   = 0.0
 
-        def _eval_candidate(args: tuple[int, str]) -> tuple[int, float, str]:
-            i, cand = args
-            fix_rate = _mini_eval(
-                cand, failures, cheatsheet,
-                label=f"mini-eval cand {i+1}/{len(candidates)}", **_gkw,
+        use_utility = utility_gate and utility_config is not None
+        used_utility_path = False   # True when utility gate actually ran (not fell_back)
+
+        if use_utility:
+            # Build shared Vmatch slice: union of val items matching any candidate
+            failure_keys: set[tuple] = {
+                (it.get("equation1", ""), it.get("equation2", "")) for it in failures
+            }
+            vmatch_seen: set[tuple] = set()
+            vmatch: list[dict] = []
+            for cand in candidates:
+                for it in build_vmatch(cand, val_items or []):
+                    k = (it.get("equation1", ""), it.get("equation2", ""))
+                    if k not in vmatch_seen:
+                        vmatch_seen.add(k)
+                        vmatch.append(it)
+
+            vgap  = [it for it in vgap_reserve
+                     if (it.get("equation1", ""), it.get("equation2", "")) not in failure_keys]
+            veasy = list(correct_pool)
+
+            u_results = score_utility_batch(
+                candidates, cheatsheet, vmatch, vgap, veasy, utility_config,
+                model_score, api_key, concurrency, reasoning_effort, cot_first,
+                log_fn=_log,
             )
-            return i, fix_rate, cand
 
-        with ThreadPoolExecutor(max_workers=len(candidates)) as ex:
-            futures = {ex.submit(_eval_candidate, (i, c)): i for i, c in enumerate(candidates)}
-            for fut in as_completed(futures):
-                i, fix_rate, cand = fut.result()
-                scored[i] = (fix_rate, cand)
-                _log(f"  [mini-eval] candidate {i+1}: fix_rate={fix_rate:.0%}")
+            if not u_results[0].fell_back:
+                used_utility_path = True
+                best_idx  = max(range(len(u_results)), key=lambda i: u_results[i].utility)
+                best_cand = candidates[best_idx]
+                best_u    = u_results[best_idx]
 
-        scored_valid = [s for s in scored if s is not None]
-        scored_valid.sort(key=lambda x: x[0], reverse=True)
-        best_fix_rate, best_cand = scored_valid[0]
+                if best_u.utility <= utility_config.threshold:
+                    _log(
+                        f"  [gate:utility] best U={best_u.utility:+.4f} ≤ "
+                        f"threshold={utility_config.threshold} — discarding."
+                    )
+                    n_discarded += 1
+                    update_log.append({
+                        "event": "bin_discarded", "batch": batch_num,
+                        "reason": "utility_below_threshold",
+                        "best_utility": best_u.utility,
+                    })
+                    return
 
-        # Step 3: fix-rate gate
-        if best_fix_rate < fix_rate_threshold:
-            _log(
-                f"  [gate:fix_rate] best={best_fix_rate:.0%} < "
-                f"threshold={fix_rate_threshold:.0%} — discarding bin."
-            )
-            n_discarded += 1
-            update_log.append({
-                "event": "bin_discarded", "batch": batch_num,
-                "reason": "fix_rate_below_threshold",
-                "best_fix_rate": best_fix_rate,
-            })
-            return
-
-        # Step 4: regression gate
-        reg_rate = 0.0
-        if correct_pool and len(correct_pool) >= min_pool_for_regression:
-            reg_rate = _regression_check(best_cand, correct_pool, cheatsheet, **_gkw)
-            _log(f"  [gate:regression] regression_rate={reg_rate:.0%}")
-            if reg_rate > regress_threshold:
                 _log(
-                    f"  [gate:regression] {reg_rate:.0%} > "
-                    f"threshold={regress_threshold:.0%} — discarding."
+                    f"  [gate:utility] accepted  U={best_u.utility:+.4f}  "
+                    f"ΔVmatch={best_u.delta_vmatch:+.2%}  ΔVgap={best_u.delta_vgap:+.2%}  "
+                    f"Regress={best_u.regress_veasy:.2%}"
+                )
+                n_utility_accepted_total += 1
+                best_fix_rate = best_u.delta_vmatch   # proxy for downstream log compat
+                reg_rate      = best_u.regress_veasy
+            else:
+                _log("  [gate:utility] slices too small — falling back to fix_rate+regression gates.")
+                n_utility_fallbacks_total += 1
+
+        if not used_utility_path:
+            # Classic path: mini-eval all candidates in parallel, pick best
+            scored: list[tuple[float, object] | None] = [None] * len(candidates)
+
+            def _eval_candidate(args: tuple[int, object]) -> tuple[int, float, object]:
+                i, cand = args
+                fix_rate = _mini_eval(
+                    cand, failures, cheatsheet,
+                    label=f"mini-eval cand {i+1}/{len(candidates)}", **_gkw,
+                )
+                return i, fix_rate, cand
+
+            with ThreadPoolExecutor(max_workers=len(candidates)) as ex:
+                futures = {ex.submit(_eval_candidate, (i, c)): i for i, c in enumerate(candidates)}
+                for fut in as_completed(futures):
+                    i, fix_rate, cand = fut.result()
+                    scored[i] = (fix_rate, cand)
+                    _log(f"  [mini-eval] candidate {i+1}: fix_rate={fix_rate:.0%}")
+
+            scored_valid = [s for s in scored if s is not None]
+            scored_valid.sort(key=lambda x: x[0], reverse=True)
+            best_fix_rate, best_cand = scored_valid[0]
+
+            # Fix-rate gate
+            if best_fix_rate < fix_rate_threshold:
+                _log(
+                    f"  [gate:fix_rate] best={best_fix_rate:.0%} < "
+                    f"threshold={fix_rate_threshold:.0%} — discarding bin."
                 )
                 n_discarded += 1
                 update_log.append({
                     "event": "bin_discarded", "batch": batch_num,
-                    "reason": "regression_above_threshold",
-                    "regression_rate": reg_rate,
+                    "reason": "fix_rate_below_threshold",
+                    "best_fix_rate": best_fix_rate,
                 })
                 return
-        elif correct_pool:
-            _log(
-                f"  [gate:regression] skipped — pool too small "
-                f"({len(correct_pool)} < min_pool={min_pool_for_regression})"
-            )
+
+            # Regression gate
+            reg_rate = 0.0
+            if correct_pool and len(correct_pool) >= min_pool_for_regression:
+                reg_rate = _regression_check(best_cand, correct_pool, cheatsheet, **_gkw)
+                _log(f"  [gate:regression] regression_rate={reg_rate:.0%}")
+                if reg_rate > regress_threshold:
+                    _log(
+                        f"  [gate:regression] {reg_rate:.0%} > "
+                        f"threshold={regress_threshold:.0%} — discarding."
+                    )
+                    n_discarded += 1
+                    update_log.append({
+                        "event": "bin_discarded", "batch": batch_num,
+                        "reason": "regression_above_threshold",
+                        "regression_rate": reg_rate,
+                    })
+                    return
+            elif correct_pool:
+                _log(
+                    f"  [gate:regression] skipped — pool too small "
+                    f"({len(correct_pool)} < min_pool={min_pool_for_regression})"
+                )
 
         # Step 5: similarity gate (optional)
         if similarity_gate and len(cheatsheet.case_studies) >= _MIN_CS_FOR_SIMILARITY:
@@ -341,6 +427,7 @@ def run_training_loop(
     def _process_flush_retry(failures: list[dict], batch_num: int) -> None:
         """Retry flush — like _process_flush but retries up to candidate_rounds times."""
         nonlocal n_added, n_discarded, n_skipped, n_merges, flush_count
+        nonlocal n_utility_accepted_total, n_utility_fallbacks_total
 
         prev_attempt: dict | None = None
 
@@ -359,9 +446,105 @@ def run_training_loop(
                 _log(f"  [flush/retry] generation failed: {exc} — {'retrying' if attempt < candidate_rounds else 'discarding'}.")
                 continue
 
-            scored: list[tuple[float, list[dict], str] | None] = [None] * len(candidates)
+            # Utility gate path (no retry on threshold failure — utility is a soft signal)
+            if utility_gate and utility_config is not None:
+                failure_keys: set[tuple] = {
+                    (it.get("equation1", ""), it.get("equation2", "")) for it in failures
+                }
+                vmatch_seen: set[tuple] = set()
+                vmatch: list[dict] = []
+                for cand in candidates:
+                    for it in build_vmatch(cand, val_items or []):
+                        k = (it.get("equation1", ""), it.get("equation2", ""))
+                        if k not in vmatch_seen:
+                            vmatch_seen.add(k)
+                            vmatch.append(it)
+                vgap  = [it for it in vgap_reserve
+                         if (it.get("equation1", ""), it.get("equation2", "")) not in failure_keys]
+                veasy = list(correct_pool)
 
-            def _eval_full(args: tuple[int, str]) -> tuple[int, float, list[dict], str]:
+                u_results = score_utility_batch(
+                    candidates, cheatsheet, vmatch, vgap, veasy, utility_config,
+                    model_score, api_key, concurrency, reasoning_effort, cot_first,
+                    log_fn=_log,
+                )
+
+                if not u_results[0].fell_back:
+                    best_idx  = max(range(len(u_results)), key=lambda i: u_results[i].utility)
+                    best_cand = candidates[best_idx]
+                    best_u    = u_results[best_idx]
+                    best_still_wrong: list[dict] = []  # not available on utility path
+
+                    if best_u.utility <= utility_config.threshold:
+                        _log(
+                            f"  [gate:utility] best U={best_u.utility:+.4f} ≤ "
+                            f"threshold={utility_config.threshold} — "
+                            f"{'retrying' if attempt < candidate_rounds else 'discarding'}."
+                        )
+                        prev_attempt = {"candidate": best_cand, "still_wrong": [], "reason": "utility"}
+                        n_utility_fallbacks_total += 1
+                        continue
+
+                    _log(
+                        f"  [gate:utility] accepted  U={best_u.utility:+.4f}  "
+                        f"ΔVmatch={best_u.delta_vmatch:+.2%}  ΔVgap={best_u.delta_vgap:+.2%}  "
+                        f"Regress={best_u.regress_veasy:.2%}"
+                    )
+                    n_utility_accepted_total += 1
+                    best_fix_rate = best_u.delta_vmatch
+                    reg_rate      = best_u.regress_veasy
+                    # Skip to similarity gate below
+                    if similarity_gate and len(cheatsheet.case_studies) >= _MIN_CS_FOR_SIMILARITY:
+                        action, merge_idx = _similarity_gate(best_cand, cheatsheet, model_casestudy, api_key)
+                        _log(f"  [gate:similarity] action={action}" +
+                             (f" (merge into CS {merge_idx+1})" if merge_idx is not None else ""))
+
+                        if action == "SKIP":
+                            n_skipped += 1
+                            update_log.append({"event": "bin_skipped", "batch": batch_num, "reason": "duplicate"})
+                            return
+
+                        if action == "MERGE" and merge_idx is not None:
+                            existing = cheatsheet.case_studies[merge_idx]
+                            merged   = _merge_case_studies(existing, best_cand, model_casestudy, api_key)
+                            cheatsheet.case_studies[merge_idx] = merged
+                            n_merges += 1
+                            flush_count += 1
+                            _log(f"  [merge] updated CS {merge_idx+1} in-place.")
+                            update_log.append({
+                                "event": "bin_merged", "batch": batch_num,
+                                "merged_into": merge_idx + 1,
+                                "fix_rate": best_fix_rate, "regression_rate": reg_rate,
+                                "attempt": attempt,
+                            })
+                            return
+
+                    best_cand.creation_fix_rate   = best_fix_rate
+                    best_cand.historical_fix_rate  = best_fix_rate
+                    cheatsheet.add_case_study(best_cand)
+                    n_added     += 1
+                    flush_count += 1
+                    _log(
+                        f"  [added] CS {len(cheatsheet.case_studies)} '{best_cand.title}' — "
+                        f"U={best_u.utility:+.4f}  attempt={attempt}"
+                    )
+                    update_log.append({
+                        "event": "bin_added", "batch": batch_num,
+                        "title": best_cand.title,
+                        "fix_rate": best_fix_rate, "regression_rate": reg_rate,
+                        "n_case_studies_total": len(cheatsheet.case_studies),
+                        "attempt": attempt,
+                    })
+                    return
+                else:
+                    _log("  [gate:utility] slices too small — falling back to fix_rate+regression gates.")
+                    n_utility_fallbacks_total += 1
+                    # Fall through to classic gates below
+
+            # Classic path: mini-eval full (returns still-wrong items for next retry context)
+            scored: list[tuple[float, list[dict], object] | None] = [None] * len(candidates)
+
+            def _eval_full(args: tuple[int, object]) -> tuple[int, float, list[dict], object]:
                 i, cand = args
                 fix_rate, still_wrong = _mini_eval_full(
                     cand, failures, cheatsheet,
@@ -542,6 +725,14 @@ def run_training_loop(
                             "oracle_sim":     round(sim, 3)}
                     disagree_bin.add(item)
                     n_dis += 1
+                    # Reservoir sampling: maintain a rolling Vgap reserve for utility gate
+                    vgap_seen_count += 1
+                    if len(vgap_reserve) < VGAP_RESERVE_MAX:
+                        vgap_reserve.append(item)
+                    else:
+                        j = random.randrange(vgap_seen_count)
+                        if j < VGAP_RESERVE_MAX:
+                            vgap_reserve[j] = item
                 else:
                     both_wrong_bin.add(item)
                     n_bw += 1
@@ -642,4 +833,6 @@ def run_training_loop(
         update_log=update_log,
         n_disagree=n_disagree_total,
         n_both_wrong=n_both_wrong_total,
+        n_utility_accepted=n_utility_accepted_total,
+        n_utility_fallbacks=n_utility_fallbacks_total,
     )
