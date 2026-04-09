@@ -59,8 +59,11 @@ def _build_parser() -> argparse.ArgumentParser:
                    help="Cap training items to first N.")
     g.add_argument("--oracle-csv",  default=None,  metavar="FILE",
                    help="Path to GPT-5.4 oracle CSV (gpt5.4_normal_default.csv). "
-                        "When provided, correct oracle reasoning is injected into "
-                        "the case study generation prompt as a contrast signal.")
+                        "Enables disagreement-bin mining: wrong items are paired with "
+                        "the structurally nearest oracle entry for richer case study teaching.")
+    g.add_argument("--oracle-min-similarity", type=float, default=0.25, metavar="F",
+                   help="Jaccard threshold for nearest-oracle structural match. "
+                        "Items below this threshold go to the both-wrong bin. (default: 0.25)")
     g.add_argument("--prescore-file", default=None, metavar="FILE",
                    help="JSON file of pre-computed SAIR eval scores (id → result). "
                         "When provided, the initial scoring pass is skipped — "
@@ -278,6 +281,7 @@ def main() -> None:
         candidate_rounds=args.candidate_rounds,
         flush_strategy=args.flush_strategy,
         oracle=oracle,
+        oracle_min_similarity=args.oracle_min_similarity,
         prescore_map=prescore_map,
         fix_rate_threshold=args.fix_rate_threshold,
         regress_threshold=args.regress_threshold,
@@ -310,6 +314,8 @@ def main() -> None:
         "bins_skipped": result.n_bins_skipped,
         "ablation_pruned": result.n_ablation_pruned,
         "condensations": result.n_condensations,
+        "disagree_items": result.n_disagree,
+        "both_wrong_items": result.n_both_wrong,
     }
 
     # ------------------------------------------------------------------

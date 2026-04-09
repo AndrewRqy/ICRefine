@@ -50,6 +50,41 @@ class FailureBin:
         return len(self._items)
 
 
+@dataclass
+class DisagreementBin:
+    """
+    Priority failure bin for teacher-correct / student-wrong pairs.
+
+    Each item added here must carry an "oracle_nearest" field (dict with
+    eq1, eq2, reasoning) attached by the training loop after nearest-neighbour
+    oracle lookup.  Items where the oracle has no distillable signal (both
+    teacher and student wrong) go to a regular FailureBin instead.
+
+    Flushed before the fallback FailureBin — disagreement items provide a
+    richer teaching signal because the prompt includes both wrong student
+    reasoning and a structurally similar correct oracle trace.
+    """
+    threshold: int
+    _items: list[dict] = field(default_factory=list, init=False)
+
+    def add(self, item: dict) -> None:
+        assert "oracle_nearest" in item, (
+            "DisagreementBin.add() requires item['oracle_nearest'] to be set"
+        )
+        self._items.append(item)
+
+    def is_full(self) -> bool:
+        return len(self._items) >= self.threshold
+
+    def flush(self) -> list[dict]:
+        items = self._items[:]
+        self._items.clear()
+        return items
+
+    def __len__(self) -> int:
+        return len(self._items)
+
+
 # ---------------------------------------------------------------------------
 # Loading
 # ---------------------------------------------------------------------------

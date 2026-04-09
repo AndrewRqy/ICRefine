@@ -64,14 +64,28 @@ def _format_failures_with_reasoning(
             f"    {post_think if post_think else '(not captured)'}"
         )
 
+        # Priority 1: exact-match oracle (same equation pair — strongest signal)
         if oracle:
             key = (it["equation1"].strip(), it["equation2"].strip())
-            correct_reasoning = oracle.get(key, "")
-            if correct_reasoning:
+            exact_reasoning = oracle.get(key, "")
+            if exact_reasoning:
                 block += (
-                    f"\n  CORRECT reasoning (oracle):\n"
-                    f"    {correct_reasoning}"
+                    f"\n  CORRECT reasoning (oracle — exact same pair):\n"
+                    f"    {exact_reasoning}"
                 )
+
+        # Priority 2: nearest-neighbour oracle (different pair, similar structure)
+        # Added by the disagreement mining router in loop.py
+        nearest = it.get("oracle_nearest")
+        if nearest and not (oracle and (it["equation1"].strip(), it["equation2"].strip()) in oracle):
+            sim   = it.get("oracle_sim", 0.0)
+            block += (
+                f"\n  STRUCTURALLY SIMILAR correct oracle case (sim={sim:.2f}):\n"
+                f"    E1' = {nearest['eq1']}\n"
+                f"    E2' = {nearest['eq2']}\n"
+                f"    CORRECT reasoning:\n"
+                f"      {nearest['reasoning']}"
+            )
 
         lines.append(block)
     return "\n\n".join(lines)

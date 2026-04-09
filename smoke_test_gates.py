@@ -434,6 +434,103 @@ def test_render_for_query():
 
 
 # ---------------------------------------------------------------------------
+# Test 10: Disagreement bin routing — oracle nearest match annotation
+# ---------------------------------------------------------------------------
+def test_disagreement_bin_routing():
+    from utils.oracle_index import OracleIndex
+
+    # Build a small oracle dict — two entries with known structural forms
+    oracle: dict[tuple[str, str], str] = {
+        ("x * y = z", "x * y = z * w"):   "E1 is absorbing (rhs var z absent from lhs). "
+                                            "E1 implies anything. TRUE.",
+        ("x = x", "x * y = x * z"):        "E1 is trivial (x=x). Trivial implies almost nothing. FALSE.",
+    }
+
+    idx = OracleIndex(oracle, min_similarity=0.25)
+    check("OracleIndex built with 2 entries", len(idx) == 2, f"got {len(idx)}")
+
+    # Item structurally matching "absorbing→general" — should match first oracle entry
+    item_absorbing = {
+        "equation1": "a * b = c",       # absorbing (c absent from lhs)
+        "equation2": "a * b = c * d",   # general
+        "answer": True,
+        "predicted": "FALSE",
+    }
+    result = idx.find_nearest(item_absorbing)
+    check(
+        "find_nearest: absorbing item matches absorbing oracle entry",
+        result is not None,
+        "no match found",
+    )
+    if result:
+        entry, sim = result
+        check(
+            "find_nearest: similarity ≥ 0.25",
+            sim >= 0.25,
+            f"sim={sim:.3f}",
+        )
+        check(
+            "find_nearest: oracle_nearest to_dict has eq1/eq2/reasoning",
+            all(k in entry.to_dict() for k in ("eq1", "eq2", "reasoning")),
+            f"keys={list(entry.to_dict())}",
+        )
+
+    # Item that exactly matches an oracle key should still find a *different* nearest
+    item_exact = {
+        "equation1": "x * y = z",
+        "equation2": "x * y = z * w",
+        "answer": True,
+        "predicted": "FALSE",
+    }
+    result_exact = idx.find_nearest(item_exact)
+    if result_exact:
+        entry_exact, _ = result_exact
+        # Must NOT be the exact-key entry (that is excluded by design)
+        check(
+            "find_nearest: exact-key entry excluded",
+            not (entry_exact.eq1 == "x * y = z" and entry_exact.eq2 == "x * y = z * w"),
+            "exact-key entry was returned as nearest",
+        )
+
+    # Item with no structural overlap — should return None
+    item_trivial = {
+        "equation1": "x = x",    # trivial
+        "equation2": "y = y",    # trivial
+        "answer": False,
+        "predicted": "TRUE",
+    }
+    # Both oracle entries have "trivial" or "absorbing" forms; "trivial→trivial" may
+    # still find a match via the trivial oracle entry — just check it doesn't crash
+    result_trivial = idx.find_nearest(item_trivial)
+    check(
+        "find_nearest: does not raise on any input",
+        True,  # just reaching here means no exception
+    )
+
+    # Routing: annotate an item and check oracle_nearest is attached
+    if result:
+        nearest_entry, sim = result
+        annotated = {**item_absorbing,
+                     "oracle_nearest": nearest_entry.to_dict(),
+                     "oracle_sim": round(sim, 3)}
+        check(
+            "annotated item has oracle_nearest and oracle_sim",
+            "oracle_nearest" in annotated and "oracle_sim" in annotated,
+        )
+
+    # --oracle-min-similarity in --help
+    result = subprocess.run(
+        [sys.executable, "-m", "ICR_select.pipeline", "--help"],
+        capture_output=True, text=True,
+        cwd=str(Path(__file__).parent),
+    )
+    check(
+        "--oracle-min-similarity in pipeline --help",
+        "--oracle-min-similarity" in result.stdout,
+    )
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
@@ -465,6 +562,9 @@ if __name__ == "__main__":
 
     print("Test 9: render_for_query routes to top-k relevant cases")
     test_render_for_query()
+
+    print("Test 10: disagreement bin routing and OracleIndex")
+    test_disagreement_bin_routing()
 
     print()
     if _failures:
