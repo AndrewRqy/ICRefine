@@ -91,9 +91,13 @@ def generate_initial_cheatsheet(
         model, api_key,
         temperature=temperature,
         max_tokens=DT_MAX_TOKENS,
-    )
+    ).content
 
-    # Step 2: seed case studies
+    # Step 2: seed case studies (optional — skip when n_studies=0)
+    if n_studies <= 0:
+        print("  [init] Skipping seed case studies (n_studies=0).", file=sys.stderr)
+        return Cheatsheet(roadmap=roadmap, case_studies=[])
+
     print(f"  [init] Generating {n_studies} seed case studies ...", file=sys.stderr)
     cs_max_tokens = int(n_studies * CASE_STUDY_MAX_CHARS / 4 * 1.2)
     cs_text = call_llm(
@@ -105,7 +109,7 @@ def generate_initial_cheatsheet(
         model, api_key,
         temperature=temperature,
         max_tokens=cs_max_tokens,
-    )
+    ).content
 
     case_studies = [CaseStudy.from_text(s) for s in split_case_studies(cs_text)]
     if not case_studies:

@@ -19,9 +19,9 @@ ICRefine uses two types of models and each can be served via OpenRouter or vLLM:
 | Backend | When to use | Key requirement |
 |---|---|---|
 | **OpenRouter** (default) | Cloud models (GPT, Claude, etc.) | `OPENROUTER_API_KEY` in `.env` |
-| **vLLM** | Locally-served open-source models (e.g. DeepSeek-R1-14B on a GPU cluster) | vLLM server running; `VLLM_BASE_URL` + `VLLM_MODEL` in `.env` |
+| **vLLM** | Locally-served open-source models (e.g. DeepSeek-R1-32B on a GPU cluster) | vLLM server running; `VLLM_BASE_URL` + `VLLM_MODEL` in `.env` |
 
-You can mix backends: e.g. use vLLM for scoring (cheap, fast) and OpenRouter for case study generation (higher quality). **API key selection is automatic and per-model** — there is no `--api-key` flag. The routing logic in `ICR_naive/core/llm_client.py` resolves the key for each call based on the model name:
+You can mix backends: e.g. use vLLM for scoring (cheap, fast) and OpenRouter for case study generation (higher quality). **API key selection is automatic and per-model** — there is no `--api-key` flag. The routing logic in `utils/llm_client.py` resolves the key for each call based on the model name:
 
 | Model name | Env var used |
 |---|---|
@@ -36,7 +36,7 @@ So to use different keys for scoring vs case study generation, simply set whiche
 OPENROUTER_API_KEY=sk-or-v1-xxxx     # used for --model-casestudy openai/gpt-4o
 OPENAI_API_KEY=sk-xxxx               # used if --model-casestudy gpt-4o (direct)
 VLLM_BASE_URL=http://localhost:8000/v1/chat/completions
-VLLM_MODEL=deepseek-r1-14b           # used for --model-score deepseek-r1-14b
+VLLM_MODEL=deepseek-r1-32b           # used for --model-score deepseek-r1-32b
 VLLM_API_KEY=                        # usually empty
 ```
 
@@ -70,7 +70,7 @@ OPENROUTER_API_KEY=sk-or-v1-xxxxxxxxxxxxxxxx
 *vLLM (local model — for scoring):*
 ```
 VLLM_BASE_URL=http://localhost:8000/v1/chat/completions
-VLLM_MODEL=deepseek-r1-14b
+VLLM_MODEL=deepseek-r1-32b
 ```
 
 **4. Run a smoke test**
@@ -82,33 +82,45 @@ python -m ICR_select.pipeline \
     --prior-knowledge path/to/prior_knowledge.txt \
     --model-score openai/gpt-oss-120b \
     --model-casestudy openai/gpt-4o \
-    --limit 20 \
+    --limit 30 \
+    --val-split 0.2 \
+    --n-seed-studies 0 --n-seed-examples 0 \
+    --utility-gate --utility-threshold -0.05 --utility-min-slice 2 \
     --output-dir runs/smoke
 ```
 
 *vLLM for scoring + OpenRouter for case studies (recommended on cluster):*
 ```bash
+VLLM_BASE_URL=http://localhost:8000/v1/chat/completions \
+VLLM_MODEL=deepseek-r1-32b \
 python -m ICR_select.pipeline \
     --dataset path/to/dataset.jsonl \
     --prior-knowledge path/to/prior_knowledge.txt \
-    --model-score deepseek-r1-14b \
+    --model-score deepseek-r1-32b \
     --model-casestudy openai/gpt-4o \
-    --limit 20 \
+    --limit 30 \
+    --val-split 0.2 \
+    --n-seed-studies 0 --n-seed-examples 0 \
+    --utility-gate --utility-threshold -0.05 --utility-min-slice 2 \
     --output-dir runs/smoke
 ```
 
-This runs 20 items and exits. Check `runs/smoke/` for output artifacts.
+This runs 30 items and exits. Check `runs/smoke/` for output artifacts.
 
 **5. Run the full pipeline**
 
 ```bash
+VLLM_BASE_URL=http://localhost:8000/v1/chat/completions \
+VLLM_MODEL=deepseek-r1-32b \
 python -m ICR_select.pipeline \
     --dataset path/to/dataset.jsonl \
     --prior-knowledge path/to/prior_knowledge.txt \
-    --model-score deepseek-r1-14b \
+    --model-score deepseek-r1-32b \
     --model-casestudy openai/gpt-4o \
     --bin-threshold 5 --batch-size 10 \
     --n-candidates 3 \
+    --val-split 0.2 \
+    --utility-gate --utility-threshold 0.0 \
     --output-dir runs/select_run \
     --cheatsheet-out path/to/output_cheatsheet.txt
 ```
@@ -187,30 +199,63 @@ Additional flags beyond ICR_naive:
 
 ## ICR_select
 
-The full quality-gated pipeline. Every candidate case study must pass four gates:
+The full quality-gated pipeline. Every candidate case study must pass quality gates before entering the cheatsheet.
 
-1. **Candidate competition** — generate N candidates, pick the best
-2. **Fix-rate gate** — must fix ≥ `fix-rate-threshold` of the failure batch
-3. **Regression gate** — must not break > `regress-threshold` of previously-correct items
-4. **Similarity gate** — LLM dedup: skip if duplicate, merge if overlapping, add if genuinely new
+Two gating paths are available:
+
+**Utility gate (recommended, `--utility-gate`)** — continuous scoring replacing the classic fix-rate + regression gates:
+
+```
+U(c) = ΔAcc(Vmatch) + λ·ΔAcc(Vgap) − μ·Regress(Veasy) − ν·len/1000
+```
+
+- **Vmatch** — val items whose structural features overlap the candidate's feature signature (pure string match, no API call)
+- **Vgap** — teacher-correct / student-wrong held-out items from the oracle disagreement reservoir
+- **Veasy** — previously-correct items used to measure regression
+- Falls back to the classic gate if slices are too small (`--utility-min-slice`)
+
+**Classic gates (fallback):**
+
+1. **Fix-rate gate** — must fix ≥ `fix-rate-threshold` of the failure batch
+2. **Regression gate** — must not break > `regress-threshold` of previously-correct items
+
+Both paths end with the **Similarity gate** — LLM dedup: skip if duplicate, merge if overlapping, add if genuinely new.
 
 Periodic maintenance: **ablation pruning** (remove zero-contribution case studies) and **condensation** (rewrite when cheatsheet grows too large).
 
+> **Note:** `feature_signature` on each candidate is auto-computed from the structural features of the failure equations (equation form, variable count, left-op depth). This ensures Vmatch always uses the correct token format for matching against val items — the LLM is not asked to generate it.
+
 ```bash
+VLLM_BASE_URL=http://localhost:8000/v1/chat/completions \
+VLLM_MODEL=deepseek-r1-32b \
 python -m ICR_select.pipeline \
     --dataset path/to/dataset.jsonl \
     --prior-knowledge path/to/prior_knowledge.txt \
-    --model-score openai/gpt-oss-120b \
+    --model-score deepseek-r1-32b \
     --model-casestudy openai/gpt-4o \
-    --bin-threshold 3 --batch-size 5 \
+    --bin-threshold 3 --batch-size 10 \
     --n-candidates 3 \
+    --val-split 0.2 \
+    --utility-gate --utility-threshold 0.0 \
     --output-dir runs/select_run \
     --cheatsheet-out path/to/output_cheatsheet.txt
 ```
 
 ### All options
 
-**Quality gates**
+**Utility gate**
+
+| Flag | Default | Description |
+|---|---|---|
+| `--utility-gate` | off | Enable continuous utility scoring (replaces fix-rate + regression gates) |
+| `--utility-threshold F` | `0.0` | Minimum U(c) score to accept a candidate; candidates below are discarded |
+| `--utility-min-slice N` | `5` | Minimum Vmatch items required to run the gate; falls back to classic gates if fewer |
+| `--utility-lambda F` | `0.5` | Weight λ on ΔAcc(Vgap) in the utility formula |
+| `--utility-mu F` | `1.0` | Weight μ on regression penalty Regress(Veasy) |
+| `--utility-nu F` | `0.1` | Weight ν on length penalty (len/1000) |
+| `--val-split F` | `0.0` | Fraction of items held out as validation set for Vmatch/Veasy; set to `0.2` when using `--utility-gate` |
+
+**Classic gates (used when utility gate is off or falls back)**
 
 | Flag | Default | Description |
 |---|---|---|
@@ -218,10 +263,22 @@ python -m ICR_select.pipeline \
 | `--flush-strategy` | `default` | `default`: discard on gate failure. `retry`: retry up to `--candidate-rounds` times with context from the previous attempt |
 | `--candidate-rounds N` | `3` | Max retry rounds when `--flush-strategy retry` |
 | `--fix-rate-threshold F` | `0.30` | Min fraction of failures a candidate must fix |
-| `--regress-threshold F` | `0.15` | Max fraction of correct-pool items a candidate may break |
+| `--regress-threshold F` | `0.35` | Max fraction of correct-pool items a candidate may break |
 | `--min-pool-for-regression N` | `10` | Skip regression gate when the correct pool has fewer than N items (avoids false rejections early in training when the pool is too small) |
+
+**Similarity gate**
+
+| Flag | Default | Description |
+|---|---|---|
 | `--no-similarity-gate` | off | Skip LLM dedup (faster, less selective) |
 | `--validate-merge` | off | Only commit a merge if the merged entry is at least as good as the original |
+
+**Seed initialisation**
+
+| Flag | Default | Description |
+|---|---|---|
+| `--n-seed-studies N` | `3` | Number of case studies to generate at init; set to `0` to skip (useful when `--prior-knowledge` already contains examples) |
+| `--n-seed-examples N` | `5` | Seed examples shown to the LLM during init case study generation |
 
 **Oracle / prescore**
 
@@ -413,7 +470,7 @@ Each case study stored in the JSON sidecar has these fields:
 | `common_wrong_move` | What the model typically does wrong in these cases |
 | `why_this_check_works` | Mathematical justification (WHY field) |
 | `support_examples` | List of `{e1, e2, answer, note}` dicts |
-| `feature_signature` | Compact structural tag, e.g. `"absorbing→general_L0"` |
+| `feature_signature` | Compact structural tag auto-computed from failure equations, e.g. `"standard_vars3→general_vars2_L1"`. Format: `{form_e1}_vars{n}→{form_e2}_vars{n}_L{n}` where form ∈ {trivial, singleton, absorbing, standard, general}. Used by Vmatch to find structurally-similar val items. |
 | `target_roadmap_aspect` | DT step this case study corrects |
 | `creation_fix_rate` | Fix rate on the flush bin that produced this entry |
 | `historical_fix_rate` | Running average updated by ablation / eval passes |

@@ -215,6 +215,11 @@ class Cheatsheet:
     # Optional frozen prior knowledge (e.g. NeuriCo prompt).
     # Rendered before the roadmap and never modified by ICR.
     prior_knowledge: str = ""
+    # When True, render() skips ALL character caps: roadmap is not truncated,
+    # every case study is included in full, and the total budget is unlimited.
+    # Use --no-render-limit in ICR_select/pipeline.py to enable.
+    # Not persisted to JSON — must be set explicitly after load().
+    no_limit: bool = field(default=False, compare=False, repr=False)
 
     def __post_init__(self) -> None:
         # Accept list[str] for backward compatibility — wrap each string.
@@ -299,24 +304,31 @@ class Cheatsheet:
         """
         Shared render core: DT + prior knowledge + a caller-provided list of
         (original_index, CaseStudy) pairs, within the standard character budget.
+
+        When self.no_limit is True, all character caps are bypassed: the roadmap
+        is never truncated, every case study is rendered in full, and the total
+        budget is unlimited.
         """
+        _no_limit = self.no_limit
+
         parts: list[str] = []
         if self.prior_knowledge.strip():
             parts += [PRIOR_KNOWLEDGE_HEADER, "", self.prior_knowledge.strip(), ""]
 
         header = ROADMAP_HEADER
-        dt = _truncate(self.roadmap.strip(), ROADMAP_MAX_CHARS)
+        dt = self.roadmap.strip() if _no_limit else _truncate(self.roadmap.strip(), ROADMAP_MAX_CHARS)
         parts += [header, "", dt]
-        budget = TOTAL_RENDER_MAX_CHARS - len("\n".join(parts))
+        budget = float("inf") if _no_limit else TOTAL_RENDER_MAX_CHARS - len("\n".join(parts))
 
         if selected:
             header_block = ["", CASE_STUDIES_HEADER]
-            budget -= len("\n".join(header_block))
+            if not _no_limit:
+                budget -= len("\n".join(header_block))
             cs_blocks: list[list[str]] = []
 
             for orig_idx, cs in selected:
                 display_n = orig_idx + 1   # 1-based, preserves original numbering
-                body  = _truncate(cs.render(), CASE_STUDY_MAX_CHARS)
+                body  = cs.render() if _no_limit else _truncate(cs.render(), CASE_STUDY_MAX_CHARS)
                 block = [
                     "",
                     CASE_STUDY_DIVIDER.format(n=display_n, title=cs.title),
@@ -326,7 +338,8 @@ class Cheatsheet:
                 if block_size > budget:
                     break
                 cs_blocks.append(block)
-                budget -= block_size
+                if not _no_limit:
+                    budget -= block_size
 
             if cs_blocks:
                 parts += header_block

@@ -147,6 +147,11 @@ def _build_parser() -> argparse.ArgumentParser:
     g = p.add_argument_group("Output")
     g.add_argument("--output-dir",     default="runs/select_run", metavar="DIR")
     g.add_argument("--cheatsheet-out", default=None, metavar="FILE")
+    g.add_argument("--no-render-limit", action="store_true", default=False,
+                   help="Disable all character caps on the rendered cheatsheet (roadmap, "
+                        "per-case-study, and total budget). Every case study is included in "
+                        "full. Useful when using large prior-knowledge prompts (e.g. NeuriCo) "
+                        "that would otherwise crowd out the ICR roadmap and case bank.")
 
     return p
 
@@ -182,6 +187,11 @@ def main() -> None:
     if args.prescore_file:
         prescore_map = _json.loads(Path(args.prescore_file).read_text(encoding="utf-8"))
         _log(f"\n[Prescore] {len(prescore_map)} pre-scored items loaded — skipping initial scoring pass.")
+
+    # Apply --limit before splitting so val_items is proportional to the
+    # limited dataset rather than the full 1000-item file.
+    if args.limit is not None:
+        all_items = all_items[: args.limit]
 
     if args.val_dataset:
         val_items = load_jsonl(Path(args.val_dataset))
@@ -277,12 +287,16 @@ def main() -> None:
         cheatsheet.save(output_dir / "cheatsheet_init")
         _log(f"  {cheatsheet.summary()}")
 
+    # Apply no-render-limit flag — must be set before any .render() call
+    if args.no_render_limit:
+        cheatsheet.no_limit = True
+        _log("\n[Stage 1] Render limits disabled — all character caps bypassed.")
+
     # ------------------------------------------------------------------
     # Stage 2: Training (inner loop only, or outer DT revision loop)
     # ------------------------------------------------------------------
     if args.limit is not None:
-        train_items = train_items[: args.limit]
-        _log(f"\n[Stage 2] Limited to first {len(train_items)} items.")
+        _log(f"\n[Stage 2] Dataset limited to {len(all_items)} items (train={len(train_items)}, val={len(val_items)}).")
 
     # Build utility config if gate is enabled
     utility_config = UtilityConfig(

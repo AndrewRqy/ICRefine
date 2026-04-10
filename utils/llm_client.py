@@ -12,6 +12,7 @@ at 25× higher density than externally prompted summaries.
 from __future__ import annotations
 
 import os
+import re
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -145,10 +146,25 @@ def call_llm(
 
             if is_vllm:
                 thinking = (message.get("reasoning_content") or "").strip()
-                # If content is empty (reasoning used all tokens), fall back to thinking
-                if not content and thinking:
+                # DeepSeek-R1 sometimes puts the structured answer (VERDICT/REASONING/etc.)
+                # inside reasoning_content and emits only a short informal sentence in content.
+                # Fall back to thinking when: content is empty OR content has no VERDICT line.
+                if thinking and (not content or "VERDICT:" not in content.upper()):
                     content  = thinking
                     thinking = ""
+                # vLLM may also return <think>...</think> inline in content instead of
+                # separating it into reasoning_content. Strip the think block and keep
+                # only the text after </think> as the structured answer.
+                if "<think>" in content:
+                    post_think = re.split(r"</think>", content, flags=re.IGNORECASE)
+                    if len(post_think) > 1:
+                        thinking = re.sub(r"<think>", "", post_think[0], flags=re.IGNORECASE).strip()
+                        content  = post_think[-1].strip()
+                    else:
+                        # <think> opened but never closed — model was cut off mid-think;
+                        # try to find VERDICT inside the think block as last resort.
+                        thinking = re.sub(r"<think>", "", content, flags=re.IGNORECASE).strip()
+                        content  = thinking
             else:
                 thinking = (message.get("reasoning") or "").strip()
                 # gpt-oss-120b via OpenRouter sometimes puts everything in "reasoning"

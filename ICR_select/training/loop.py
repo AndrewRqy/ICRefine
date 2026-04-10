@@ -769,7 +769,13 @@ def run_training_loop(
                 f"(clusters: {sorted(disagree_bins)} d / {sorted(both_wrong_bins)} bw)"
             )
 
-        _flush_fn = _process_flush_retry if flush_strategy == "retry" else _process_flush
+        # Retry strategy is only meaningful on the classic gate path — when the utility
+        # gate is active, still_wrong is always [] so retry generates blind (no extra
+        # signal). Force default strategy to save N*(candidate_rounds-1) scoring calls.
+        # TODO: fix retry on utility path by running a cheap mini-eval to get still_wrong
+        #       and passing it as context even when utility gate is the primary gate.
+        _effective_strategy = "default" if (utility_gate and utility_config is not None) else flush_strategy
+        _flush_fn = _process_flush_retry if _effective_strategy == "retry" else _process_flush
 
         # Flush full disagree clusters first (any key, deterministic order)
         for _key in sorted(disagree_bins):

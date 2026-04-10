@@ -11,7 +11,7 @@ from __future__ import annotations
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from utils.cheatsheet import Cheatsheet
+from utils.cheatsheet import Cheatsheet, extract_query_features
 from utils.case_study import CaseStudy
 from utils.llm_client import call_llm
 from ICR_reasoning.core.oracle import OracleDict
@@ -100,9 +100,22 @@ def generate_candidates(
         for fut in as_completed(futures):
             candidates[futures[fut]] = fut.result()
 
+    # Auto-compute feature_signature from failure structural features when the
+    # LLM didn't write a FEATURE_SIGNATURE: line.  Without this, build_vmatch
+    # returns [] for every candidate → utility gate always falls back.
+    failure_sigs: list[str] = []
+    for item in failures:
+        try:
+            failure_sigs.append(extract_query_features(item).signature())
+        except Exception:
+            pass
+    auto_sig = failure_sigs[0] if failure_sigs else ""
+
     valid = [c for c in candidates if c is not None]
     if not valid:
         raise RuntimeError("All candidate generations failed.")
+    for c in valid:
+        c.feature_signature = auto_sig
 
     print(
         f"  [candidates] generated {len(valid)}/{n} valid candidates",

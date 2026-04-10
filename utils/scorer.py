@@ -155,6 +155,17 @@ def score_batch(
             f"counted as wrong.",
             file=sys.stderr,
         )
+        # Debug: show first 3 failed raw responses so we can diagnose the format
+        shown = 0
+        for it in wrong:
+            if it.get("predicted") is None and shown < 3:
+                raw = it.get("raw_response", "")
+                print(
+                    f"\n  [parse-debug] raw_response (first 300 chars):\n"
+                    f"  {repr(raw[:300])}",
+                    file=sys.stderr,
+                )
+                shown += 1
 
     return correct, wrong
 

@@ -40,7 +40,12 @@ _BACK_REFERENCE_PATTERNS = re.compile(
 )
 
 _MD_BOLD_RE = re.compile(
-    r"\*{1,2}(VERDICT|REASONING|PROOF|COUNTEREXAMPLE):\*{0,2}",
+    # Matches all variants the model produces:
+    #   **VERDICT:** TRUE   — bold with colon inside
+    #   **VERDICT**: TRUE   — bold with colon outside
+    #   **VERDICT: FALSE**  — whole token bolded
+    #   *VERDICT:* TRUE     — single-star italic
+    r"\*{1,2}(VERDICT|REASONING|PROOF|COUNTEREXAMPLE)\*{0,2}:?\*{0,2}:?",
     re.IGNORECASE,
 )
 
@@ -79,7 +84,22 @@ def parse_response(text: str) -> dict:
     """
     text = normalize(text)
     verdict_match = re.search(r"^VERDICT:\s*(TRUE|FALSE)", text, re.MULTILINE | re.IGNORECASE)
-    verdict = verdict_match.group(1).upper() if verdict_match else None
+    if verdict_match:
+        verdict = verdict_match.group(1).upper()
+    else:
+        # Fallback: model wrote a conversational answer without a VERDICT: line.
+        # Scan the last 400 chars for common answer patterns.
+        tail = text[-400:]
+        tail_match = re.search(
+            r"\b(?:the\s+)?(?:answer|implication|verdict|result)\s+is\s+(TRUE|FALSE)"
+            r"|\b(TRUE|FALSE)\s*[.\n]?\s*$"
+            r"|\btherefore[,\s]+(?:the\s+answer\s+is\s+)?(TRUE|FALSE)",
+            tail, re.IGNORECASE,
+        )
+        if tail_match:
+            verdict = next(g for g in tail_match.groups() if g is not None).upper()
+        else:
+            verdict = None
     reasoning = _extract_section(text, "REASONING")
     raw_proof = _extract_section(text, "PROOF")
     return {

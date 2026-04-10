@@ -114,7 +114,6 @@ WHY THIS WORKS: [1–2 sentences — the compact mathematical reason the correct
 SUPPORT:
   • E1 = ...  |  E2 = ...  |  Answer: TRUE/FALSE  — [one phrase: what structural fact the trigger catches]
   • E1 = ...  |  E2 = ...  |  Answer: TRUE/FALSE  — [one phrase]
-FEATURE_SIGNATURE: [compact tag, e.g. "standard_L0_vars3→general_symmetric"]
 TARGET_STEP: [roadmap aspect this corrects, e.g. "ASPECT 2" or "ASPECT 4"]
 
 OUTPUT 2 — ROADMAP PATCH (max 800 chars)

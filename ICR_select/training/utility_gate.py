@@ -196,7 +196,10 @@ def score_utility_one(
     vg_acc_wo, vg_n = baseline["vgap"]
     ve_acc_wo, ve_n = baseline["veasy"]
 
-    if vm_n < config.min_slice or vg_n < config.min_slice:
+    # Vgap is optional — it is only populated when an oracle CSV is provided.
+    # Fall back only when Vmatch is too small; skip Vgap scoring when it is empty.
+    vgap_missing = vg_n == 0
+    if vm_n < config.min_slice or (not vgap_missing and vg_n < config.min_slice):
         return UtilityResult(
             utility=0.0, delta_vmatch=0.0, delta_vgap=0.0,
             regress_veasy=0.0, length_penalty=0.0,
@@ -298,8 +301,10 @@ def score_utility_batch(
         f"veasy={ve_n}  min_slice={config.min_slice}"
     )
 
-    # Early-exit if slices too small — all candidates fall back
-    if vm_n < config.min_slice or vg_n < config.min_slice:
+    # Early-exit if Vmatch too small. Vgap is optional (only available with oracle);
+    # when vg_n == 0, skip Vgap scoring rather than falling back.
+    vgap_missing = vg_n == 0
+    if vm_n < config.min_slice or (not vgap_missing and vg_n < config.min_slice):
         _log(
             f"  [gate:utility] slices too small → falling back to "
             f"fix_rate+regression gates for all candidates"
