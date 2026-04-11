@@ -174,6 +174,25 @@ def call_llm(
 
             return LLMResponse(content=content, thinking=thinking)
 
+        except requests.HTTPError as exc:
+            # 4xx (except 429) are client errors — retrying won't help.
+            if exc.response is not None and 400 <= exc.response.status_code < 500 \
+                    and exc.response.status_code != 429:
+                raise RuntimeError(
+                    f"LLM call failed (HTTP {exc.response.status_code}, not retrying): {exc}"
+                ) from exc
+            if attempt < MAX_RETRIES:
+                print(
+                    f"\n  [retry] {type(exc).__name__} — backing off {delay:.0f}s "
+                    f"(attempt {attempt}/{MAX_RETRIES}): {exc}",
+                    file=sys.stderr, flush=True,
+                )
+                time.sleep(delay)
+                delay *= 2
+            else:
+                raise RuntimeError(
+                    f"LLM call failed after {MAX_RETRIES} retries: {exc}"
+                ) from exc
         except requests.RequestException as exc:
             if attempt < MAX_RETRIES:
                 print(

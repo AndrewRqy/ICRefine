@@ -16,10 +16,12 @@ signal for identifying what went wrong in a failure.
 from __future__ import annotations
 
 import sys
+from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
 from dataclasses import dataclass, field
+from typing import Callable, Iterator
 
 from .data import is_true
-from .llm_client import LLMResponse, call_llm_batch
+from .llm_client import LLMResponse, call_llm, call_llm_batch
 from .parser import parse_response as _parse, normalize as _normalize
 from ICR_naive.prompts.templates import SCORING_PROMPT, SCORING_PROMPT_COT_FIRST, SCORING_MAX_TOKENS
 
@@ -168,6 +170,78 @@ def score_batch(
                 shown += 1
 
     return correct, wrong
+
+
+def score_items_streaming(
+    items: list[dict],
+    get_cheatsheet: Callable[[], str],
+    model: str,
+    api_key: str,
+    concurrency: int = 10,
+    temperature: float = 0.0,
+    reasoning_effort: str | None = "low",
+    cot_first: bool = False,
+    max_tokens: int = SCORING_MAX_TOKENS,
+) -> Iterator[dict]:
+    """
+    Sliding-window scorer: yields one annotated item dict as each request
+    completes. Always keeps `concurrency` requests in-flight so vLLM never
+    idles between batches or during case-study generation.
+
+    get_cheatsheet() is called immediately before each new submission, so
+    any cheatsheet update made during a yield (e.g. adding a case study)
+    is automatically picked up for the next queued request.
+
+    Yielded dict keys: predicted, expected, post_think, thinking,
+    raw_response — plus all original item fields.
+    """
+    items_iter = iter(items)
+    pending: dict[Future, dict] = {}
+
+    def _submit_next(pool: ThreadPoolExecutor) -> bool:
+        try:
+            item = next(items_iter)
+        except StopIteration:
+            return False
+        prompt = _build_scoring_prompt(get_cheatsheet(), item, cot_first)
+        f = pool.submit(
+            call_llm, prompt, model, api_key, temperature, max_tokens, reasoning_effort
+        )
+        pending[f] = item
+        return True
+
+    with ThreadPoolExecutor(max_workers=concurrency) as pool:
+        for _ in range(concurrency):
+            if not _submit_next(pool):
+                break
+
+        while pending:
+            done, _ = wait(pending, return_when=FIRST_COMPLETED)
+            for f in done:
+                item = pending.pop(f)
+                ground_truth = is_true(item["answer"])
+                try:
+                    resp = f.result()
+                    predicted  = _parse_verdict(resp.content)
+                    post_think = _extract_post_think(resp.content)
+                    thinking   = resp.thinking
+                    raw        = resp.content
+                except Exception:
+                    predicted = post_think = thinking = raw = ""
+                    predicted = None
+
+                yield {
+                    **item,
+                    "predicted":    predicted,
+                    "expected":     "TRUE" if ground_truth else "FALSE",
+                    "post_think":   post_think,
+                    "thinking":     thinking,
+                    "raw_response": raw,
+                }
+
+                # Submit next AFTER yield so get_cheatsheet() sees any update
+                # the caller made while processing the yielded item.
+                _submit_next(pool)
 
 
 def test_cheatsheet(

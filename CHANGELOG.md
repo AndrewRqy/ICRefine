@@ -2,6 +2,28 @@
 
 ---
 
+## 2026-04-10
+
+### ICR_select: Skip redundant val scoring when prescore is provided
+
+**Problem:** Inside the recursive-refine pipeline, ICR_select ran a full val-split
+re-score at the end of each iteration (using vLLM) even though the very next SAIR
+eval step would re-evaluate all items — including the val split — with the refined
+cheatsheet. This added an unnecessary vLLM call during the inter-phase gap.
+
+**Changes:**
+
+`ICR_select/pipeline.py` — when `--prescore-file` is supplied (i.e., we are inside
+the recursive-refine loop), `skip_final_val=True` is passed to `run_training_loop()`.
+
+`ICR_select/training/loop.py` — `run_training_loop()` accepts a new
+`skip_final_val: bool = False` parameter. The final `test_cheatsheet()` call on val
+items is skipped when `True`.
+
+No change to standalone ICR_select runs (val scoring still runs when prescore is absent).
+
+---
+
 ## 2026-04-08
 
 ### Structural: CaseStudy dataclass replaces flat strings

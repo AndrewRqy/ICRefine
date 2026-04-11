@@ -307,6 +307,12 @@ def main() -> None:
         min_slice=args.utility_min_slice,
     ) if args.utility_gate else None
 
+    # When a prescore is provided we're inside the recursive-refine pipeline,
+    # which runs a full SAIR eval after every ICR_select call.  That eval
+    # covers all items (including the val split) with the refined cheatsheet,
+    # so re-scoring val items here is redundant — skip it to cut the gap.
+    skip_final_val = prescore_map is not None
+
     # Shared kwargs passed to run_training_loop in every round
     inner_kwargs = dict(
         model_score=model_score,
@@ -333,6 +339,7 @@ def main() -> None:
         flush_remainder=not args.no_flush_remainder,
         cot_first=args.cot_first,
         reasoning_effort=reasoning_effort,
+        skip_final_val=skip_final_val,
         log=True,
     )
 

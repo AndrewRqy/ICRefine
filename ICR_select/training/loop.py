@@ -145,6 +145,7 @@ def run_training_loop(
     reasoning_effort: str | None = "low",
     output_dir: Path | None = None,
     log: bool = True,
+    skip_final_val: bool = False,  # skip test_cheatsheet when outer pipeline will re-evaluate
 ) -> TrainingResult:
 
     def _log(msg: str) -> None:
@@ -838,7 +839,7 @@ def run_training_loop(
     )
 
     val_accuracy: float | None = None
-    if val_items:
+    if val_items and not skip_final_val:
         _log(f"\nValidating on {len(val_items)} held-out items ...")
         result = test_cheatsheet(
             cheatsheet_text=cheatsheet.render(),

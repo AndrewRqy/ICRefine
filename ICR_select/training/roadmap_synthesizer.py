@@ -59,12 +59,13 @@ class RoadmapSynthesisResult:
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _format_case_studies(case_studies: list[str]) -> str:
+def _format_case_studies(case_studies: list) -> str:
     if not case_studies:
         return "(none yet)"
     lines = []
     for i, cs in enumerate(case_studies, 1):
-        lines.append(f"--- Case Study {i} ---\n{cs.strip()}")
+        text = cs.render() if hasattr(cs, "render") else str(cs)
+        lines.append(f"--- Case Study {i} ---\n{text.strip()}")
     return "\n\n".join(lines)
 
 

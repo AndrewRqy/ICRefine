@@ -222,11 +222,13 @@ class Cheatsheet:
     no_limit: bool = field(default=False, compare=False, repr=False)
 
     def __post_init__(self) -> None:
-        # Accept list[str] for backward compatibility — wrap each string.
+        # Accept list[str] or list[dict] for backward compatibility.
         normalized: list[CaseStudy] = []
         for cs in self.case_studies:
             if isinstance(cs, str):
                 normalized.append(CaseStudy.from_text(cs))
+            elif isinstance(cs, dict):
+                normalized.append(CaseStudy.from_dict(cs))
             else:
                 normalized.append(cs)
         self.case_studies = normalized

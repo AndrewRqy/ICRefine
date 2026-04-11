@@ -25,6 +25,8 @@ from ..core.cheatsheet import Cheatsheet
 from ..core.data import FailureBin
 from ..generators.case_study import generate_case_study
 from .scorer import score_batch, test_cheatsheet
+from utils.scorer import score_items_streaming
+from utils.data import is_true
 
 
 # ---------------------------------------------------------------------------
@@ -114,43 +116,37 @@ def run_training_loop(
     _log(
         f"\n{'='*60}\n"
         f"Training loop\n"
-        f"  items={len(train_items)}  batch_size={batch_size}\n"
+        f"  items={len(train_items)}  batch_size={batch_size} (log interval)\n"
         f"  bin_threshold={bin_threshold}\n"
         f"  model_score={model_score}\n"
         f"  model_casestudy={model_casestudy}\n"
         f"{'='*60}"
     )
 
-    total_batches = (len(train_items) + batch_size - 1) // batch_size
+    for scored_item in score_items_streaming(
+        train_items, cheatsheet.render, model_score, api_key,
+        concurrency=concurrency, reasoning_effort=reasoning_effort,
+    ):
+        total_scored += 1
+        ground_truth = is_true(scored_item["answer"])
+        correct = (scored_item["predicted"] == "TRUE") == ground_truth \
+                  if scored_item["predicted"] is not None else False
 
-    for batch_start in range(0, len(train_items), batch_size):
-        batch     = train_items[batch_start : batch_start + batch_size]
-        batch_num = batch_start // batch_size + 1
+        if correct:
+            total_correct += 1
+        else:
+            bin_.add(scored_item)
 
-        _log(
-            f"\n[batch {batch_num}/{total_batches}]  "
-            f"items {batch_start+1}–{min(batch_start+len(batch), len(train_items))}  "
-            f"bin={len(bin_)}/{bin_threshold}"
-        )
-
-        correct, wrong = score_batch(
-            batch, cheatsheet.render(), model_score, api_key, concurrency,
-            reasoning_effort=reasoning_effort,
-        )
-        total_correct += len(correct)
-        total_scored  += len(batch)
-        running_acc = total_correct / total_scored
-
-        _log(
-            f"  correct={len(correct)}  wrong={len(wrong)}  "
-            f"running_accuracy={running_acc:.1%}"
-        )
-
-        for item in wrong:
-            bin_.add(item)
+        if total_scored % batch_size == 0 or total_scored == len(train_items):
+            running_acc = total_correct / total_scored
+            _log(
+                f"\n[{total_scored}/{len(train_items)}]  "
+                f"accuracy={running_acc:.1%}  bin={len(bin_)}/{bin_threshold}"
+            )
 
         while bin_.is_full():
             failures = bin_.flush()
+            running_acc = total_correct / total_scored
             _log(f"  [bin full] {len(failures)} failures → new case study")
             new_cs = generate_case_study(
                 failures=failures,
@@ -165,7 +161,6 @@ def run_training_loop(
 
             update_log.append({
                 "event": "bin_flush",
-                "batch": batch_num,
                 "items_processed": total_scored,
                 "n_failures": len(failures),
                 "n_case_studies_total": len(cheatsheet.case_studies),

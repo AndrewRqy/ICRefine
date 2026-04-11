@@ -58,6 +58,7 @@ def _ablation_prune(
         temp = Cheatsheet(
             roadmap=cheatsheet.roadmap,
             case_studies=[c for j, c in enumerate(cheatsheet.case_studies) if j != i],
+            prior_knowledge=cheatsheet.prior_knowledge,
         )
         correct_without, _ = score_batch(
             sample, temp.render(), model_score, api_key,
@@ -81,7 +82,7 @@ def _ablation_prune(
             n_pruned += 1
             log_fn(f"  [ablation] CS {i+1}: contribution={contributions[i]:+.1%} — PRUNED")
 
-    return Cheatsheet(roadmap=cheatsheet.roadmap, case_studies=to_keep), n_pruned
+    return Cheatsheet(roadmap=cheatsheet.roadmap, case_studies=to_keep, prior_knowledge=cheatsheet.prior_knowledge), n_pruned
 
 
 def _condense(
@@ -123,6 +124,7 @@ def _condense(
     condensed_cs = Cheatsheet(
         roadmap=cheatsheet.roadmap,
         case_studies=condensed_list,
+        prior_knowledge=cheatsheet.prior_knowledge,
     )
 
     if train_seen:
