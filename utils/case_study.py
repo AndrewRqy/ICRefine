@@ -291,6 +291,29 @@ class CaseStudy:
         )
 
     # ------------------------------------------------------------------
+    # Completeness check
+    # ------------------------------------------------------------------
+
+    def is_complete(self) -> tuple[bool, list[str]]:
+        """
+        Return (True, []) if the case study has all required fields,
+        otherwise (False, [list of missing field names]).
+
+        Required fields:
+          - activate_if   : at least one trigger condition
+          - why_this_check_works : non-empty justification
+          - support_examples    : at least one example
+        """
+        missing = []
+        if not self.activate_if:
+            missing.append("ACTIVATE IF / IDENTIFY")
+        if not self.why_this_check_works:
+            missing.append("WHY THIS WORKS / WHY")
+        if not self.support_examples:
+            missing.append("SUPPORT / EXAMPLES")
+        return (len(missing) == 0), missing
+
+    # ------------------------------------------------------------------
     # Stats helpers (called by loop.py / maintenance.py)
     # ------------------------------------------------------------------
 

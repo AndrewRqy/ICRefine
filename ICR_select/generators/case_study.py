@@ -80,6 +80,31 @@ def generate_candidates(
         failure_lines=failure_lines,
     )
 
+    _COMPLETION_RETRY_PROMPT = """\
+The case study below is INCOMPLETE — it is missing the following required fields: {missing}.
+
+Please rewrite it in full, adding the missing fields. Keep all existing content intact.
+Required format:
+=== CASE STUDY: [title] ===
+FAILURE_TYPE: A or B
+ACTIVATE IF:
+  - [condition 1]
+  - [condition 2]
+DO NOT ACTIVATE IF: [boundary case where this should not fire]
+COMMON WRONG MOVE: [what the weaker model does wrong]
+NEXT CHECK: [mechanical check to perform instead — end with "If yes → TRUE/FALSE."]
+WHY THIS WORKS: [1–2 sentence justification]
+SUPPORT:
+  • E1 = ...  |  E2 = ...  |  Answer: TRUE/FALSE  — [brief note]
+  • E1 = ...  |  E2 = ...  |  Answer: TRUE/FALSE  — [brief note]
+TARGET_STEP: [roadmap aspect this corrects]
+
+=== INCOMPLETE CASE STUDY ===
+{incomplete_text}
+=== END ===
+
+Output ONLY the completed case study starting with === CASE STUDY: ..."""
+
     def _call(temp: float) -> CaseStudy | None:
         try:
             resp = call_llm(
@@ -89,7 +114,43 @@ def generate_candidates(
                 reasoning_effort=None,
             )
             result = _parse_response(resp.content)
-            return result.case_study
+            cs = result.case_study
+            if cs is None:
+                return None
+
+            ok, missing = cs.is_complete()
+            if ok:
+                return cs
+
+            # Retry once with the incomplete output fed back to the LLM
+            print(
+                f"  [candidate gen] temp={temp} incomplete (missing: {', '.join(missing)}) — retrying",
+                file=sys.stderr,
+            )
+            retry_prompt = _COMPLETION_RETRY_PROMPT.format(
+                missing=", ".join(missing),
+                incomplete_text=cs.raw_text.strip(),
+            )
+            retry_resp = call_llm(
+                retry_prompt, model, api_key,
+                temperature=0.3,
+                max_tokens=FLUSH_MAX_TOKENS,
+                reasoning_effort=None,
+            )
+            retry_result = _parse_response(retry_resp.content)
+            retry_cs = retry_result.case_study
+            if retry_cs is None:
+                return None
+            ok2, missing2 = retry_cs.is_complete()
+            if not ok2:
+                print(
+                    f"  [candidate gen] temp={temp} still incomplete after retry "
+                    f"(missing: {', '.join(missing2)}) — dropping",
+                    file=sys.stderr,
+                )
+                return None
+            return retry_cs
+
         except Exception as exc:
             print(f"  [candidate gen] temp={temp} failed: {exc}", file=sys.stderr)
             return None
@@ -121,14 +182,15 @@ def generate_candidates(
 
     valid = [c for c in candidates if c is not None]
     if not valid:
-        raise RuntimeError("All candidate generations failed.")
+        raise RuntimeError("All candidate generations failed or were incomplete after retry.")
+
     for c in valid:
         if not c.feature_signature:
             # TYPE A → broad scope (E1 form only); TYPE B or unknown → full pair
             c.feature_signature = e1_form_sig if c.failure_type == "A" else full_pair_sig
 
     print(
-        f"  [candidates] generated {len(valid)}/{n} valid candidates",
+        f"  [candidates] {len(valid)}/{n} candidates complete and valid",
         file=sys.stderr,
     )
     return valid
