@@ -66,6 +66,7 @@ class CaseStudy:
     # Routing metadata
     feature_signature: str = ""
     target_roadmap_aspect: str = ""
+    failure_type: str = ""   # "A" (missing knowledge) or "B" (wrong reasoning pattern)
 
     # Running statistics
     creation_fix_rate: float = 0.0
@@ -165,6 +166,7 @@ class CaseStudy:
             "support_examples":     self.support_examples,
             "feature_signature":    self.feature_signature,
             "target_roadmap_aspect": self.target_roadmap_aspect,
+            "failure_type":         self.failure_type,
             "creation_fix_rate":    self.creation_fix_rate,
             "historical_fix_rate":  self.historical_fix_rate,
             "n_activations":        self.n_activations,
@@ -186,6 +188,7 @@ class CaseStudy:
             support_examples=d.get("support_examples", []),
             feature_signature=d.get("feature_signature", ""),
             target_roadmap_aspect=d.get("target_roadmap_aspect", ""),
+            failure_type=d.get("failure_type", ""),
             creation_fix_rate=d.get("creation_fix_rate", 0.0),
             historical_fix_rate=d.get("historical_fix_rate", 0.0),
             n_activations=d.get("n_activations", 0),
@@ -249,6 +252,18 @@ class CaseStudy:
             _parse_scalar_field(text, "TARGET_STEP")
             or _parse_scalar_field(text, "TARGET STEP")
         )
+        failure_type_raw = (
+            _parse_scalar_field(text, "FAILURE_TYPE")
+            or _parse_scalar_field(text, "FAILURE TYPE")
+        )
+        # Normalise to "A" or "B"; default empty means unknown (treated as B)
+        failure_type = ""
+        if failure_type_raw:
+            t = failure_type_raw.strip().upper()
+            if t.startswith("A"):
+                failure_type = "A"
+            elif t.startswith("B"):
+                failure_type = "B"
 
         # Legacy fallbacks: PATTERN/RULE map onto activate_if/action
         if not activate_if:
@@ -271,6 +286,7 @@ class CaseStudy:
             support_examples=support_examples,
             feature_signature=feature_signature,
             target_roadmap_aspect=target_roadmap_aspect,
+            failure_type=failure_type,
             raw_text=raw,
         )
 

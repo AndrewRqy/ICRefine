@@ -103,19 +103,29 @@ def generate_candidates(
     # Auto-compute feature_signature from failure structural features when the
     # LLM didn't write a FEATURE_SIGNATURE: line.  Without this, build_vmatch
     # returns [] for every candidate → utility gate always falls back.
-    failure_sigs: list[str] = []
+    #
+    # TYPE A (missing knowledge): the lemma applies to an entire E1 form class,
+    # not a specific structural pair.  Use only E1's form token so the case study
+    # routes broadly to every query where that lemma condition holds.
+    # TYPE B (wrong reasoning pattern): mistake is configuration-specific;
+    # keep the full pair signature so routing stays narrow and precise.
+    failure_qfs = []
     for item in failures:
         try:
-            failure_sigs.append(extract_query_features(item).signature())
+            failure_qfs.append(extract_query_features(item))
         except Exception:
             pass
-    auto_sig = failure_sigs[0] if failure_sigs else ""
+
+    full_pair_sig = failure_qfs[0].signature() if failure_qfs else ""
+    e1_form_sig   = failure_qfs[0].form_e1.lower() if failure_qfs else ""
 
     valid = [c for c in candidates if c is not None]
     if not valid:
         raise RuntimeError("All candidate generations failed.")
     for c in valid:
-        c.feature_signature = auto_sig
+        if not c.feature_signature:
+            # TYPE A → broad scope (E1 form only); TYPE B or unknown → full pair
+            c.feature_signature = e1_form_sig if c.failure_type == "A" else full_pair_sig
 
     print(
         f"  [candidates] generated {len(valid)}/{n} valid candidates",

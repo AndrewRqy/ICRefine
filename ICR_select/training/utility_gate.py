@@ -38,6 +38,7 @@ then falls back to the existing fix_rate + regression gate pair unchanged.
 
 from __future__ import annotations
 
+import os
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
@@ -78,7 +79,8 @@ class UtilityResult:
 # Max size for the rolling Vgap reserve (maintained by training loop)
 # ---------------------------------------------------------------------------
 
-VGAP_RESERVE_MAX = 40
+VGAP_RESERVE_MAX  = int(os.environ.get("ICR_SELECT_VGAP_RESERVE_MAX",  40))
+VMATCH_MAX        = int(os.environ.get("ICR_SELECT_VMATCH_MAX",         30))  # cap vmatch to avoid huge utility calls on broad TYPE A signatures
 
 
 # ---------------------------------------------------------------------------
@@ -89,6 +91,13 @@ def build_vmatch(candidate: CaseStudy, val_items: list[dict]) -> list[dict]:
     """
     Return val_items whose structural feature tokens have any overlap with
     the candidate's feature_signature token set.
+
+    TYPE A case studies (missing knowledge) use a narrow E1-form signature
+    (e.g. "absorbing").  Any val item whose query tokens contain that form
+    token is included — this produces a large, representative Vmatch slice
+    so the utility gate has enough signal rather than falling back.
+
+    TYPE B / unknown: unchanged — token intersection required as before.
 
     Pure string matching — no API call.  Returns [] when the candidate
     has no feature_signature (caller detects this via len < min_slice).
@@ -107,6 +116,12 @@ def build_vmatch(candidate: CaseStudy, val_items: list[dict]) -> list[dict]:
             continue
         if q_tokens & cs_tokens:
             matched.append(item)
+    # Cap to avoid runaway costs when a broad TYPE A signature matches most of the val set.
+    # Shuffle so the sample is representative rather than just the first N items.
+    if len(matched) > VMATCH_MAX:
+        import random
+        random.shuffle(matched)
+        matched = matched[:VMATCH_MAX]
     return matched
 
 
@@ -197,9 +212,12 @@ def score_utility_one(
     ve_acc_wo, ve_n = baseline["veasy"]
 
     # Vgap is optional — it is only populated when an oracle CSV is provided.
-    # Fall back only when Vmatch is too small; skip Vgap scoring when it is empty.
-    vgap_missing = vg_n == 0
-    if vm_n < config.min_slice or (not vgap_missing and vg_n < config.min_slice):
+    # Treat vgap as missing (skip its contribution) when it has fewer than
+    # min_slice items — on small datasets the disagree reservoir may never fill
+    # enough to be statistically meaningful, and requiring it causes unnecessary
+    # fallbacks when vmatch is perfectly adequate on its own.
+    vgap_missing = vg_n < config.min_slice   # treat sparse vgap same as absent
+    if vm_n < config.min_slice:
         return UtilityResult(
             utility=0.0, delta_vmatch=0.0, delta_vgap=0.0,
             regress_veasy=0.0, length_penalty=0.0,
@@ -215,7 +233,9 @@ def score_utility_one(
     )
     text_with = cs_with.render()
 
-    tagged = _tag(vmatch, "vmatch") + _tag(vgap, "vgap") + _tag(veasy, "veasy")
+    # Skip vgap items from scoring when the reservoir is too small — avoids
+    # noisy single-item delta_vgap contributions distorting the utility score.
+    tagged = _tag(vmatch, "vmatch") + ([] if vgap_missing else _tag(vgap, "vgap")) + _tag(veasy, "veasy")
     correct_w, wrong_w = score_batch(
         tagged, text_with, model, api_key,
         concurrency=concurrency,
@@ -229,7 +249,7 @@ def score_utility_one(
     ve_acc_w, _ = _acc_for_slice(correct_w, all_w, "veasy")
 
     delta_vmatch  = vm_acc_w - vm_acc_wo
-    delta_vgap    = vg_acc_w - vg_acc_wo
+    delta_vgap    = 0.0 if vgap_missing else (vg_acc_w - vg_acc_wo)
     regress_veasy = max(0.0, ve_acc_wo - ve_acc_w)
     length_penalty = config.nu * len(candidate.render()) / 1000.0
 

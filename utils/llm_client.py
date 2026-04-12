@@ -26,7 +26,7 @@ load_dotenv(Path(__file__).parent.parent / ".env")
 
 OPENROUTER_URL    = "https://openrouter.ai/api/v1/chat/completions"
 OPENAI_URL        = "https://api.openai.com/v1/chat/completions"
-MAX_TOKENS        = 16_000
+MAX_TOKENS        = int(os.environ.get("ICR_MAX_TOKENS", 16_000))
 MAX_RETRIES       = 3
 RETRY_BASE_DELAY  = 2.0
 VLLM_READ_TIMEOUT = 600   # local inference can be slow — 10 min per request

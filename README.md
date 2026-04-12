@@ -141,7 +141,7 @@ Three refinement modes are available. **ICR_select is recommended** for all prod
 
 ## Cheatsheet Init Modes
 
-All pipelines support these initialisation options (mutually exclusive except `--prior-knowledge`):
+All pipelines support these initialisation options (mutually exclusive except `--prior-knowledge` and `--resume`):
 
 | Flag | Behaviour |
 |---|---|
@@ -149,6 +149,7 @@ All pipelines support these initialisation options (mutually exclusive except `-
 | `--init-roadmap FILE` | Load a plain `.txt` as the trainable roadmap; case studies start empty |
 | `--init-cheatsheet PATH` | Load a previously saved cheatsheet (`.json` sidecar); full state restored |
 | `--prior-knowledge FILE` | Load a frozen plain-text file into the `prior_knowledge` field — can be combined with any option above, or used alone to start with an empty trainable roadmap |
+| `--resume` | Resume an interrupted run — loads `cheatsheet_current.json` from `--output-dir` and skips Stage 1 init entirely. All other init flags are ignored when a checkpoint is found (the checkpoint already encodes the full state including `prior_knowledge`). Falls back to a fresh run if no checkpoint exists. |
 
 ---
 
@@ -223,7 +224,23 @@ Both paths end with the **Similarity gate** — LLM dedup: skip if duplicate, me
 
 Periodic maintenance: **ablation pruning** (remove zero-contribution case studies) and **condensation** (rewrite when cheatsheet grows too large).
 
-> **Note:** `feature_signature` on each candidate is auto-computed from the structural features of the failure equations (equation form, variable count, left-op depth). This ensures Vmatch always uses the correct token format for matching against val items — the LLM is not asked to generate it.
+> **Note:** `feature_signature` on each candidate is auto-computed from the structural features of the failure equations. The scope of the signature depends on the case study's failure type (see below) — the LLM is not asked to generate it.
+
+### Case Study Generation
+
+Each case study generated from a failure bin is classified as one of two failure types. The generator (powered by the oracle trace when `--oracle-csv` is set) diagnoses which applies before writing the teaching note:
+
+| Type | Meaning | Example |
+|---|---|---|
+| **TYPE A — Missing knowledge** | The weaker model's reasoning strategy was plausible but it lacks a key algebraic fact (a lemma, identity, or structural property). Signal: the oracle trace invokes a fact the weaker model never considers. | Model doesn't know "absorbing E1 forces all elements equal → TRUE always" |
+| **TYPE B — Wrong reasoning pattern** | The weaker model has the relevant tools but applies the wrong one, stops too early, or skips a necessary check. Signal: oracle and weaker model start similarly but diverge at a specific decision point. | Model tries counterexample in small magmas instead of checking substitution first |
+
+This classification affects how the case study is stored and routed at inference time:
+
+- **TYPE A** — `feature_signature` uses only the **E1 form token** (e.g. `"absorbing"`). At inference, any query whose E1 matches that form gets a full relevance score, so the lemma is always surfaced when the triggering condition holds — regardless of E2's structure.
+- **TYPE B** — `feature_signature` uses the **full structural pair** (e.g. `"standard_vars3→general_vars5_L1"`). Routing stays narrow and precise — the case study only fires on the specific configuration where the reasoning mistake occurs.
+
+The `FAILURE_TYPE: A/B` field is written as part of the case study output and stored in the JSON sidecar.
 
 ```bash
 VLLM_BASE_URL=http://localhost:8000/v1/chat/completions \
@@ -284,8 +301,14 @@ python -m ICR_select.pipeline \
 
 | Flag | Default | Description |
 |---|---|---|
-| `--oracle-csv FILE` | off | Oracle CSV — appends correct reasoning as a contrast signal in case study generation |
+| `--oracle-csv FILE` | off | Oracle CSV — provides correct reasoning traces from a stronger model. Used as a contrast signal in case study generation: the weaker model's wrong trace is shown alongside the oracle's correct trace, enabling the TYPE A / TYPE B failure diagnosis (see [Case Study Generation](#case-study-generation)) |
 | `--prescore-file FILE` | off | Pre-computed score map `{id: {predicted, correct, ...}}` — skips the initial scoring pass |
+
+**Resume**
+
+| Flag | Default | Description |
+|---|---|---|
+| `--resume` | off | Resume an interrupted run from `cheatsheet_current.json` in `--output-dir`. Skips Stage 1 init. See [Cheatsheet Init Modes](#cheatsheet-init-modes). |
 
 **Maintenance**
 
@@ -470,8 +493,9 @@ Each case study stored in the JSON sidecar has these fields:
 | `common_wrong_move` | What the model typically does wrong in these cases |
 | `why_this_check_works` | Mathematical justification (WHY field) |
 | `support_examples` | List of `{e1, e2, answer, note}` dicts |
-| `feature_signature` | Compact structural tag auto-computed from failure equations, e.g. `"standard_vars3→general_vars2_L1"`. Format: `{form_e1}_vars{n}→{form_e2}_vars{n}_L{n}` where form ∈ {trivial, singleton, absorbing, standard, general}. Used by Vmatch to find structurally-similar val items. |
-| `target_roadmap_aspect` | DT step this case study corrects |
+| `feature_signature` | Compact structural tag auto-computed from failure equations. **TYPE A:** E1 form only, e.g. `"absorbing"` — broad routing so the lemma fires for any matching E1 form. **TYPE B:** full structural pair, e.g. `"standard_vars3→general_vars2_L1"` — narrow routing for configuration-specific mistakes. Format for TYPE B: `{form_e1}_vars{n}→{form_e2}_vars{n}_L{n}` where form ∈ {trivial, singleton, absorbing, standard, general}. Used by Vmatch to find structurally-similar val items. |
+| `failure_type` | `"A"` (missing knowledge — lemma the model lacks) or `"B"` (wrong/missing reasoning pattern). Controls signature scope and inference-time routing breadth. Empty string means unknown (treated as TYPE B). |
+| `target_roadmap_aspect` | Roadmap aspect this case study corrects |
 | `creation_fix_rate` | Fix rate on the flush bin that produced this entry |
 | `historical_fix_rate` | Running average updated by ablation / eval passes |
 | `n_activations` / `n_fixes` | Activation and precision counters |

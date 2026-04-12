@@ -150,11 +150,15 @@ def _relevance_score(cs: CaseStudy, qf: QueryFeatures) -> float:
     Score a case study's relevance to a query, in [0.0, 1.0].
 
     Two components:
-      - Jaccard similarity (weight 0.7): token overlap between the query's
-        structural feature set and the case study's feature_signature tokens.
-        Also bonuses for keyword hits in activate_if conditions.
-      - historical_fix_rate (weight 0.3): more accurate case studies rank
-        higher when structural similarity is tied.
+      - Structural similarity (weight 0.7): Jaccard overlap between the query's
+        structural tokens and the case study's feature_signature tokens, plus a
+        keyword bonus from activate_if text.
+        TYPE A case studies (missing knowledge) use a narrow E1-form signature
+        (e.g. "absorbing") that applies to an entire form class — a query that
+        shares even one token gets a full structural match so the lemma is always
+        surfaced when the E1 form condition holds.
+      - historical_fix_rate (weight 0.3): more accurate case studies rank higher
+        when structural similarity is tied.
 
     Cases with no feature_signature get jaccard=0 but still compete on fix rate.
     """
@@ -164,7 +168,13 @@ def _relevance_score(cs: CaseStudy, qf: QueryFeatures) -> float:
     if cs.feature_signature:
         cs_tokens = _sig_tokens(cs.feature_signature)
         union = q_tokens | cs_tokens
-        jaccard = len(q_tokens & cs_tokens) / len(union) if union else 0.0
+        intersection = q_tokens & cs_tokens
+        if cs.failure_type == "A" and intersection:
+            # TYPE A: any token hit on the lemma scope means full relevance —
+            # the knowledge gap applies whenever the E1 form condition matches.
+            jaccard = 1.0
+        else:
+            jaccard = len(intersection) / len(union) if union else 0.0
     else:
         jaccard = 0.0
 

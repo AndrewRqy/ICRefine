@@ -147,6 +147,12 @@ def _build_parser() -> argparse.ArgumentParser:
     g = p.add_argument_group("Output")
     g.add_argument("--output-dir",     default="runs/select_run", metavar="DIR")
     g.add_argument("--cheatsheet-out", default=None, metavar="FILE")
+    g.add_argument("--resume", action="store_true", default=False,
+                   help="Resume an interrupted run. Loads cheatsheet_current.json from "
+                        "--output-dir (if it exists), skipping Stage 1 init entirely. "
+                        "All other init flags (--init-cheatsheet, --prior-knowledge, etc.) "
+                        "are ignored when a checkpoint is found — the checkpoint already "
+                        "contains the full cheatsheet state including prior_knowledge.")
     g.add_argument("--no-render-limit", action="store_true", default=False,
                    help="Disable all character caps on the rendered cheatsheet (roadmap, "
                         "per-case-study, and total budget). Every case study is included in "
@@ -236,56 +242,81 @@ def main() -> None:
     )
 
     # ------------------------------------------------------------------
-    # Stage 1: Init
+    # Stage 1: Init  (skipped when --resume finds a checkpoint)
     # ------------------------------------------------------------------
 
-    # Load optional frozen prior knowledge (e.g. NeuriCo prompt).
-    prior_knowledge = ""
-    if args.prior_knowledge:
-        pk_path = Path(args.prior_knowledge)
-        if not pk_path.exists():
-            raise SystemExit(f"Error: --prior-knowledge not found: {pk_path}")
-        prior_knowledge = pk_path.read_text(encoding="utf-8").strip()
-        _log(f"\n[Stage 1] Loaded prior knowledge from {pk_path.name} ({len(prior_knowledge)} chars).")
+    # Resume path: if cheatsheet_current.json exists in output_dir, load it
+    # and skip all other init logic.  The checkpoint already encodes the full
+    # state (roadmap, case studies, prior_knowledge) as of the last accepted
+    # update, so re-initialising would undo that progress.
+    _resumed = False
+    if args.resume:
+        checkpoint_path = output_dir / "cheatsheet_current.json"
+        if checkpoint_path.exists():
+            cheatsheet = Cheatsheet.load(str(output_dir / "cheatsheet_current"))
+            if args.no_render_limit:
+                cheatsheet.no_limit = True
+            train_items = seed_items + train_items
+            _log(
+                f"\n[Resume] Loaded checkpoint from {checkpoint_path.name}: "
+                f"{cheatsheet.summary()}"
+            )
+            _log(f"  Skipping Stage 1 init — continuing training loop from checkpoint.")
+            _resumed = True
+        else:
+            _log(
+                f"\n[Resume] No checkpoint found at {checkpoint_path} — "
+                f"starting fresh (--resume ignored)."
+            )
 
-    if args.init_roadmap:
-        txt_path = Path(args.init_roadmap)
-        if not txt_path.exists():
-            raise SystemExit(f"Error: --init-roadmap not found: {txt_path}")
-        cheatsheet = Cheatsheet(
-            roadmap=txt_path.read_text(encoding="utf-8").strip(),
-            prior_knowledge=prior_knowledge,
-        )
-        _log(f"\n[Stage 1] Loaded roadmap from {txt_path.name}. Case studies start empty.")
-        train_items = seed_items + train_items
+    if not _resumed:
+        # Load optional frozen prior knowledge (e.g. NeuriCo prompt).
+        prior_knowledge = ""
+        if args.prior_knowledge:
+            pk_path = Path(args.prior_knowledge)
+            if not pk_path.exists():
+                raise SystemExit(f"Error: --prior-knowledge not found: {pk_path}")
+            prior_knowledge = pk_path.read_text(encoding="utf-8").strip()
+            _log(f"\n[Stage 1] Loaded prior knowledge from {pk_path.name} ({len(prior_knowledge)} chars).")
 
-    elif args.init_cheatsheet:
-        cheatsheet = Cheatsheet.load(Path(args.init_cheatsheet))
-        if prior_knowledge:
-            cheatsheet.prior_knowledge = prior_knowledge
-        train_items = seed_items + train_items
-        _log(f"\n[Stage 1] Loaded cheatsheet: {cheatsheet.summary()}")
+        if args.init_roadmap:
+            txt_path = Path(args.init_roadmap)
+            if not txt_path.exists():
+                raise SystemExit(f"Error: --init-roadmap not found: {txt_path}")
+            cheatsheet = Cheatsheet(
+                roadmap=txt_path.read_text(encoding="utf-8").strip(),
+                prior_knowledge=prior_knowledge,
+            )
+            _log(f"\n[Stage 1] Loaded roadmap from {txt_path.name}. Case studies start empty.")
+            train_items = seed_items + train_items
 
-    elif prior_knowledge:
-        # Prior knowledge provided alone — start with empty trainable roadmap
-        cheatsheet = Cheatsheet(roadmap="", prior_knowledge=prior_knowledge)
-        train_items = seed_items + train_items
-        _log(f"\n[Stage 1] Prior knowledge loaded ({len(prior_knowledge)} chars). Roadmap starts empty.")
+        elif args.init_cheatsheet:
+            cheatsheet = Cheatsheet.load(Path(args.init_cheatsheet))
+            if prior_knowledge:
+                cheatsheet.prior_knowledge = prior_knowledge
+            train_items = seed_items + train_items
+            _log(f"\n[Stage 1] Loaded cheatsheet: {cheatsheet.summary()}")
 
-    else:
-        _log(f"\n[Stage 1] Generating initial cheatsheet from {len(seed_items)} seed examples ...")
-        cheatsheet = generate_initial_cheatsheet(
-            items=seed_items,
-            model=model_init,
-            api_key=api_key,
-            n_seed_true=args.n_seed_examples // 2,
-            n_seed_false=args.n_seed_examples // 2,
-            n_studies=args.n_seed_studies,
-            seed=args.seed,
-            temperature=args.init_temperature,
-        )
-        cheatsheet.save(output_dir / "cheatsheet_init")
-        _log(f"  {cheatsheet.summary()}")
+        elif prior_knowledge:
+            # Prior knowledge provided alone — start with empty trainable roadmap
+            cheatsheet = Cheatsheet(roadmap="", prior_knowledge=prior_knowledge)
+            train_items = seed_items + train_items
+            _log(f"\n[Stage 1] Prior knowledge loaded ({len(prior_knowledge)} chars). Roadmap starts empty.")
+
+        else:
+            _log(f"\n[Stage 1] Generating initial cheatsheet from {len(seed_items)} seed examples ...")
+            cheatsheet = generate_initial_cheatsheet(
+                items=seed_items,
+                model=model_init,
+                api_key=api_key,
+                n_seed_true=args.n_seed_examples // 2,
+                n_seed_false=args.n_seed_examples // 2,
+                n_studies=args.n_seed_studies,
+                seed=args.seed,
+                temperature=args.init_temperature,
+            )
+            cheatsheet.save(output_dir / "cheatsheet_init")
+            _log(f"  {cheatsheet.summary()}")
 
     # Apply no-render-limit flag — must be set before any .render() call
     if args.no_render_limit:

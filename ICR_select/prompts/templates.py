@@ -10,6 +10,8 @@ mechanism prompts:
 
 from __future__ import annotations
 
+import os
+
 from ICR_naive.prompts.templates import (
     ROADMAP_PROMPT,
     DECISION_TREE_PROMPT,  # backward-compat alias
@@ -31,7 +33,7 @@ from ICR_reasoning.prompts.templates import (
 
 N_CANDIDATES        = 3       # candidates generated per bin flush
 CANDIDATE_TEMPS     = [0.3, 0.6, 0.9]   # one per candidate — diversity via temperature
-CORRECT_POOL_MAX    = 40      # max items kept in correct pool for regression check
+CORRECT_POOL_MAX    = int(os.environ.get("ICR_SELECT_CORRECT_POOL_MAX", 40))  # max items kept in correct pool for regression check
 
 # ---------------------------------------------------------------------------
 # Retry context — appended to generation prompt when flush_strategy="retry"
