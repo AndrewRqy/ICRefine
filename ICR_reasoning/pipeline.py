@@ -212,7 +212,6 @@ def main() -> None:
         concurrency=args.concurrency,
         casestudy_temperature=args.casestudy_temperature,
         flush_remainder=not args.no_flush_remainder,
-        apply_dt_patch=not args.no_dt_patch,
         cot_first=args.cot_first,
         output_dir=output_dir,
         log=True,

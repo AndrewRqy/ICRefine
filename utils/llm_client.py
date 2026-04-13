@@ -29,7 +29,7 @@ OPENAI_URL        = "https://api.openai.com/v1/chat/completions"
 MAX_TOKENS        = int(os.environ.get("ICR_MAX_TOKENS", 16_000))
 MAX_RETRIES       = 3
 RETRY_BASE_DELAY  = 2.0
-VLLM_READ_TIMEOUT = 600   # local inference can be slow — 10 min per request
+VLLM_READ_TIMEOUT = 1800  # local inference can be slow — 30 min per request
 
 _OPENAI_PREFIXES = ("gpt-4", "gpt-3", "o1", "o3", "o4")
 
@@ -121,7 +121,7 @@ def call_llm(
         headers["HTTP-Referer"] = "https://github.com/sair-evaluation"
         headers["X-Title"]      = "SAIR ICRefine"
 
-    read_timeout = VLLM_READ_TIMEOUT if is_vllm else 300
+    read_timeout = VLLM_READ_TIMEOUT if is_vllm else 600
     delay = RETRY_BASE_DELAY
     for attempt in range(1, MAX_RETRIES + 1):
         try:
