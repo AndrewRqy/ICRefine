@@ -68,6 +68,14 @@ The cheatsheet the model uses has two parts:
 {case_studies}
 === END CASE STUDIES ===
 
+=== PATTERNS ALREADY COVERED — YOUR CASE STUDY MUST NOT RESTATE THESE ===
+{already_covered}
+Your new case study MUST address a gap NOT covered above. If your ACTIVATE IF
+conditions would fire on the same equation pairs as any pattern listed above,
+you are restating existing knowledge — discard that idea and find a genuinely
+new pattern in the failure examples.
+=== END ALREADY COVERED ===
+
 The following examples were ALL predicted INCORRECTLY by the weaker model.
 The ground-truth verdict and the weaker model's wrong reasoning are shown.
 Where available, a CORRECT oracle reasoning trace from a stronger model is shown \

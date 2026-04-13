@@ -144,7 +144,8 @@ def _similarity_gate(
     api_key: str,
 ) -> tuple[str, int | None]:
     """
-    Check if candidate duplicates an existing case study.
+    Check if candidate duplicates an existing case study OR restates a rule
+    already in the roadmap/prior knowledge.
 
     Returns:
         ('ADD',   None)  — new pattern, add it
@@ -154,8 +155,14 @@ def _similarity_gate(
     if not cheatsheet.case_studies:
         return "ADD", None
 
+    roadmap_text = "\n\n".join(filter(None, [
+        cheatsheet.roadmap.strip(),
+        cheatsheet.prior_knowledge.strip() if hasattr(cheatsheet, "prior_knowledge") else "",
+    ])).strip() or "(none)"
+
     resp = call_llm(
         SIMILARITY_CHECK_PROMPT.format(
+            roadmap=roadmap_text,
             existing=_format_existing(cheatsheet.case_studies),
             candidate=candidate_cs.render(),
         ),

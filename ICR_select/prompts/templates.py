@@ -64,22 +64,29 @@ SIMILARITY_CHECK_PROMPT = """\
 You are reviewing a NEW case study before adding it to a cheatsheet for magma \
 equation implication decisions.
 
+=== REASONING ROADMAP / PRIOR KNOWLEDGE (already in the cheatsheet) ===
+{roadmap}
+
 === EXISTING CASE STUDIES ===
 {existing}
 
 === NEW CANDIDATE ===
 {candidate}
 
-Compare the IDENTIFY conditions of the new candidate against each existing entry.
-Two case studies are duplicates if their IDENTIFY conditions would fire on the
-same set of equation pairs — even if they are worded differently or have different
-titles. Focus on the structural conditions (equation forms, variable counts,
-nesting patterns), not the surface text.
+Check the ACTIVATE IF / IDENTIFY conditions of the new candidate against:
+  1. The existing case studies above.
+  2. The rules and aspects already stated in the reasoning roadmap / prior knowledge.
+
+A case study is redundant if its ACTIVATE IF conditions would fire on the same
+set of equation pairs as an existing case study OR as a rule already in the
+roadmap — even if worded differently or given a different title.
+Focus on structural conditions (equation forms, variable counts, nesting
+patterns), not surface text.
 
 Reply with EXACTLY one of the following — no explanation, no extra text:
-  ADD       — the IDENTIFY conditions are genuinely distinct from all existing entries
-  SKIP      — an existing entry has IDENTIFY conditions that cover the same cases
-  MERGE:N   — the new candidate's IDENTIFY conditions overlap with entry N and \
+  ADD       — the ACTIVATE IF conditions are genuinely distinct from all existing entries AND from the roadmap rules
+  SKIP      — an existing case study or roadmap rule already covers the same cases
+  MERGE:N   — the new candidate overlaps with existing case study N and \
 should be merged into it (replace N with the integer number shown above)\
 """
 

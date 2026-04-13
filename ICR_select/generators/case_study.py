@@ -25,6 +25,32 @@ from ..prompts.templates import (
 )
 
 
+def _format_already_covered(cheatsheet: Cheatsheet) -> str:
+    """
+    Summarise patterns already covered by the roadmap and existing case studies
+    so the generation prompt can explicitly tell the LLM not to restate them.
+    """
+    lines: list[str] = []
+
+    # Extract key roadmap rules as bullet points (first sentence of each ASPECT line)
+    for line in cheatsheet.roadmap.splitlines():
+        line = line.strip()
+        if line.upper().startswith("ASPECT") or line.upper().startswith("RULE") or line.upper().startswith("STEP"):
+            # Keep only the label + first clause
+            short = line[:120] + ("..." if len(line) > 120 else "")
+            lines.append(f"  [roadmap] {short}")
+
+    # Summarise ACTIVATE IF conditions from existing case studies
+    for cs in cheatsheet.case_studies:
+        if cs.activate_if:
+            conditions = "; ".join(cs.activate_if[:2])  # first 2 conditions
+            lines.append(f"  [case study: {cs.title}] {conditions}")
+        elif cs.title:
+            lines.append(f"  [case study: {cs.title}]")
+
+    return "\n".join(lines) if lines else "  (none yet — this is the first case study)"
+
+
 def generate_candidates(
     failures: list[dict],
     cheatsheet: Cheatsheet,
@@ -78,6 +104,7 @@ def generate_candidates(
         roadmap=cheatsheet.roadmap.strip(),
         case_studies=_render_case_studies_text(cheatsheet),
         failure_lines=failure_lines,
+        already_covered=_format_already_covered(cheatsheet),
     )
 
     _COMPLETION_RETRY_PROMPT = """\
