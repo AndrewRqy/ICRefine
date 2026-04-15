@@ -232,6 +232,15 @@ TRAIN_JID=$(sbatch \
         source ~/.bashrc
         cd ${ICR_ROOT}
 
+        # ---- Activate Python environment ----
+        if [[ -f .venv/bin/activate ]]; then
+            source .venv/bin/activate
+        else
+            echo "[train] .venv not found — running uv sync first ..."
+            uv sync
+            source .venv/bin/activate
+        fi
+
         # ---- Wait for vLLM endpoints ----
         echo \"[train] Waiting for Llama endpoint (${LLAMA_ENDPOINT_FILE})...\"
         until [[ -f ${LLAMA_ENDPOINT_FILE} ]]; do sleep 15; done
