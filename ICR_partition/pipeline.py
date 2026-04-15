@@ -381,8 +381,21 @@ def main() -> None:
     )
 
     if args.cheatsheet_out:
+        # Render the full scoring prompt (evaluation.jinja2) with the cheatsheet
+        # embedded and equation placeholders left as Jinja2 literals so the file
+        # shows exactly what the scoring LLM receives.
+        from jinja2 import Environment, FileSystemLoader
+        prompts_dir = Path(__file__).parent.parent.parent / "SAIR_eval_pipeline" / "prompts"
+        env = Environment(loader=FileSystemLoader(str(prompts_dir)), keep_trailing_newline=True)
+        jinja_template = env.get_template("evaluation.jinja2")
+        prompt_text = jinja_template.render(
+            cheatsheet=result.cheatsheet.render(),
+            equation1="{{ equation1 }}",
+            equation2="{{ equation2 }}",
+        )
         out_path = Path(args.cheatsheet_out)
-        out_path.write_text(result.cheatsheet.render(), encoding="utf-8")
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(prompt_text, encoding="utf-8")
         _log(f"  Written to: {out_path}")
 
     print(result.cheatsheet.render())

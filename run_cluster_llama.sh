@@ -234,6 +234,7 @@ python3 -m ICR_partition.pipeline \
     --output-dir          ${OUTPUT_DIR} \
     --model-score         llama-3.3-70b \
     --model-casestudy     gpt-4o \
+    --cheatsheet-out      ${ICR_ROOT}/../SAIR_eval_pipeline/cheatsheets/icr_partition_llama_\$(date +%Y%m%d_%H%M%S).txt \
     \${RESUME_FLAG} \
     ${TRAIN_OPTS}
 
