@@ -124,6 +124,10 @@ if [[ ! -x "$VLLM_BIN" ]]; then
     echo "[run_cluster_ensemble] vLLM installed."
 fi
 
+# Upgrade transformers to latest — required for Gemma-4 architecture support.
+echo "[run_cluster_ensemble] Upgrading transformers for Gemma-4 support..."
+"${SCRATCH}/vllm-env/bin/pip" install --quiet --upgrade transformers
+
 # ---------------------------------------------------------------------------
 # Job 1 — Llama-3.3-70B on port 8000 (2×A100-80GB, tensor-parallel-size 2)
 # ---------------------------------------------------------------------------
@@ -144,6 +148,7 @@ LLAMA_JID=$(sbatch \
             ${LLAMA70B_PATH} \
             --served-model-name llama-3.3-70b \
             --tensor-parallel-size 2 \
+            --max-model-len 16384 \
             --port 8000 &
         VLLM_PID=\$!
         # Poll until server accepts requests, then write endpoint sentinel
@@ -177,6 +182,7 @@ GEMMA_JID=$(sbatch \
         ${VLLM_BIN} serve \
             ${GEMMA31B_PATH} \
             --served-model-name gemma-4-31b \
+            --max-model-len 16384 \
             --port 8001 &
         VLLM_PID=\$!
         # Poll until server accepts requests, then write endpoint sentinel
