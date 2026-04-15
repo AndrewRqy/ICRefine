@@ -70,6 +70,14 @@ def _resolve_endpoint(model: str) -> tuple[str, str, bool, bool]:
     if vllm_url and vllm_model and model == vllm_model:
         return vllm_url, os.environ.get("VLLM_API_KEY", ""), False, True
 
+    # Secondary vLLM endpoint — used by ensemble scoring for the second model.
+    # Set VLLM_BASE_URL_2 and VLLM_MODEL_2 to route a specific model to a
+    # different vLLM server (e.g. different node/port on the cluster).
+    vllm_url_2   = os.environ.get("VLLM_BASE_URL_2", "")
+    vllm_model_2 = os.environ.get("VLLM_MODEL_2", "")
+    if vllm_url_2 and vllm_model_2 and model == vllm_model_2:
+        return vllm_url_2, os.environ.get("VLLM_API_KEY_2", ""), False, True
+
     openai_key = os.environ.get("OPENAI_API_KEY", "")
     bare = model.removeprefix("openai/")
     if openai_key and bare.startswith(_OPENAI_PREFIXES):
@@ -86,9 +94,10 @@ def call_llm(
     prompt: str,
     model: str,
     api_key: str,
-    temperature: float = 0.3,
+    temperature: float = 0.0,
     max_tokens: int = MAX_TOKENS,
     reasoning_effort: str | None = "low",
+    seed: int | None = 42,
 ) -> LLMResponse:
     """
     Send a single prompt and return LLMResponse(content, thinking).
@@ -111,8 +120,13 @@ def call_llm(
         "max_tokens":  max_tokens,
         "temperature": temperature,
     }
+    if seed is not None:
+        payload["seed"] = seed
     if reasoning_effort is not None and not is_openai and not is_vllm:
         payload["reasoning"] = {"effort": reasoning_effort}
+    if not is_openai and not is_vllm:
+        # Competition setting: strict provider pinning, no fallbacks
+        payload["provider"] = {"allow_fallbacks": False}
 
     headers = {"Content-Type": "application/json"}
     if resolved_key:
@@ -223,6 +237,7 @@ def call_llm_batch(
     concurrency: int = 10,
     progress_label: str = "",
     reasoning_effort: str | None = "low",
+    seed: int | None = 42,
 ) -> list[LLMResponse | None]:
     """
     Call the LLM for each prompt in parallel using a thread pool.
@@ -235,7 +250,7 @@ def call_llm_batch(
 
     def _call(idx: int, prompt: str) -> tuple[int, LLMResponse | None]:
         try:
-            return idx, call_llm(prompt, model, api_key, temperature, max_tokens, reasoning_effort)
+            return idx, call_llm(prompt, model, api_key, temperature, max_tokens, reasoning_effort, seed)
         except Exception as exc:
             print(f"\n  [batch] item {idx} error: {exc}", file=sys.stderr)
             return idx, None
@@ -247,7 +262,5 @@ def call_llm_batch(
             results[idx] = resp
             done += 1
             label = f"  {progress_label} " if progress_label else "  "
-            print(f"\r{label}{done}/{len(prompts)}", end="", flush=True, file=sys.stderr)
-
-    print(file=sys.stderr)
+            print(f"{label}{done}/{len(prompts)}", flush=True, file=sys.stderr)
     return results

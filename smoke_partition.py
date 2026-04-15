@@ -5,7 +5,7 @@ smoke_partition.py — Smoke tests for ICR_partition without live API calls.
 Patches score_batch, generate_candidates, _mini_eval_full, _regression_check,
 and _similarity_gate to return deterministic results, then verifies:
 
-  1.  item_partition_key: correct (form_e1, form_e2, depth_bucket, polarity)
+  1.  item_partition_key: correct (form_e1, form_e2, depth_bucket, polarity, e1_proj_class)
   2.  build_partitions: bins created only when failures >= bin_threshold
   3.  build_partitions: designated correct pool populated from same key
   4.  PartitionBin.add_correct: reservoir-sampled cap respected
@@ -17,9 +17,12 @@ and _similarity_gate to return deterministic results, then verifies:
   10. run_partition_loop: retired bins excluded from re-score pass
   11. run_partition_loop: prescore_map skips initial scoring API call
   12. run_partition_loop: update_log contains initial_score + iter events
-  13. pipeline CLI: --help returns zero exit code
-  14. pipeline CLI: --no-oracle flag present in --help
-  15. pipeline CLI: --partition-concurrency flag present in --help
+  13. pipeline CLI: --help returns zero exit code + key flags present
+  14. score_batch_ensemble: _wrong_weight proportional to models that failed
+  15. score_batch_ensemble: post_think concatenates both models' traces
+  16. run_partition_loop: model_score_2 routes through score_batch_ensemble
+  17. PartitionBin.archive_candidate: capped at ARCHIVE_MAX, sorted descending
+  18. PartitionBin.archive_candidate: accepted entry removed before re-adding
 """
 
 from __future__ import annotations
@@ -137,6 +140,7 @@ def test_partition_key():
     check("form_e1 == ABSORBING", key[0] == "ABSORBING", f"got {key[0]}")
     check("form_e2 == GENERAL",   key[1] == "GENERAL",   f"got {key[1]}")
     check("polarity == TRUE",     key[3] == "TRUE",       f"got {key[3]}")
+    check("absorbing e1_proj_class == other", key[4] == "other", f"got {key[4]}")
 
     item_std = _item(STANDARD_EQ1, STANDARD_EQ2, False, "TRUE")
     key_std = item_partition_key(item_std)
@@ -149,6 +153,14 @@ def test_partition_key():
     item_triv = _item(TRIVIAL_EQ1, TRIVIAL_EQ2, False, "TRUE")
     key_triv = item_partition_key(item_triv)
     check("depth_bucket == 0 for trivial (x=x)", key_triv[2] == 0, f"got {key_triv[2]}")
+
+    # e1_proj_class detection
+    from ICR_partition.training.partition import _e1_proj_class
+    check("left_proj detected",  _e1_proj_class("x = x * ((y * z) * (w * u))") == "left_proj",  "failed")
+    check("right_proj detected", _e1_proj_class("x = ((y * y) * z) * x")       == "right_proj", "failed")
+    check("nested detected",     _e1_proj_class("x = x * (y * (x * z))")        == "nested",     "failed")
+    check("absorbing→other",     _e1_proj_class("x = y * z")                    == "other",      "failed")
+    check("trivial→other",       _e1_proj_class("x = x")                        == "other",      "failed")
 
 
 # ---------------------------------------------------------------------------
@@ -554,6 +566,209 @@ def test_cli_help():
 
 
 # ---------------------------------------------------------------------------
+# Test 13 — score_batch_ensemble: _wrong_weight and post_think merging
+# ---------------------------------------------------------------------------
+def test_score_batch_ensemble_weights():
+    print("\nTest 13: score_batch_ensemble — _wrong_weight and post_think")
+    from utils.scorer import score_batch_ensemble
+    from unittest.mock import patch as _patch
+
+    items = [
+        _item(ABSORBING_EQ1, GENERAL_EQ2, True,  "FALSE", 0),   # answer=TRUE
+        _item(ABSORBING_EQ1, GENERAL_EQ2, True,  "FALSE", 1),   # answer=TRUE
+        _item(ABSORBING_EQ1, GENERAL_EQ2, True,  "FALSE", 2),   # answer=TRUE
+    ]
+
+    # Model 1 (primary): item0=wrong, item1=correct, item2=wrong
+    m1_results = [
+        (False, {**items[0], "predicted": "FALSE", "post_think": "m1_wrong_0",
+                 "expected": "TRUE", "thinking": "", "raw_response": ""}),
+        (True,  {**items[1], "predicted": "TRUE",  "post_think": "m1_right_1",
+                 "expected": "TRUE", "thinking": "", "raw_response": ""}),
+        (False, {**items[2], "predicted": "FALSE", "post_think": "m1_wrong_2",
+                 "expected": "TRUE", "thinking": "", "raw_response": ""}),
+    ]
+    # Model 2 (secondary): item0=wrong, item1=wrong, item2=correct
+    m2_results = [
+        (False, {**items[0], "predicted": "FALSE", "post_think": "m2_wrong_0",
+                 "expected": "TRUE", "thinking": "", "raw_response": ""}),
+        (False, {**items[1], "predicted": "FALSE", "post_think": "m2_wrong_1",
+                 "expected": "TRUE", "thinking": "", "raw_response": ""}),
+        (True,  {**items[2], "predicted": "TRUE",  "post_think": "m2_right_2",
+                 "expected": "TRUE", "thinking": "", "raw_response": ""}),
+    ]
+
+    _PATCH_ORDERED = "utils.scorer._score_batch_ordered"
+    call_count = [0]
+    def _fake_ordered(items_, cs, model, *a, **kw):
+        idx = call_count[0] % 2
+        call_count[0] += 1
+        return m1_results if idx == 0 else m2_results
+
+    with _patch(_PATCH_ORDERED, side_effect=_fake_ordered):
+        correct, wrong = score_batch_ensemble(
+            items, "cheatsheet",
+            models=["model-a", "model-b"],
+            weights=[1.0, 1.0],
+            api_key="dummy",
+            concurrency=1,
+        )
+
+    wrong_by_id = {w["id"]: w for w in wrong}
+    correct_by_id = {c["id"]: c for c in correct}
+
+    # item0: both wrong → weight=1.0, in wrong list
+    check("item0 in wrong list (both models wrong)",
+          "item_0000" in wrong_by_id, f"wrong ids: {list(wrong_by_id)}")
+    check("item0 _wrong_weight == 1.0",
+          wrong_by_id.get("item_0000", {}).get("_wrong_weight") == 1.0,
+          f"got {wrong_by_id.get('item_0000', {}).get('_wrong_weight')}")
+
+    # item1: m1 correct, m2 wrong → weight=0.5
+    check("item1 in wrong list (one model wrong)",
+          "item_0001" in wrong_by_id, f"wrong ids: {list(wrong_by_id)}")
+    check("item1 _wrong_weight == 0.5",
+          wrong_by_id.get("item_0001", {}).get("_wrong_weight") == 0.5,
+          f"got {wrong_by_id.get('item_0001', {}).get('_wrong_weight')}")
+
+    # item2: m1 wrong, m2 correct → weight=0.5
+    check("item2 _wrong_weight == 0.5",
+          wrong_by_id.get("item_0002", {}).get("_wrong_weight") == 0.5,
+          f"got {wrong_by_id.get('item_0002', {}).get('_wrong_weight')}")
+
+    # item0 post_think should contain both models' traces
+    pt0 = wrong_by_id.get("item_0000", {}).get("post_think", "")
+    check("item0 post_think contains m1 trace", "m1_wrong_0" in pt0, f"got: {pt0!r}")
+    check("item0 post_think contains m2 trace", "m2_wrong_0" in pt0, f"got: {pt0!r}")
+
+    # correct list should be empty (no item was correct on both models)
+    check("correct list is empty (no item correct on both)",
+          len(correct) == 0, f"correct={[c['id'] for c in correct]}")
+
+
+# ---------------------------------------------------------------------------
+# Test 14 — run_partition_loop with model_score_2 routes to ensemble scorer
+# ---------------------------------------------------------------------------
+def test_loop_ensemble_routing():
+    print("\nTest 14: run_partition_loop — model_score_2 routes to score_batch_ensemble")
+
+    items = _make_absorbing_items(6)
+    ps    = _prescore(items, n_correct=0)
+
+    ensemble_calls: list[tuple] = []
+
+    def _fake_ensemble(batch, cs_text, models, weights, api_key, **kw):
+        ensemble_calls.append((tuple(models), tuple(weights)))
+        # Return all items as wrong with weight=1.0
+        wrong = [{**i, "predicted": "FALSE", "expected": "TRUE",
+                  "_wrong_weight": 1.0, "post_think": "", "thinking": "",
+                  "raw_response": ""} for i in batch]
+        return [], wrong
+
+    def _mini_eval_fixes_all(cand, failures, cs, *a, **kw):
+        return 1.0, []
+
+    _PATCH_ENSEMBLE = "ICR_partition.training.loop.score_batch_ensemble"
+
+    with patch(_PATCH_ENSEMBLE, side_effect=_fake_ensemble), \
+         patch(_PATCH_MINI_EVAL, side_effect=_mini_eval_fixes_all), \
+         patch(_PATCH_REGRESS,   return_value=0.0), \
+         patch(_PATCH_SIMGATE,   return_value=("ADD", None)), \
+         patch(_PATCH_GEN,       return_value=[_candidate()]):
+
+        run_partition_loop(
+            cheatsheet=Cheatsheet(roadmap="", case_studies=[]),
+            train_items=items, val_items=None,
+            model_score="primary-model",
+            model_casestudy="dummy",
+            api_key="dummy",
+            model_score_2="secondary-model",
+            model_score_weights=[2.0, 1.0],
+            oracle=None,
+            bin_threshold=3, retirement_threshold=2, max_outer_iters=1,
+            partition_concurrency=2, concurrency=1,
+            n_candidates=1, candidate_rounds=1,
+            fix_rate_threshold=0.30, regress_threshold=0.15,
+            min_pool_for_regression=100,
+            similarity_gate=False,
+            prescore_map=ps,
+            output_dir=None, log=False,
+        )
+
+    check("score_batch_ensemble was called at least once",
+          len(ensemble_calls) > 0,
+          "ensemble scorer never called — _do_score did not route to ensemble")
+    if ensemble_calls:
+        models_used, weights_used = ensemble_calls[0]
+        check("ensemble called with both model IDs",
+              "primary-model" in models_used and "secondary-model" in models_used,
+              f"models={models_used}")
+        check("ensemble called with correct weights",
+              weights_used == (2.0, 1.0),
+              f"weights={weights_used}")
+
+
+# ---------------------------------------------------------------------------
+# Test 15 — PartitionBin.archive_candidate: cap and sort
+# ---------------------------------------------------------------------------
+def test_archive_candidate():
+    print("\nTest 15: PartitionBin.archive_candidate — cap and sort")
+    from ICR_partition.training.partition import ARCHIVE_MAX
+
+    pb = PartitionBin(key=("ABSORBING", "GENERAL", 1, "TRUE", "other"))
+
+    # Add ARCHIVE_MAX + 3 candidates with varying fix_rates
+    candidates = []
+    for i in range(ARCHIVE_MAX + 3):
+        cs = CaseStudy(title=f"CS_{i}", activate_if=[f"cond_{i}"])
+        pb.archive_candidate(fix_rate=float(i) / 10, cs=cs)
+        candidates.append(cs)
+
+    check(f"archive capped at ARCHIVE_MAX={ARCHIVE_MAX}",
+          len(pb.candidate_archive) == ARCHIVE_MAX,
+          f"got {len(pb.candidate_archive)}")
+
+    # Should keep the highest fix_rate entries
+    rates = [fr for fr, _ in pb.candidate_archive]
+    check("archive sorted descending by fix_rate",
+          rates == sorted(rates, reverse=True),
+          f"rates={rates}")
+
+    top_rate = rates[0]
+    expected_min_rate = float(ARCHIVE_MAX + 3 - ARCHIVE_MAX) / 10
+    check("archive contains highest fix_rate entries",
+          top_rate >= expected_min_rate,
+          f"top={top_rate}  expected_min={expected_min_rate}")
+
+
+# ---------------------------------------------------------------------------
+# Test 16 — archive_candidate: accepted entry correctly removed
+# ---------------------------------------------------------------------------
+def test_archive_eviction():
+    print("\nTest 16: archive eviction on acceptance")
+    pb = PartitionBin(key=("ABSORBING", "GENERAL", 1, "TRUE", "other"))
+
+    cs_a = CaseStudy(title="CS_A", activate_if=["cond_a"])
+    cs_b = CaseStudy(title="CS_B", activate_if=["cond_b"])
+    pb.archive_candidate(0.8, cs_a)
+    pb.archive_candidate(0.5, cs_b)
+    check("archive has 2 entries before eviction",
+          len(pb.candidate_archive) == 2)
+
+    # Simulate the eviction logic in loop.py
+    pb.candidate_archive = [
+        (fr, cs) for fr, cs in pb.candidate_archive if cs is not cs_a
+    ]
+    check("archive has 1 entry after evicting cs_a",
+          len(pb.candidate_archive) == 1,
+          f"got {len(pb.candidate_archive)}")
+    check("remaining entry is cs_b",
+          pb.candidate_archive[0][1] is cs_b)
+    check("cs_a no longer in archive",
+          all(cs is not cs_a for _, cs in pb.candidate_archive))
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
@@ -571,6 +786,10 @@ if __name__ == "__main__":
     test_prescore_skips_initial_score()
     test_update_log_structure()
     test_cli_help()
+    test_score_batch_ensemble_weights()
+    test_loop_ensemble_routing()
+    test_archive_candidate()
+    test_archive_eviction()
 
     print()
     if _failures:

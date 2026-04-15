@@ -194,6 +194,11 @@ def generate_case_study_with_reasoning(
         roadmap=cheatsheet.roadmap.strip(),
         case_studies=_render_case_studies_text(cheatsheet),
         failure_lines=_format_failures_with_reasoning(failures, oracle=oracle),
+        already_covered="  (none yet — this is the first case study)",
+        polarity_instruction=(
+            "Diagnose whether these failures are TYPE A (missing algebraic knowledge) or TYPE B "
+            "(wrong reasoning pattern), choosing the type that best explains the majority of cases."
+        ),
     )
 
     resp = call_llm(

@@ -280,3 +280,46 @@ Output ONLY the roadmap starting with ASPECT 1 — no preamble.\
 """
 
 ROADMAP_SYNTHESIS_MAX_TOKENS = 1_600
+
+# ---------------------------------------------------------------------------
+# Crossover — evolve two archived candidates into one stronger child
+# ---------------------------------------------------------------------------
+
+CROSSOVER_PROMPT = """\
+You are evolving two case studies for magma equation implication into a stronger combined version.
+
+The two parent case studies below were generated for the same structural failure bin but each \
+failed to pass the fix-rate gate on their own. Your task is to produce a single "child" case study \
+that combines the best elements of both parents and fixes MORE failures than either parent alone.
+
+=== PARENT A (fix_rate={fr1:.0%}) ===
+{cs_a}
+
+=== PARENT B (fix_rate={fr2:.0%}) ===
+{cs_b}
+
+Crossover rules:
+- Combine ACTIVATE IF conditions so the child fires on cases that triggered EITHER parent.
+- Keep the NEXT CHECK that is more mechanically specific (easier to apply correctly).
+- Merge WHY THIS WORKS paragraphs if they are complementary; keep the better one if they conflict.
+- Combine SUPPORT examples: keep the 2–3 most structurally distinct examples total.
+- DO NOT ACTIVATE IF should cover the union of boundary cases from both parents.
+- The child must remain within 700 characters total.
+- Preserve FAILURE_TYPE and TARGET_STEP from the higher-fix-rate parent.
+
+Output ONLY the child case study in this exact format:
+=== CASE STUDY: [short specific title] ===
+FAILURE_TYPE: A or B
+ACTIVATE IF:
+  - [condition 1]
+  - [condition 2]
+DO NOT ACTIVATE IF: [boundary cases where this should not fire]
+COMMON WRONG MOVE: [what the weaker model does wrong]
+NEXT CHECK: [mechanical check to perform — end with "If yes → TRUE/FALSE."]
+WHY THIS WORKS: [1–2 sentence mathematical justification]
+SUPPORT:
+  • E1 = ...  |  E2 = ...  |  Answer: TRUE/FALSE  — [brief note]
+TARGET_STEP: [roadmap aspect this corrects]\
+"""
+
+CROSSOVER_MAX_TOKENS = FLUSH_MAX_TOKENS  # same token budget as a regular case study

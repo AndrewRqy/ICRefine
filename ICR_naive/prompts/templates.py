@@ -27,7 +27,7 @@ from ..core.cheatsheet import CASE_STUDY_MAX_CHARS, ROADMAP_MAX_CHARS
 # the hard char cap in cheatsheet.py will truncate the rest.
 DT_MAX_TOKENS      = int(ROADMAP_MAX_CHARS    / 4 * 1.2)
 CS_MAX_TOKENS      = int(CASE_STUDY_MAX_CHARS / 4 * 1.2)
-SCORING_MAX_TOKENS = 16_000  # 16K needed for DeepSeek-R1-32B inline reasoning + structured output at end
+SCORING_MAX_TOKENS = 8_192   # match competition setting: max output tokens 8192
 
 
 # ---------------------------------------------------------------------------
@@ -179,18 +179,19 @@ Use the following decision guide to inform your determination:
 
 {cheatsheet}
 
-IMPORTANT: You MUST end your response with a line that starts with exactly "VERDICT:" \
-followed by TRUE or FALSE. This line is required — responses without it cannot be scored.
+CRITICAL INSTRUCTION: The VERY FIRST LINE of your response must be either:
+  VERDICT: TRUE
+  VERDICT: FALSE
+Do NOT write anything before this line. Not a single word. Start with VERDICT immediately.
+After the verdict line you may provide reasoning, proof, or counterexample.
+Even if you are uncertain, you MUST commit to a verdict — write VERDICT: TRUE or VERDICT: FALSE \
+based on your best assessment or lean. Never leave the verdict blank or say "I don't know".
 
-Output format (use exact headers without any additional text or formatting):
-VERDICT: must be exactly TRUE or FALSE (in the same line). THIS LINE IS MANDATORY.
-REASONING: must be non-empty. If you apply ASPECT sections from the decision guide, \
-open each clause with its checkpoint tag — [CK:A1] for ASPECT 1, [CK:A2] for ASPECT 2, \
-and so on — so that the aspect you are applying is unambiguous.
+Output format:
+VERDICT: TRUE or FALSE  ← THIS MUST BE YOUR FIRST LINE, NO EXCEPTIONS.
+REASONING: apply the decision guide step by step.
 PROOF: if VERDICT is TRUE, provide a proof; otherwise leave empty.
-COUNTEREXAMPLE: if VERDICT is FALSE, provide a counterexample magma; otherwise leave empty.
-
-Remember: your final output MUST contain the line "VERDICT: TRUE" or "VERDICT: FALSE".\
+COUNTEREXAMPLE: if VERDICT is FALSE, provide a counterexample magma; otherwise leave empty.\
 """
 
 # Variant: reasoning written BEFORE the verdict so the model cannot anchor on a
@@ -205,18 +206,19 @@ Use the following decision guide to inform your determination:
 
 {cheatsheet}
 
-IMPORTANT: You MUST emit a line starting with exactly "VERDICT:" followed by TRUE or FALSE \
-after your reasoning. This line is required — responses without it cannot be scored.
+CRITICAL INSTRUCTION: The VERY FIRST LINE of your response must be either:
+  VERDICT: TRUE
+  VERDICT: FALSE
+Do NOT write anything before this line. Not a single word. Start with VERDICT immediately.
+After the verdict line you may provide reasoning, proof, or counterexample.
+Even if you are uncertain, you MUST commit to a verdict — write VERDICT: TRUE or VERDICT: FALSE \
+based on your best assessment or lean. Never leave the verdict blank or say "I don't know".
 
-Work through your reasoning step by step BEFORE stating your verdict.
-Output format (use exact headers in this exact order, no extra text):
+Output format:
+VERDICT: TRUE or FALSE  ← THIS MUST BE YOUR FIRST LINE, NO EXCEPTIONS.
 REASONING: apply the decision guide aspect by aspect. For each ASPECT you consult, \
 begin that clause with its checkpoint tag: [CK:A1] for ASPECT 1, [CK:A2] for ASPECT 2, \
-etc. Then explain which check fires and why. This tagging is required — it is used to \
-track which aspects are applied correctly vs. incorrectly.
-VERDICT: must be exactly TRUE or FALSE (in the same line, after REASONING). THIS LINE IS MANDATORY.
+etc.
 PROOF: if VERDICT is TRUE, provide a proof; otherwise leave empty.
-COUNTEREXAMPLE: if VERDICT is FALSE, provide a counterexample magma; otherwise leave empty.
-
-Remember: after your reasoning, you MUST write "VERDICT: TRUE" or "VERDICT: FALSE".\
+COUNTEREXAMPLE: if VERDICT is FALSE, provide a counterexample magma; otherwise leave empty.\
 """

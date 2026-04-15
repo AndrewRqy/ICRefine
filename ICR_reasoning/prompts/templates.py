@@ -87,6 +87,8 @@ for contrast — this is your primary signal for what the weaker model is missin
 
 === YOUR TASK ===
 
+{polarity_instruction}
+
 Step 0 — DIAGNOSE the failure type. Choose exactly one:
   TYPE A — MISSING KNOWLEDGE: The weaker model's reasoning strategy was reasonable
     but it lacks a key algebraic fact (a lemma, identity, or structural property).

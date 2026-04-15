@@ -50,6 +50,8 @@ guarantee.  Cross-partition interference is measured in the update_log
 from __future__ import annotations
 
 import json
+import os
+import signal
 import sys
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -57,10 +59,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from utils.cheatsheet import Cheatsheet
-from utils.scorer import score_batch
+from utils.scorer import score_batch, score_batch_ensemble
 from utils.oracle_index import OracleIndex
 from ICR_reasoning.core.oracle import OracleDict
-from ICR_select.generators.case_study import generate_candidates
+from ICR_select.generators.case_study import generate_candidates, generate_crossover
 from ICR_select.training.gates import (
     _MIN_CS_FOR_SIMILARITY,
     _apply_prescore,
@@ -188,6 +190,88 @@ def _solve_bin(
         cot_first=cot_first,
     )
 
+    # ── EA: Archive re-evaluation ─────────────────────────────────────────────
+    # Candidates that failed gates in a previous outer iteration are re-scored
+    # against the CURRENT failure set.  If the failure set has shifted enough
+    # (e.g. a previously-broken item was fixed by another case study), an
+    # archived candidate may now pass both the fix-rate and regression gates.
+    # This avoids discarding work that was "close" in an earlier iteration.
+    if pb.candidate_archive:
+        log_fn(
+            f"  [partition:{label}] re-evaluating {len(pb.candidate_archive)} "
+            f"archived candidate(s) against updated failure set ..."
+        )
+        with cs_lock:
+            cs_arch_snapshot = Cheatsheet(
+                roadmap=cheatsheet.roadmap,
+                case_studies=list(cheatsheet.case_studies),
+                prior_knowledge=cheatsheet.prior_knowledge,
+                no_limit=cheatsheet.no_limit,
+            )
+        for arch_fr_prev, arch_cand in pb.candidate_archive:
+            arch_fr, arch_still_wrong = _mini_eval_full(
+                arch_cand, failures, cs_arch_snapshot,
+                label=f"[{label}] archive",
+                **gkw,
+            )
+            log_fn(
+                f"  [partition:{label}] archive '{arch_cand.title}': "
+                f"fix_rate={arch_fr:.0%} (was {arch_fr_prev:.0%})"
+            )
+            if arch_fr < fix_rate_threshold:
+                continue
+            # Passes fix-rate — check regression
+            arch_reg = 0.0
+            if pb.correct_pool and len(pb.correct_pool) >= min_pool_for_regression:
+                arch_reg = _regression_check(arch_cand, pb.correct_pool, cs_arch_snapshot, **gkw)
+                log_fn(f"  [partition:{label}] archive regression_rate={arch_reg:.0%}")
+                if arch_reg > regress_threshold:
+                    log_fn(
+                        f"  [partition:{label}] archive regression {arch_reg:.0%} > "
+                        f"threshold={regress_threshold:.0%} — skipping"
+                    )
+                    continue
+            # Passes both gates — accept and return immediately.
+            # Remove from archive so it isn't re-added on future iterations.
+            pb.candidate_archive = [
+                (fr, cs) for fr, cs in pb.candidate_archive if cs is not arch_cand
+            ]
+            with cs_lock:
+                arch_cand.creation_fix_rate  = arch_fr
+                arch_cand.historical_fix_rate = arch_fr
+                cheatsheet.add_case_study(arch_cand)
+                pb.n_flushes += 1
+                log_fn(
+                    f"  [partition:{label}] archive candidate accepted: "
+                    f"'{arch_cand.title}' fix_rate={arch_fr:.0%}  regress={arch_reg:.0%}"
+                )
+                return {
+                    "partition":       label,
+                    "event":           "bin_added",
+                    "title":           arch_cand.title,
+                    "fix_rate":        arch_fr,
+                    "regression_rate": arch_reg,
+                    "attempt":         0,   # 0 = accepted from archive (no new generation)
+                    "n_cs_total":      len(cheatsheet.case_studies),
+                    "source":          "archive",
+                }
+
+    # ── EA: Crossover candidate ───────────────────────────────────────────────
+    # If the archive has two or more entries, combine the top-2 into a single
+    # crossover candidate that is prepended to the pool for attempt 1.
+    # This is cheap (one LLM call at temperature=0.5) and gives the loop a
+    # structurally novel starting point before falling back to fresh generation.
+    crossover_cand = None
+    if len(pb.candidate_archive) >= 2:
+        try:
+            fr1, cs1 = pb.candidate_archive[0]
+            fr2, cs2 = pb.candidate_archive[1]
+            crossover_cand = generate_crossover(cs1, fr1, cs2, fr2, model_casestudy, api_key)
+            if crossover_cand:
+                log_fn(f"  [partition:{label}] crossover candidate generated from archive top-2")
+        except Exception as exc:
+            log_fn(f"  [partition:{label}] crossover generation failed: {exc}")
+
     prev_attempt: dict | None = None
     best_fix_rate = 0.0
 
@@ -211,10 +295,14 @@ def _solve_bin(
             )
 
         # --- Generate candidates ---
+        # pb.key[3] is expected_answer ("TRUE" or "FALSE") — the bin polarity.
+        # Passing it lets generate_candidates weight case study type appropriately:
+        # TRUE bins → TYPE A (missing lemma/proof); FALSE bins → TYPE B (wrong pattern).
         try:
             candidates = generate_candidates(
                 failures, cs_snapshot, model_casestudy, api_key,
                 n=n_candidates, oracle=oracle, prev_attempt=prev_attempt,
+                polarity=pb.key[3],   # index 3 = expected_answer (unchanged)
             )
         except RuntimeError as exc:
             log_fn(f"  [partition:{label}] generation failed: {exc}")
@@ -227,6 +315,11 @@ def _solve_bin(
                 "reason":    "generation_failed",
                 "attempt":   attempt,
             }
+
+        # Prepend crossover candidate on the first attempt (consumed once only).
+        if crossover_cand is not None and attempt == 1:
+            candidates = [crossover_cand] + candidates
+            crossover_cand = None   # don't reuse in subsequent attempts
 
         # --- Inject partition key as guaranteed ACTIVATE IF conditions ---
         # The LLM writes semantic conditions; we prepend the structural ground
@@ -266,6 +359,12 @@ def _solve_bin(
         scored_valid = [(fr, sw, c) for item in scored if (item is not None) for fr, sw, c in [item]]
         scored_valid.sort(key=lambda x: x[0], reverse=True)
         best_fix_rate, best_still_wrong, best_cand = scored_valid[0]
+
+        # Archive all evaluated candidates for future re-evaluation and crossover.
+        # This is safe to do unconditionally: the archive keeps top-ARCHIVE_MAX by
+        # fix_rate and silently discards duplicates via the sort-and-cap logic.
+        for fr_i, _, cand_i in scored_valid:
+            pb.archive_candidate(fr_i, cand_i)
 
         # --- Fix-rate gate ---
         if best_fix_rate < fix_rate_threshold:
@@ -376,6 +475,9 @@ def run_partition_loop(
     model_score:             str,
     model_casestudy:         str,
     api_key:                 str,
+    # Ensemble scoring — optional second scoring model
+    model_score_2:           str | None = None,
+    model_score_weights:     list[float] | None = None,  # [w1, w2]; default [1,1]
     # Oracle (on by default)
     oracle:                  OracleDict | None = None,
     oracle_min_similarity:   float = 0.25,
@@ -407,6 +509,39 @@ def run_partition_loop(
         if log:
             print(msg, file=sys.stderr, flush=True)
 
+    # ── Ensemble scorer ───────────────────────────────────────────────────────
+    # _do_score is a drop-in for score_batch throughout this loop.
+    # When model_score_2 is provided it calls score_batch_ensemble, scoring both
+    # models in parallel.  Each wrong item carries _wrong_weight ∈ (0,1] —
+    # 1.0 if both models failed, 0.5 if only one failed — which flows into the
+    # weighted fix_rate inside _mini_eval_full without any extra API calls.
+    if model_score_2:
+        _models  = [model_score, model_score_2]
+        _weights = model_score_weights or [1.0, 1.0]
+        def _do_score(
+            items, cheatsheet_text, *, concurrency, reasoning_effort, cot_first,
+            progress_label="scoring",
+        ) -> tuple[list[dict], list[dict]]:
+            return score_batch_ensemble(
+                items, cheatsheet_text, _models, _weights, api_key,
+                concurrency=concurrency, reasoning_effort=reasoning_effort,
+                cot_first=cot_first,
+            )
+        _log(
+            f"\n[ensemble] scoring with 2 models: {model_score} (w={_weights[0]}) "
+            f"+ {model_score_2} (w={_weights[1]})"
+        )
+    else:
+        def _do_score(
+            items, cheatsheet_text, *, concurrency, reasoning_effort, cot_first,
+            progress_label="scoring",
+        ) -> tuple[list[dict], list[dict]]:
+            return score_batch(
+                items, cheatsheet_text, model_score, api_key,
+                concurrency=concurrency, reasoning_effort=reasoning_effort,
+                cot_first=cot_first, progress_label=progress_label,
+            )
+
     # Build oracle index for nearest-neighbour enrichment
     oracle_index: OracleIndex | None = None
     if oracle:
@@ -423,13 +558,30 @@ def run_partition_loop(
 
     cs_lock = threading.Lock()
 
+    # ── Graceful-shutdown via SIGINT / SIGTERM ────────────────────────────────
+    # Writing the PID file lets the user do:  kill -TERM <pid>  or Ctrl-C
+    # The loop checks _stop_event before each outer iteration and after each
+    # bin completes; it always saves a checkpoint before exiting.
+    _stop_event = threading.Event()
+
+    def _handle_signal(signum, frame):
+        _log(
+            f"\n[shutdown] Signal {signum} received — "
+            f"finishing current iteration then saving checkpoint ..."
+        )
+        _stop_event.set()
+
+    _prev_sigint  = signal.signal(signal.SIGINT,  _handle_signal)
+    _prev_sigterm = signal.signal(signal.SIGTERM, _handle_signal)
+
     _log(
         f"\n{'='*65}\n"
-        f"ICR_partition Training Loop\n"
+        f"ICR_partition Training Loop  (PID {os.getpid()})\n"
         f"  items={len(train_items)}  bin_threshold={bin_threshold}  "
         f"retirement_threshold={retirement_threshold}\n"
         f"  max_outer_iters={max_outer_iters}  "
         f"partition_concurrency={partition_concurrency}\n"
+        f"  concurrency={concurrency} (divided across active bins)\n"
         f"  n_candidates={n_candidates}  candidate_rounds={candidate_rounds}\n"
         f"  fix_rate≥{fix_rate_threshold:.0%}  "
         f"regress≤{regress_threshold:.0%}  "
@@ -446,11 +598,12 @@ def run_partition_loop(
         correct, wrong = _apply_prescore(train_items, prescore_map)
         _log(f"  [prescore] {len(correct)} correct  {len(wrong)} wrong  (no API call)")
     else:
-        correct, wrong = score_batch(
-            train_items, cheatsheet.render(), model_score, api_key,
+        correct, wrong = _do_score(
+            train_items, cheatsheet.render(),
             concurrency=concurrency,
             reasoning_effort=reasoning_effort,
             cot_first=cot_first,
+            progress_label="scoring",
         )
 
     train_accuracy = len(correct) / len(train_items) if train_items else 0.0
@@ -475,21 +628,35 @@ def run_partition_loop(
     # ── Outer iterations ─────────────────────────────────────────────────────
 
     for outer_iter in range(1, max_outer_iters + 1):
+        if _stop_event.is_set():
+            _log(f"\n[iter {outer_iter}] Stop requested — exiting loop.")
+            break
+
         active_bins = {k: pb for k, pb in bins.items() if not pb.solved}
         if not active_bins:
             _log(f"\n[iter {outer_iter}] All bins retired — stopping.")
             break
 
+        # Divide total concurrency across all simultaneous LLM calls.
+        # Each bin evaluates n_candidates in parallel, each using score_batch
+        # with per_bin_concurrency workers.  The true multiplication is:
+        #   n_parallel_bins × n_candidates × per_bin_concurrency
+        # We solve for per_bin_concurrency so the product ≤ concurrency.
+        n_parallel = min(partition_concurrency, len(active_bins))
+        per_bin_concurrency = max(1, concurrency // (n_parallel * n_candidates))
         _log(
             f"\n{'─'*65}\n"
-            f"[iter {outer_iter}] Solving {len(active_bins)} active partitions ...\n"
+            f"[iter {outer_iter}] Solving {len(active_bins)} active partitions "
+            f"({n_parallel} parallel × {n_candidates} cands × "
+            f"{per_bin_concurrency} concurrency = "
+            f"{n_parallel * n_candidates * per_bin_concurrency} max requests) ...\n"
             f"{'─'*65}"
         )
 
         iter_results: list[dict] = []
 
         # Solve all active bins concurrently
-        with ThreadPoolExecutor(max_workers=min(partition_concurrency, len(active_bins))) as ex:
+        with ThreadPoolExecutor(max_workers=n_parallel) as ex:
             futs = {
                 ex.submit(
                     _solve_bin,
@@ -503,7 +670,7 @@ def run_partition_loop(
                     model_score,
                     model_casestudy,
                     api_key,
-                    concurrency,
+                    per_bin_concurrency,
                     fix_rate_threshold,
                     regress_threshold,
                     min_pool_for_regression,
@@ -533,6 +700,10 @@ def run_partition_loop(
         if output_dir:
             _save_checkpoint(cheatsheet, update_log, output_dir, tag=outer_iter)
 
+        if _stop_event.is_set():
+            _log(f"\n[iter {outer_iter}] Stop requested — checkpoint saved, exiting.")
+            break
+
         # ── Re-score only active-bin items ────────────────────────────────────
         # Collect the union of failures from all still-active bins.
         # This is O(active_failures) not O(all_items).
@@ -549,8 +720,8 @@ def run_partition_loop(
         _log(
             f"\n[iter {outer_iter}] Re-scoring {len(active_failure_items)} active-bin items ..."
         )
-        new_correct, new_wrong = score_batch(
-            active_failure_items, cheatsheet.render(), model_score, api_key,
+        new_correct, new_wrong = _do_score(
+            active_failure_items, cheatsheet.render(),
             concurrency=concurrency,
             reasoning_effort=reasoning_effort,
             cot_first=cot_first,
@@ -593,10 +764,14 @@ def run_partition_loop(
             )
             break
 
+    # Restore original signal handlers
+    signal.signal(signal.SIGINT,  _prev_sigint)
+    signal.signal(signal.SIGTERM, _prev_sigterm)
+
     # ── Final accuracy on full train set ─────────────────────────────────────
     _log(f"\n[final] Scoring {len(train_items)} train items for final accuracy ...")
-    final_correct, final_wrong = score_batch(
-        train_items, cheatsheet.render(), model_score, api_key,
+    final_correct, final_wrong = _do_score(
+        train_items, cheatsheet.render(),
         concurrency=concurrency,
         reasoning_effort=reasoning_effort,
         cot_first=cot_first,

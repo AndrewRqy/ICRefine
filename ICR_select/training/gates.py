@@ -77,7 +77,12 @@ def _mini_eval_full(
         concurrency=concurrency, reasoning_effort=reasoning_effort, cot_first=cot_first,
         progress_label=label,
     )
-    return len(correct) / len(failures) if failures else 0.0, wrong
+    # Weighted fix_rate: ensemble-scored items carry _wrong_weight (0,1].
+    # Fixing a consensus failure (weight=1.0) counts more than fixing a
+    # single-model failure (weight=0.5).  Falls back to 1.0 for non-ensemble.
+    total_weight = sum(item.get("_wrong_weight", 1.0) for item in failures)
+    fixed_weight = sum(item.get("_wrong_weight", 1.0) for item in correct)
+    return fixed_weight / total_weight if total_weight > 0 else 0.0, wrong
 
 
 def _replace_eval(
@@ -125,6 +130,9 @@ def _regression_check(
         concurrency=concurrency, reasoning_effort=reasoning_effort, cot_first=cot_first,
         progress_label="regression-check",
     )
+    # Correct-pool items from ensemble have _wrong_weight on them too (≈0 since
+    # they were correct on all models).  Use uniform 1.0 weight here — regression
+    # is measured only against the primary model, uniformly across the pool.
     return len(wrong) / len(correct_pool)
 
 

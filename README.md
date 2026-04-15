@@ -26,6 +26,7 @@ You can mix backends: e.g. use vLLM for scoring (cheap, fast) and OpenRouter for
 | Model name | Env var used |
 |---|---|
 | Matches `VLLM_MODEL` | `VLLM_API_KEY` (usually empty) |
+| Matches `VLLM_MODEL_2` | `VLLM_API_KEY_2` (secondary vLLM endpoint) |
 | Starts with `gpt-4`, `o1`, `o3`, `o4` and `OPENAI_API_KEY` is set | `OPENAI_API_KEY` → OpenAI directly |
 | Everything else | `OPENROUTER_API_KEY` → OpenRouter |
 
@@ -38,6 +39,11 @@ OPENAI_API_KEY=sk-xxxx               # used if --model-casestudy gpt-4o (direct)
 VLLM_BASE_URL=http://localhost:8000/v1/chat/completions
 VLLM_MODEL=deepseek-r1-32b           # used for --model-score deepseek-r1-32b
 VLLM_API_KEY=                        # usually empty
+
+# Optional: second vLLM endpoint for ensemble scoring
+VLLM_BASE_URL_2=http://localhost:8001/v1/chat/completions
+VLLM_MODEL_2=gemma-4-31b
+VLLM_API_KEY_2=
 ```
 
 **1. Install uv** (if not already installed)
@@ -129,13 +135,14 @@ python -m ICR_select.pipeline \
 
 ## Modes
 
-Three refinement modes are available. **ICR_select is recommended** for all production runs.
+Four refinement modes are available. **ICR_partition is recommended** for cluster runs with open-source models.
 
 | Mode | Entry point | Description |
 |---|---|---|
 | `ICR_naive` | `python -m ICR_naive.pipeline` | Basic loop — collect failures, generate one case study, append |
 | `ICR_reasoning` | `python -m ICR_reasoning.pipeline` | Same, but feeds the model's chain-of-thought to the case study generator |
 | `ICR_select` | `python -m ICR_select.pipeline` | Full quality-gated loop with candidate competition, fix-rate / regression / similarity gates, pruning, condensation |
+| `ICR_partition` | `python -m ICR_partition.pipeline` | Partition-parallel variant of ICR_select. Failures are split into structural bins (by equation form + depth + expected answer) and each bin is solved concurrently. Supports ensemble scoring (two models in parallel) and an evolutionary candidate archive with crossover. Recommended for cluster runs. |
 
 ---
 
@@ -337,6 +344,8 @@ All pipelines accept per-stage model overrides:
 | Flag | Stage |
 |---|---|
 | `--model-score MODEL_ID` | Scoring items during training |
+| `--model-score-2 MODEL_ID` | Second scoring model for ensemble (ICR_partition only) |
+| `--model-score-weights W1,W2` | Weights for both scoring models (default `1.0,1.0`) |
 | `--model-casestudy MODEL_ID` | Case study generation |
 | `--model-init MODEL_ID` | Initial cheatsheet generation (if not using `--prior-knowledge`) |
 | `--model MODEL_ID` | Default for all stages |
@@ -443,6 +452,94 @@ Key building blocks already available to reuse:
 
 ---
 
+## ICR_partition
+
+Partition-parallel iterative refinement. Failures are routed into structural bins keyed by equation form, depth, and expected answer. Each bin is solved concurrently by an inner loop that runs candidate generation, fix-rate, regression, and similarity gates — same quality gates as ICR_select, but scoped to the bin's failure set and a per-bin regression pool.
+
+**Additional features beyond ICR_select:**
+
+- **Candidate archive** — failing candidates are stored per bin (up to 8, sorted by fix rate). At the start of each outer iteration, archived candidates are re-evaluated against the shifted failure set — an archived candidate that now passes gates is accepted immediately (`source: archive`).
+- **Evolutionary crossover** — if a bin's archive has 2+ entries, the top-2 are crossed to produce a child candidate with the union of their ACTIVATE IF conditions. The child is evaluated first in the next solve attempt.
+- **Ensemble scoring** — pass `--model-score-2 MODEL` to score each item on two models in parallel. Items that fail both models get `_wrong_weight=1.0` (consensus failure); items that fail only one model get a proportional weight. The weighted fix rate is used throughout all gates.
+- **Bin retirement** — partitions with few residual failures are retired after each outer iteration to focus compute on the hard tail.
+
+### Basic usage
+
+```bash
+python -m ICR_partition.pipeline \
+    --dataset  path/to/dataset.jsonl \
+    --oracle-csv path/to/gpt5.4_normal_default.csv \
+    --prior-knowledge path/to/NeuriCo_cheatsheet.txt \
+    --model-score deepseek-r1-32b \
+    --model-casestudy openai/gpt-4o \
+    --output-dir runs/partition_run
+```
+
+### Ensemble scoring (two models)
+
+```bash
+# With two local vLLM servers
+VLLM_BASE_URL=http://localhost:8000/v1/chat/completions  VLLM_MODEL=llama-3.3-70b \
+VLLM_BASE_URL_2=http://localhost:8001/v1/chat/completions VLLM_MODEL_2=gemma-4-31b \
+python -m ICR_partition.pipeline \
+    --dataset  path/to/dataset.jsonl \
+    --oracle-csv path/to/gpt5.4_hard_correct.csv \
+    --model-score        llama-3.3-70b \
+    --model-score-2      gemma-4-31b \
+    --model-score-weights 1.0,1.0 \
+    --model-casestudy    llama-3.3-70b \
+    --output-dir runs/ensemble_run
+```
+
+### Cluster ensemble script
+
+`run_cluster_ensemble.sh` automates the full three-job cluster setup: it submits both vLLM jobs (Llama-3.3-70B on port 8000, Gemma-4-31B on port 8001), then submits the training job with a SLURM `after:` dependency. The training job polls sentinel files written by the vLLM jobs once their HTTP endpoints are ready.
+
+```bash
+bash run_cluster_ensemble.sh \
+    --dataset  /net/projects2/chai-lab/sair/hard1.jsonl \
+    --oracle   /net/projects2/chai-lab/sair/gpt5.4_hard_correct.csv \
+    --output   /net/scratch/renqy/runs/ensemble_run1
+
+# Resume after interruption (passes --resume to ICR_partition):
+bash run_cluster_ensemble.sh \
+    --dataset  /net/projects2/chai-lab/sair/hard1.jsonl \
+    --oracle   /net/projects2/chai-lab/sair/gpt5.4_hard_correct.csv \
+    --output   /net/scratch/renqy/runs/ensemble_run1 \
+    --resume
+```
+
+### All options
+
+| Flag | Default | Description |
+|---|---|---|
+| `--model-score MODEL` | `deepseek-r1-32b` | Primary scoring model |
+| `--model-score-2 MODEL` | off | Second scoring model for ensemble scoring |
+| `--model-score-weights W1,W2` | `1.0,1.0` | Weights for the two scoring models |
+| `--model-casestudy MODEL` | same as `--model` | Case study generation model |
+| `--oracle-csv FILE` | required | Oracle CSV (e.g. `gpt5.4_normal_default.csv`). Use `--no-oracle` to disable. |
+| `--no-oracle` | off | Disable oracle enrichment |
+| `--prior-knowledge FILE` | off | Frozen knowledge prefix injected before trainable roadmap |
+| `--init-roadmap FILE` | off | Load a reasoning roadmap as the trainable roadmap (empty by default) |
+| `--init-cheatsheet PATH` | off | Load a full cheatsheet JSON as the starting point |
+| `--bin-threshold N` | `3` | Min failures per partition to attempt case study generation |
+| `--retirement-threshold N` | `2` | Retire a partition when residual failures fall below this |
+| `--max-outer-iters N` | `5` | Maximum outer iterations |
+| `--partition-concurrency N` | `8` | Max partitions solved concurrently |
+| `--concurrency N` | `25` | LLM API concurrency for score_batch calls |
+| `--n-candidates N` | `3` | Candidates generated per bin per attempt |
+| `--candidate-rounds N` | `3` | Max retry rounds per bin when gates fail |
+| `--fix-rate-threshold F` | `0.30` | Min fraction of failures a candidate must fix |
+| `--regress-threshold F` | `0.15` | Max regression rate on the partition's correct pool |
+| `--min-pool-for-regression N` | `5` | Skip regression gate when correct pool has fewer than N items |
+| `--reasoning-effort` | `low` | `low` / `medium` / `high` / `none` |
+| `--prescore-file FILE` | off | Pre-computed score map — skips the initial scoring pass |
+| `--resume` | off | Load `cheatsheet_current.json` from `--output-dir` and skip init |
+| `--output-dir DIR` | `runs/partition_run` | Output directory |
+| `--cheatsheet-out FILE` | off | Write final rendered cheatsheet to this path |
+
+---
+
 ## Comparing Modes
 
 `compare_modes.sh` trains all three modes on the same dataset for a side-by-side comparison:
@@ -459,21 +556,27 @@ bash compare_modes.sh smoke   # quick smoke test — verifies all gates fire wit
 
 ```
 ICRefine/
-├── utils/               # Shared utilities (used by all three ICR packages)
+├── utils/               # Shared utilities (used by all ICR packages)
 │   ├── case_study.py    # CaseStudy dataclass — structured record with routing metadata
 │   ├── cheatsheet.py    # Cheatsheet dataclass — render, save, load (case_studies: list[CaseStudy])
 │   ├── data.py          # Dataset loading, splitting, FailureBin, is_true
 │   ├── parser.py        # Parse VERDICT / REASONING / PROOF / COUNTEREXAMPLE
-│   ├── llm_client.py    # Unified LLM client — vLLM / OpenAI / OpenRouter routing
-│   └── scorer.py        # score_batch, test_cheatsheet, TestResult
+│   ├── llm_client.py    # Unified LLM client — vLLM (primary + secondary) / OpenAI / OpenRouter routing
+│   └── scorer.py        # score_batch, score_batch_ensemble (multi-model parallel scoring)
 ├── ICR_naive/           # Basic HypoGenic-style loop
 ├── ICR_reasoning/       # Post-think aware loop
-├── ICR_select/          # Selective quality-gated loop (recommended)
+├── ICR_select/          # Selective quality-gated loop
 │   └── training/
 │       ├── loop.py                # Inner CS loop (4 gates + pruning + condensation)
 │       └── roadmap_synthesizer.py # Synthesises a routing controller roadmap over the case bank
-├── smoke_test_gates.py     # Gate threshold smoke tests (no live LLM required)
+├── ICR_partition/       # Partition-parallel loop (recommended for cluster runs)
+│   └── training/
+│       ├── loop.py      # Outer partition loop — bin routing, concurrent bin solving, retirement
+│       └── partition.py # PartitionBin dataclass (candidate archive, crossover, EA loop)
+├── smoke_partition.py      # Smoke tests for ICR_partition (no live LLM required)
+├── smoke_test_gates.py     # Gate threshold smoke tests
 ├── eval_oracle_quality.py  # Compare case study quality with vs without oracle injection
+├── run_cluster_ensemble.sh # Submit Llama + Gemma vLLM jobs + training job on SLURM
 ├── compare_modes.sh
 ├── pyproject.toml          # Dependencies (managed by uv)
 └── .env.example

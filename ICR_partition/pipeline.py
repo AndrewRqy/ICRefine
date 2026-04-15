@@ -35,6 +35,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -52,6 +53,46 @@ load_dotenv(Path(__file__).parent / ".env")
 
 def _log(msg: str) -> None:
     print(msg, file=sys.stderr, flush=True)
+
+
+# ---------------------------------------------------------------------------
+# Run lock — prevents two processes writing to the same output directory
+# ---------------------------------------------------------------------------
+
+def _acquire_lock(output_dir: Path) -> Path:
+    """
+    Write a .icr_lock file to output_dir.  Raises SystemExit if one already exists.
+    Returns the lock path so the caller can release it on exit.
+    """
+    lock_path = output_dir / ".icr_lock"
+    if lock_path.exists():
+        info = {}
+        try:
+            info = json.loads(lock_path.read_text())
+        except Exception:
+            pass
+        pid  = info.get("pid", "unknown")
+        dir_ = info.get("output_dir", str(output_dir))
+        _log(
+            f"\n[Error] Output directory is locked by another process (PID {pid}).\n"
+            f"  Lock file: {lock_path}\n"
+            f"  If the previous run crashed, delete the lock file and retry:\n"
+            f"    rm {lock_path}"
+        )
+        raise SystemExit(1)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    lock_path.write_text(
+        json.dumps({"pid": os.getpid(), "output_dir": str(output_dir)}),
+        encoding="utf-8",
+    )
+    return lock_path
+
+
+def _release_lock(lock_path: Path) -> None:
+    try:
+        lock_path.unlink(missing_ok=True)
+    except Exception:
+        pass
 
 
 # ---------------------------------------------------------------------------
@@ -134,6 +175,13 @@ def _build_parser() -> argparse.ArgumentParser:
     g = p.add_argument_group("Models")
     g.add_argument("--model",           default="deepseek-r1-32b", metavar="MODEL_ID")
     g.add_argument("--model-score",     default=None, metavar="MODEL_ID")
+    g.add_argument("--model-score-2",   default=None, metavar="MODEL_ID",
+                   help="Optional second scoring model for ensemble scoring. "
+                        "When set, each item is scored by both models in parallel; "
+                        "failures carry _wrong_weight proportional to how many models failed.")
+    g.add_argument("--model-score-weights", default=None, metavar="W1,W2",
+                   help="Comma-separated weights for --model-score and --model-score-2 "
+                        "(e.g. '1.0,1.0'). Defaults to equal weights.")
     g.add_argument("--model-casestudy", default=None, metavar="MODEL_ID")
 
     g = p.add_argument_group("Output")
@@ -152,10 +200,21 @@ def main() -> None:
     api_key = get_api_key()
 
     model_score     = args.model_score     or args.model
+    model_score_2   = args.model_score_2   or None
     model_casestudy = args.model_casestudy or args.model
+    model_score_weights: list[float] | None = None
+    if args.model_score_weights:
+        try:
+            model_score_weights = [float(w) for w in args.model_score_weights.split(",")]
+        except ValueError:
+            raise SystemExit(f"Error: --model-score-weights must be comma-separated floats, "
+                             f"e.g. '1.0,1.0'. Got: {args.model_score_weights}")
     output_dir      = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     reasoning_effort = None if args.reasoning_effort == "none" else args.reasoning_effort
+
+    # Acquire run lock — prevents two processes from writing to the same directory
+    lock_path = _acquire_lock(output_dir)
 
     # ------------------------------------------------------------------
     # Oracle — ON by default
@@ -267,32 +326,37 @@ def main() -> None:
     # ------------------------------------------------------------------
     # Training
     # ------------------------------------------------------------------
-    result = run_partition_loop(
-        cheatsheet=cheatsheet,
-        train_items=all_items,
-        val_items=None,
-        model_score=model_score,
-        model_casestudy=model_casestudy,
-        api_key=api_key,
-        oracle=oracle,
-        oracle_min_similarity=args.oracle_min_similarity,
-        bin_threshold=args.bin_threshold,
-        retirement_threshold=args.retirement_threshold,
-        max_outer_iters=args.max_outer_iters,
-        partition_concurrency=args.partition_concurrency,
-        concurrency=args.concurrency,
-        n_candidates=args.n_candidates,
-        candidate_rounds=args.candidate_rounds,
-        fix_rate_threshold=args.fix_rate_threshold,
-        regress_threshold=args.regress_threshold,
-        min_pool_for_regression=args.min_pool_for_regression,
-        similarity_gate=not args.no_similarity_gate,
-        reasoning_effort=reasoning_effort,
-        cot_first=args.cot_first,
-        prescore_map=prescore_map,
-        output_dir=output_dir,
-        log=True,
-    )
+    try:
+        result = run_partition_loop(
+            cheatsheet=cheatsheet,
+            train_items=all_items,
+            val_items=None,
+            model_score=model_score,
+            model_casestudy=model_casestudy,
+            api_key=api_key,
+            model_score_2=model_score_2,
+            model_score_weights=model_score_weights,
+            oracle=oracle,
+            oracle_min_similarity=args.oracle_min_similarity,
+            bin_threshold=args.bin_threshold,
+            retirement_threshold=args.retirement_threshold,
+            max_outer_iters=args.max_outer_iters,
+            partition_concurrency=args.partition_concurrency,
+            concurrency=args.concurrency,
+            n_candidates=args.n_candidates,
+            candidate_rounds=args.candidate_rounds,
+            fix_rate_threshold=args.fix_rate_threshold,
+            regress_threshold=args.regress_threshold,
+            min_pool_for_regression=args.min_pool_for_regression,
+            similarity_gate=not args.no_similarity_gate,
+            reasoning_effort=reasoning_effort,
+            cot_first=args.cot_first,
+            prescore_map=prescore_map,
+            output_dir=output_dir,
+            log=True,
+        )
+    finally:
+        _release_lock(lock_path)
 
     # ------------------------------------------------------------------
     # Report & save

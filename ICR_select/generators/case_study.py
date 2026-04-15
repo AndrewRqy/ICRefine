@@ -18,6 +18,8 @@ from ICR_reasoning.core.oracle import OracleDict
 from ICR_reasoning.generators.case_study import _format_failures_with_reasoning, _parse_response, _render_case_studies_text
 from ..prompts.templates import (
     CASE_STUDY_WITH_REASONING_PROMPT,
+    CROSSOVER_PROMPT,
+    CROSSOVER_MAX_TOKENS,
     RETRY_CONTEXT_TEMPLATE,
     FLUSH_MAX_TOKENS,
     N_CANDIDATES,
@@ -60,6 +62,7 @@ def generate_candidates(
     temperatures: list[float] | None = None,
     oracle: OracleDict | None = None,
     prev_attempt: dict | None = None,
+    polarity: str = "",
 ) -> list[CaseStudy]:
     """
     Generate *n* candidate case study strings in parallel at different temperatures.
@@ -79,6 +82,36 @@ def generate_candidates(
             appended to the prompt so the model knows what was tried and what failed.
     """
     temps = (temperatures or CANDIDATE_TEMPS)[:n]
+
+    # Build polarity-conditional instruction so TRUE bins (false negatives) get
+    # TYPE A / missing-lemma case studies with equal weight to FALSE-pattern ones.
+    _p = polarity.strip().upper()
+    if _p == "TRUE":
+        polarity_instruction = (
+            "POLARITY DIRECTIVE — FALSE NEGATIVE bin (model said FALSE, correct answer is TRUE):\n"
+            "Prioritize TYPE A (MISSING KNOWLEDGE). These failures happen because the weaker model "
+            "lacks an algebraic fact that would let it see WHY E1 forces E2. Your goal is to distill "
+            "a missing lemma, identity, or structural property from the oracle traces above — something "
+            "the weaker model never considers even when following a plausible path. A good TYPE A case "
+            "study gives the model a concrete shortcut: IF [lemma condition holds] THEN verdict is TRUE "
+            "immediately, no further analysis needed.\n"
+            "Do NOT generate a FALSE-counterexample case study for these failures."
+        )
+    elif _p == "FALSE":
+        polarity_instruction = (
+            "POLARITY DIRECTIVE — FALSE POSITIVE bin (model said TRUE, correct answer is FALSE):\n"
+            "Prioritize TYPE B (WRONG/MISSING REASONING PATTERN). These failures happen because the "
+            "weaker model applies a flawed heuristic, stops too early, or skips a necessary "
+            "counterexample check. Identify the exact wrong move and the correct structural test "
+            "that produces a counterexample. A good TYPE B case study names the trap and gives a "
+            "mechanical check: IF [structural condition] THEN try building a counterexample magma.\n"
+            "Do NOT generate a missing-lemma/proof case study for these failures."
+        )
+    else:
+        polarity_instruction = (
+            "Diagnose whether these failures are TYPE A (missing algebraic knowledge) or TYPE B "
+            "(wrong reasoning pattern), choosing the type that best explains the majority of cases."
+        )
 
     failure_lines = _format_failures_with_reasoning(failures, oracle=oracle)
     if prev_attempt:
@@ -105,6 +138,7 @@ def generate_candidates(
         case_studies=_render_case_studies_text(cheatsheet),
         failure_lines=failure_lines,
         already_covered=_format_already_covered(cheatsheet),
+        polarity_instruction=polarity_instruction,
     )
 
     _COMPLETION_RETRY_PROMPT = """\
@@ -221,3 +255,50 @@ Output ONLY the completed case study starting with === CASE STUDY: ..."""
         file=sys.stderr,
     )
     return valid
+
+
+def generate_crossover(
+    cs1: CaseStudy,
+    fr1: float,
+    cs2: CaseStudy,
+    fr2: float,
+    model: str,
+    api_key: str,
+) -> CaseStudy | None:
+    """
+    Evolve two archived (failed) candidates into a single crossover child.
+
+    The child inherits the best ACTIVATE IF conditions and structural checks
+    from both parents, targeting the union of failure cases each parent caught.
+    Returns None if generation or parsing fails — caller treats this as a
+    no-op (falls back to regular candidate generation without crossover).
+    """
+    prompt = CROSSOVER_PROMPT.format(
+        fr1=fr1,
+        cs_a=cs1.render(),
+        fr2=fr2,
+        cs_b=cs2.render(),
+    )
+    try:
+        resp = call_llm(
+            prompt, model, api_key,
+            temperature=0.5,
+            max_tokens=CROSSOVER_MAX_TOKENS,
+            reasoning_effort=None,
+        )
+        result = _parse_response(resp.content)
+        child = result.case_study
+        if child is None:
+            print("  [crossover] parse returned no case study", file=sys.stderr)
+            return None
+        ok, missing = child.is_complete()
+        if not ok:
+            print(
+                f"  [crossover] incomplete case study (missing: {', '.join(missing)}) — dropping",
+                file=sys.stderr,
+            )
+            return None
+        return child
+    except Exception as exc:
+        print(f"  [crossover] failed: {exc}", file=sys.stderr)
+        return None

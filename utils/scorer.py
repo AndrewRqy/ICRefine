@@ -172,6 +172,153 @@ def score_batch(
     return correct, wrong
 
 
+def _score_batch_ordered(
+    items: list[dict],
+    cheatsheet_text: str,
+    model: str,
+    api_key: str,
+    concurrency: int = 10,
+    temperature: float = 0.0,
+    reasoning_effort: str | None = "low",
+    cot_first: bool = False,
+    progress_label: str = "scoring",
+) -> list[tuple[bool | None, dict]]:
+    """
+    Like score_batch but returns results in the original item order as
+    list[(is_correct, annotated_item)].  is_correct is None on parse error.
+    Internal helper — used by score_batch_ensemble.
+    """
+    prompts   = [_build_scoring_prompt(cheatsheet_text, item, cot_first) for item in items]
+    responses = call_llm_batch(
+        prompts,
+        model=model,
+        api_key=api_key,
+        temperature=temperature,
+        max_tokens=SCORING_MAX_TOKENS,
+        concurrency=concurrency,
+        progress_label=progress_label,
+        reasoning_effort=reasoning_effort,
+    )
+    results = []
+    for item, resp in zip(items, responses):
+        ground_truth = is_true(item["answer"])
+        if resp is None:
+            annotated = {
+                **item,
+                "predicted":    None,
+                "expected":     "TRUE" if ground_truth else "FALSE",
+                "post_think":   "",
+                "thinking":     "",
+                "raw_response": "",
+            }
+            results.append((None, annotated))
+            continue
+        predicted  = _parse_verdict(resp.content)
+        post_think = _extract_post_think(resp.content)
+        annotated  = {
+            **item,
+            "predicted":    predicted,
+            "expected":     "TRUE" if ground_truth else "FALSE",
+            "post_think":   post_think,
+            "thinking":     resp.thinking,
+            "raw_response": resp.content,
+        }
+        is_correct = (predicted is not None) and ((predicted == "TRUE") == ground_truth)
+        results.append((is_correct if predicted is not None else None, annotated))
+    return results
+
+
+def score_batch_ensemble(
+    items: list[dict],
+    cheatsheet_text: str,
+    models: list[str],
+    weights: list[float],
+    api_key: str,
+    concurrency: int = 10,
+    temperature: float = 0.0,
+    reasoning_effort: str | None = "low",
+    cot_first: bool = False,
+) -> tuple[list[dict], list[dict]]:
+    """
+    Score items with multiple models in parallel and return weighted (correct, wrong).
+
+    An item is "correct" only if ALL models agree it is correct.
+    An item is "wrong" if ANY model fails it; the item carries a ``_wrong_weight``
+    field ∈ (0, 1] — the normalised sum of weights of models that failed it.
+
+    This propagates into weighted fix_rate inside _mini_eval_full:
+      • weight=1.0 — both models wrong  (consensus failure, highest priority)
+      • weight=0.5 — one model wrong    (single-model failure, lower priority)
+
+    Post-think traces from all failing models are concatenated with a divider
+    so the case-study generator sees richer failure reasoning.
+    Structured fields (predicted, expected) come from models[0] (primary).
+
+    weights: relative contribution of each model (normalised internally to sum=1).
+    """
+    from concurrent.futures import ThreadPoolExecutor as _TPE
+
+    assert len(models) == len(weights) >= 1, "models and weights must be same length ≥ 1"
+    total_w      = sum(weights)
+    norm_weights = [w / total_w for w in weights]
+
+    # Run all models in parallel — each spawns its own inner thread pool over items.
+    with _TPE(max_workers=len(models)) as pool:
+        futures = [
+            pool.submit(
+                _score_batch_ordered,
+                items, cheatsheet_text, m, api_key,
+                concurrency, temperature, reasoning_effort, cot_first,
+                f"scoring[{m.split('/')[-1]}]",
+            )
+            for m in models
+        ]
+        all_ordered: list[list[tuple]] = [f.result() for f in futures]
+
+    correct: list[dict] = []
+    wrong:   list[dict] = []
+    n_parse_errors = 0
+
+    for i in range(len(items)):
+        wrong_weight    = 0.0
+        reasoning_parts: list[str] = []
+        primary_ann: dict | None   = None
+
+        for j, (model_results, nw) in enumerate(zip(all_ordered, norm_weights)):
+            is_correct, ann = model_results[i]
+            if j == 0:
+                primary_ann = ann
+            if is_correct is None:
+                wrong_weight   += nw
+                n_parse_errors += 1
+            elif not is_correct:
+                wrong_weight += nw
+            think = ann.get("post_think", "")
+            if think:
+                label = models[j].split("/")[-1]
+                reasoning_parts.append(f"[{label}]\n{think}")
+
+        merged = {
+            **primary_ann,
+            "_wrong_weight": round(wrong_weight, 4),
+            "post_think":    "\n\n---\n\n".join(reasoning_parts),
+        }
+
+        if wrong_weight == 0.0:
+            correct.append(merged)
+        else:
+            wrong.append(merged)
+
+    if n_parse_errors:
+        print(
+            f"\n  [ensemble] {n_parse_errors} parse errors across {len(models)} models — "
+            f"counted as wrong.",
+            file=sys.stderr,
+        )
+
+    return correct, wrong
+
+
 def score_items_streaming(
     items: list[dict],
     get_cheatsheet: Callable[[], str],
@@ -182,6 +329,7 @@ def score_items_streaming(
     reasoning_effort: str | None = "low",
     cot_first: bool = False,
     max_tokens: int = SCORING_MAX_TOKENS,
+    seed: int | None = 42,
 ) -> Iterator[dict]:
     """
     Sliding-window scorer: yields one annotated item dict as each request
@@ -205,7 +353,7 @@ def score_items_streaming(
             return False
         prompt = _build_scoring_prompt(get_cheatsheet(), item, cot_first)
         f = pool.submit(
-            call_llm, prompt, model, api_key, temperature, max_tokens, reasoning_effort
+            call_llm, prompt, model, api_key, temperature, max_tokens, reasoning_effort, seed
         )
         pending[f] = item
         return True
