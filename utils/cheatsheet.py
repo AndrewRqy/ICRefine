@@ -26,6 +26,7 @@ from __future__ import annotations
 import json
 import re
 import sys
+from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import NamedTuple
@@ -201,7 +202,7 @@ def _relevance_score(cs: CaseStudy, qf: QueryFeatures) -> float:
 
 ROADMAP_MAX_CHARS      = 2_500   # ~600 tokens — covers 8-10 detailed steps
 CASE_STUDY_MAX_CHARS   =   600   # ~150 tokens — one focused rule + 2-3 examples
-TOTAL_RENDER_MAX_CHARS = 9_500   # leaves headroom under 10 kb after headers
+TOTAL_RENDER_MAX_CHARS = 50_000  # ~14 k tokens — safe for 28 k-token vLLM context
 
 # Backward-compat alias — external code that imported DECISION_TREE_MAX_CHARS still works
 DECISION_TREE_MAX_CHARS = ROADMAP_MAX_CHARS
@@ -251,18 +252,44 @@ class Cheatsheet:
         """
         Produce the full cheatsheet text ready for injection into a prompt.
 
-        Includes all case studies newest-first until the character budget is
-        exhausted.  This is the global (non-routed) render used during training
-        and any context where the query is not known in advance.
+        Selection strategy (two passes):
+          1. Bin representatives — for each distinct feature_signature, include
+             the highest-fix-rate case study.  This guarantees every structural
+             bin that has at least one case study is represented in the render.
+          2. Remaining budget — fill with the remaining case studies sorted by
+             fix rate descending, so the weakest ones are dropped when the
+             character budget (TOTAL_RENDER_MAX_CHARS) runs out.
+
+        Fix rate is historical_fix_rate when available, falling back to
+        creation_fix_rate.  Case studies with no feature_signature are grouped
+        together as one "unclassified" bin.
 
         For inference-time routing, use render_for_query(item, top_k) instead.
         """
-        # Newest-first, preserving original 1-based display index
-        selected = [
-            (len(self.case_studies) - 1 - i, cs)
-            for i, cs in enumerate(reversed(self.case_studies))
-        ]
-        return self._render_with_selection(selected)
+        if not self.case_studies:
+            return self._render_with_selection([])
+
+        def _fix_rate(cs: CaseStudy) -> float:
+            return cs.historical_fix_rate or cs.creation_fix_rate or 0.0
+
+        # Group by feature_signature — each distinct signature is one bin
+        by_sig: dict[str, list[tuple[int, CaseStudy]]] = defaultdict(list)
+        for i, cs in enumerate(self.case_studies):
+            key = cs.feature_signature or "__unclassified__"
+            by_sig[key].append((i, cs))
+
+        # Pass 1: best representative from each bin, sorted by fix rate
+        representatives: list[tuple[int, CaseStudy]] = []
+        rest: list[tuple[int, CaseStudy]] = []
+        for group in by_sig.values():
+            group_sorted = sorted(group, key=lambda p: _fix_rate(p[1]), reverse=True)
+            representatives.append(group_sorted[0])
+            rest.extend(group_sorted[1:])
+
+        representatives.sort(key=lambda p: _fix_rate(p[1]), reverse=True)
+        rest.sort(key=lambda p: _fix_rate(p[1]), reverse=True)
+
+        return self._render_with_selection(representatives + rest)
 
     def render_for_query(
         self,

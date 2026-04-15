@@ -145,7 +145,7 @@ LLAMA_JID=$(sbatch \
             ${LLAMA70B_PATH} \
             --served-model-name llama-3.3-70b \
             --tensor-parallel-size 2 \
-            --max-model-len 65536 \
+            --max-model-len 28000 \
             --port 8000 &
         VLLM_PID=\$!
         # Poll until server accepts requests, then write endpoint sentinel
