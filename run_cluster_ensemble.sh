@@ -312,6 +312,9 @@ else
     echo "[train] No checkpoint found — starting fresh."
 fi
 
+# ---- Remove stale lock file from a previous crashed run ----
+rm -f ${OUTPUT_DIR}/.icr_lock
+
 # ---- Run training ----
 python3 -m ICR_partition.pipeline \
     --dataset             ${DATASET} \

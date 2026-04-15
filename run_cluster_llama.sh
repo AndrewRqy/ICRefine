@@ -145,7 +145,7 @@ LLAMA_JID=$(sbatch \
             ${LLAMA70B_PATH} \
             --served-model-name llama-3.3-70b \
             --tensor-parallel-size 2 \
-            --max-model-len 16384 \
+            --max-model-len 65536 \
             --port 8000 &
         VLLM_PID=\$!
         # Poll until server accepts requests, then write endpoint sentinel
@@ -223,6 +223,9 @@ if [[ -f ${OUTPUT_DIR}/cheatsheet_current.json ]]; then
 else
     echo "[train] No checkpoint found — starting fresh."
 fi
+
+# ---- Remove stale lock file from a previous crashed run ----
+rm -f ${OUTPUT_DIR}/.icr_lock
 
 # ---- Run training ----
 python3 -m ICR_partition.pipeline \
