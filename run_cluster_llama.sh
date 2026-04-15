@@ -233,7 +233,7 @@ python3 -m ICR_partition.pipeline \
     --oracle-csv          ${ORACLE} \
     --output-dir          ${OUTPUT_DIR} \
     --model-score         llama-3.3-70b \
-    --model-casestudy     llama-3.3-70b \
+    --model-casestudy     gpt-4o \
     \${RESUME_FLAG} \
     ${TRAIN_OPTS}
 
