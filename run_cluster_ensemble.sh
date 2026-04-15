@@ -7,7 +7,7 @@
 #   bash run_cluster_ensemble.sh --output /net/scratch/renqy/runs/my_run
 #
 # Defaults (all parameters pre-configured to match previous hard_combined runs):
-#   --dataset          <ICRefine>/../SAIR_eval_pipeline/datasets/hard_combined.jsonl
+#   --dataset          <ICRefine>/../SAIR_eval_pipeline/datasets/hard.jsonl
 #   --oracle           <ICRefine>/gpt5.4_hard_correct.csv
 #   --prior-knowledge  <ICRefine>/../SAIR_eval_pipeline/prompts/NeuriCo_cheatsheet.txt
 #   --output           /net/scratch/renqy/runs/icr_ensemble_<timestamp>  (auto-generated)
@@ -46,7 +46,7 @@ ICR_ROOT="$(cd "$(dirname "$0")" && pwd)"
 # Defaults (match previous hard_combined runs exactly)
 # ---------------------------------------------------------------------------
 
-DATASET="${ICR_ROOT}/../SAIR_eval_pipeline/datasets/hard_combined.jsonl"
+DATASET="${ICR_ROOT}/../SAIR_eval_pipeline/datasets/hard.jsonl"
 ORACLE="${ICR_ROOT}/gpt5.4_hard_correct.csv"
 PRIOR_KNOWLEDGE="${ICR_ROOT}/../SAIR_eval_pipeline/prompts/NeuriCo_cheatsheet.txt"
 OUTPUT_DIR="${SCRATCH}/runs/icr_ensemble_$(date +%Y%m%d_%H%M%S)"
@@ -218,6 +218,77 @@ TRAIN_OPTS="${TRAIN_OPTS} ${EXTRA_TRAIN_ARGS}"
 
 echo "Submitting ICR_partition training job (after:${LLAMA_JID}:${GEMMA_JID})..."
 
+# Write the training script to a temp file to avoid --wrap quoting issues
+# with multi-word TRAIN_OPTS expansions.
+TRAIN_SCRIPT=$(mktemp "${SCRATCH}/icr_train_XXXXXX.sh")
+cat > "$TRAIN_SCRIPT" << SCRIPTEOF
+#!/bin/bash
+source ~/.bashrc
+cd ${ICR_ROOT}
+
+# ---- Activate Python environment ----
+if [[ -f .venv/bin/activate ]]; then
+    source .venv/bin/activate
+else
+    echo "[train] .venv not found — running uv sync first ..."
+    uv sync
+    source .venv/bin/activate
+fi
+
+# ---- Wait for vLLM endpoints ----
+echo "[train] Waiting for Llama endpoint (${LLAMA_ENDPOINT_FILE})..."
+until [[ -f ${LLAMA_ENDPOINT_FILE} ]]; do sleep 15; done
+LLAMA_URL=\$(cat ${LLAMA_ENDPOINT_FILE})
+echo "[train] Llama ready: \$LLAMA_URL"
+
+echo "[train] Waiting for Gemma endpoint (${GEMMA_ENDPOINT_FILE})..."
+until [[ -f ${GEMMA_ENDPOINT_FILE} ]]; do sleep 15; done
+GEMMA_URL=\$(cat ${GEMMA_ENDPOINT_FILE})
+echo "[train] Gemma ready: \$GEMMA_URL"
+
+# ---- Set vLLM env vars ----
+export VLLM_BASE_URL="\$LLAMA_URL"
+export VLLM_MODEL="llama-3.3-70b"
+export VLLM_BASE_URL_2="\$GEMMA_URL"
+export VLLM_MODEL_2="gemma-4-31b"
+export OPENROUTER_API_KEY="unused-local"
+
+# ---- Auto-resume if checkpoint exists ----
+RESUME_FLAG=""
+if [[ -f ${OUTPUT_DIR}/cheatsheet_current.json ]]; then
+    echo "[train] Checkpoint found at ${OUTPUT_DIR}/cheatsheet_current.json — resuming."
+    RESUME_FLAG="--resume"
+else
+    echo "[train] No checkpoint found — starting fresh."
+fi
+
+# ---- Run training ----
+python3 -m ICR_partition.pipeline \
+    --dataset             ${DATASET} \
+    --oracle-csv          ${ORACLE} \
+    --output-dir          ${OUTPUT_DIR} \
+    --model-score         llama-3.3-70b \
+    --model-score-2       gemma-4-31b \
+    --model-score-weights 1.0,1.0 \
+    --model-casestudy     llama-3.3-70b \
+    \${RESUME_FLAG} \
+    ${TRAIN_OPTS}
+
+EXIT_CODE=\$?
+
+# ---- Clean up on success ----
+if [[ \$EXIT_CODE -eq 0 ]]; then
+    rm -f ${LLAMA_ENDPOINT_FILE} ${GEMMA_ENDPOINT_FILE}
+    echo "[train] Completed successfully. Sentinel files removed."
+else
+    echo "[train] Exited with code \$EXIT_CODE. Sentinel files preserved for debugging."
+    echo "[train] To resume: bash run_cluster_ensemble.sh --output ${OUTPUT_DIR} --dataset ${DATASET} --oracle ${ORACLE}"
+fi
+
+exit \$EXIT_CODE
+SCRIPTEOF
+chmod +x "$TRAIN_SCRIPT"
+
 TRAIN_JID=$(sbatch \
     --partition=general \
     --gres=gpu:0 \
@@ -228,71 +299,7 @@ TRAIN_JID=$(sbatch \
     --output="${LOG_DIR}/icr-ensemble-%j.log" \
     --dependency="after:${LLAMA_JID}:${GEMMA_JID}" \
     --parsable \
-    --wrap="bash -c '
-        source ~/.bashrc
-        cd ${ICR_ROOT}
-
-        # ---- Activate Python environment ----
-        if [[ -f .venv/bin/activate ]]; then
-            source .venv/bin/activate
-        else
-            echo "[train] .venv not found — running uv sync first ..."
-            uv sync
-            source .venv/bin/activate
-        fi
-
-        # ---- Wait for vLLM endpoints ----
-        echo \"[train] Waiting for Llama endpoint (${LLAMA_ENDPOINT_FILE})...\"
-        until [[ -f ${LLAMA_ENDPOINT_FILE} ]]; do sleep 15; done
-        LLAMA_URL=\$(cat ${LLAMA_ENDPOINT_FILE})
-        echo \"[train] Llama ready: \$LLAMA_URL\"
-
-        echo \"[train] Waiting for Gemma endpoint (${GEMMA_ENDPOINT_FILE})...\"
-        until [[ -f ${GEMMA_ENDPOINT_FILE} ]]; do sleep 15; done
-        GEMMA_URL=\$(cat ${GEMMA_ENDPOINT_FILE})
-        echo \"[train] Gemma ready: \$GEMMA_URL\"
-
-        # ---- Set vLLM env vars ----
-        export VLLM_BASE_URL=\"\$LLAMA_URL\"
-        export VLLM_MODEL=\"llama-3.3-70b\"
-        export VLLM_BASE_URL_2=\"\$GEMMA_URL\"
-        export VLLM_MODEL_2=\"gemma-4-31b\"
-        export OPENROUTER_API_KEY=\"unused-local\"
-
-        # ---- Auto-resume if checkpoint exists ----
-        RESUME_FLAG=\"\"
-        if [[ -f ${OUTPUT_DIR}/cheatsheet_current.json ]]; then
-            echo \"[train] Checkpoint found at ${OUTPUT_DIR}/cheatsheet_current.json — resuming.\"
-            RESUME_FLAG=\"--resume\"
-        else
-            echo \"[train] No checkpoint found — starting fresh.\"
-        fi
-
-        # ---- Run training ----
-        python3 -m ICR_partition.pipeline \
-            --dataset            ${DATASET} \
-            --oracle-csv         ${ORACLE} \
-            --output-dir         ${OUTPUT_DIR} \
-            --model-score        llama-3.3-70b \
-            --model-score-2      gemma-4-31b \
-            --model-score-weights 1.0,1.0 \
-            --model-casestudy    llama-3.3-70b \
-            \${RESUME_FLAG} \
-            ${TRAIN_OPTS}
-
-        EXIT_CODE=\$?
-
-        # ---- Clean up sentinel files on clean exit only ----
-        if [[ \$EXIT_CODE -eq 0 ]]; then
-            rm -f ${LLAMA_ENDPOINT_FILE} ${GEMMA_ENDPOINT_FILE}
-            echo \"[train] Completed successfully. Sentinel files removed.\"
-        else
-            echo \"[train] Exited with code \$EXIT_CODE. Sentinel files preserved for debugging.\"
-            echo \"[train] To resume: bash run_cluster_ensemble.sh --output ${OUTPUT_DIR} --dataset ${DATASET} --oracle ${ORACLE}\"
-        fi
-
-        exit \$EXIT_CODE
-    '")
+    "$TRAIN_SCRIPT")
 
 echo "  Training job ID : $TRAIN_JID"
 echo "  Log             : ${LOG_DIR}/icr-ensemble-${TRAIN_JID}.log"
