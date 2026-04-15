@@ -133,8 +133,8 @@ echo "Submitting Llama-3.3-70B vLLM job..."
 
 LLAMA_JID=$(sbatch \
     --partition=general \
-    --gres=gpu:a100:2 \
-    --mem=160G \
+    --gres=gpu:a100:4 \
+    --mem=320G \
     --time=12:00:00 \
     --job-name=vllm-llama70b \
     --output="${LOG_DIR}/vllm-llama70b-%j.log" \
@@ -144,8 +144,8 @@ LLAMA_JID=$(sbatch \
         ${VLLM_BIN} serve \
             ${LLAMA70B_PATH} \
             --served-model-name llama-3.3-70b \
-            --tensor-parallel-size 2 \
-            --max-model-len 28000 \
+            --tensor-parallel-size 4 \
+            --max-model-len 65536 \
             --port 8000 &
         VLLM_PID=\$!
         # Poll until server accepts requests, then write endpoint sentinel
