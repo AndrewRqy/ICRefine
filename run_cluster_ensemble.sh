@@ -124,9 +124,10 @@ if [[ ! -x "$VLLM_BIN" ]]; then
     echo "[run_cluster_ensemble] vLLM installed."
 fi
 
-# Upgrade transformers to latest — required for Gemma-4 architecture support.
-echo "[run_cluster_ensemble] Upgrading transformers for Gemma-4 support..."
-"${SCRATCH}/vllm-env/bin/pip" install --quiet --upgrade transformers
+# Upgrade vLLM to latest — required for Gemma-4 architecture support.
+# vLLM 0.19.x predates gemma4; upgrading pulls in compatible transformers automatically.
+echo "[run_cluster_ensemble] Upgrading vLLM for Gemma-4 support..."
+"${SCRATCH}/vllm-env/bin/pip" install --quiet --upgrade vllm
 
 # ---------------------------------------------------------------------------
 # Job 1 — Llama-3.3-70B on port 8000 (2×A100-80GB, tensor-parallel-size 2)
