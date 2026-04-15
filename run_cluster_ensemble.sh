@@ -2,6 +2,11 @@
 # run_cluster_ensemble.sh — Launch Llama-3.3-70B + Gemma-4-31B vLLM servers, then
 # submit ICR_partition training as a dependent job that waits for both to be ready.
 #
+# Gemma-4 requires a newer vLLM than the stable PyPI release (0.19.0).
+# This script first submits a SLURM build job that compiles vLLM from source
+# into a separate gemma-venv on a GPU compute node (matching CUDA version).
+# The Gemma vLLM job depends on the build job completing successfully.
+#
 # Run from the ICRefine/ directory on the cluster login node:
 #   bash run_cluster_ensemble.sh
 #   bash run_cluster_ensemble.sh --output /net/scratch/renqy/runs/my_run
@@ -38,6 +43,11 @@ SCRATCH="/net/scratch/${DSI_USER}"
 
 LLAMA70B_PATH="/net/projects2/chai-lab/shared_models/hub/models--meta-llama--Llama-3.3-70B-Instruct/snapshots/6f6073b423013f6a7d4d9f39144961bfbfbc386b"
 GEMMA31B_PATH="/net/projects2/chai-lab/shared_models/google/gemma-4-31B-it"
+
+# Separate venv for Gemma — built from vLLM source so it supports gemma4.
+# Kept separate from vllm-env so Llama's stable install is never touched.
+GEMMA_VENV="${SCRATCH}/gemma-venv"
+GEMMA_VLLM_BIN="${GEMMA_VENV}/bin/vllm"
 
 # ICRefine project root (directory containing this script)
 ICR_ROOT="$(cd "$(dirname "$0")" && pwd)"
@@ -124,10 +134,39 @@ if [[ ! -x "$VLLM_BIN" ]]; then
     echo "[run_cluster_ensemble] vLLM installed."
 fi
 
-# Upgrade vLLM to latest — required for Gemma-4 architecture support.
-# vLLM 0.19.x predates gemma4; upgrading pulls in compatible transformers automatically.
-echo "[run_cluster_ensemble] Upgrading vLLM for Gemma-4 support..."
-"${SCRATCH}/vllm-env/bin/pip" install --quiet --upgrade vllm
+
+# ---------------------------------------------------------------------------
+# Job 0 — Build vLLM from source in gemma-venv (GPU compute node, ~30 min)
+# Only submitted if gemma-venv doesn't already have a working vllm install.
+# ---------------------------------------------------------------------------
+
+BUILD_JID=""
+if [[ ! -x "$GEMMA_VLLM_BIN" ]]; then
+    echo "Submitting vLLM source build job for Gemma-4 support..."
+    BUILD_JID=$(sbatch \
+        --partition=general \
+        --gres=gpu:a100:1 \
+        --mem=32G \
+        --time=02:00:00 \
+        --job-name=build-gemma-venv \
+        --output="${LOG_DIR}/build-gemma-venv-%j.log" \
+        --parsable \
+        --wrap="bash -c '
+            source ~/.bashrc
+            echo \"[build] Creating gemma-venv at ${GEMMA_VENV} ...\"
+            python3 -m venv ${GEMMA_VENV}
+            ${GEMMA_VENV}/bin/pip install --quiet --upgrade pip
+            echo \"[build] Installing vLLM from source (this takes ~20-30 min) ...\"
+            ${GEMMA_VENV}/bin/pip install \
+                git+https://github.com/vllm-project/vllm.git
+            echo \"[build] vLLM source build complete.\"
+            ${GEMMA_VLLM_BIN} --version
+        '")
+    echo "  Build job ID : $BUILD_JID"
+    echo "  Log          : ${LOG_DIR}/build-gemma-venv-${BUILD_JID}.log"
+else
+    echo "gemma-venv already exists — skipping build job."
+fi
 
 # ---------------------------------------------------------------------------
 # Job 1 — Llama-3.3-70B on port 8000 (2×A100-80GB, tensor-parallel-size 2)
@@ -165,10 +204,13 @@ echo "  Llama job ID : $LLAMA_JID"
 echo "  Log          : ${LOG_DIR}/vllm-llama70b-${LLAMA_JID}.log"
 
 # ---------------------------------------------------------------------------
-# Job 2 — Gemma-4-31B on port 8001 (1×A100-80GB)
+# Job 2 — Gemma-4-31B on port 8001 (1×A100-80GB, gemma-venv from source build)
 # ---------------------------------------------------------------------------
 
 echo "Submitting Gemma-4-31B vLLM job..."
+
+GEMMA_DEP=""
+[[ -n "$BUILD_JID" ]] && GEMMA_DEP="--dependency=afterok:${BUILD_JID}"
 
 GEMMA_JID=$(sbatch \
     --partition=general \
@@ -178,9 +220,10 @@ GEMMA_JID=$(sbatch \
     --job-name=vllm-gemma31b \
     --output="${LOG_DIR}/vllm-gemma31b-%j.log" \
     --parsable \
+    ${GEMMA_DEP} \
     --wrap="bash -c '
         source ~/.bashrc
-        ${VLLM_BIN} serve \
+        ${GEMMA_VLLM_BIN} serve \
             ${GEMMA31B_PATH} \
             --served-model-name gemma-4-31b \
             --max-model-len 16384 \
@@ -319,8 +362,9 @@ echo ""
 echo "========================================"
 echo "  All jobs submitted"
 echo "========================================"
+echo "  vLLM build  : ${BUILD_JID:-skipped (gemma-venv exists)}"
 echo "  vLLM Llama  : $LLAMA_JID  (port 8000)"
-echo "  vLLM Gemma  : $GEMMA_JID  (port 8001)"
+echo "  vLLM Gemma  : $GEMMA_JID  (port 8001, starts after build)"
 echo "  Training    : $TRAIN_JID  (starts after both vLLMs begin)"
 echo ""
 echo "  dataset     : $DATASET"
