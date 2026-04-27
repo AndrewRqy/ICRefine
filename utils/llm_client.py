@@ -27,11 +27,12 @@ load_dotenv(Path(__file__).parent.parent / ".env")
 OPENROUTER_URL    = "https://openrouter.ai/api/v1/chat/completions"
 OPENAI_URL        = "https://api.openai.com/v1/chat/completions"
 MAX_TOKENS        = int(os.environ.get("ICR_MAX_TOKENS", 16_000))
-MAX_RETRIES       = 3
-RETRY_BASE_DELAY  = 2.0
+MAX_RETRIES       = 6
+RETRY_BASE_DELAY  = 10.0
 VLLM_READ_TIMEOUT = 1800  # local inference can be slow — 30 min per request
 
-_OPENAI_PREFIXES = ("gpt-4", "gpt-3", "o1", "o3", "o4")
+_OPENAI_PREFIXES  = ("gpt-4", "gpt-3", "o1", "o3", "o4")
+_OPENAI_REASONING = ("o1", "o3", "o4")  # o-series: no temperature, max_completion_tokens, reasoning_effort
 
 
 # ---------------------------------------------------------------------------
@@ -113,20 +114,29 @@ def call_llm(
     """
     url, resolved_key, is_openai, is_vllm = _resolve_endpoint(model)
     model_name = model.removeprefix("openai/") if is_openai else model
+    is_openai_reasoning = is_openai and any(model_name.startswith(p) for p in _OPENAI_REASONING)
 
     payload: dict = {
-        "model":       model_name,
-        "messages":    [{"role": "user", "content": prompt}],
-        "max_tokens":  max_tokens,
-        "temperature": temperature,
+        "model":    model_name,
+        "messages": [{"role": "user", "content": prompt}],
     }
-    if seed is not None:
+    # o-series (o1/o3/o4) use max_completion_tokens and don't support temperature
+    if is_openai_reasoning:
+        payload["max_completion_tokens"] = max_tokens
+    else:
+        payload["max_tokens"]  = max_tokens
+        payload["temperature"] = temperature
+    if seed is not None and not is_openai_reasoning:
         payload["seed"] = seed
-    if reasoning_effort is not None and not is_openai and not is_vllm:
-        payload["reasoning"] = {"effort": reasoning_effort}
+    # reasoning_effort: OpenRouter uses {"reasoning": {"effort": ...}};
+    # OpenAI o-series uses top-level "reasoning_effort"
+    if reasoning_effort is not None:
+        if is_openai_reasoning:
+            payload["reasoning_effort"] = reasoning_effort
+        elif not is_openai and not is_vllm:
+            payload["reasoning"] = {"effort": reasoning_effort}
     if not is_openai and not is_vllm:
-        # Competition setting: strict provider pinning, no fallbacks
-        payload["provider"] = {"allow_fallbacks": False}
+        payload["provider"] = {"allow_fallbacks": True}
 
     headers = {"Content-Type": "application/json"}
     if resolved_key:
@@ -135,7 +145,7 @@ def call_llm(
         headers["HTTP-Referer"] = "https://github.com/sair-evaluation"
         headers["X-Title"]      = "SAIR ICRefine"
 
-    read_timeout = VLLM_READ_TIMEOUT if is_vllm else 600
+    read_timeout = VLLM_READ_TIMEOUT if is_vllm else 300
     delay = RETRY_BASE_DELAY
     for attempt in range(1, MAX_RETRIES + 1):
         try:
@@ -256,7 +266,11 @@ def call_llm_batch(
             return idx, None
 
     with ThreadPoolExecutor(max_workers=concurrency) as pool:
-        futures = {pool.submit(_call, i, p): i for i, p in enumerate(prompts)}
+        futures = {}
+        for i, p in enumerate(prompts):
+            futures[pool.submit(_call, i, p)] = i
+            if i > 0 and i % concurrency == 0:
+                time.sleep(1.0)  # brief pause every batch to avoid burst 429s
         for future in as_completed(futures):
             idx, resp = future.result()
             results[idx] = resp

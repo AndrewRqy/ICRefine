@@ -1,0 +1,190 @@
+Your task: determine whether source law A implies target law B across all magmas (binary operation `*`). Execute this protocol in order without skipping steps.
+
+GROUND RULES
+- Do not supplement any rule with free-form algebraic reasoning.
+- The moment a collapse lemma, contradiction motif, separator, or FALSE rule triggers, halt and emit the verdict.
+- Algebraic manipulation is permitted only inside STEP 0 collapse evaluation.
+- A verdict of TRUE requires an explicit rule to fire; if none does, the answer is FALSE.
+
+─────────────────────────────────────────────
+STEP 0: SOURCE-COLLAPSE LEMMAS
+─────────────────────────────────────────────
+
+Determine whether A is a bare law: exactly one side is a lone variable and the other side contains `*`.
+
+For bare laws only, bring A into canonical form:
+- orient so the lone variable is on the LEFT; call it `x`
+- preserve all bracketing on the product side
+- every copy of the bare variable maps to `x`
+- remaining variables rename by order of first appearance on the product side: `y`, `z`, `w`, ...
+
+Match the normalized form against the canonical table:
+
+SIMPLE PROJECTIONS (check first):
+- `x = x * y`  →  LEFT PROJECTION:  every product `(p*q)` collapses to `p`
+- `x = y * x`  →  RIGHT PROJECTION: every product `(p*q)` collapses to `q`
+
+COMPLEX PROJECTIONS:
+- `x = x*(y*(z*(x*y)))`  →  LEFT PROJECTION
+- `x = x*((y*z)*(z*z))`  →  LEFT PROJECTION
+- `x = (((y*z)*x)*z)*x`  →  RIGHT PROJECTION
+
+When a projection fires, fully reduce both sides of B under that rule. If the two reduced forms are the same variable, emit TRUE; otherwise FALSE. Stop here.
+
+NON-BARE CONSTANT-PRODUCT LEMMA
+
+For non-bare A, also run this check:
+- rename variables in A by order of first appearance, preserving brackets
+- the LEFT side of the renamed form must be exactly `x*y`
+- the RIGHT side must be a product `U * V` where every occurrence of `x` falls inside `V` and none inside `U`
+
+When this pattern holds, apply CONSTANT-PRODUCT collapse to B: every non-atomic product becomes the constant symbol `c`; lone variables stay themselves. If both sides of B reduce to the same symbol, emit TRUE; otherwise FALSE.
+
+─────────────────────────────────────────────
+STEP 0B: BARE-SOURCE CONTRADICTION MOTIFS
+─────────────────────────────────────────────
+
+Execute only when A is bare and STEP 0 produced no match.
+
+Setup — do NOT perform a full variable rename:
+- orient so the lone variable is on the LEFT; call it `x`
+- all analysis below operates on the PRODUCT side as written
+
+Read off these source-side features from the product side:
+
+  rhsVars(A)   — distinct variable count on the product side
+  rhsTotals(A) — per-variable occurrence counts, sorted ascending and concatenated
+                 e.g. counts {2,2,1} → rhsTotals=122;  counts {3,1,1} → rhsTotals=113
+  Lx(A)        — TRUE when the leftmost variable on the product side is x
+  Rx(A)        — TRUE when the rightmost variable on the product side is x
+  xTop(A)      — position of x in the root split U*V:
+                   left  → x appears in U only
+                   right → x appears in V only
+                   both  → x appears in both U and V
+  square(A)    — TRUE when the product side contains any subterm u*u
+  topShape(A)  — shape of the root split:
+                   v-m → left child is a lone variable, right child is a product
+                   m-v → left child is a product, right child is a lone variable
+                   m-m → both children are products
+
+For motifs that reference B, additionally compute:
+  RP(B)   — TRUE when the rightmost variable matches on both sides of B
+  XOR(B)  — TRUE when every variable has matching parity on both sides of B
+  imb(B)  — Σ |left-count(v) − right-count(v)| over all v in B
+
+The first motif below that fires makes the verdict TRUE — stop immediately.
+
+  M1:  rhsVars(A)=4  ·  Lx(A)=F  ·  Rx(A)=F  ·  topShape(A)≠m-m
+  M2:  rhsTotals(A)=113  ·  Lx(A)=F  ·  Rx(A)=F
+  M3:  Lx(A)=F  ·  xTop(A)=left  ·  square(A)=T  ·  topShape(A)=m-v  ·  rhsVars(A)≥3
+  M4:  rhsTotals(A)=112  ·  Lx(A)=F  ·  Rx(A)=F  ·  xTop(A)=right  ·  topShape(A)=v-m
+  M5:  rhsTotals(A)=1112  ·  Lx(A)=F  ·  Rx(A)=F  ·  xTop(A)=right  ·  topShape(A)=v-m
+  M6:  rhsVars(A)=3  ·  xTop(A)=right  ·  topShape(A)=v-m  ·  x appears exactly twice  ·  Rx(A)=F
+  M7:  rhsVars(A)=3  ·  Lx(A)=F  ·  Rx(A)=F  ·  xTop(A)=left  ·  topShape(A)=m-v  ·  x appears exactly twice
+  M8:  rhsTotals(A)=122  ·  Lx(A)=T  ·  Rx(A)=F  ·  xTop(A)=both  ·  topShape(A)=v-m  ·  XOR(B)=F  ·  square(A)=F  ·  imb(B)≥3
+  M9:  rhsTotals(A)=122  ·  Lx(A)=F  ·  Rx(A)=T  ·  x appears exactly twice  ·  RP(B)=T
+  M10: rhsTotals(A)=1112  ·  Lx(A)=F  ·  Rx(A)=T  ·  RP(B)=T
+
+─────────────────────────────────────────────
+STEP 1: FEATURE EXTRACTION
+─────────────────────────────────────────────
+
+For each equation `E: L = R`, list every variable letter that appears on each side,
+counting multiplicity. Then derive:
+
+  size(E)  — count every variable occurrence on L plus every occurrence on R
+             e.g. `x*(y*x) = y` → L has x,y,x (3) + R has y (1) → size=4
+
+  vars(E)  — count distinct letters appearing anywhere in E (ignore multiplicity)
+             e.g. `x*(y*x) = y` → {x,y} → vars=2
+
+  imb(E)   — for each distinct variable v, take |count(v,L) − count(v,R)|, then sum
+             e.g. `x*(y*x) = y` → x: |2−0|=2, y: |1−1|=0 → imb=2
+
+  bare(E)  — TRUE when exactly one side is a single lone variable (no `*`)
+             e.g. `x = y*x` → bare=TRUE;  `x*y = y*x` → bare=FALSE
+
+  LP(E)    — TRUE when the leftmost variable token on L equals the leftmost on R
+             e.g. `x*(y*z) = x*w` → both start with x → LP=TRUE
+
+  RP(E)    — TRUE when the rightmost variable token on L equals the rightmost on R
+             e.g. `x*y = z*y` → both end with y → RP=TRUE
+
+  SET(E)   — TRUE when the set of distinct variable letters on L equals that on R
+             e.g. `x*(y*x) = y*x` → L:{x,y} = R:{x,y} → SET=TRUE
+
+  XOR(E)   — TRUE when every variable appears an even number of times on EACH side,
+             OR an odd number on each side (parity matches per variable per side)
+             e.g. `x*y = y*x` → x:odd/odd, y:odd/odd → XOR=TRUE
+
+  AB(E)    — TRUE when every variable has the same total count on L as on R
+             e.g. `x*y = y*x` → x:1=1, y:1=1 → AB=TRUE
+
+─────────────────────────────────────────────
+STEP 2: SEPARATOR TESTS
+─────────────────────────────────────────────
+
+Each test is a structural invariant preserved under implication. A mismatch is conclusive — emit FALSE and stop.
+
+  LP(A)=T  and  LP(B)=F   →  FALSE
+  RP(A)=T  and  RP(B)=F   →  FALSE
+  SET(A)=T and  SET(B)=F  →  FALSE
+  XOR(A)=T and  XOR(B)=F  →  FALSE
+  AB(A)=T  and  AB(B)=F   →  FALSE
+
+─────────────────────────────────────────────
+STEP 3: FALSE GUARDS
+─────────────────────────────────────────────
+
+Each guard is a conjunction of conditions; when every condition holds, emit FALSE and stop.
+
+  FG-1: bare(A)=T  ·  bare(B)=F  ·  size(A)=size(B)  ·  vars(B)<vars(A)  ·  imb(B)>imb(A)  ·  XOR(A)=T
+  FG-2: bare(A)=T  ·  vars(A)=2  ·  bare(B)=F  ·  vars(B)>vars(A)  ·  size(B)≥size(A)
+  FG-3: bare(A)=F  ·  vars(A)≥5  ·  bare(B)=F  ·  vars(B)<vars(A)  ·  size(B)=size(A)
+  FG-4: bare(A)=F  ·  bare(B)=F  ·  size(B)=size(A)  ·  vars(B)≤vars(A)−2
+
+─────────────────────────────────────────────
+STEP 4: STRUCTURAL RULES
+─────────────────────────────────────────────
+
+Let sA=size(A), sB=size(B), vA=vars(A), vB=vars(B), iA=imb(A), iB=imb(B).
+
+Scan top to bottom; apply the first matching rule:
+
+  TR-1:  bare(A)=T  ·  vA≥4  ·  vB=2  ·  Lx(A)=F                                       →  TRUE
+  TR-2:  bare(A)=T  ·  RP(A)=F  ·  XOR(A)=T  ·  vB=2  ·  RP(B)=T  ·  vA≥3             →  TRUE
+  TR-3:  vA=3  ·  XOR(A)=F  ·  bare(B)=T  ·  RP(B)=F                                   →  TRUE
+  FR-1:  vB=vA                                                                            →  FALSE
+  FR-2:  sB<sA                                                                            →  FALSE
+  TR-4:  bare(A)=T  ·  vA≥3  ·  sB>sA                                                   →  TRUE
+  TR-5:  bare(A)=T  ·  bare(B)=T  ·  vA≥3  ·  vB>vA  ·  iB>iA                          →  TRUE
+
+─────────────────────────────────────────────
+STEP 5: EXTENDED RULES
+─────────────────────────────────────────────
+
+Reach this step only when no earlier rule fired.
+
+  ER-1: A has uniform total variable counts (each variable appears equally often across both sides combined),
+        vB<vA, and B is bare of the form `x = x*(...)`  →  TRUE
+  ER-2: bare(A)=T  ·  vA≥4  ·  topShape(A)≠m-m         →  TRUE
+  ER-3: bare(A)=T  ·  vA≥5                              →  TRUE
+  ER-4: none of the above fired                          →  FALSE
+
+─────────────────────────────────────────────
+RESPONSE FORMAT
+─────────────────────────────────────────────
+
+Your reasoning trace must report:
+- extracted features for A and B
+- which collapse lemma or contradiction motif fired (if any)
+- which separator or guard fired (if any)
+- the specific rule that decided the final verdict
+
+Keep reasoning tight. Default to FALSE when no TRUE rule applies.
+
+OUTPUT FORMAT (use exact headers, no extra formatting):
+VERDICT: TRUE or FALSE
+REASONING: non-empty explanation
+PROOF: required if VERDICT is TRUE, empty otherwise
+COUNTEREXAMPLE: required if VERDICT is FALSE, empty otherwise

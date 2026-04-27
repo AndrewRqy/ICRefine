@@ -223,9 +223,18 @@ ROADMAP_HEADER         = "=== REASONING ROADMAP ==="
 class Cheatsheet:
     roadmap: str
     case_studies: list[CaseStudy] = field(default_factory=list)
-    # Optional frozen prior knowledge (e.g. NeuriCo prompt).
+    # Optional frozen prior knowledge (e.g. NeuriCo prompt or CS-ICL bootstrap).
     # Rendered before the roadmap and never modified by ICR.
+    # When prior_knowledge_segments is non-empty this field is ignored at render
+    # time — use it only as a fallback / backward-compat string.
     prior_knowledge: str = ""
+    # Structured segments of prior_knowledge.  Each dict has keys:
+    #   id      : str   — stable identifier, e.g. "seg_0"
+    #   title   : str   — first heading in the block
+    #   content : str   — full text of the segment (including its heading)
+    #   enabled : bool  — False means the segment is excluded from render
+    # Populated by gen_icr_bootstrap.py; empty in all older Cheatsheet files.
+    prior_knowledge_segments: list[dict] = field(default_factory=list)
     # When True, render() skips ALL character caps: roadmap is not truncated,
     # every case study is included in full, and the total budget is unlimited.
     # Use --no-render-limit in ICR_select/pipeline.py to enable.
@@ -351,8 +360,9 @@ class Cheatsheet:
         _no_limit = self.no_limit
 
         parts: list[str] = []
-        if self.prior_knowledge.strip():
-            parts += [PRIOR_KNOWLEDGE_HEADER, "", self.prior_knowledge.strip(), ""]
+        pk = self._render_prior_knowledge()
+        if pk:
+            parts += [PRIOR_KNOWLEDGE_HEADER, "", pk, ""]
 
         header = ROADMAP_HEADER
         dt = self.roadmap.strip() if _no_limit else _truncate(self.roadmap.strip(), ROADMAP_MAX_CHARS)
@@ -390,6 +400,43 @@ class Cheatsheet:
     def render_size(self) -> int:
         """Return the character count of the rendered cheatsheet."""
         return len(self.render())
+
+    def _render_prior_knowledge(self) -> str:
+        """
+        Return the prior-knowledge text to inject into the prompt.
+
+        If prior_knowledge_segments is populated, join only the enabled segments
+        (preserving the original --- separators between them).
+        Falls back to the raw prior_knowledge string for backward compatibility.
+        """
+        if self.prior_knowledge_segments:
+            enabled = [s["content"] for s in self.prior_knowledge_segments if s.get("enabled", True)]
+            return "\n\n---\n\n".join(enabled).strip()
+        return self.prior_knowledge.strip()
+
+    # ------------------------------------------------------------------
+    # Prior-knowledge segment ablation
+    # ------------------------------------------------------------------
+
+    def disable_prior_segment(self, segment_id: str) -> bool:
+        """Disable a prior-knowledge segment by id. Returns True if found."""
+        for seg in self.prior_knowledge_segments:
+            if seg["id"] == segment_id:
+                seg["enabled"] = False
+                return True
+        return False
+
+    def enable_prior_segment(self, segment_id: str) -> bool:
+        """Re-enable a prior-knowledge segment by id. Returns True if found."""
+        for seg in self.prior_knowledge_segments:
+            if seg["id"] == segment_id:
+                seg["enabled"] = True
+                return True
+        return False
+
+    def prior_segment_ids(self) -> list[str]:
+        """Return all segment ids in order."""
+        return [s["id"] for s in self.prior_knowledge_segments]
 
     # ------------------------------------------------------------------
     # Mutation
@@ -446,16 +493,17 @@ class Cheatsheet:
         path.parent.mkdir(parents=True, exist_ok=True)
 
         path.with_suffix(".txt").write_text(self.render(), encoding="utf-8")
+        payload: dict = {
+            "roadmap":         self.roadmap,
+            "case_studies":    [cs.to_dict() for cs in self.case_studies],
+            # Always write prior_knowledge as the current rendered text so older
+            # loaders can read it without understanding segments.
+            "prior_knowledge": self._render_prior_knowledge(),
+        }
+        if self.prior_knowledge_segments:
+            payload["prior_knowledge_segments"] = self.prior_knowledge_segments
         path.with_suffix(".json").write_text(
-            json.dumps(
-                {
-                    "roadmap":         self.roadmap,
-                    "case_studies":    [cs.to_dict() for cs in self.case_studies],
-                    "prior_knowledge": self.prior_knowledge,
-                },
-                indent=2,
-                ensure_ascii=False,
-            ),
+            json.dumps(payload, indent=2, ensure_ascii=False),
             encoding="utf-8",
         )
 
@@ -485,6 +533,7 @@ class Cheatsheet:
             roadmap=rm,
             case_studies=case_studies,
             prior_knowledge=data.get("prior_knowledge", ""),
+            prior_knowledge_segments=data.get("prior_knowledge_segments", []),
         )
 
     # ------------------------------------------------------------------

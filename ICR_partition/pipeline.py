@@ -145,6 +145,8 @@ def _build_parser() -> argparse.ArgumentParser:
                    help="Retire a partition when residual failures fall below this.")
     g.add_argument("--max-outer-iters",    type=int,   default=5,   metavar="N",
                    help="Maximum outer iterations (each re-scores active bins).")
+    g.add_argument("--cs-static-iters",   type=int,   default=2,   metavar="N",
+                   help="Stop Phase 2 after this many consecutive iterations with no CS added.")
     g.add_argument("--partition-concurrency", type=int, default=8,  metavar="N",
                    help="Max partitions solved concurrently.")
     g.add_argument("--concurrency",        type=int,   default=25,  metavar="N",
@@ -191,13 +193,41 @@ def _build_parser() -> argparse.ArgumentParser:
     g.add_argument("--resume", action="store_true", default=False,
                    help="Load cheatsheet_current.json from --output-dir if it exists "
                         "and skip initialisation.")
+    g.add_argument("--save-scored", action="store_true", default=False,
+                   help="Save initial scored failures to scored_failures.jsonl in --output-dir.")
+
+    g = p.add_argument_group("Task")
+    g.add_argument("--task", default="magma",
+                   choices=list(_TASK_MAP),
+                   help="Task domain. 'magma' = equational implication (default); "
+                        "'bbh_boolean' = BBH boolean_expressions; "
+                        "or any BBH task from tasks.bbh_tasks.")
 
     return p
+
+
+_TASK_MAP = {
+    "magma":                "tasks.magma:MAGMA_TASK",
+    "bbh_boolean":          "tasks.bbh_boolean:BBH_BOOLEAN_TASK",
+    "causal_judgement":     "tasks.bbh_tasks:CAUSAL_JUDGEMENT_TASK",
+    "sports_understanding": "tasks.bbh_tasks:SPORTS_TASK",
+    "disambiguation_qa":    "tasks.bbh_tasks:DISAMBIGUATION_TASK",
+    "movie_recommendation": "tasks.bbh_tasks:MOVIE_TASK",
+    "geometric_shapes":     "tasks.bbh_tasks:GEOMETRIC_TASK",
+}
+
+
+def _load_task(task_name: str):
+    import importlib
+    module_path, attr = _TASK_MAP[task_name].split(":")
+    return getattr(importlib.import_module(module_path), attr)
 
 
 def main() -> None:
     args    = _build_parser().parse_args()
     api_key = get_api_key()
+
+    task_spec = _load_task(args.task)
 
     model_score     = args.model_score     or args.model
     model_score_2   = args.model_score_2   or None
@@ -341,6 +371,7 @@ def main() -> None:
             bin_threshold=args.bin_threshold,
             retirement_threshold=args.retirement_threshold,
             max_outer_iters=args.max_outer_iters,
+            cs_static_iters=args.cs_static_iters,
             partition_concurrency=args.partition_concurrency,
             concurrency=args.concurrency,
             n_candidates=args.n_candidates,
@@ -352,7 +383,9 @@ def main() -> None:
             reasoning_effort=reasoning_effort,
             cot_first=args.cot_first,
             prescore_map=prescore_map,
+            task_spec=task_spec,
             output_dir=output_dir,
+            save_scored=args.save_scored,
             log=True,
         )
     finally:

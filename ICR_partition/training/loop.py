@@ -61,16 +61,28 @@ from pathlib import Path
 from utils.cheatsheet import Cheatsheet
 from utils.scorer import score_batch, score_batch_ensemble
 from utils.oracle_index import OracleIndex
+from utils.task_spec import TaskSpec
 from ICR_reasoning.core.oracle import OracleDict
-from ICR_select.generators.case_study import generate_candidates, generate_crossover
+from ICR_select.generators.case_study import (
+    generate_candidates,
+    generate_crossover,
+    _detect_failure_type,
+    _parse_divergence_step,
+)
 from ICR_select.training.gates import (
     _MIN_CS_FOR_SIMILARITY,
     _apply_prescore,
     _mini_eval_full,
+    _mini_eval_text,
     _regression_check,
+    _regression_check_text,
     _similarity_gate,
     _merge_case_studies,
 )
+from ICR_rules.rules.rule import RuleSet
+from ICR_rules.rules.parser import parse_cheatsheet_text, identify_triggered_rule
+from ICR_rules.generators.rule_patch import generate_rule_patch
+from ICR_rules.training.scorer import score_batch_sair
 
 from .partition import (
     PartitionBin,
@@ -100,6 +112,7 @@ class PartitionTrainingResult:
     train_accuracy:       float
     update_log:           list[dict]
     partition_summary:    list[dict]
+    n_rule_patches:       int = 0   # rule patches applied (ICR_rules mode)
 
 
 # ---------------------------------------------------------------------------
@@ -148,6 +161,7 @@ def _solve_bin(
     reasoning_effort:        str | None,
     cot_first:               bool,
     log_fn,
+    task_spec:               TaskSpec | None = None,
 ) -> dict:
     """
     Attempt to generate and accept one case study for this partition.
@@ -188,7 +202,76 @@ def _solve_bin(
         concurrency=concurrency,
         reasoning_effort=reasoning_effort,
         cot_first=cot_first,
+        task_spec=task_spec,
     )
+
+    # ── Concrete-example generation pre-pass ─────────────────────────────────
+    # When task_spec.concrete_cs_gen_fn is set, try generating a named-scenario
+    # text section (CS-ICL style) before the standard archive/crossover path.
+    # If the section passes fix-rate and regression gates, it is appended to
+    # cheatsheet.prior_knowledge and we return immediately.  Otherwise we fall
+    # through to the normal structured CaseStudy generation path.
+    if task_spec is not None and task_spec.concrete_cs_gen_fn is not None:
+        with cs_lock:
+            cs_text = cheatsheet.render()
+            cs_pre_snap = Cheatsheet(
+                roadmap=cheatsheet.roadmap,
+                case_studies=list(cheatsheet.case_studies),
+                prior_knowledge=cheatsheet.prior_knowledge,
+                no_limit=cheatsheet.no_limit,
+            )
+        log_fn(f"  [partition:{label}] trying concrete-example generation ...")
+        try:
+            section = task_spec.concrete_cs_gen_fn(
+                failures, cs_text, model_casestudy, api_key
+            )
+        except Exception as exc:
+            log_fn(f"  [partition:{label}] concrete_cs_gen_fn failed: {exc}")
+            section = None
+        if section:
+            fr_txt, _ = _mini_eval_text(
+                section, failures, cs_pre_snap,
+                label=f"[{label}] concrete-gen",
+                **gkw,
+            )
+            log_fn(f"  [partition:{label}] concrete-gen fix_rate={fr_txt:.0%}")
+            if fr_txt >= fix_rate_threshold:
+                reg_txt = 0.0
+                if pb.correct_pool and len(pb.correct_pool) >= min_pool_for_regression:
+                    reg_txt = _regression_check_text(
+                        section, pb.correct_pool, cs_pre_snap, **gkw
+                    )
+                    log_fn(f"  [partition:{label}] concrete-gen regression_rate={reg_txt:.0%}")
+                if reg_txt <= regress_threshold:
+                    with cs_lock:
+                        cheatsheet.prior_knowledge = (
+                            cheatsheet.prior_knowledge.rstrip() + "\n\n" + section
+                        ).lstrip()
+                        pb.n_flushes += 1
+                    log_fn(
+                        f"  [partition:{label}] concrete-gen accepted: "
+                        f"fix_rate={fr_txt:.0%}  regress={reg_txt:.0%}"
+                    )
+                    return {
+                        "partition":       label,
+                        "event":           "bin_added",
+                        "title":           f"concrete:{label}",
+                        "fix_rate":        fr_txt,
+                        "regression_rate": reg_txt,
+                        "attempt":         1,
+                        "n_cs_total":      len(cheatsheet.case_studies),
+                        "source":          "concrete_cs_gen",
+                    }
+                else:
+                    log_fn(
+                        f"  [partition:{label}] concrete-gen regression {reg_txt:.0%} > "
+                        f"threshold={regress_threshold:.0%} — falling back to structured generation."
+                    )
+            else:
+                log_fn(
+                    f"  [partition:{label}] concrete-gen fix_rate {fr_txt:.0%} < "
+                    f"threshold={fix_rate_threshold:.0%} — falling back to structured generation."
+                )
 
     # ── EA: Archive re-evaluation ─────────────────────────────────────────────
     # Candidates that failed gates in a previous outer iteration are re-scored
@@ -240,6 +323,8 @@ def _solve_bin(
                 arch_cand.creation_fix_rate  = arch_fr
                 arch_cand.historical_fix_rate = arch_fr
                 cheatsheet.add_case_study(arch_cand)
+                if arch_cand.roadmap_patch:
+                    cheatsheet.patch_roadmap(arch_cand.roadmap_patch)
                 pb.n_flushes += 1
                 log_fn(
                     f"  [partition:{label}] archive candidate accepted: "
@@ -294,15 +379,37 @@ def _solve_bin(
                 f"(prev: {prev_attempt['reason']}) ..."
             )
 
+        # --- Detect failure type and divergence step (from ICR_adaptive) ---
+        # ABANDONMENT failures → CONTRAST strategy (show wrong path + correct path).
+        # WRONG_ANSWER failures → DIRECT_FIX or ORACLE_GUIDED (existing behaviour).
+        # divergence_step_hint focuses the NEXT CHECK on the specific step where the
+        # model went wrong, rather than a generic instruction.
+        failure_type_hint  = _detect_failure_type(failures)
+        divergence_step_hint = _parse_divergence_step(failures)
+        log_fn(
+            f"  [partition:{label}] failure_type={failure_type_hint}  "
+            f"diverge_step={divergence_step_hint}"
+        )
+
         # --- Generate candidates ---
-        # pb.key[3] is expected_answer ("TRUE" or "FALSE") — the bin polarity.
-        # Passing it lets generate_candidates weight case study type appropriately:
-        # TRUE bins → TYPE A (missing lemma/proof); FALSE bins → TYPE B (wrong pattern).
+        # Polarity = majority expected answer ("TRUE" / "FALSE") — tells the generator
+        # whether to weight TYPE A (missing proof, TRUE bins) or TYPE B (wrong pattern,
+        # FALSE bins).  For the 8-element magma key, index 3 stores this directly.
+        # For generic keys (e.g. BBH boolean (bool, bool, bool)), derive it from items.
+        if len(pb.key) >= 4 and isinstance(pb.key[3], str) and pb.key[3] in ("TRUE", "FALSE"):
+            bin_polarity = pb.key[3]
+        else:
+            from collections import Counter as _Counter
+            _lc = _Counter(task_spec.answer_label(it) for it in failures)
+            bin_polarity = _lc.most_common(1)[0][0] if _lc else "FALSE"
         try:
             candidates = generate_candidates(
                 failures, cs_snapshot, model_casestudy, api_key,
                 n=n_candidates, oracle=oracle, prev_attempt=prev_attempt,
-                polarity=pb.key[3],   # index 3 = expected_answer (unchanged)
+                polarity=bin_polarity,
+                failure_type_hint=failure_type_hint,
+                divergence_step_hint=divergence_step_hint,
+                task_spec=task_spec,
             )
         except RuntimeError as exc:
             log_fn(f"  [partition:{label}] generation failed: {exc}")
@@ -326,7 +433,9 @@ def _solve_bin(
         # truth from the partition key so the case study is guaranteed to only
         # fire on items from this structural class.  This makes ACTIVATE IF
         # conditions machine-checkable and prevents cross-partition interference.
-        partition_conditions = partition_key_to_conditions(pb.key)
+        _pk_to_cond = (task_spec.partition_key_to_conditions
+                       if task_spec is not None else partition_key_to_conditions)
+        partition_conditions = _pk_to_cond(pb.key)
         for cand in candidates:
             # Avoid duplicating if retry already injected them
             if not cand.activate_if or cand.activate_if[:1] != partition_conditions[:1]:
@@ -435,10 +544,19 @@ def _solve_bin(
                         "attempt":         attempt,
                     }
 
-            # ADD
+            # ADD case study + apply any accompanying roadmap patch (rules-based correction).
+            # The generation prompt always produces a ROADMAP PATCH alongside the case study,
+            # but prior versions discarded it.  Applying it here makes both the example-level
+            # fix (case study) and the rule-level fix (roadmap patch) take effect together.
             best_cand.creation_fix_rate   = best_fix_rate
             best_cand.historical_fix_rate  = best_fix_rate
             cheatsheet.add_case_study(best_cand)
+            if best_cand.roadmap_patch:
+                cheatsheet.patch_roadmap(best_cand.roadmap_patch)
+                log_fn(
+                    f"  [partition:{label}] roadmap patch applied "
+                    f"({len(best_cand.roadmap_patch)} chars)"
+                )
             pb.n_flushes += 1
             log_fn(
                 f"  [partition:{label}] added CS {len(cheatsheet.case_studies)} "
@@ -462,6 +580,181 @@ def _solve_bin(
         "reason":        "all_rounds_failed",
         "best_fix_rate": best_fix_rate,
     }
+
+
+# ---------------------------------------------------------------------------
+# Rule-patch pre-step (ICR_rules mode integrated into ICR_partition)
+# ---------------------------------------------------------------------------
+
+def _dominant_triggered_rule(failures: list[dict], task_spec=None) -> str | None:
+    """Return the rule ID that fired most often across failure reasoning traces."""
+    from collections import Counter
+    _identify = (
+        task_spec.identify_triggered_rule
+        if task_spec is not None and task_spec.identify_triggered_rule is not None
+        else identify_triggered_rule
+    )
+    counts: Counter = Counter()
+    for item in failures:
+        reasoning = item.get("reasoning") or item.get("post_think") or ""
+        rule_id = _identify(reasoning)
+        if rule_id:
+            counts[rule_id] += 1
+    return counts.most_common(1)[0][0] if counts else None
+
+
+def _rule_patch_pass(
+    active_bins:       dict,
+    rule_set:          RuleSet,
+    cheatsheet:        Cheatsheet,
+    model_patch:       str,
+    model_score:       str,
+    api_key:           str,
+    oracle:            OracleDict | None,
+    fix_rate_threshold: float,
+    regress_threshold:  float,
+    concurrency:        int,
+    partition_concurrency: int,
+    log_fn,
+    task_spec=None,
+) -> tuple[RuleSet, list[dict], int]:
+    """
+    For each active bin, try to identify the dominant misfiring rule and
+    generate a surgical patch (TIGHTEN / SPLIT / REPLACE / ADD_GUARD).
+
+    Patches are staged (one per target rule ID, highest fix_rate wins) and
+    applied atomically after all bins are processed — mirroring ICR_rules'
+    conflict-resolution strategy.
+
+    Returns (updated_rule_set, patch_log_entries, n_applied).
+    Bins that receive a patch have their failure lists trimmed in-place so
+    the subsequent case-study pass only sees items not already fixed.
+    """
+    staged: list[tuple[str, object, RuleSet, float, str]] = []  # (bin_label, patch, patched_rs, fix_rate, bin_key_str)
+    patch_log: list[dict] = []
+
+    def _solve_one(pb_label_key):
+        pb, label, bin_key_str = pb_label_key
+        triggered = _dominant_triggered_rule(pb.failures, task_spec=task_spec)
+        if triggered is None:
+            log_fn(f"  [rule-patch:{label}] no dominant rule identified — skipping")
+            return None
+
+        target_rule = rule_set.get_rule(triggered)
+        if target_rule is None:
+            log_fn(f"  [rule-patch:{label}] rule {triggered} not in RuleSet — skipping")
+            return None
+
+        log_fn(f"  [rule-patch:{label}] targeting rule {triggered}")
+
+        patch = generate_rule_patch(
+            target_rule=target_rule,
+            rule_set=rule_set,
+            failures=pb.failures,
+            correct_pool=list(pb.correct_pool)[:30],
+            oracle=oracle or {},
+            model=model_patch,
+            api_key=api_key,
+            task_spec=task_spec,
+        )
+        if patch is None:
+            log_fn(f"  [rule-patch:{label}] patch generation failed")
+            return None
+
+        try:
+            patched_rs = rule_set.apply_patch(patch)
+        except Exception as exc:
+            log_fn(f"  [rule-patch:{label}] patch apply error: {exc}")
+            return None
+
+        # Score bin failures with the patched RuleSet
+        bin_items = pb.failures + list(pb.correct_pool)[:len(pb.failures)]
+        bc, bw = score_batch_sair(
+            bin_items, patched_rs, model_score, api_key,
+            concurrency=min(concurrency, len(bin_items) + 1),
+            task_spec=task_spec,
+        )
+        failure_ids = {item["id"] for item in pb.failures}
+        fix_rate = sum(1 for it in bc if it["id"] in failure_ids) / len(pb.failures)
+        patch.bin_fix_rate = fix_rate
+
+        if fix_rate < fix_rate_threshold:
+            log_fn(f"  [rule-patch:{label}] fix_rate={fix_rate:.0%} < threshold — discarding")
+            return None
+
+        # Regression check on correct pool
+        pool = list(pb.correct_pool)[:30]
+        if pool:
+            pc, pw = score_batch_sair(
+                pool, patched_rs, model_score, api_key,
+                concurrency=min(concurrency, len(pool) + 1),
+                task_spec=task_spec,
+            )
+            reg_rate = len(pw) / len(pool)
+            if reg_rate > regress_threshold:
+                log_fn(f"  [rule-patch:{label}] regression={reg_rate:.0%} > threshold — discarding")
+                return None
+
+        log_fn(
+            f"  [rule-patch:{label}] ACCEPTED  rule={triggered}  "
+            f"type={patch.patch_type}  fix_rate={fix_rate:.0%}"
+        )
+        return (label, patch, patched_rs, fix_rate, bin_key_str, triggered, pb)
+
+    n_parallel = min(partition_concurrency, len(active_bins))
+    work = [(pb, pb.label, str(k)) for k, pb in active_bins.items()]
+
+    with ThreadPoolExecutor(max_workers=n_parallel) as ex:
+        futs = {ex.submit(_solve_one, item): item for item in work}
+        for fut in as_completed(futs):
+            result = fut.result()
+            if result is not None:
+                label, patch, patched_rs, fix_rate, bin_key_str, triggered, pb = result
+                staged.append((label, patch, patched_rs, fix_rate, bin_key_str, triggered, pb))
+
+    if not staged:
+        return rule_set, [], 0
+
+    # Apply one patch per target rule (highest fix_rate wins) — conflict resolution
+    staged.sort(key=lambda x: x[3], reverse=True)
+    applied_targets: set[str] = set()
+    current_rs = rule_set
+    n_applied = 0
+
+    for label, patch, patched_rs, fix_rate, bin_key_str, triggered, pb in staged:
+        if triggered in applied_targets:
+            continue
+        current_rs = patched_rs
+        applied_targets.add(triggered)
+        n_applied += 1
+        patch_log.append({
+            "event":       "rule_patch_applied",
+            "partition":   bin_key_str,
+            "target_rule": triggered,
+            "patch_type":  patch.patch_type,
+            "fix_rate":    fix_rate,
+            "reasoning":   patch.reasoning,
+        })
+        log_fn(
+            f"  [rule-patch] applied: {triggered} → {patch.patch_type}  "
+            f"(fix_rate={fix_rate:.0%})"
+        )
+
+        # Mark newly-fixed failures so the case-study pass skips them.
+        # Re-use the patched RuleSet to score only this bin's failures.
+        bc, _ = score_batch_sair(
+            pb.failures, current_rs, model_score, api_key,
+            concurrency=min(concurrency, len(pb.failures) + 1),
+            task_spec=task_spec,
+        )
+        fixed_ids = {it["id"] for it in bc}
+        pb.failures = [f for f in pb.failures if f["id"] not in fixed_ids]
+
+    # Update prior_knowledge in the cheatsheet from the patched RuleSet.
+    # render_decision_guide() strips the jinja2 preamble so it's pure rule text.
+    cheatsheet.prior_knowledge = current_rs.render_decision_guide()
+
+    return current_rs, patch_log, n_applied
 
 
 # ---------------------------------------------------------------------------
@@ -500,9 +793,23 @@ def run_partition_loop(
     reasoning_effort:        str | None = "low",
     cot_first:               bool  = True,
     prescore_map:            dict | None = None,
+    # ICR_rules integration — optional rule-patch pre-step
+    rule_set:                RuleSet | None = None,
+    model_patch:             str = "",     # model used for rule-patch generation
+    # Task specification — defaults to MAGMA_TASK for backward compat
+    task_spec:               TaskSpec | None = None,
     # Output
+    cs_static_iters:         int   = 2,   # stop Phase 2 after this many consecutive idle iters
     output_dir:              Path | None = None,
+    save_scored:             bool  = False,
     log:                     bool  = True,
+    # Prior-knowledge regression guard
+    # When enabled, a pk-only baseline is scored at iter 0.  At the end of
+    # Phase 2, if the full cheatsheet accuracy drops more than pk_regression_tolerance
+    # below that baseline, all case studies are reverted and the pk-only cheatsheet
+    # is restored.
+    pk_regression_guard:     bool  = False,
+    pk_regression_tolerance: float = 0.03,
 ) -> PartitionTrainingResult:
 
     def _log(msg: str) -> None:
@@ -515,6 +822,11 @@ def run_partition_loop(
     # models in parallel.  Each wrong item carries _wrong_weight ∈ (0,1] —
     # 1.0 if both models failed, 0.5 if only one failed — which flows into the
     # weighted fix_rate inside _mini_eval_full without any extra API calls.
+    # Resolve task_spec — default to MAGMA_TASK for backward compat
+    if task_spec is None:
+        from tasks.magma import MAGMA_TASK
+        task_spec = MAGMA_TASK
+
     if model_score_2:
         _models  = [model_score, model_score_2]
         _weights = model_score_weights or [1.0, 1.0]
@@ -525,7 +837,7 @@ def run_partition_loop(
             return score_batch_ensemble(
                 items, cheatsheet_text, _models, _weights, api_key,
                 concurrency=concurrency, reasoning_effort=reasoning_effort,
-                cot_first=cot_first,
+                cot_first=cot_first, task_spec=task_spec,
             )
         _log(
             f"\n[ensemble] scoring with 2 models: {model_score} (w={_weights[0]}) "
@@ -540,6 +852,7 @@ def run_partition_loop(
                 items, cheatsheet_text, model_score, api_key,
                 concurrency=concurrency, reasoning_effort=reasoning_effort,
                 cot_first=cot_first, progress_label=progress_label,
+                task_spec=task_spec,
             )
 
     # Build oracle index for nearest-neighbour enrichment
@@ -554,7 +867,9 @@ def run_partition_loop(
     n_skipped         = 0
     n_merges          = 0
     n_bins_solved     = 0
+    n_rule_patches    = 0
     outer_iter        = 0
+    static_cs_iters   = 0   # consecutive outer iters with no CS added
 
     cs_lock = threading.Lock()
 
@@ -588,6 +903,7 @@ def run_partition_loop(
         f"min_pool={min_pool_for_regression}\n"
         f"  oracle={'yes (' + str(len(oracle_index)) + ' entries)' if oracle_index else 'none'}\n"
         f"  model_score={model_score}  model_casestudy={model_casestudy}\n"
+        f"  rule_patch={'yes (model=' + model_patch + ')' if rule_set is not None else 'disabled'}\n"
         f"{'='*65}"
     )
 
@@ -612,7 +928,33 @@ def run_partition_loop(
         f"correct={len(correct)}  wrong={len(wrong)}"
     )
 
-    bins = build_partitions(wrong, correct, bin_threshold=bin_threshold)
+    # ── PK regression guard — baseline ───────────────────────────────────────
+    pk_baseline_acc: float | None = None
+    if pk_regression_guard and cheatsheet.prior_knowledge.strip():
+        _log(f"\n[pk-guard] Scoring prior_knowledge-only baseline ...")
+        _pk_only = Cheatsheet(
+            roadmap=cheatsheet.roadmap,
+            case_studies=[],
+            prior_knowledge=cheatsheet.prior_knowledge,
+            no_limit=cheatsheet.no_limit,
+        )
+        _pk_correct, _ = _do_score(
+            train_items, _pk_only.render(),
+            concurrency=concurrency, reasoning_effort=reasoning_effort,
+            cot_first=cot_first, progress_label="pk-baseline",
+        )
+        pk_baseline_acc = len(_pk_correct) / len(train_items) if train_items else 0.0
+        _log(f"  [pk-guard] baseline acc = {pk_baseline_acc:.1%}  tolerance = {pk_regression_tolerance:.0%}")
+
+    if save_scored and output_dir is not None:
+        scored_path = Path(output_dir) / "scored_failures.jsonl"
+        with open(scored_path, "w", encoding="utf-8") as _sf:
+            for _item in wrong:
+                _sf.write(json.dumps(_item, ensure_ascii=False) + "\n")
+        _log(f"  [scored] {len(wrong)} failures saved to {scored_path}")
+
+    bins = build_partitions(wrong, correct, bin_threshold=bin_threshold,
+                            partition_key_fn=task_spec.partition_key)
     print_partition_table(bins, title="INITIAL PARTITION SUMMARY")
     update_log.append({
         "event":          "initial_score",
@@ -636,6 +978,37 @@ def run_partition_loop(
         if not active_bins:
             _log(f"\n[iter {outer_iter}] All bins retired — stopping.")
             break
+
+        # ── Rule-patch pre-step (ICR_rules mode) ─────────────────────────────
+        # If a RuleSet was provided, attempt to patch misfiring named rules
+        # before the case-study generation pass.  Patches that pass the fix-rate
+        # and regression gates are applied and the updated RuleSet is used for
+        # all subsequent iterations.  Bins whose failures are resolved by a patch
+        # are trimmed in-place so the case-study pass only sees remaining items.
+        if rule_set is not None:
+            _log(
+                f"\n[iter {outer_iter}] Running rule-patch pre-step on "
+                f"{len(active_bins)} active bins ..."
+            )
+            rule_set, rp_log, n_rp = _rule_patch_pass(
+                active_bins=active_bins,
+                rule_set=rule_set,
+                cheatsheet=cheatsheet,
+                model_patch=model_patch or model_casestudy,
+                model_score=model_score,
+                api_key=api_key,
+                oracle=oracle,
+                fix_rate_threshold=fix_rate_threshold,
+                regress_threshold=regress_threshold,
+                concurrency=concurrency,
+                partition_concurrency=partition_concurrency,
+                log_fn=_log,
+                task_spec=task_spec,
+            )
+            n_rule_patches += n_rp
+            update_log.extend([{**e, "outer_iter": outer_iter} for e in rp_log])
+            if n_rp:
+                _log(f"  [rule-patch] {n_rp} patch(es) applied this iteration.")
 
         # Divide total concurrency across all simultaneous LLM calls.
         # Each bin evaluates n_candidates in parallel, each using score_batch
@@ -678,6 +1051,7 @@ def run_partition_loop(
                     reasoning_effort,
                     cot_first,
                     _log,
+                    task_spec,
                 ): pb.label
                 for pb in active_bins.values()
             }
@@ -740,6 +1114,7 @@ def run_partition_loop(
             new_correct=new_correct,
             retirement_threshold=retirement_threshold,
             log_fn=_log,
+            partition_key_fn=task_spec.partition_key,
         )
 
         newly_retired = sum(1 for pb in bins.values() if pb.solved)
@@ -756,13 +1131,20 @@ def run_partition_loop(
 
         print_partition_table(bins, title=f"PARTITION SUMMARY — after iter {outer_iter}")
 
-        # Early stop: no bin made progress this iteration
+        # Early stop: exit after cs_static_iters consecutive idle iterations
         iter_added = sum(1 for r in iter_results if r.get("event") in ("bin_added", "bin_merged"))
         if iter_added == 0:
+            static_cs_iters += 1
             _log(
-                f"\n[iter {outer_iter}] No case studies added this iteration — stopping early."
+                f"\n[iter {outer_iter}] No case studies added "
+                f"({static_cs_iters}/{cs_static_iters} consecutive idle) — "
+                + ("stopping early." if static_cs_iters >= cs_static_iters
+                   else "continuing.")
             )
-            break
+            if static_cs_iters >= cs_static_iters:
+                break
+        else:
+            static_cs_iters = 0
 
     # Restore original signal handlers
     signal.signal(signal.SIGINT,  _prev_sigint)
@@ -780,6 +1162,37 @@ def run_partition_loop(
     train_accuracy = len(final_correct) / len(train_items) if train_items else 0.0
     _log(f"  final train accuracy={train_accuracy:.1%}")
 
+    # ── PK regression guard — revert check ───────────────────────────────────
+    if pk_baseline_acc is not None:
+        _log(
+            f"\n[pk-guard] final={train_accuracy:.1%}  "
+            f"baseline={pk_baseline_acc:.1%}  tol={pk_regression_tolerance:.0%}"
+        )
+        if train_accuracy < pk_baseline_acc - pk_regression_tolerance:
+            n_reverted = len(cheatsheet.case_studies)
+            reverted_from_acc = train_accuracy
+            _log(
+                f"  [pk-guard] REGRESSION DETECTED — reverting {n_reverted} case "
+                f"studies and restoring prior_knowledge-only cheatsheet."
+            )
+            cheatsheet.case_studies = []
+            _revert_correct, _ = _do_score(
+                train_items, cheatsheet.render(),
+                concurrency=concurrency, reasoning_effort=reasoning_effort,
+                cot_first=cot_first, progress_label="pk-fallback",
+            )
+            train_accuracy = len(_revert_correct) / len(train_items) if train_items else 0.0
+            _log(f"  [pk-guard] reverted accuracy = {train_accuracy:.1%}")
+            update_log.append({
+                "event":                         "pk_guard_revert",
+                "n_case_studies_reverted":       n_reverted,
+                "train_accuracy_before_revert":  round(reverted_from_acc, 4),
+                "pk_baseline_acc":               round(pk_baseline_acc, 4),
+                "train_accuracy_after_revert":   round(train_accuracy, 4),
+            })
+        else:
+            _log(f"  [pk-guard] OK — no regression detected.")
+
     if output_dir:
         _save_checkpoint(cheatsheet, update_log, output_dir, tag="final")
 
@@ -793,5 +1206,6 @@ def run_partition_loop(
         n_outer_iters=outer_iter,
         train_accuracy=train_accuracy,
         update_log=update_log,
+        n_rule_patches=n_rule_patches,
         partition_summary=partition_summary(bins),
     )

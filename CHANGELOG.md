@@ -2,6 +2,152 @@
 
 ---
 
+## 2026-04-26
+
+### ICR_hybrid: New hybrid rule-patch → case-study pipeline
+
+A new `ICR_hybrid` pipeline module was added. It supersedes the task-specific magma pipeline and generalises to any task registered in `_TASK_MAP`.
+
+**Design: two-phase refinement**
+
+- **Phase 1 (rule patching)** — optional. Either provide `--rule-set` (a Jinja2 rule file) or use `--auto-rule-init` to bootstrap an initial rule set from scored failures. The phase iterates patch→score→patch until `--rule-acc-goal` is reached or `--max-rule-iters` is exhausted.
+- **Phase 2 (case study generation)** — always runs. Uses the same partition-parallel quality-gated loop as ICR_partition on top of whatever Phase 1 established.
+
+**PK regression guard** — `--pk-regression-guard` measures accuracy with only `prior_knowledge` (no case studies), then reverts Phase 2 additions if they fall more than `--pk-regression-tolerance` below that baseline. Prevents case studies from causing net harm when `prior_knowledge` is already strong (e.g. from a CS-ICL bootstrap cheat sheet).
+
+**Entry point:** `python -m ICR_hybrid.pipeline`
+
+---
+
+### BBH extended tasks: 6 new tasks in `_TASK_MAP`
+
+Six new BBH tasks were registered in `ICR_hybrid/pipeline.py` via `tasks/bbh_tasks_ext.py`:
+
+| Task | Train items |
+|---|---|
+| `formal_fallacies` | 150 |
+| `logical_deduction_three` | 150 |
+| `web_of_lies` | 150 |
+| `date_understanding` | 150 |
+| `navigate` | 150 |
+| `snarks` | 100 |
+
+Training data added to `datasets/bbh/` as `{task}_train.jsonl`.
+
+---
+
+### CS-ICL baseline comparison framework
+
+Two new scripts enable systematic comparison against CS-ICL (Cheat Sheet In-Context Learning):
+
+**`gen_csicl_ext.py`** — generates CS-ICL cheat sheets for each BBH task using the original CS-ICL paper prompt: "Create a cheat sheet based on the examples below… only include specific, detailed points to address the challenging ones." Saved to `../cheat-sheet-icl/data/cheat_prompt/{task}/cheat_prompt.txt`.
+
+**`eval_bbh_comparison.py`** — evaluates both CS-ICL and ICR on the test split. Reads ICR final cheatsheets from `--run-dir/{task}/cheatsheet_final.json`, reads CS-ICL cheat sheets from `--cs-icl-dir/{task}/cheat_prompt.txt`, scores both with the same model against the test split, writes combined results to `{run-dir}/comparison_results.json`.
+
+**BBH ext results (test split, `openai/gpt-4.1-mini`):**
+
+| Task | N_test | CS-ICL | ICR | Δ |
+|---|---|---|---|---|
+| formal_fallacies | ~50 | 60.0% | 65.0% | +5.0% |
+| logical_deduction_three | ~50 | ~94% | ~94% | ≈0 |
+| web_of_lies | ~50 | 55.0% | 57.0% | +2.0% |
+| date_understanding | ~50 | ~72% | ~72% | ≈0 |
+| navigate | ~50 | 78.0% | 76.0% | −2.0% |
+| snarks | ~40 | ~90.1% | ~90.1% | ≈0 |
+
+ICR matches or exceeds CS-ICL on 5 of 6 tasks; navigate is the only exception.
+
+---
+
+### MAGMA comparison: CS-ICL 88.1% vs ICR 80.95%
+
+**New scripts:** `gen_csicl_magma.py` (generate CS-ICL cheat sheet from 100 magma training items) and `run_magma_comparison.sh` (run both pipelines and evaluate on 42 hard3 test items).
+
+**Results (`runs/magma_comparison/comparison_results.json`, `openai/gpt-4.1-mini` scoring):**
+- CS-ICL: **88.1%** (37/42)
+- ICR: **80.95%** (34/42)
+- Delta: **−7.1%** (ICR underperforms CS-ICL on MAGMA)
+
+**Root cause analysis:**
+
+CS-ICL generates mathematical pedagogy — translations (`L_x = left multiplication by x`), mathematical identities (idempotence, projection laws), a 24-row lookup table of concrete example pairs. This content is immediately applicable at inference time.
+
+ICR generates structural patch descriptions in pipeline-internal terms (`topShape=v-m`, `xTop=both`, `ASPECT EXCEPTION`) — meaningful for the pipeline's iteration logic but not useful as mathematical guidance for the scoring model.
+
+MAGMA's algebraic interconnectedness makes case-by-case refinement self-defeating: the `TRUE_left_proj` partition exhibited 43–86% regression on other TRUE items every time a targeted case study was added. Any fix to one TRUE-projection case broke algebraically related cases. CS-ICL avoids this by teaching the underlying mathematical structure rather than patching individual failure modes.
+
+**Conclusion:** For algebraically-interconnected domains with large shared mathematical structure, pedagogical cheat sheets (CS-ICL style) beat patch-based refinement (ICR). The bootstrap+ICR hybrid below is designed to combine both.
+
+---
+
+### Bootstrap+ICR: CS-ICL seeded initial cheatsheet + ICR gap-filling
+
+**Motivation:** ICR starts from a blank roadmap on BBH tasks and must rediscover general principles from failures. CS-ICL generates a complete pedagogical summary in one pass but cannot adapt to specific failure modes. The bootstrap approach seeds ICR with a CS-ICL cheat sheet, then uses Phase 1 (rule patching) to address gaps and Phase 2 to add case studies for residual hard failures.
+
+**New file `gen_icr_bootstrap.py`:**
+
+Generates a CS-ICL style cheat sheet for each task from the first N training items (75 per task, 50 for snarks) and stores it as a `Cheatsheet` JSON with the CS-ICL text in `prior_knowledge` — **not** in `roadmap`.
+
+Key constraint: `ROADMAP_MAX_CHARS = 2500` means a 6k–8k char CS-ICL cheat sheet placed in `roadmap` would be silently truncated. Placing it in `prior_knowledge` avoids the cap and leaves the empty `roadmap` slot available for Phase 1 gap-filling patches.
+
+```bash
+python3 gen_icr_bootstrap.py [--tasks formal_fallacies snarks] [--model openai/gpt-4.1-mini]
+# Output: runs/bbh_bootstrap/bootstrap_cheatsheets/{task}/bootstrap_cs.json
+```
+
+**New script `run_bbh_bootstrap.sh`:**
+
+Orchestrates the full bootstrap+ICR run for all 6 BBH tasks:
+1. Generate CS-ICL bootstrap cheat sheets (`gen_icr_bootstrap.py`)
+2. Run ICR pipeline per task with `--init-cheatsheet`, `--auto-rule-init`, `--rule-acc-goal 0.95`, `--max-rule-iters 3`, `--max-cs-iters 5`, `--pk-regression-guard`
+3. Run `eval_bbh_comparison.py` per task and accumulate results
+4. Print final summary table comparing Bootstrap+ICR vs CS-ICL vs ICR-base
+
+**New script `run_formal_fallacies_bootstrap.sh`:**
+
+Single-task version for `formal_fallacies` (CS-ICL baseline: 60%, ICR-only: 65%). All three steps include skip logic — if output already exists, the step is skipped, so re-runs are safe. Uses `openai/gpt-4.1-mini` for all roles.
+
+---
+
+### Cheatsheet: `prior_knowledge_segments` field for per-segment ablation
+
+**Motivation:** CS-ICL cheat sheets are structured documents with multiple sections (preamble, core rules, reference tables, pattern library, algorithm, tips). To identify which sections help and which hurt — without regenerating — each section should be independently disableable.
+
+**Changes (`utils/cheatsheet.py`):**
+
+New field `prior_knowledge_segments: list[dict] = field(default_factory=list)`.
+
+Each segment dict has four keys:
+- `id` — `"seg_0"`, `"seg_1"`, … (stable; set at generation time)
+- `title` — first `###`/`##`/`####` heading in the block, or `"(preamble)"`
+- `content` — full block text (heading included)
+- `enabled` — `True` by default; set `False` to exclude from rendering
+
+New method `_render_prior_knowledge()` — if `prior_knowledge_segments` is non-empty, joins all enabled segments with `"\n\n---\n\n"`; otherwise falls back to raw `self.prior_knowledge` (backward compatible). `_render_with_selection()` now calls this method instead of `self.prior_knowledge.strip()`.
+
+New helper methods:
+- `disable_prior_segment(segment_id) -> bool`
+- `enable_prior_segment(segment_id) -> bool`
+- `prior_segment_ids() -> list[str]`
+
+`save()` writes `prior_knowledge_segments` conditionally and derives the flat `prior_knowledge` key from `_render_prior_knowledge()` for backward compatibility. `load()` reads `prior_knowledge_segments=data.get("prior_knowledge_segments", [])`.
+
+**Segment generation (`gen_icr_bootstrap.py`):**
+
+`_parse_segments(text)` splits the CS-ICL output by `\n---\n` delimiter. Each block becomes a segment dict. The `---` divider naturally separates the 5-layer CS-ICL structure so segments align with logical sections without any prompt changes.
+
+---
+
+### Pipeline: `--ablate-prior-segments` flag
+
+**Changes (`ICR_hybrid/pipeline.py`):**
+
+New flag `--ablate-prior-segments IDS` (comma-separated segment IDs, e.g. `seg_0,seg_3`). When specified, the pipeline loads `--init-cheatsheet`, calls `cs.disable_prior_segment(seg_id)` for each listed ID, logs the result, then proceeds normally.
+
+This enables ablation studies without re-generating the bootstrap cheat sheet — pass different `--ablate-prior-segments` values to measure each section's contribution in isolation.
+
+---
+
 ## 2026-04-10
 
 ### ICR_select: Skip redundant val scoring when prescore is provided
@@ -937,8 +1083,74 @@ All cross-package imports updated to use `utils.*` directly:
 
 ---
 
+## 2026-04-22
+
+### ICR_adaptive: New domain-agnostic cheatsheet refinement mode
+
+A new refinement mode `ICR_adaptive` was added alongside `ICR_naive`, `ICR_reasoning`, and `ICR_select`. Unlike the others, `ICR_adaptive` makes no assumptions about the case study format, protocol structure, or scoring model — everything is injected via two config objects.
+
+**Design:**
+
+`ICR_adaptive/config.py` — two dataclasses:
+- `TaskConfig`: domain_description, input_fields, answer_field, verdict_pattern, answer_map, truncation_token_threshold. `base_partition_key(item)` and `query_features(item)` for bin keying and routing. `validate()` raises on blank description.
+- `PipelineConfig`: scoring_models, generator_model, fix_rate_threshold, regress_threshold, regress_relative_factor, min_pool_for_regression, bin_threshold, n_candidates, utility_threshold, lam, mu, nu. `primary_model()` returns `scoring_models[0]`. `adaptive_regress_limit(pool_size, fix_count)` = `max(ceil(regress_threshold×pool_size), ceil(fix_count×relative_factor))`.
+
+**Components** (`ICR_adaptive/components/`):
+
+- `format_filter.py` — `FormatFilter.check()` classifies each response as empty/truncated/no_verdict/ok.
+- `failure_classifier.py` — `FailureClassifier.classify()` returns `FailureType` (CORRECT / WRONG_ANSWER / ABANDONMENT / FORMAT).
+- `execution_parser.py` — `ExecutionPathParser.parse()` finds the last `[STEP:]`/`[RULE:]` tag seen in the response; with oracle trace finds the first step present in oracle but absent in model response.
+- `generator_router.py` — `GeneratorRouter.route()` finds the most relevant case bank entry via token Jaccard similarity.
+- `multi_model_scorer.py` — `MultiModelScorer.score()` runs score_fn across all scoring models; `ScorerResult.all_pass_fix_rate()` and `.any_regresses()` for gate checks.
+
+**Training** (`ICR_adaptive/training/`):
+
+- `adaptive_gate.py` — `AdaptiveRegressionGate.evaluate()` runs three sequential gates: fix_rate → regression → utility. Utility = lam×Vgap − mu×regress_cost − nu×length_penalty. Returns `GateResult(passed, reason, utility, fix_rate, regress_count)`.
+- `loop.py` — `AdaptiveTrainingLoop.run()`: score → bin failures (skip FORMAT) → pick largest eligible bin ≥ threshold → generate N candidates → gate each → accept best → repeat. `IterationResult` tracks acc_before/acc_after for the summary table. Bins are logged with sizes; every gate decision logged at INFO.
+
+**Prompts** (`ICR_adaptive/prompts/`):
+
+- `strategies.py` — `build_prompt(ctx, strategy)` dispatches to DIRECT_FIX / ORACLE_GUIDED / CONTRAST. All strategies include `_FORMAT_BLOCK` requiring plain text + `[STEP:]`/`[RULE:]` annotations + two format examples (TRUE motif case, FALSE counterexample case). Both examples show `[RULE:]` tags so the generator knows to annotate both proof and counterexample paths.
+
+**Facade:**
+
+- `pipeline.py` — `AdaptivePipeline(task_cfg, pipe_cfg, score_fn, generate_fn)` validates both configs then delegates to `AdaptiveTrainingLoop`.
+
+**Tests:** 56 smoke tests across 10 test files (one per component), all passing.
+
+**Demo run script:** `run_adaptive_hard1.py` (project root) — runs the adaptive pipeline on `hard1` (69 items) with GPT-OSS-120B only and a blank initial cheatsheet. Async concurrency=20 via `httpx.AsyncClient` + `asyncio.gather`; sync/async bridge via `ThreadPoolExecutor(max_workers=1) + asyncio.run()`. Intermediate accuracy printed after each scoring pass. Final clean scoring pass and per-iteration summary table printed on completion.
+
+---
+
+### ICR_adaptive: Bug fixes from first two demo runs
+
+Three bugs were identified from demo runs on `hard1` and fixed:
+
+**1. Equation hallucination in case study generation (`strategies.py`)**
+
+Problem: The generator (GPT-OSS-120B) ignored the sample item's actual equations and substituted a different, easier problem it found familiar. The gate did not catch this because it only checks accuracy on the training set, not whether the case covers the correct equations. The hallucinated case study was accepted and added to the cheatsheet with wrong equations.
+
+Fix: Added a `CRITICAL CONSTRAINT` block to `_direct_fix()` that explicitly names both equations and the expected answer at the top of the prompt, and mandates that the first step must be `[STEP: parse_equations]` listing those exact equations. The constraint appears before the failure details so the model sees it before writing anything.
+
+**2. Duplicate bin targeting — same bin accepted multiple times (`loop.py`)**
+
+Problem: The loop had no memory of which bins had already been addressed. After a candidate was accepted for a bin, subsequent iterations still re-targeted the same bin (same failure type + divergence step + structural key) once the bin still had failures, producing redundant and often near-duplicate case studies.
+
+Fix: Added `completed_bins: set` in `AdaptiveTrainingLoop.run()`. When selecting the target bin, only bins not in `completed_bins` are eligible. When a candidate is accepted, `completed_bins.add(target_key)` marks that bin as done. The loop stops early when all bins are either addressed or below threshold, with a log message "All failure bins already addressed".
+
+**3. Sparse `[RULE:]` annotations in FALSE / counterexample cases (`strategies.py`)**
+
+Problem: The existing `_FORMAT_BLOCK` contained only a TRUE/motif-rule example. Generated case studies for FALSE items had zero `[RULE:]` markers because the model had no example showing how to annotate counterexample-construction steps. This made the execution parser unable to identify divergence points in FALSE failures.
+
+Fix: Added a second format example (FORMAT EXAMPLE B) to `_FORMAT_BLOCK` showing a complete FALSE case with `[RULE:]` tags on every check: probe passes, refutation rules, and counterexample confirmation. Added an explicit note: "Every step that checks or applies a rule MUST emit at least one [RULE:] tag."
+
+---
+
 ## Next Steps
 
-- Run full recursive refinement pipeline (5 iterations, 200 items, eval-first-and-last) with oracle CSV
+- Run `run_formal_fallacies_bootstrap.sh` to validate Bootstrap+ICR on formal_fallacies (CS-ICL: 60%, ICR-only: 65% — target: >65%)
+- Run `run_bbh_bootstrap.sh` for all 6 BBH tasks and compare Bootstrap+ICR vs ICR-base and CS-ICL
+- Run per-segment ablations on the formal_fallacies bootstrap cheat sheet to identify which sections drive accuracy
+- Rerun MAGMA comparison with `openai/gpt-4.1` (gen/patch/casestudy) to measure model quality impact on the CS-ICL vs ICR gap
 - Fix similarity gate to catch semantic duplicates with different wording
-- Consider tighter DT revision prompt that makes substantive changes rather than adding clarifying notes
+- Run ICR_adaptive on hard1 after the three bug fixes to measure impact

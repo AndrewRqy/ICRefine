@@ -1,6 +1,7 @@
 # ICRefine — Iterative Cheatsheet Refinement
 
-Automatically improves a cheatsheet used to prompt LLMs on **magma equation implication** tasks.
+Automatically improves a cheatsheet used to prompt LLMs on classification tasks. ICRefine supports **magma equation implication** (algebraic reasoning) and six **BBH** (BIG-Bench Hard) tasks: formal fallacies, logical deduction, web of lies, date understanding, navigate, and snarks.
+
 ICRefine is a standalone project — it only needs a dataset (`.jsonl`) and an optional starting cheatsheet/prior-knowledge file.
 
 ---
@@ -135,7 +136,7 @@ python -m ICR_select.pipeline \
 
 ## Modes
 
-Four refinement modes are available. **ICR_partition is recommended** for cluster runs with open-source models.
+Five refinement modes are available. **ICR_hybrid is recommended** for all new experiments.
 
 | Mode | Entry point | Description |
 |---|---|---|
@@ -143,6 +144,7 @@ Four refinement modes are available. **ICR_partition is recommended** for cluste
 | `ICR_reasoning` | `python -m ICR_reasoning.pipeline` | Same, but feeds the model's chain-of-thought to the case study generator |
 | `ICR_select` | `python -m ICR_select.pipeline` | Full quality-gated loop with candidate competition, fix-rate / regression / similarity gates, pruning, condensation |
 | `ICR_partition` | `python -m ICR_partition.pipeline` | Partition-parallel variant of ICR_select. Failures are split into structural bins (by equation form + depth + expected answer) and each bin is solved concurrently. Supports ensemble scoring (two models in parallel) and an evolutionary candidate archive with crossover. Recommended for cluster runs. |
+| `ICR_hybrid` | `python -m ICR_hybrid.pipeline` | Two-phase pipeline: optional rule patching (Phase 1) then partition-parallel case study generation (Phase 2). Supports magma and all 6 BBH extended tasks. Includes CS-ICL bootstrap seeding and per-segment prior_knowledge ablation. **Recommended for all new experiments.** |
 
 ---
 
@@ -540,6 +542,137 @@ bash run_cluster_ensemble.sh \
 
 ---
 
+## ICR_hybrid
+
+Two-phase refinement pipeline. Phase 1 (rule patching) is optional; Phase 2 (case study generation) always runs. Supports all tasks in `_TASK_MAP` — magma, BBH boolean, causal judgement, sports understanding, disambiguation QA, movie recommendation, geometric shapes, formal fallacies, logical deduction, web of lies, date understanding, navigate, and snarks.
+
+### Phase 1 — Rule patching (optional)
+
+Provide `--rule-set` (a Jinja2 rule file) to use an existing rule set, or `--auto-rule-init` to bootstrap rules from scored failures. The phase iterates patch→score until `--rule-acc-goal` is reached or `--max-rule-iters` is exhausted. For BBH tasks that have no prior rule set, `--auto-rule-init --rule-acc-goal 0.95 --max-rule-iters 3` is a good starting point.
+
+### Phase 2 — Case study generation
+
+Same quality-gated partition-parallel loop as ICR_partition. Each failure partition is solved concurrently with fix-rate, regression, and similarity gates.
+
+### PK regression guard
+
+`--pk-regression-guard` measures accuracy with only `prior_knowledge` (no Phase 2 case studies) and reverts any Phase 2 additions that drop accuracy more than `--pk-regression-tolerance` below that baseline. Useful when `prior_knowledge` already contains a strong cheat sheet (e.g. from CS-ICL bootstrap).
+
+### Bootstrap+ICR approach
+
+Seed the pipeline with a CS-ICL style cheat sheet generated from a subset of training data, then run ICR to fill gaps and add targeted case studies. The CS-ICL text goes in `prior_knowledge` (not `roadmap`) so the 2500-char roadmap cap does not truncate it, and the empty `roadmap` slot is available for Phase 1 rule patches.
+
+```bash
+# Step 1: generate CS-ICL bootstrap cheat sheet for one or all tasks
+python3 gen_icr_bootstrap.py --tasks formal_fallacies --model openai/gpt-4.1-mini
+# Output: runs/bbh_bootstrap/bootstrap_cheatsheets/formal_fallacies/bootstrap_cs.json
+
+# Step 2: run ICR with bootstrap seed + Phase 1 gap-filling + Phase 2 case studies
+python3 -m ICR_hybrid.pipeline \
+    --task formal_fallacies \
+    --dataset datasets/bbh/formal_fallacies_train.jsonl \
+    --no-oracle \
+    --init-cheatsheet runs/bbh_bootstrap/bootstrap_cheatsheets/formal_fallacies/bootstrap_cs.json \
+    --model openai/gpt-4.1-mini \
+    --auto-rule-init --bootstrap-n 20 \
+    --rule-acc-goal 0.95 --max-rule-iters 3 \
+    --max-cs-iters 5 \
+    --pk-regression-guard --pk-regression-tolerance 0.03 \
+    --output-dir runs/formal_fallacies_bootstrap
+```
+
+Convenience scripts for all 6 BBH tasks:
+
+```bash
+chmod +x run_bbh_bootstrap.sh && ./run_bbh_bootstrap.sh          # all 6 tasks
+chmod +x run_formal_fallacies_bootstrap.sh && ./run_formal_fallacies_bootstrap.sh  # one task
+```
+
+Both scripts skip any step whose output already exists — re-runs are safe.
+
+### Prior knowledge segment ablation
+
+When a bootstrap cheat sheet is loaded via `--init-cheatsheet`, individual `prior_knowledge_segments` can be disabled to measure each section's contribution without regenerating the cheat sheet:
+
+```bash
+python3 -m ICR_hybrid.pipeline \
+    --task formal_fallacies \
+    --dataset datasets/bbh/formal_fallacies_train.jsonl \
+    --no-oracle \
+    --init-cheatsheet runs/bbh_bootstrap/bootstrap_cheatsheets/formal_fallacies/bootstrap_cs.json \
+    --ablate-prior-segments seg_0,seg_3 \
+    --model openai/gpt-4.1-mini \
+    --output-dir runs/formal_fallacies_ablate_0_3
+```
+
+Segments are named `seg_0`, `seg_1`, … as split by `---` dividers in the CS-ICL output. Run with different `--ablate-prior-segments` values to identify which sections help or hurt.
+
+### All options
+
+**Task / Data**
+
+| Flag | Default | Description |
+|---|---|---|
+| `--task TASK` | `magma` | Task domain. See `_TASK_MAP` in `ICR_hybrid/pipeline.py` for all choices. |
+| `--dataset FILE` | required | Training dataset JSONL |
+| `--limit N` | off | Cap training items to the first N |
+| `--no-oracle` | off | Disable oracle enrichment (required for BBH tasks — no oracle available) |
+| `--oracle-csv FILE` | required (unless `--no-oracle`) | Oracle CSV with correct reasoning traces |
+
+**Starting state**
+
+| Flag | Default | Description |
+|---|---|---|
+| `--rule-set FILE` | off | Jinja2 rule file — enables Phase 1 rule patching |
+| `--auto-rule-init` | off | Bootstrap rules from initial failures before Phase 1 |
+| `--bootstrap-n N` | `20` | Failure examples used for rule bootstrap |
+| `--init-cheatsheet PATH` | off | Load a cheatsheet JSON as the Phase 2 starting point |
+| `--prior-knowledge FILE` | off | Frozen knowledge prefix injected before the trainable roadmap |
+| `--ablate-prior-segments IDs` | off | Comma-separated segment IDs to disable from `prior_knowledge_segments` |
+
+**Models**
+
+| Flag | Default | Description |
+|---|---|---|
+| `--model MODEL` | `openai/gpt-4.1-2025-04-14` | Default for all stages |
+| `--model-score MODEL` | `--model` | Scoring model |
+| `--model-rule-patch MODEL` | `--model` | Rule patch generation model |
+| `--model-casestudy MODEL` | `--model` | Case study generation model |
+
+**Phase 1 — Rule patching**
+
+| Flag | Default | Description |
+|---|---|---|
+| `--max-rule-iters N` | `4` | Max Phase 1 iterations |
+| `--rule-acc-goal F` | `0.85` | Exit Phase 1 when training accuracy reaches this |
+| `--rule-concurrency N` | `25` | LLM concurrency during Phase 1 |
+| `--rule-bin-threshold N` | `3` | Failures needed to trigger a rule patch |
+| `--rule-fix-rate-threshold F` | `0.20` | Min fix rate for rule patch acceptance |
+| `--rule-regress-threshold F` | `0.20` | Max regression rate for rule patch acceptance |
+
+**Phase 2 — Case study generation**
+
+| Flag | Default | Description |
+|---|---|---|
+| `--max-cs-iters N` | `5` | Max Phase 2 iterations |
+| `--cs-concurrency N` | `25` | LLM concurrency during Phase 2 |
+| `--cs-bin-threshold N` | `3` | Failures needed to trigger case study generation |
+| `--cs-fix-rate-threshold F` | `0.30` | Min fix rate for case study acceptance |
+| `--cs-regress-threshold F` | `0.15` | Max regression rate for case study acceptance |
+| `--cs-n-candidates N` | `3` | Candidates generated per bin |
+| `--cs-candidate-rounds N` | `3` | Max retry rounds per bin |
+| `--pk-regression-guard` | off | Revert Phase 2 if it degrades below prior_knowledge-only baseline |
+| `--pk-regression-tolerance F` | `0.03` | Allowed accuracy drop below pk-only baseline before revert |
+
+**Output**
+
+| Flag | Default | Description |
+|---|---|---|
+| `--output-dir DIR` | `runs/hybrid_run` | Output directory |
+| `--resume` | off | Load `cheatsheet_current` from `--output-dir/phase2` if it exists |
+
+---
+
 ## Comparing Modes
 
 `compare_modes.sh` trains all three modes on the same dataset for a side-by-side comparison:
@@ -558,7 +691,7 @@ bash compare_modes.sh smoke   # quick smoke test — verifies all gates fire wit
 ICRefine/
 ├── utils/               # Shared utilities (used by all ICR packages)
 │   ├── case_study.py    # CaseStudy dataclass — structured record with routing metadata
-│   ├── cheatsheet.py    # Cheatsheet dataclass — render, save, load (case_studies: list[CaseStudy])
+│   ├── cheatsheet.py    # Cheatsheet dataclass — render, save, load; prior_knowledge_segments ablation
 │   ├── data.py          # Dataset loading, splitting, FailureBin, is_true
 │   ├── parser.py        # Parse VERDICT / REASONING / PROOF / COUNTEREXAMPLE
 │   ├── llm_client.py    # Unified LLM client — vLLM (primary + secondary) / OpenAI / OpenRouter routing
@@ -569,10 +702,25 @@ ICRefine/
 │   └── training/
 │       ├── loop.py                # Inner CS loop (4 gates + pruning + condensation)
 │       └── roadmap_synthesizer.py # Synthesises a routing controller roadmap over the case bank
-├── ICR_partition/       # Partition-parallel loop (recommended for cluster runs)
+├── ICR_partition/       # Partition-parallel loop (cluster runs with open-source models)
 │   └── training/
 │       ├── loop.py      # Outer partition loop — bin routing, concurrent bin solving, retirement
 │       └── partition.py # PartitionBin dataclass (candidate archive, crossover, EA loop)
+├── ICR_hybrid/          # Two-phase rule-patch + case-study pipeline (recommended for all new experiments)
+│   └── training/
+│       └── loop.py      # run_hybrid_loop — Phase 1 rule patching + Phase 2 partition CS loop
+├── tasks/               # Task specs (scoring prompts, answer parsing, bootstrap rule init)
+│   ├── magma.py         # MAGMA equation implication task
+│   ├── bbh_boolean.py   # BBH boolean expressions
+│   ├── bbh_tasks.py     # BBH original tasks (causal judgement, sports, etc.)
+│   └── bbh_tasks_ext.py # BBH extended tasks (formal_fallacies, logical_deduction_three, web_of_lies,
+│                        #   date_understanding, navigate, snarks)
+├── datasets/bbh/        # BBH training data (150 items per task, 100 for snarks)
+├── gen_icr_bootstrap.py    # Generate CS-ICL bootstrap cheat sheets for BBH tasks
+├── gen_csicl_ext.py        # Generate CS-ICL cheat sheets for BBH extended tasks (baseline)
+├── eval_bbh_comparison.py  # Evaluate ICR vs CS-ICL baseline on BBH test splits
+├── run_bbh_bootstrap.sh    # Bootstrap+ICR for all 6 BBH tasks (skip-if-exists safe)
+├── run_formal_fallacies_bootstrap.sh  # Bootstrap+ICR for formal_fallacies only
 ├── smoke_partition.py      # Smoke tests for ICR_partition (no live LLM required)
 ├── smoke_test_gates.py     # Gate threshold smoke tests
 ├── eval_oracle_quality.py  # Compare case study quality with vs without oracle injection

@@ -118,6 +118,20 @@ Step 3 — Find the TRIGGER: the precise structural conditions that distinguish 
   than no case study at all. Prefer a trigger that fires on 2–3 cases correctly
   over one that fires on 10 cases and gets half wrong.
 
+  FEATURE VOCABULARY — use these exact terms in ACTIVATE IF conditions wherever
+  applicable (the scoring model can read them from the PRECOMPUTED FEATURES block):
+    bare(E1), vars(E1), size(E1), imb(E1), LP(E1), RP(E1), XOR(E1), AB(E1)
+    topShape(E1): "v-m" (var*product), "m-v" (product*var), "m-m" (product*product)
+    xTop(E1): "left" | "right" | "both"  (where bare var x sits in top split)
+    Lx(E1): TRUE if leftmost RHS variable is x  |  Rx(E1): TRUE if rightmost is x
+    square(E1): TRUE if RHS contains u*u subterm
+    rhsVars(E1): distinct variable count on RHS (product side)
+
+  For TRUE-polarity bins with bare E1 and proj_class=nested, express the trigger
+  using topShape/xTop/Lx/Rx/square/rhsVars — these map directly to the STEP 0B
+  contradiction motifs (C1–C13) in the decision protocol. Name the motif if it
+  applies (e.g. "matches C4: rhsVars=3, Lx=FALSE, Rx=FALSE, xTop=right, topShape=v-m").
+
 Step 4 — Find the ANTI-TRIGGER: 1–2 structurally similar cases where this teaching
   note should NOT fire (the shortcut or the weaker model's approach is actually fine).
 

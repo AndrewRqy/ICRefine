@@ -175,6 +175,7 @@ You are a mathematician specializing in equational theories of magmas.
 Your task is to determine whether Equation 1 ({equation1}) implies Equation 2 \
 ({equation2}) over all magmas.
 
+{features_block}\
 Use the following decision guide to inform your determination:
 
 {cheatsheet}
@@ -202,6 +203,7 @@ You are a mathematician specializing in equational theories of magmas.
 Your task is to determine whether Equation 1 ({equation1}) implies Equation 2 \
 ({equation2}) over all magmas.
 
+{features_block}\
 Use the following decision guide to inform your determination:
 
 {cheatsheet}

@@ -24,6 +24,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from tqdm import tqdm
+
 from utils.cheatsheet import Cheatsheet
 from utils.data import load_jsonl, is_true
 from utils.llm_client import get_api_key, call_llm
@@ -116,7 +118,9 @@ def main() -> None:
         # Stream-score remaining items, writing each result immediately
         # ------------------------------------------------------------------
         cs_text = cheatsheet.render()
+        correct_so_far = 0
         with output_path.open("a", encoding="utf-8") as fout:
+            pbar = tqdm(total=len(remaining), unit="item", desc="scoring")
             for scored_item in score_items_streaming(
                 remaining,
                 get_cheatsheet=lambda: cs_text,
@@ -129,6 +133,12 @@ def main() -> None:
                 fout.write(json.dumps(scored_item, ensure_ascii=False) + "\n")
                 fout.flush()
                 already_scored[scored_item["id"]] = scored_item
+                if scored_item.get("predicted") == scored_item.get("expected"):
+                    correct_so_far += 1
+                done_so_far = len(already_scored)
+                pbar.set_postfix(acc=f"{correct_so_far/done_so_far:.1%}" if done_so_far else "n/a")
+                pbar.update(1)
+            pbar.close()
 
     # ------------------------------------------------------------------
     # Final accuracy over all scored items

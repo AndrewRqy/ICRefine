@@ -20,6 +20,7 @@ from utils.case_study import CaseStudy
 from utils.data import is_true
 from utils.llm_client import call_llm
 from utils.scorer import score_batch
+from utils.task_spec import TaskSpec
 from ..prompts.templates import (
     SIMILARITY_CHECK_PROMPT, SIMILARITY_MAX_TOKENS,
     MERGE_PROMPT, MERGE_MAX_TOKENS,
@@ -42,6 +43,7 @@ def _mini_eval(
     reasoning_effort: str | None,
     cot_first: bool,
     label: str = "mini-eval",
+    task_spec: TaskSpec | None = None,
 ) -> float:
     """Score the failure batch with candidate injected. Returns fix_rate."""
     temp = Cheatsheet(
@@ -51,7 +53,7 @@ def _mini_eval(
     correct, _ = score_batch(
         failures, temp.render(), model_score, api_key,
         concurrency=concurrency, reasoning_effort=reasoning_effort, cot_first=cot_first,
-        progress_label=label,
+        progress_label=label, task_spec=task_spec,
     )
     return len(correct) / len(failures) if failures else 0.0
 
@@ -66,6 +68,7 @@ def _mini_eval_full(
     reasoning_effort: str | None,
     cot_first: bool,
     label: str = "mini-eval",
+    task_spec: TaskSpec | None = None,
 ) -> tuple[float, list[dict]]:
     """Score the failure batch with candidate injected. Returns (fix_rate, still_wrong)."""
     temp = Cheatsheet(
@@ -75,7 +78,7 @@ def _mini_eval_full(
     correct, wrong = score_batch(
         failures, temp.render(), model_score, api_key,
         concurrency=concurrency, reasoning_effort=reasoning_effort, cot_first=cot_first,
-        progress_label=label,
+        progress_label=label, task_spec=task_spec,
     )
     # Weighted fix_rate: ensemble-scored items carry _wrong_weight (0,1].
     # Fixing a consensus failure (weight=1.0) counts more than fixing a
@@ -95,6 +98,7 @@ def _replace_eval(
     concurrency: int,
     reasoning_effort: str | None,
     cot_first: bool,
+    task_spec: TaskSpec | None = None,
 ) -> float:
     """Score failures with CS at merge_idx replaced by merged_cs. Returns fix_rate."""
     new_studies = cheatsheet.case_studies[:]
@@ -103,7 +107,7 @@ def _replace_eval(
     correct, _ = score_batch(
         failures, temp.render(), model_score, api_key,
         concurrency=concurrency, reasoning_effort=reasoning_effort, cot_first=cot_first,
-        progress_label="merge-eval-merged",
+        progress_label="merge-eval-merged", task_spec=task_spec,
     )
     return len(correct) / len(failures) if failures else 0.0
 
@@ -117,6 +121,7 @@ def _regression_check(
     concurrency: int,
     reasoning_effort: str | None,
     cot_first: bool,
+    task_spec: TaskSpec | None = None,
 ) -> float:
     """Score the correct pool with candidate injected. Returns regression_rate."""
     if not correct_pool:
@@ -128,11 +133,68 @@ def _regression_check(
     _, wrong = score_batch(
         correct_pool, temp.render(), model_score, api_key,
         concurrency=concurrency, reasoning_effort=reasoning_effort, cot_first=cot_first,
-        progress_label="regression-check",
+        progress_label="regression-check", task_spec=task_spec,
     )
     # Correct-pool items from ensemble have _wrong_weight on them too (≈0 since
     # they were correct on all models).  Use uniform 1.0 weight here — regression
     # is measured only against the primary model, uniformly across the pool.
+    return len(wrong) / len(correct_pool)
+
+
+def _mini_eval_text(
+    text_section: str,
+    failures: list[dict],
+    cheatsheet: Cheatsheet,
+    model_score: str,
+    api_key: str,
+    concurrency: int,
+    reasoning_effort: str | None,
+    cot_first: bool,
+    label: str = "mini-eval-text",
+    task_spec: TaskSpec | None = None,
+) -> tuple[float, list[dict]]:
+    """Score failures with text_section appended to prior_knowledge. Returns (fix_rate, still_wrong)."""
+    temp = Cheatsheet(
+        roadmap=cheatsheet.roadmap,
+        case_studies=cheatsheet.case_studies,
+        prior_knowledge=cheatsheet.prior_knowledge + "\n\n" + text_section,
+        no_limit=cheatsheet.no_limit,
+    )
+    correct, wrong = score_batch(
+        failures, temp.render(), model_score, api_key,
+        concurrency=concurrency, reasoning_effort=reasoning_effort, cot_first=cot_first,
+        progress_label=label, task_spec=task_spec,
+    )
+    total_weight = sum(item.get("_wrong_weight", 1.0) for item in failures)
+    fixed_weight = sum(item.get("_wrong_weight", 1.0) for item in correct)
+    return fixed_weight / total_weight if total_weight > 0 else 0.0, wrong
+
+
+def _regression_check_text(
+    text_section: str,
+    correct_pool: list[dict],
+    cheatsheet: Cheatsheet,
+    model_score: str,
+    api_key: str,
+    concurrency: int,
+    reasoning_effort: str | None,
+    cot_first: bool,
+    task_spec: TaskSpec | None = None,
+) -> float:
+    """Score correct pool with text_section appended to prior_knowledge. Returns regression_rate."""
+    if not correct_pool:
+        return 0.0
+    temp = Cheatsheet(
+        roadmap=cheatsheet.roadmap,
+        case_studies=cheatsheet.case_studies,
+        prior_knowledge=cheatsheet.prior_knowledge + "\n\n" + text_section,
+        no_limit=cheatsheet.no_limit,
+    )
+    _, wrong = score_batch(
+        correct_pool, temp.render(), model_score, api_key,
+        concurrency=concurrency, reasoning_effort=reasoning_effort, cot_first=cot_first,
+        progress_label="regression-check-text", task_spec=task_spec,
+    )
     return len(wrong) / len(correct_pool)
 
 
