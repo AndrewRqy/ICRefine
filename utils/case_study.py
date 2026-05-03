@@ -77,6 +77,15 @@ class CaseStudy:
     # Original LLM text — preserved for fallback rendering and debugging
     raw_text: str = ""
 
+    # Roadmap patch produced alongside this case study (from === ROADMAP PATCH === block).
+    # ICR_partition applies this to cheatsheet.roadmap when the case study is accepted,
+    # making both the example-level (case study) and rule-level (roadmap) corrections.
+    roadmap_patch: str = ""
+
+    # When the generator chose MODIFY instead of ADD NEW, this holds the title of
+    # the existing case study to replace.  Empty string means ADD NEW (default).
+    modification_target: str = ""
+
     # ------------------------------------------------------------------
     # Rendering — identical format to the existing prompt injection
     # ------------------------------------------------------------------

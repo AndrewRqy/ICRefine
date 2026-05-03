@@ -1,0 +1,443 @@
+# Prompt Revision Report
+
+**Dataset**: datasets/mixed_n100_h1_h2.jsonl  
+**Cheatsheet**: runs/partition_mixed_n100h1h2/cheatsheet_current.txt  
+**Scoring model**: openai/gpt-4o-mini  
+**Revision model**: openai/gpt-4o  
+**Test model**: openai/gpt-4o  
+**Failures used**: 6  
+**Variants requested**: 3  
+
+
+================================================================================
+# CASE STUDY PROMPT REVISION
+================================================================================
+
+
+## Failures used (6 items)
+
+```
+[1] E1 = x = (y * (x * (z * x))) * y  |  E2 = x * y = x * ((z * w) * z)
+    Expected: TRUE  Predicted: ?
+    Weak model reasoning (excerpt):
+      **Analyzing equational implications**
+
+      I need to tackle solving equational implications in magmas, specifically determining if identity E1 implies E2 universally. E1 states that for all x, y, and z, x = (y * (x * (z * x))) * y. I’ll denote the binary operation as "*", noting there’s no associativity present. I should explore the consequences this might enforce, like possibly a trivial structure. It’s clear I need to derive or find a counterexample where E1 holds, but E2 does not. Let’s see where this leads!**Deriving simplifications**
+
+      I'm attempting to derive simplifications for the equation ...
+
+[2] E1 = x = (y * (x * (z * x))) * y  |  E2 = x * y = x * ((z * w) * z)
+    Expected: TRUE  Predicted: ?
+    Weak model reasoning (excerpt):
+      VERDICT: FALSE
+      REASONING: There is an infinite magma satisfying Equation 1 but not Equation 2. A convenient counterexample is built from normal forms of a terminating rewrite system whose single rule is exactly the pattern from Equation 1.
+
+      PROOF: 
+
+      COUNTEREXAMPLE: Let \(T\) be the set of all binary terms over distinct atoms \(p,q,r,s,\dots\) with binary symbol \(*\). Consider the rewrite rule
+      \[
+      ((u*(v*(w*v)))*u)\to v.
+      \]
+      This strictly shortens terms, so repeated leftmost-outermost rewriting always terminates. Let \(N\subseteq T\) be the set of irreducible terms, and define a binary operation...
+
+[3] E1 = x = (y * x) * (y * (z * y))  |  E2 = x = ((y * z) * w) * (y * w)
+    Expected: TRUE  Predicted: ?
+    Weak model reasoning (excerpt):
+      VERDICT: FALSE
+      REASONING: Equation 1 does not force Equation 2. A counterexample can be built on a free term algebra with tagged constructors so that every value of the form y*(z*y) acts as a right inverse for the map x ↦ y*x, but the term in Equation 2 does not collapse to x.
+
+      PROOF:
+
+      COUNTEREXAMPLE: Let T be the set of all finite terms generated from one constant e using binary constructors S, T, L, M. Define a binary operation * on T by the following cases, in this order:
+
+      1. S(y,x) * T(y,d) = x
+      2. T(y,L(z,a)) * T(y,d) = S(z,a)
+      3. T(y,M(z,a)) * T(y,d) = T(z,a)
+      4. p * S(z,a) = T(p,L(z,a)) if...
+
+[4] E1 = x = ((y * x) * (y * z)) * y  |  E2 = x = ((y * z) * (y * w)) * u
+    Expected: TRUE  Predicted: ?
+    Weak model reasoning (excerpt):
+      VERDICT: FALSE
+      REASONING: Equation 2 forces every magma to be trivial: for fixed y,z,w,u, the term ((y*z)*(y*w))*u is independent of x, so x=((y*z)*(y*w))*u for all x implies all elements are equal. Thus it is enough to show that Equation 1 has a nontrivial model. It does: one can obtain such a model by a standard compactness construction. Hence Equation 1 does not imply Equation 2.
+      PROOF: 
+      COUNTEREXAMPLE: Let the language have one binary operation * and two distinguished constants a,b. Add also a constant c_t for every formal binary term t built from a,b. Consider the theory T consisting of:
+      ...
+
+[5] E1 = x = ((y * x) * (y * z)) * y  |  E2 = x = ((y * z) * (y * w)) * u
+    Expected: TRUE  Predicted: ?
+    Weak model reasoning (excerpt):
+      VERDICT: FALSE
+      REASONING: Equation 1 does not force all magmas to satisfy Equation 2. One can build a countable magma that is engineered to satisfy every instance of \(x=((y*x)*(y*z))*y\), while many values of \(((y*z)*(y*w))*u\) remain unconstrained and can be kept different from \(x\).
+
+      PROOF: 
+
+      COUNTEREXAMPLE: Take a countable set built recursively, starting with five distinct elements \(0,1,2,3,4\). We define a binary operation \(*\) by a fair stage construction over all triples \((y,x,z)\) of elements already created.
+
+      At a stage for a triple \((y,x,z)\), do the following:
+      1. If \(y*x\) i...
+
+[6] E1 = x = y * (((x * y) * y) * z)  |  E2 = x * (y * z) = (x * y) * w
+    Expected: TRUE  Predicted: ?
+    Weak model reasoning (excerpt):
+      VERDICT: FALSE
+      REASONING: Let \(T\) be the term algebra of magmas on generators \(a,b,c,d\), and orient Equation 1 as the rewrite rule
+      \[
+      y*(((x*y)*y)*z)\;\to\;x.
+      \]
+      This rule strictly decreases term size, and its self-overlaps are joinable, so it gives a convergent rewrite system for the equational theory generated by Equation 1. Hence the free magma satisfying Equation 1 is the magma of rewrite-normal forms with multiplication induced by term formation followed by normalization.
+
+      Now consider the two terms
+      \[
+      a*(b*c)\qquad\text{and}\qquad (a*b)*d.
+      \]
+      Neither contains a subterm of the form \(...
+```
+
+
+## Original Prompt
+
+```
+You are an expert in universal algebra working on equational theories of magmas.
+A magma is a set with a single binary operation * and no other axioms.
+
+You are writing a TEACHING NOTE for a weaker reasoning model that keeps making the same mistake. Your job is to diagnose WHY it fails and teach the exact fix — either a key piece of missing algebraic knowledge, or a wrong/missing reasoning pattern compared to how a stronger model handles the same case.
+
+The cheatsheet the model uses has two parts:
+
+=== REASONING ROADMAP ===
+{roadmap}
+=== END REASONING ROADMAP ===
+
+=== EXISTING CASE STUDIES ===
+{case_studies}
+=== END CASE STUDIES ===
+
+=== PATTERNS ALREADY COVERED — YOUR CASE STUDY MUST NOT RESTATE THESE ===
+{already_covered}
+Your new case study MUST address a gap NOT covered above. If your ACTIVATE IF
+conditions would fire on the same equation pairs as any pattern listed above,
+you are restating existing knowledge — discard that idea and find a genuinely
+new pattern in the failure examples.
+=== END ALREADY COVERED ===
+
+The following examples were ALL predicted INCORRECTLY by the weaker model.
+The ground-truth verdict and the weaker model's wrong reasoning are shown.
+Where available, a CORRECT oracle reasoning trace from a stronger model is shown for contrast — this is your primary signal for what the weaker model is missing.
+
+=== FAILURES WITH INCORRECT MODEL REASONING ===
+
+{failure_lines}
+
+=== YOUR TASK ===
+
+{polarity_instruction}
+
+Step 0 — DIAGNOSE the failure type. Choose exactly one:
+  TYPE A — MISSING KNOWLEDGE: The weaker model's reasoning strategy was reasonable
+    but it lacks a key algebraic fact (a lemma, identity, or structural property).
+    Signal: the oracle trace invokes a fact or consequence that the weaker model
+    never considers, even though the weaker model followed a plausible path.
+    Example: model doesn't know "absorbing E1 forces all elements equal → TRUE always".
+  TYPE B — WRONG/MISSING REASONING PATTERN: The weaker model has the relevant tools
+    but applies the wrong one, stops too early, skips a necessary check, or follows
+    a bad heuristic that a stronger model avoids.
+    Signal: the oracle trace and the weaker model both start similarly, but the
+    oracle takes a different branch or performs an extra check the weaker model skips.
+
+Step 1 — For TYPE A: State the missing lemma or algebraic fact precisely in one
+  sentence. Explain what structural condition triggers it and what it implies.
+  For TYPE B: Quote or paraphrase the exact wrong move from the weaker model's trace.
+  Name the correct move the stronger model takes instead, at the same decision point.
+
+Step 2 — Find the CORRECT MOVE: the specific mechanical check that produces the
+  right answer. It must be something the model can execute by direct inspection
+  of the equation syntax — no proof, no judgment, just structural reading.
+  For TYPE A this is often: "check whether [lemma condition] holds → if yes, verdict
+  follows immediately." For TYPE B this is the alternative branch/check to take.
+
+Step 3 — Find the TRIGGER: the precise structural conditions that distinguish these
+  equations from superficially similar ones where the same mistake would not occur.
+  Be narrow. A trigger that fires on too many cases causes regressions and is worse
+  than no case study at all. Prefer a trigger that fires on 2–3 cases correctly
+  over one that fires on 10 cases and gets half wrong.
+
+Step 4 — Find the ANTI-TRIGGER: 1–2 structurally similar cases where this teaching
+  note should NOT fire (the shortcut or the weaker model's approach is actually fine).
+
+Now produce TWO outputs:
+
+OUTPUT 1 — CASE STUDY (max 900 chars)
+Write the teaching note in EXACTLY this format, with these exact field names:
+
+=== CASE STUDY: [short title — name the missing lemma (TYPE A) or the mistaken shortcut/structural trap (TYPE B)] ===
+FAILURE_TYPE: A or B
+ACTIVATE IF:
+  - [condition 1 — one structural fact about E1 or E2 that must be true]
+  - [condition 2 — ...]
+  (All conditions must hold. If any is false, do not use this note.)
+DO NOT ACTIVATE IF: [1 sentence — the closest structural case where the shortcut is actually correct]
+COMMON WRONG MOVE: [1 sentence — TYPE A: "Does not apply [missing lemma/fact]..."; TYPE B: start with a verb: "Applies...", "Stops at...", "Treats...", "Ignores..."]
+NEXT CHECK: [the one mechanical thing to verify instead — must be answerable by direct inspection; end with what it means: "If yes → TRUE. If no → FALSE." or "If yes → proceed to STEP N."]
+WHY THIS WORKS: [TYPE A: state the missing lemma explicitly and why it resolves the case. TYPE B: explain why the stronger model's reasoning branch is correct and the weaker model's is not. 1–2 sentences.]
+SUPPORT:
+  • E1 = ...  |  E2 = ...  |  Answer: TRUE/FALSE  — [one phrase: what structural fact the trigger catches]
+  • E1 = ...  |  E2 = ...  |  Answer: TRUE/FALSE  — [one phrase]
+TARGET_STEP: [roadmap aspect this corrects, e.g. "ASPECT 2" or "ASPECT 4"]
+
+OUTPUT 2 — ROADMAP PATCH (max 800 chars)
+One or more targeted corrections to the reasoning roadmap that would have prevented
+these failures. Write only aspects that need to be ADDED or MODIFIED — do not
+rewrite the whole roadmap. Name the aspect being refined.
+
+=== ROADMAP PATCH ===
+[ASPECT X EXCEPTION / INSERT AFTER ASPECT Y / NEW ASPECT Z]
+[corrected or new rule text]
+...
+=== END PATCH ===
+
+Output ONLY these two sections — no preamble, no sign-off.
+```
+
+
+## Meta-revision raw response
+
+```
+### VARIANT 1
+CHANGE: Emphasizes feature-vector terms in ACTIVATE IF and requires NEXT CHECK to use PRECOMPUTED FEATURES.
+
+You are an expert in universal algebra working on equational theories of magmas. A magma is a set with a single binary operation * and no other axioms.
+
+You are writing a TEACHING NOTE for a weaker reasoning model that keeps making the same mistake. Your job is to diagnose WHY it fails and teach the exact fix — either a key piece of missing algebraic knowledge or a wrong/missing reasoning pattern compared to how a stronger model handles the same case.
+
+The cheatsheet the model uses has two parts:
+
+=== REASONING ROADMAP ===
+{roadmap}
+=== END REASONING ROADMAP ===
+
+=== EXISTING CASE STUDIES ===
+{case_studies}
+=== END CASE STUDIES ===
+
+=== PATTERNS ALREADY COVERED — YOUR CASE STUDY MUST NOT RESTATE THESE ===
+{already_covered}
+Your new case study MUST address a gap NOT covered above. If your ACTIVATE IF conditions would fire on the same equation pairs as any pattern listed above, you are restating existing knowledge — discard that idea and find a genuinely new pattern in the failure examples.
+=== END ALREADY COVERED ===
+
+The following examples were ALL predicted INCORRECTLY by the weaker model. The ground-truth verdict and the weaker model's wrong reasoning are shown. Where available, a CORRECT oracle reasoning trace from a stronger model is shown for contrast — this is your primary signal for what the weaker model is missing.
+
+=== FAILURES WITH INCORRECT MODEL REASONING ===
+
+{failure_lines}
+
+=== YOUR TASK ===
+
+{polarity_instruction}
+
+Step 0 — DIAGNOSE the failure type. Choose exactly one:
+  TYPE A — MISSING KNOWLEDGE: The weaker model's reasoning strategy was reasonable but it lacks a key algebraic fact (a lemma, identity, or structural property). Signal: the oracle trace invokes a fact or consequence that the weaker model never considers, even though the weaker model followed a plausible path. Example: model doesn't know "absorbing E1 forces all elements equal → TRUE always".
+  TYPE B — WRONG/MISSING REASONING PATTERN: The weaker model has the relevant tools but applies the wrong one, stops too early, skips a necessary check, or follows a bad heuristic that a stronger model avoids. Signal: the oracle trace and the weaker model both start similarly, but the oracle takes a different branch or performs an extra check the weaker model skips.
+
+Step 1 — For TYPE A: State the missing lemma or algebraic fact precisely in one sentence. Explain what structural condition triggers it and what it implies. For TYPE B: Quote or paraphrase the exact wrong move from the weaker model's trace. Name the correct move the stronger model takes instead, at the same decision point.
+
+Step 2 — Find the CORRECT MOVE: the specific mechanical check that produces the right answer. It must be something the model can execute by direct inspection of the equation syntax — no proof, no judgment, just structural reading. For TYPE A this is often: "check whether [l...
+```
+
+
+## Variant 1: Emphasizes feature-vector terms in ACTIVATE IF and requires NEXT CHECK to use PRECOMPUTED FEATURES.
+
+### Proposed Prompt
+```
+You are an expert in universal algebra working on equational theories of magmas. A magma is a set with a single binary operation * and no other axioms.
+
+You are writing a TEACHING NOTE for a weaker reasoning model that keeps making the same mistake. Your job is to diagnose WHY it fails and teach the exact fix — either a key piece of missing algebraic knowledge or a wrong/missing reasoning pattern compared to how a stronger model handles the same case.
+
+The cheatsheet the model uses has two parts:
+
+=== REASONING ROADMAP ===
+{roadmap}
+=== END REASONING ROADMAP ===
+
+=== EXISTING CASE STUDIES ===
+{case_studies}
+=== END CASE STUDIES ===
+
+=== PATTERNS ALREADY COVERED — YOUR CASE STUDY MUST NOT RESTATE THESE ===
+{already_covered}
+Your new case study MUST address a gap NOT covered above. If your ACTIVATE IF conditions would fire on the same equation pairs as any pattern listed above, you are restating existing knowledge — discard that idea and find a genuinely new pattern in the failure examples.
+=== END ALREADY COVERED ===
+
+The following examples were ALL predicted INCORRECTLY by the weaker model. The ground-truth verdict and the weaker model's wrong reasoning are shown. Where available, a CORRECT oracle reasoning trace from a stronger model is shown for contrast — this is your primary signal for what the weaker model is missing.
+
+=== FAILURES WITH INCORRECT MODEL REASONING ===
+
+{failure_lines}
+
+=== YOUR TASK ===
+
+{polarity_instruction}
+
+Step 0 — DIAGNOSE the failure type. Choose exactly one:
+  TYPE A — MISSING KNOWLEDGE: The weaker model's reasoning strategy was reasonable but it lacks a key algebraic fact (a lemma, identity, or structural property). Signal: the oracle trace invokes a fact or consequence that the weaker model never considers, even though the weaker model followed a plausible path. Example: model doesn't know "absorbing E1 forces all elements equal → TRUE always".
+  TYPE B — WRONG/MISSING REASONING PATTERN: The weaker model has the relevant tools but appli...
+```
+
+### Sample Output
+```
+OUTPUT 1 — CASE STUDY
+
+=== CASE STUDY: Wrong Reasoning in Non-Trivial Models (TYPE B) ===
+FAILURE_TYPE: B
+ACTIVATE IF:
+  - vars(E1) >= 3
+  - depth(E1) >= 2
+  - E1 is not in projection form
+DO NOT ACTIVATE IF: E1 forces a single-element magma trivially.
+COMMON WRONG MOVE: Stops at assuming E1 implies triviality without checking non-trivial models.
+NEXT CHECK: Verify if E1 can hold in a non-trivial magma by constructing a specific counterexample. If yes → FALSE. If no → TRUE.
+WHY THIS WORKS: The stronger model explores whether E1 can hold in non-trivial magmas by constructing specific counterexamples, which the weaker model fails to consider. This ensures that E1 does not trivially imply E2 in all cases.
+SUPPORT:
+  • E1 = x = (y * (x * (z * x))) * y  |  E2 = x * y = x * ((z * w) * z)  |  Answer: TRUE  — explores non-trivial magma
+  • E1 = x = ((y * x) * (y * z)) * y  |  E2 = x = ((y * z) * (y * w)) * u  |  Answer: TRUE  — explores non-trivial magma
+TARGET_STEP: ASPECT 3
+
+OUTPUT 2 — ROADMAP PATCH
+
+=== ROADMAP PATCH ===
+INSERT AFTER ASPECT 3
+When E1 is not in projection form and has depth >= 2 with vars(E1) >= 3, consider constructing a non-trivial magma to test if E1 can hold without forcing triviality. Use specific counterexamples to verify if E2 follows.
+=== END PATCH ===
+```
+
+
+## Variant 2: Focuses on TYPE A diagnosis with explicit signals and encourages tight TRIGGER conditions.
+
+### Proposed Prompt
+```
+You are an expert in universal algebra working on equational theories of magmas. A magma is a set with a single binary operation * and no other axioms.
+
+You are writing a TEACHING NOTE for a weaker reasoning model that keeps making the same mistake. Your job is to diagnose WHY it fails and teach the exact fix — either a key piece of missing algebraic knowledge or a wrong/missing reasoning pattern compared to how a stronger model handles the same case.
+
+The cheatsheet the model uses has two parts:
+
+=== REASONING ROADMAP ===
+{roadmap}
+=== END REASONING ROADMAP ===
+
+=== EXISTING CASE STUDIES ===
+{case_studies}
+=== END CASE STUDIES ===
+
+=== PATTERNS ALREADY COVERED — YOUR CASE STUDY MUST NOT RESTATE THESE ===
+{already_covered}
+Your new case study MUST address a gap NOT covered above. If your ACTIVATE IF conditions would fire on the same equation pairs as any pattern listed above, you are restating existing knowledge — discard that idea and find a genuinely new pattern in the failure examples.
+=== END ALREADY COVERED ===
+
+The following examples were ALL predicted INCORRECTLY by the weaker model. The ground-truth verdict and the weaker model's wrong reasoning are shown. Where available, a CORRECT oracle reasoning trace from a stronger model is shown for contrast — this is your primary signal for what the weaker model is missing.
+
+=== FAILURES WITH INCORRECT MODEL REASONING ===
+
+{failure_lines}
+
+=== YOUR TASK ===
+
+{polarity_instruction}
+
+Step 0 — DIAGNOSE the failure type. Choose exactly one:
+  TYPE A — MISSING KNOWLEDGE: The weaker model's reasoning strategy was reasonable but it lacks a key algebraic fact (a lemma, identity, or structural property). Signal: the oracle trace invokes a fact or consequence that the weaker model never considers, even though the weaker model followed a plausible path. Example: model doesn't know "absorbing E1 forces all elements equal → TRUE always".
+  TYPE B — WRONG/MISSING REASONING PATTERN: The weaker model has the relevant tools but appli...
+```
+
+### Sample Output
+```
+OUTPUT 1 — CASE STUDY
+
+=== CASE STUDY: Wrong Reasoning Pattern in Handling Triviality ===
+FAILURE_TYPE: B
+ACTIVATE IF:
+  - vars(E1) >= 3
+  - depth(E1) >= 2
+  - E1 is not a clean projection form
+DO NOT ACTIVATE IF: E1 forces a single-element magma trivially.
+COMMON WRONG MOVE: Stops at assuming E1 does not force triviality without further checks.
+NEXT CHECK: Verify if E1 structurally implies triviality by checking if every substitution leads to a single-element result → If yes → TRUE. If no → FALSE.
+WHY THIS WORKS: The stronger model correctly checks if E1 forces triviality by examining if every possible substitution collapses the magma to a single element, which directly implies E2.
+SUPPORT:
+  • E1 = x = (y * (x * (z * x))) * y  |  E2 = x * y = x * ((z * w) * z)  |  Answer: TRUE  — E1 forces triviality
+  • E1 = x = ((y * x) * (y * z)) * y  |  E2 = x = ((y * z) * (y * w)) * u  |  Answer: TRUE  — E1 forces triviality
+TARGET_STEP: ASPECT 4
+
+OUTPUT 2 — ROADMAP PATCH
+
+=== ROADMAP PATCH ===
+INSERT AFTER ASPECT 4
+Check for Triviality: For equations with vars(E1) >= 3 and depth(E1) >= 2, verify if E1 forces triviality by collapsing all substitutions to a single element. If so, E2 holds trivially.
+=== END PATCH ===
+```
+
+
+## Variant 3: Emphasizes SUPPORT section to ensure it captures structural conditions and refines TYPE B diagnosis.
+
+### Proposed Prompt
+```
+You are an expert in universal algebra working on equational theories of magmas. A magma is a set with a single binary operation * and no other axioms.
+
+You are writing a TEACHING NOTE for a weaker reasoning model that keeps making the same mistake. Your job is to diagnose WHY it fails and teach the exact fix — either a key piece of missing algebraic knowledge or a wrong/missing reasoning pattern compared to how a stronger model handles the same case.
+
+The cheatsheet the model uses has two parts:
+
+=== REASONING ROADMAP ===
+{roadmap}
+=== END REASONING ROADMAP ===
+
+=== EXISTING CASE STUDIES ===
+{case_studies}
+=== END CASE STUDIES ===
+
+=== PATTERNS ALREADY COVERED — YOUR CASE STUDY MUST NOT RESTATE THESE ===
+{already_covered}
+Your new case study MUST address a gap NOT covered above. If your ACTIVATE IF conditions would fire on the same equation pairs as any pattern listed above, you are restating existing knowledge — discard that idea and find a genuinely new pattern in the failure examples.
+=== END ALREADY COVERED ===
+
+The following examples were ALL predicted INCORRECTLY by the weaker model. The ground-truth verdict and the weaker model's wrong reasoning are shown. Where available, a CORRECT oracle reasoning trace from a stronger model is shown for contrast — this is your primary signal for what the weaker model is missing.
+
+=== FAILURES WITH INCORRECT MODEL REASONING ===
+
+{failure_lines}
+
+=== YOUR TASK ===
+
+{polarity_instruction}
+
+Step 0 — DIAGNOSE the failure type. Choose exactly one:
+  TYPE A — MISSING KNOWLEDGE: The weaker model's reasoning strategy was reasonable but it lacks a key algebraic fact (a lemma, identity, or structural property). Signal: the oracle trace invokes a fact or consequence that the weaker model never considers, even though the weaker model followed a plausible path. Example: model doesn't know "absorbing E1 forces all elements equal → TRUE always".
+  TYPE B — WRONG/MISSING REASONING PATTERN: The weaker model has the relevant tools but appli...
+```
+
+### Sample Output
+```
+OUTPUT 1 — CASE STUDY
+
+=== CASE STUDY: Wrong Reasoning Pattern in Non-Trivial Magma Construction ===
+FAILURE_TYPE: B
+ACTIVATE IF:
+  - depth(E1) >= 2
+  - vars(E1) >= 3
+  - E1 is not a clean projection form
+DO NOT ACTIVATE IF: E1 forces a single-element magma.
+COMMON WRONG MOVE: Stops at assuming non-trivial models cannot exist without exploring explicit constructions.
+NEXT CHECK: Verify if a non-trivial model can be constructed by ensuring E1 holds but E2 does not. If yes → proceed to construct a counterexample.
+WHY THIS WORKS: The stronger model constructs explicit non-trivial magmas where E1 holds but E2 fails, showing that E1 does not force triviality. This reasoning avoids the incorrect assumption that E1 implies E2 in all cases.
+SUPPORT:
+  • E1 = x = (y * (x * (z * x))) * y  |  E2 = x * y = x * ((z * w) * z)  |  Answer: TRUE  — non-trivial model construction
+  • E1 = x = ((y * x) * (y * z)) * y  |  E2 = x = ((y * z) * (y * w)) * u  |  Answer: TRUE  — non-trivial model construction
+TARGET_STEP: ASPECT 3
+
+OUTPUT 2 — ROADMAP PATCH
+
+=== ROADMAP PATCH ===
+INSERT AFTER ASPECT 3
+When evaluating if E1 implies E2, consider constructing explicit non-trivial magmas where E1 holds. Verify if E2 fails in such constructions to determine if E1 does not force triviality.
+=== END PATCH ===
+```

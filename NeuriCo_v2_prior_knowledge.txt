@@ -1,0 +1,164 @@
+Decide whether source law A implies target law B over all magmas (binary op `*`). Follow this protocol exactly.
+
+IMPORTANT
+- Never override a rule with free-form algebra.
+- If a source-collapse lemma, contradiction motif, separator, or FALSE rule fires, stop immediately.
+- Only use extra algebra for the source-collapse lemmas in STEP 0.
+- If no listed rule proves TRUE, answer FALSE.
+
+STEP 0: SOURCE-COLLAPSE LEMMAS
+
+First check whether A is a bare law: one side is a single variable and the other side is a product term.
+
+Only for bare laws, normalize A as follows:
+- swap the sides if needed so the single variable is on the LEFT
+- rename that bare variable to `x`
+- on the product side, keep full bracketing
+- every occurrence of the bare variable stays `x`
+- rename the OTHER variables by first appearance on the product side to `y`, then `z`, then `w`, ...
+
+After this normalization, compare A to exactly one of these canonical source laws:
+
+SIMPLE PROJECTIONS (check these first):
+- `x = x * y`  -> LEFT PROJECTION: `p*q = p`
+- `x = y * x`  -> RIGHT PROJECTION: `p*q = q`
+
+COMPLEX PROJECTIONS:
+- `x = x*(y*(z*(x*y)))`  -> LEFT PROJECTION: `p*q = p`
+- `x = x*((y*z)*(z*z))` -> LEFT PROJECTION: `p*q = p`
+- `x = (((y*z)*x)*z)*x` -> RIGHT PROJECTION: `p*q = q`
+
+If a collapse lemma fires, evaluate B under that projection and stop:
+- under LEFT PROJECTION, every product collapses to its leftmost variable
+- under RIGHT PROJECTION, every product collapses to its rightmost variable
+- if both sides of B collapse to the same variable, answer TRUE; otherwise FALSE
+
+NON-BARE CONSTANT-PRODUCT LEMMA
+
+Also check this non-bare source family:
+- normalize A by renaming variables by first appearance, but keep full bracketing
+- if normalized A has LEFT side exactly `x*y`
+- and the RIGHT side is a product term `U * V`
+- and every occurrence of `x` on the RIGHT side lies in `V` and none lies in `U`
+
+then use CONSTANT-PRODUCT collapse:
+- every non-variable product term collapses to the same symbol `c`
+- a single variable stays itself
+- if both sides of B collapse to the same symbol, answer TRUE; otherwise FALSE
+
+STEP 0B: BARE-SOURCE CONTRADICTION MOTIFS
+
+Apply this step only if A is bare and STEP 0 did not fire.
+
+For STEP 0B, do not do a full rename.
+- only swap sides if needed so the single variable side is on the LEFT
+- then work on the PRODUCT side exactly as written
+- treat the lone variable on the LEFT as the distinguished variable `x` for this step
+
+Compute these source-only features of the product side:
+- `rhsVars(A)` = number of distinct variables on the product side
+- `rhsTotals(A)` = sorted occurrence counts on the product side only, written without separators
+  (e.g. counts `2,2,1` -> `rhsTotals=122`; counts `3,1,1` -> `rhsTotals=113`)
+- `Lx(A)` = whether the leftmost variable on the product side is `x`
+- `Rx(A)` = whether the rightmost variable on the product side is `x`
+- `xTop(A)`:
+  - `left` if, at the top product split `U*V`, `x` occurs only in `U`
+  - `right` if `x` occurs only in `V`
+  - `both` if `x` occurs in both `U` and `V`
+- `square(A)` = whether the product side contains a subterm `u*u`
+- `topShape(A)`:
+  - `v-m` if the product side is `(variable * product)`
+  - `m-v` if it is `(product * variable)`
+  - `m-m` if both top children are products
+
+Also compute these target features for motifs that need them:
+- `RP(B)` = whether rightmost variable matches across the two sides of B
+- `XOR(B)` = whether every variable has the same parity on both sides of B
+- `imb(B)` = sum of absolute left/right count differences per variable in B
+
+If any contradiction motif matches, answer TRUE immediately:
+
+- C1: `rhsVars(A)=4` and `Lx(A)=FALSE` and `Rx(A)=FALSE` and `topShape(A)` is NOT `m-m`
+- C2: product side has exactly three variables with counts `3,1,1`, and `Lx(A)=FALSE` and `Rx(A)=FALSE`
+- C3: `Lx(A)=FALSE` and `xTop(A)=left` and `square(A)=TRUE` and `topShape(A)=m-v` and `rhsVars(A) >= 3`
+- C4: product side has three variables with counts `2,1,1`, and `Lx(A)=FALSE` and `Rx(A)=FALSE` and `xTop(A)=right` and `topShape(A)=v-m`
+- C5: product side has four variables with counts `2,1,1,1`, and `Lx(A)=FALSE` and `Rx(A)=FALSE` and `xTop(A)=right` and `topShape(A)=v-m`
+- C6: `rhsVars(A)=3` and `xTop(A)=right` and `topShape(A)=v-m` and exactly two occurrences of `x` on the product side and `Rx(A)=FALSE`
+- C7: `rhsVars(A)=3` and `Lx(A)=FALSE` and `Rx(A)=FALSE` and `xTop(A)=left` and `topShape(A)=m-v` and exactly two occurrences of `x`
+- C9: product side has three variables with counts `2,2,1`, and `Lx(A)=TRUE` and `Rx(A)=FALSE` and `xTop(A)=both` and `topShape(A)=v-m` and `XOR(B)=FALSE` and `square(A)=FALSE` and `imb(B) >= 3`
+- C10: product side has three variables with counts `2,2,1`, and `Lx(A)=FALSE` and `Rx(A)=TRUE` and exactly two occurrences of `x` and `RP(B)=TRUE`
+- C13: product side has four variables with counts `2,1,1,1`, and `Lx(A)=FALSE` and `Rx(A)=TRUE` and `RP(B)=TRUE`
+
+STEP 1: COMPUTE FEATURES EXACTLY
+
+For each equation `E: L = R`, count variable letters on each side separately.
+
+Compute for both A and B:
+- `size(E)` = total variable occurrences on both sides
+- `vars(E)` = number of distinct variables
+- `imb(E)` = sum of absolute left/right count differences per variable
+- `bare(E)` = one side is a single variable
+- `LP(E)` = leftmost variable matches across the two sides
+- `RP(E)` = rightmost variable matches across the two sides
+- `SET(E)` = both sides use the same variable set
+- `XOR(E)` = every variable has the same parity on both sides
+- `AB(E)` = every variable has exactly the same count on both sides
+
+STEP 2: SEPARATOR TESTS
+
+If `LP(A)` and not `LP(B)`: FALSE.
+If `RP(A)` and not `RP(B)`: FALSE.
+If `SET(A)` and not `SET(B)`: FALSE.
+If `XOR(A)` and not `XOR(B)`: FALSE.
+If `AB(A)` and not `AB(B)`: FALSE.
+
+One separator means FALSE immediately.
+
+STEP 3: FALSE GUARDS
+
+G1: If `bare(A)` and not `bare(B)` and `size(A) = size(B)` and `vars(B) < vars(A)` and `imb(B) > imb(A)` and `XOR(A)`, answer FALSE.
+
+G2: If `bare(A)` and `vars(A) = 2` and not `bare(B)` and `vars(B) > vars(A)` and `size(B) >= size(A)`, answer FALSE.
+
+G3: If not `bare(A)` and `vars(A) >= 5` and not `bare(B)` and `vars(B) < vars(A)` and `size(B) = size(A)`, answer FALSE.
+
+G4: If not `bare(A)` and not `bare(B)` and `size(B) = size(A)` and `vars(B) <= vars(A) - 2`, answer FALSE.
+
+STEP 4: STRUCTURAL RULES
+
+Let `sA=size(A)`, `sB=size(B)`, `vA=vars(A)`, `vB=vars(B)`, `iA=imb(A)`, `iB=imb(B)`.
+
+Apply in order, stopping at the first match:
+
+- T4: if `bare(A)` and `vA >= 4` and `vB = 2` and `Lx(A) = FALSE`, answer TRUE.
+- T6: if `bare(A)` and not `RP(A)` and `XOR(A)` and `vB = 2` and `RP(B)` and `vA >= 3`, answer TRUE.
+- T8: if `vA = 3` and not `XOR(A)` and `bare(B)` and not `RP(B)`, answer TRUE.
+- F1: if `vB = vA`, answer FALSE.
+- F3: if `sB < sA`, answer FALSE.
+- T1: if `bare(A)` and `vA >= 3` and `sB > sA`, answer TRUE.
+- T2: if `bare(A)` and `bare(B)` and `vA >= 3` and `vB > vA` and `iB > iA`, answer TRUE.
+
+STEP 5: EXTENDED RULES
+
+Apply only if nothing above fired.
+
+- D3: if every variable in A appears the same TOTAL number of times across both sides, and `vB < vA`, and B is a bare law of the form `x = x * (...)`, answer TRUE.
+- NR1: if `bare(A)` and `vA >= 4` and `topShape(A)` is NOT `m-m`, answer TRUE.
+- NR2: if `bare(A)` and `vA >= 5`, answer TRUE.
+- D4: otherwise FALSE.
+
+REASONING STYLE
+
+State:
+- the computed features,
+- whether a source-collapse lemma or contradiction motif fired,
+- whether any separator or guard fired,
+- and which final rule decided the verdict.
+
+Be concise. If no listed rule proves TRUE, answer FALSE.
+
+OUTPUT FORMAT (use exact headers, no extra formatting):
+VERDICT: TRUE or FALSE
+REASONING: non-empty explanation
+PROOF: required if VERDICT is TRUE, empty otherwise
+COUNTEREXAMPLE: required if VERDICT is FALSE, empty otherwise

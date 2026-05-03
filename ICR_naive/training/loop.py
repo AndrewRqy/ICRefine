@@ -21,10 +21,10 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-from ..core.cheatsheet import Cheatsheet
-from ..core.data import FailureBin
+from utils.cheatsheet import Cheatsheet
+from utils.data import FailureBin
 from ..generators.case_study import generate_case_study
-from .scorer import score_batch, test_cheatsheet
+from utils.scorer import score_batch, test_cheatsheet
 from utils.scorer import score_items_streaming
 from utils.data import is_true
 

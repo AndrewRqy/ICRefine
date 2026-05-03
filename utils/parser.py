@@ -87,17 +87,23 @@ def parse_response(text: str) -> dict:
     if verdict_match:
         verdict = verdict_match.group(1).upper()
     else:
-        # Fallback: model wrote a conversational answer without a VERDICT: line.
-        # Scan the last 400 chars for common answer patterns.
-        tail = text[-400:]
-        tail_match = re.search(
-            r"\b(?:the\s+)?(?:answer|implication|verdict|result)\s+is\s+(TRUE|FALSE)"
-            r"|\b(TRUE|FALSE)\s*[.\n]?\s*$"
-            r"|\btherefore[,\s]+(?:the\s+answer\s+is\s+)?(TRUE|FALSE)",
-            tail, re.IGNORECASE,
+        # Fallback: model wrote conversational CoT without a VERDICT: line.
+        # Strategy: find the LAST clear concluding TRUE/FALSE statement in the
+        # full response — the model's final conclusion is most authoritative.
+        # Patterns ordered from most to least reliable.
+        _CONCLUDE_RE = re.compile(
+            r"\b(?:the\s+)?(?:answer|implication|verdict|result|conclusion)\s+is\s+(TRUE|FALSE)"
+            r"|\bE1\s+(?:does\s+(?:not\s+)?)?implies?\s+E2[^.]*?\b(TRUE|FALSE)"
+            r"|\btherefore[,\s]+(?:the\s+(?:answer|implication)\s+is\s+)?(TRUE|FALSE)"
+            r"|\bso[,\s]+(?:the\s+(?:answer|implication)\s+is\s+)?(TRUE|FALSE)"
+            r"|\b(TRUE|FALSE)\s*[.]\s*$",
+            re.IGNORECASE | re.MULTILINE,
         )
-        if tail_match:
-            verdict = next(g for g in tail_match.groups() if g is not None).upper()
+        all_matches = list(_CONCLUDE_RE.finditer(text))
+        if all_matches:
+            # Take the last match — most likely the final conclusion
+            last = all_matches[-1]
+            verdict = next(g for g in last.groups() if g is not None).upper()
         else:
             verdict = None
     reasoning = _extract_section(text, "REASONING")

@@ -1,0 +1,209 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{csicl2024}
+\citation{opro2023,ape2022,zhou2022large}
+\citation{bbh}
+\citation{csicl2024}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\newlabel{sec:intro}{{1}{1}{Introduction}{section.1}{}}
+\@writefile{toc}{\contentsline {paragraph}{Contributions.}{1}{section*.2}\protected@file@percent }
+\citation{csicl2024}
+\citation{csicl2024}
+\def\@LN@column{1}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Preliminaries}{2}{section.2}\protected@file@percent }
+\newlabel{sec:prelim}{{2}{2}{Preliminaries}{section.2}{}}
+\@writefile{toc}{\contentsline {paragraph}{Task setting.}{2}{section*.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Cheatsheet.}{2}{section*.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Train and eval models.}{2}{section*.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}\textsc  {ICRefine}}{2}{section.3}\protected@file@percent }
+\newlabel{sec:method}{{3}{2}{\textsc {ICRefine}}{section.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Cheatsheet format}{2}{subsection.3.1}\protected@file@percent }
+\newlabel{sec:format}{{3.1}{2}{Cheatsheet format}{subsection.3.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Phase 0: bootstrap}{2}{subsection.3.2}\protected@file@percent }
+\newlabel{sec:phase0}{{3.2}{2}{Phase 0: bootstrap}{subsection.3.2}{}}
+\def\@LN@column{1}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Phase 1: prior-knowledge patching}{3}{subsection.3.3}\protected@file@percent }
+\newlabel{sec:phase1}{{3.3}{3}{Phase 1: prior-knowledge patching}{subsection.3.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Phase 2: partition-based case study generation}{3}{subsection.3.4}\protected@file@percent }
+\newlabel{sec:phase2}{{3.4}{3}{Phase 2: partition-based case study generation}{subsection.3.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Evolutionary Algorithm Phase~1}{3}{subsection.3.5}\protected@file@percent }
+\newlabel{sec:ea_method}{{3.5}{3}{Evolutionary Algorithm Phase~1}{subsection.3.5}{}}
+\@writefile{toc}{\contentsline {paragraph}{Population.}{3}{section*.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Per-generation loop.}{3}{section*.7}\protected@file@percent }
+\citation{csicl2024}
+\citation{csicl2024}
+\def\@LN@column{1}
+\@writefile{toc}{\contentsline {paragraph}{Survivor selection and crossover.}{4}{section*.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Oracle injection}{4}{subsection.3.6}\protected@file@percent }
+\newlabel{sec:oracle_method}{{3.6}{4}{Oracle injection}{subsection.3.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Experimental Setup}{4}{section.4}\protected@file@percent }
+\newlabel{sec:eval}{{4}{4}{Experimental Setup}{section.4}{}}
+\@writefile{toc}{\contentsline {paragraph}{Reasoning-first (RF) scoring.}{4}{section*.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Dataset.}{4}{section*.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Models.}{4}{section*.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Seed variance.}{4}{section*.12}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Non-train transfer---average RF accuracy on five non-ceiling tasks (GS, FF, Snarks, DQ, CJ). CS-ICL: static one-shot baseline (gpt-4.1 generated). PK only: \textsc  {ICRefine} prior knowledge, no case studies. Full: complete v3 pipeline. $\Delta $ is full minus CS-ICL (pp). 95\% CI bootstraps over the 5 tasks (resampling with replacement, 10{,}000 iterations); $^{*}$ indicates CI excludes zero. \textbf  {All columns are 3-seed means} (v3 pipeline seeds 1--3; FF averaged over 2 seeds; CS-ICL re-scored 3 times with the same RF prompting used for \textsc  {ICRefine} evaluations).}}{5}{table.caption.13}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{tab:transfer}{{1}{5}{Non-train transfer---average RF accuracy on five non-ceiling tasks (GS, FF, Snarks, DQ, CJ). CS-ICL: static one-shot baseline (gpt-4.1 generated). PK only: \textsc {ICRefine} prior knowledge, no case studies. Full: complete v3 pipeline. $\Delta $ is full minus CS-ICL (pp). 95\% CI bootstraps over the 5 tasks (resampling with replacement, 10{,}000 iterations); $^{*}$ indicates CI excludes zero. \textbf {All columns are 3-seed means} (v3 pipeline seeds 1--3; FF averaged over 2 seeds; CS-ICL re-scored 3 times with the same RF prompting used for \textsc {ICRefine} evaluations)}{table.caption.13}{}}
+\def\@LN@column{1}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Results}{5}{section.5}\protected@file@percent }
+\newlabel{sec:results}{{5}{5}{Results}{section.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Transfer gap: the full pipeline underperforms CS-ICL on non-train models}{5}{subsection.5.1}\protected@file@percent }
+\newlabel{sec:transfer}{{5.1}{5}{Transfer gap: the full pipeline underperforms CS-ICL on non-train models}{subsection.5.1}{}}
+\@writefile{toc}{\contentsline {paragraph}{The transfer gap is task-structured, not model-structured.}{5}{section*.15}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Non-train RF accuracy averaged over five non-ceiling tasks for each evaluation model under three conditions. PK-only transfers more consistently than the full cheatsheet across three of four model families, identifying Phase~2 case studies as the transfer bottleneck.}}{6}{figure.caption.14}\protected@file@percent }
+\newlabel{fig:transfer}{{1}{6}{Non-train RF accuracy averaged over five non-ceiling tasks for each evaluation model under three conditions. PK-only transfers more consistently than the full cheatsheet across three of four model families, identifying Phase~2 case studies as the transfer bottleneck}{figure.caption.14}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Bidirectional transfer check: Gemini-2.0-flash as train model, full v3 pipeline, 3-seed means (seeds 1--3). Non-train 5-task RF averages compared to mini-trained v3 (3-seed mean) and CS-ICL. $\Delta _\text  {cs}$ is full minus PK-only for CJ and GS. Gemini* denotes the train model.}}{6}{table.caption.17}\protected@file@percent }
+\newlabel{tab:gemini_transfer}{{2}{6}{Bidirectional transfer check: Gemini-2.0-flash as train model, full v3 pipeline, 3-seed means (seeds 1--3). Non-train 5-task RF averages compared to mini-trained v3 (3-seed mean) and CS-ICL. $\Delta _\text {cs}$ is full minus PK-only for CJ and GS. Gemini* denotes the train model}{table.caption.17}{}}
+\def\@LN@column{1}
+\@writefile{toc}{\contentsline {paragraph}{A second training model yields consistent results.}{6}{section*.16}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces $\Delta _\text  {cs}$ (full minus PK-only, in pp) heatmap over 5 tasks $\times $ 5 models, from v3 3-seed means. Blue cells: case studies help; red cells: case studies hurt. CJ shows uniformly negative case study contributions across all models (except mini, the train model), consistent with the failure modes characterised in Section~\ref {sec:oracle}. GS shows heterogeneous effects: positive for mini ($+1.3$\,pp) and Gemini ($+2.0$\,pp), negative for Claude ($-3.3$\,pp) and Llama ($-6.7$\,pp), consistent with model-specific SVG parsing capabilities. Dashed line separates the train model (mini) from non-train models. DQ (Claude $-5.0$\,pp) and Llama GS ($-6.7$\,pp) are the largest individual harms. FF is near-neutral across all models. Snarks is near-neutral except for Llama ($+6.1$\,pp), whose PK-only accuracy on Snarks is below ceiling ($83.1\%$), leaving room for case study benefit.}}{7}{figure.caption.18}\protected@file@percent }
+\newlabel{fig:delta_cs}{{2}{7}{$\Delta _\text {cs}$ (full minus PK-only, in pp) heatmap over 5 tasks $\times $ 5 models, from v3 3-seed means. Blue cells: case studies help; red cells: case studies hurt. CJ shows uniformly negative case study contributions across all models (except mini, the train model), consistent with the failure modes characterised in Section~\ref {sec:oracle}. GS shows heterogeneous effects: positive for mini ($+1.3$\,pp) and Gemini ($+2.0$\,pp), negative for Claude ($-3.3$\,pp) and Llama ($-6.7$\,pp), consistent with model-specific SVG parsing capabilities. Dashed line separates the train model (mini) from non-train models. DQ (Claude $-5.0$\,pp) and Llama GS ($-6.7$\,pp) are the largest individual harms. FF is near-neutral across all models. Snarks is near-neutral except for Llama ($+6.1$\,pp), whose PK-only accuracy on Snarks is below ceiling ($83.1\%$), leaving room for case study benefit}{figure.caption.18}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Phase contribution on the test set---gpt-4.1-mini, reasoning-first (RF) accuracy. \textit  {Phase~0}: auto-bootstrap only. \textit  {Phase~1 (PK)}: after iterative PK patching. \textit  {Phase~2 (full)}: with case studies. $\Delta $\,P1$\!\to $P2 isolates the marginal case study contribution. Single-run results.}}{7}{table.caption.19}\protected@file@percent }
+\newlabel{tab:phase_contribution}{{3}{7}{Phase contribution on the test set---gpt-4.1-mini, reasoning-first (RF) accuracy. \textit {Phase~0}: auto-bootstrap only. \textit {Phase~1 (PK)}: after iterative PK patching. \textit {Phase~2 (full)}: with case studies. $\Delta $\,P1$\!\to $P2 isolates the marginal case study contribution. Single-run results}{table.caption.19}{}}
+\def\@LN@column{1}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}On-train performance}{7}{subsection.5.2}\protected@file@percent }
+\newlabel{sec:overall}{{5.2}{7}{On-train performance}{subsection.5.2}{}}
+\def\@LN@column{1}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Analysis}{8}{section.6}\protected@file@percent }
+\newlabel{sec:analysis}{{6}{8}{Analysis}{section.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Mechanism 1: case study partition overfitting}{8}{subsection.6.1}\protected@file@percent }
+\newlabel{sec:overfitting}{{6.1}{8}{Mechanism 1: case study partition overfitting}{subsection.6.1}{}}
+\@writefile{toc}{\contentsline {paragraph}{Geometric shapes: generalizable structural case studies.}{8}{section*.20}\protected@file@percent }
+\newlabel{lst:gs_cs}{{1}{8}{Phase-2 case studies generated for geometric\_shapes (v3). ACTIVATE IF conditions encode structural SVG parsing rules intended to generalise across model families (narrow predicates such as \texttt {n\_vertices}$\approx $7 limit scope): under Gemini training, these rules benefit GPT-4.1 ($+4.0$\,pp) and Gemini ($+5.0$\,pp)}{lstlisting.1}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1}{\ignorespaces Phase-2 case studies generated for geometric\_shapes (v3). ACTIVATE IF conditions encode structural SVG parsing rules intended to generalise across model families (narrow predicates such as \texttt  {n\_vertices}$\approx $7 limit scope): under Gemini training, these rules benefit GPT-4.1 ($+4.0$\,pp) and Gemini ($+5.0$\,pp).}}{8}{lstlisting.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Formal fallacies: partition search fixation.}{8}{section*.21}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Causal judgement: oracle-contaminated specificity.}{8}{section*.22}\protected@file@percent }
+\def\@LN@column{1}
+\newlabel{lst:cj_cs}{{2}{9}{The single Phase-2 case study generated for causal\_judgement (v3). Free-form prose paraphrasing one training item's oracle reasoning, encoding the train model's idiosyncratic treatment of joint-AND causation}{lstlisting.2}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {2}{\ignorespaces The single Phase-2 case study generated for causal\_judgement (v3). Free-form prose paraphrasing one training item's oracle reasoning, encoding the train model's idiosyncratic treatment of joint-AND causation.}}{9}{lstlisting.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Mechanism 2: oracle contamination}{9}{subsection.6.2}\protected@file@percent }
+\newlabel{sec:oracle}{{6.2}{9}{Mechanism 2: oracle contamination}{subsection.6.2}{}}
+\@writefile{toc}{\contentsline {paragraph}{Oracle-free Phase~2 generates more transferable case studies.}{9}{section*.23}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces E3 oracle ablation on causal\_judgement (RF, 5 models). E3: both Phase~1 and Phase~2 oracle disabled (\texttt  {--no-oracle}); Phase~2 generates case studies without gold chain-of-thought. v3 full: standard oracle-enabled pipeline. $\Delta $\,=\,E3 full\,$-$\,v3 full. \textbf  {Both columns are 3-seed means} (E3 and v3 each averaged over 3 independent pipeline runs); improvements range from $+1.9$ to $+3.8$\,pp. The train model (mini*, $+1.9$\,pp) and Gemini ($+1.9$\,pp) improvements approach the 2--4\,pp noise floor; non-train improvements for GPT-4.1 ($+3.1$\,pp), Claude ($+3.5$\,pp), and Llama ($+3.8$\,pp) are more robustly above it. * denotes the training model.}}{10}{table.caption.24}\protected@file@percent }
+\newlabel{tab:e3_oracle}{{4}{10}{E3 oracle ablation on causal\_judgement (RF, 5 models). E3: both Phase~1 and Phase~2 oracle disabled (\texttt {--no-oracle}); Phase~2 generates case studies without gold chain-of-thought. v3 full: standard oracle-enabled pipeline. $\Delta $\,=\,E3 full\,$-$\,v3 full. \textbf {Both columns are 3-seed means} (E3 and v3 each averaged over 3 independent pipeline runs); improvements range from $+1.9$ to $+3.8$\,pp. The train model (mini*, $+1.9$\,pp) and Gemini ($+1.9$\,pp) improvements approach the 2--4\,pp noise floor; non-train improvements for GPT-4.1 ($+3.1$\,pp), Claude ($+3.5$\,pp), and Llama ($+3.8$\,pp) are more robustly above it. * denotes the training model}{table.caption.24}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Oracle contamination gradient on causal\_judgement (left, full CS accuracy) and geometric\_shapes (right, full CS accuracy) across three oracle conditions: E3 no-oracle, v3 standard (Phase~2 oracle only), and v5 full-oracle (both Phase~1 and Phase~2 oracle enabled). All values are 3-seed means. On CJ, removing oracle access consistently improves transfer: E3 $>$ v3 for 4 of 5 models; full oracle (v5) degrades accuracy further for GPT-4.1, Gemini, and Llama. On GS, oracle effects are less consistent, reflecting that GS case study harm is structural (SVG parsing) rather than oracle-contamination driven.}}{10}{figure.caption.25}\protected@file@percent }
+\newlabel{fig:oracle_gradient}{{3}{10}{Oracle contamination gradient on causal\_judgement (left, full CS accuracy) and geometric\_shapes (right, full CS accuracy) across three oracle conditions: E3 no-oracle, v3 standard (Phase~2 oracle only), and v5 full-oracle (both Phase~1 and Phase~2 oracle enabled). All values are 3-seed means. On CJ, removing oracle access consistently improves transfer: E3 $>$ v3 for 4 of 5 models; full oracle (v5) degrades accuracy further for GPT-4.1, Gemini, and Llama. On GS, oracle effects are less consistent, reflecting that GS case study harm is structural (SVG parsing) rather than oracle-contamination driven}{figure.caption.25}{}}
+\def\@LN@column{1}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Mechanism 3: bootstrap convergence and sequential patching limits}{10}{subsection.6.3}\protected@file@percent }
+\newlabel{sec:phases}{{6.3}{10}{Mechanism 3: bootstrap convergence and sequential patching limits}{subsection.6.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Per-seed (dots) and 3-seed mean (bars) full CS accuracy on geometric\_shapes under E3 (no oracle), v3 (Phase~2 oracle), and v5 (both oracles). Unlike causal\_judgement (where E3 $>$ v3 holds for all seeds and all models), GS shows no consistent oracle ordering. Within-condition $\sigma $ values (bottom labels) are 3--10\,pp, comparable to the cross-condition differences, confirming that oracle injection provides no reliable signal on this task. GS case study harm is structural (SVG path parsing difficulty) rather than oracle-contamination driven.}}{11}{figure.caption.26}\protected@file@percent }
+\newlabel{fig:gs_oracle_variance}{{4}{11}{Per-seed (dots) and 3-seed mean (bars) full CS accuracy on geometric\_shapes under E3 (no oracle), v3 (Phase~2 oracle), and v5 (both oracles). Unlike causal\_judgement (where E3 $>$ v3 holds for all seeds and all models), GS shows no consistent oracle ordering. Within-condition $\sigma $ values (bottom labels) are 3--10\,pp, comparable to the cross-condition differences, confirming that oracle injection provides no reliable signal on this task. GS case study harm is structural (SVG path parsing difficulty) rather than oracle-contamination driven}{figure.caption.26}{}}
+\def\@LN@column{1}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Intervention: evolutionary algorithm Phase~1}{11}{subsection.6.4}\protected@file@percent }
+\newlabel{sec:ea}{{6.4}{11}{Intervention: evolutionary algorithm Phase~1}{subsection.6.4}{}}
+\@writefile{toc}{\contentsline {paragraph}{EA addresses the GS bootstrap convergence case.}{11}{section*.27}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Results on other tasks.}{11}{section*.28}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces EA Phase~1 vs.\ standard Phase~1---RF test accuracy on gpt-4.1-mini. \textit  {PK only}: cheatsheet without case studies evaluated on test set. \textit  {Full}: complete pipeline (PK + Phase~2 case studies). EA: population size 3, 2 survivors, 12\,K-char PK budget, 20\% hold-out. Std CS / EA CS: number of Phase~2 case studies retained in each condition. \textbf  {All PK columns are 3-seed means} (seeds 1--3 for both conditions); CS counts and patch counts are from seed~1.}}{12}{table.caption.29}\protected@file@percent }
+\newlabel{tab:ea}{{5}{12}{EA Phase~1 vs.\ standard Phase~1---RF test accuracy on gpt-4.1-mini. \textit {PK only}: cheatsheet without case studies evaluated on test set. \textit {Full}: complete pipeline (PK + Phase~2 case studies). EA: population size 3, 2 survivors, 12\,K-char PK budget, 20\% hold-out. Std CS / EA CS: number of Phase~2 case studies retained in each condition. \textbf {All PK columns are 3-seed means} (seeds 1--3 for both conditions); CS counts and patch counts are from seed~1}{table.caption.29}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces EA Phase~1 vs.\ standard Phase~1---RF test PK-only accuracy for four non-ceiling tasks (all 3-seed means, train model). GS is the primary beneficiary ($+6.0$\,pp), eliminating Phase~2 case studies entirely. CJ shows a consistent $+5.4$\,pp PK improvement; Snarks and DQ are within noise ($-0.9$\,pp and $0.0$\,pp respectively).}}{12}{figure.caption.30}\protected@file@percent }
+\newlabel{fig:ea}{{5}{12}{EA Phase~1 vs.\ standard Phase~1---RF test PK-only accuracy for four non-ceiling tasks (all 3-seed means, train model). GS is the primary beneficiary ($+6.0$\,pp), eliminating Phase~2 case studies entirely. CJ shows a consistent $+5.4$\,pp PK improvement; Snarks and DQ are within noise ($-0.9$\,pp and $0.0$\,pp respectively)}{figure.caption.30}{}}
+\def\@LN@column{1}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.5}Combined interventions: does the best-available pipeline beat CS-ICL?}{12}{subsection.6.5}\protected@file@percent }
+\newlabel{sec:combined}{{6.5}{12}{Combined interventions: does the best-available pipeline beat CS-ICL?}{subsection.6.5}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces EA+no-oracle and best-combo vs.\ CS-ICL---non-train 5-task RF average (3-seed means). EA+no-oracle is a single coherent pipeline (EA Phase~1, oracle-free Phase~2) applied uniformly across all five tasks. Best-combo applies the best available intervention per task (EA PK-only for GS; E3 full for CJ; v3 full for FF/DQ/Snarks). $\Delta $\,=\,EA+no-oracle\,$-$\,CS-ICL; 95\% CI bootstraps over 5 tasks. $^{*}$\,CI excludes zero. $\dagger $\,Best-combo is a per-task oracle, not a deployable pipeline. \textbf  {CS-ICL column is the same 3-seed mean as Table~\ref {tab:transfer}.}}}{13}{table.caption.31}\protected@file@percent }
+\newlabel{tab:combined}{{6}{13}{EA+no-oracle and best-combo vs.\ CS-ICL---non-train 5-task RF average (3-seed means). EA+no-oracle is a single coherent pipeline (EA Phase~1, oracle-free Phase~2) applied uniformly across all five tasks. Best-combo applies the best available intervention per task (EA PK-only for GS; E3 full for CJ; v3 full for FF/DQ/Snarks). $\Delta $\,=\,EA+no-oracle\,$-$\,CS-ICL; 95\% CI bootstraps over 5 tasks. $^{*}$\,CI excludes zero. $\dagger $\,Best-combo is a per-task oracle, not a deployable pipeline. \textbf {CS-ICL column is the same 3-seed mean as Table~\ref {tab:transfer}.}}{table.caption.31}{}}
+\def\@LN@column{1}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.6}Seed variance analysis}{13}{subsection.6.6}\protected@file@percent }
+\newlabel{sec:variance}{{6.6}{13}{Seed variance analysis}{subsection.6.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Discussion}{13}{section.7}\protected@file@percent }
+\newlabel{sec:discussion}{{7}{13}{Discussion}{section.7}{}}
+\@writefile{toc}{\contentsline {paragraph}{Principle 1: Task failure structure, not model identity, governs transferability.}{13}{section*.32}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Observation 2: On the two tasks with non-trivial Phase~2 effects, oracle context helps where failure modes are principled and hurts where they are idiosyncratic.}{13}{section*.33}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Principle 3: A strong single-pass generator may extract holistic heuristics that iterative patching cannot recover.}{13}{section*.34}\protected@file@percent }
+\citation{brown2020gpt3}
+\citation{zhao2021calibrate,lu2022order}
+\citation{wei2022cot}
+\citation{agarwal2024manyshot}
+\citation{csicl2024}
+\citation{li2023promptdistillation}
+\citation{ape2022,zhou2022large}
+\citation{ape2022}
+\citation{opro2023}
+\citation{pryzant2023protegi}
+\citation{khattab2024dspy}
+\citation{yuksekgonul2024textgrad}
+\citation{fernando2023promptbreeder}
+\def\@LN@column{1}
+\@writefile{toc}{\contentsline {paragraph}{Principle 4: Partition overfitting is a structural failure of greedy partition search.}{14}{section*.35}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Principle 5: Evolutionary search adds value when greedy search stalls, at least on the task where we observe stalling.}{14}{section*.36}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {8}Related Work}{14}{section.8}\protected@file@percent }
+\newlabel{sec:related}{{8}{14}{Related Work}{section.8}{}}
+\@writefile{toc}{\contentsline {paragraph}{In-context learning.}{14}{section*.37}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Cheatsheet and prompt distillation.}{14}{section*.38}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Automatic prompt optimization.}{14}{section*.39}\protected@file@percent }
+\citation{madaan2023selfrefine}
+\citation{shinn2023reflexion}
+\citation{zelikman2022star}
+\citation{bai2022constitutional}
+\citation{ouyang2022instructgpt}
+\citation{lester2021power}
+\citation{ape2022,opro2023}
+\citation{chen2023modelagnostic}
+\citation{logan2021cutting}
+\def\@LN@column{1}
+\@writefile{toc}{\contentsline {paragraph}{Iterative and self-improving NLP systems.}{15}{section*.40}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Cross-model prompt transfer.}{15}{section*.41}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {9}Conclusion}{15}{section.9}\protected@file@percent }
+\newlabel{sec:conclusion}{{9}{15}{Conclusion}{section.9}{}}
+\bibstyle{plainnat}
+\bibdata{references}
+\bibcite{agarwal2024manyshot}{{1}{2024}{{Agarwal et~al.}}{{Agarwal, Maharana, Park, Xue, Abbas, {Yu}, Narasimhan, Cho, and Garg}}}
+\bibcite{bai2022constitutional}{{2}{2022}{{Bai et~al.}}{{Bai, Jones, Ndousse, Askell, Chen, DasSarma, Drain, Fort, Ganguli, Henighan, Johnston, Kadavath, Kernion, Conerly, El-Showk, Elhage, Hatfield-Dodds, Hernandez, Hume, Jacobson, Lasenby, Lovitt, Nanda, Olsson, Amodei, Amodei, Clark, McCandlish, Olah, Steinhardt, Sohl-Dickstein, and Kaplan}}}
+\bibcite{brown2020gpt3}{{3}{2020}{{Brown et~al.}}{{Brown, Mann, Ryder, Subbiah, Kaplan, Dhariwal, Neelakantan, Shyam, Sastry, Askell, Agarwal, Herbert-Voss, Krueger, Henighan, Child, Ramesh, Ziegler, Wu, Winter, Hesse, Chen, Sigler, Litwin, Gray, Chess, Clark, Berner, McCandlish, Radford, Sutskever, and Amodei}}}
+\bibcite{chen2023modelagnostic}{{4}{2023}{{Chen et~al.}}{{Chen, Hu, Zhang, Hou, Zhang, Ye, Wang, Zhang, Han, Liu, and Sun}}}
+\bibcite{fernando2023promptbreeder}{{5}{2024}{{Fernando et~al.}}{{Fernando, Banarse, Michalewski, Osindero, and Rockt\"{a}schel}}}
+\bibcite{csicl2024}{{6}{2025}{{Honda et~al.}}{{Honda, Murakami, and Zhang}}}
+\def\@LN@column{1}
+\@writefile{toc}{\contentsline {section}{\numberline {10}Limitations}{16}{section.10}\protected@file@percent }
+\newlabel{sec:limits}{{10}{16}{Limitations}{section.10}{}}
+\bibcite{khattab2024dspy}{{7}{2024}{{Khattab et~al.}}{{Khattab, Singhvi, Maheshwari, Zhang, Santhanam, Vardhamanan, Hira, Zhong, Kwiatkowski, Potts, Liang, and Zaharia}}}
+\bibcite{lester2021power}{{8}{2021}{{Lester et~al.}}{{Lester, Al-Rfou, and Constant}}}
+\bibcite{li2023promptdistillation}{{9}{2023}{{Li et~al.}}{{Li, Zhang, and Chen}}}
+\bibcite{logan2021cutting}{{10}{2021}{{Logan~IV et~al.}}{{Logan~IV, Balashankar, Chen, Ruder, and Singh}}}
+\bibcite{lu2022order}{{11}{2022}{{Lu et~al.}}{{Lu, Bartolo, Moore, Riedel, and Stenetorp}}}
+\bibcite{madaan2023selfrefine}{{12}{2024}{{Madaan et~al.}}{{Madaan, Tandon, Gupta, Hallinan, Gao, Wiegreffe, Alon, Dziri, Prabhumoye, Yang, Gupta, Welleck, Clark, Bosselut, Clark, Singh, and Holtzman}}}
+\bibcite{ouyang2022instructgpt}{{13}{2022}{{Ouyang et~al.}}{{Ouyang, Wu, Jiang, Almeida, Wainwright, Mishkin, Zhang, Agarwal, Slama, Ray, Schulman, Hilton, Kelton, Miller, Simens, Askell, Welinder, Christiano, Leike, and Lowe}}}
+\bibcite{pryzant2023protegi}{{14}{2023}{{Pryzant et~al.}}{{Pryzant, Iter, Li, Lee, Zhu, and Zeng}}}
+\bibcite{shinn2023reflexion}{{15}{2024}{{Shinn et~al.}}{{Shinn, Cassano, Berman, Gopinath, Narasimhan, and Yao}}}
+\bibcite{bbh}{{16}{2022}{{Suzgun et~al.}}{{Suzgun, Scales, Sch\"{a}rli, Gehrmann, Tay, Chung, Chowdhery, Le, Chi, Zhou, and Wei}}}
+\bibcite{wei2022cot}{{17}{2022}{{Wei et~al.}}{{Wei, Wang, Schuurmans, Bosma, Ichter, Xia, Chi, Le, and Zhou}}}
+\bibcite{opro2023}{{18}{2024}{{Yang et~al.}}{{Yang, Wang, Lu, Liu, Le, Zhou, and Chen}}}
+\bibcite{yuksekgonul2024textgrad}{{19}{2024}{{Yuksekgonul et~al.}}{{Yuksekgonul, Bianchi, Boen, Liu, Huang, Guestrin, and Zou}}}
+\bibcite{zelikman2022star}{{20}{2022}{{Zelikman et~al.}}{{Zelikman, Wu, Mu, and Goodman}}}
+\bibcite{zhao2021calibrate}{{21}{2021}{{Zhao et~al.}}{{Zhao, Wallace, Feng, Klein, and Singh}}}
+\def\@LN@column{1}
+\bibcite{zhou2022large}{{22}{2022}{{Zhou et~al.}}{{Zhou, Muresanu, Han, Paster, Pitis, Chan, and Ba}}}
+\bibcite{ape2022}{{23}{2023}{{Zhou et~al.}}{{Zhou, Muresanu, Han, Paster, Pitis, Chan, and Ba}}}
+\def\@LN@column{1}
+\@writefile{toc}{\contentsline {section}{\numberline {A}Supplementary figures and ablations}{18}{appendix.A}\protected@file@percent }
+\newlabel{sec:size_appendix}{{A}{18}{Supplementary figures and ablations}{appendix.A}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.1}Phase contribution breakdown (all 11 tasks)}{18}{subsection.A.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces RF test accuracy by pipeline phase for gpt-4.1-mini across all 11 BIG-Bench Hard tasks. Seven tasks reach $\geq $95\% after Phase~0 alone. Phase~2 produces the largest task-level shifts on geometric\_shapes ($+5.0$\,pp) and causal\_judgement ($-5.7$\,pp).}}{18}{figure.caption.43}\protected@file@percent }
+\newlabel{fig:phase_contribution}{{6}{18}{RF test accuracy by pipeline phase for gpt-4.1-mini across all 11 BIG-Bench Hard tasks. Seven tasks reach $\geq $95\% after Phase~0 alone. Phase~2 produces the largest task-level shifts on geometric\_shapes ($+5.0$\,pp) and causal\_judgement ($-5.7$\,pp)}{figure.caption.43}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.2}Cheatsheet size ablations (single-run, exploratory)}{18}{subsection.A.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.3}Phase~1 PK character limit}{18}{subsection.A.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.4}Phase~2 best-of-$N$ case study selection}{18}{subsection.A.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Phase~1 PK character limit ablation---RF test accuracy on gpt-4.1-mini (single-run).}}{19}{table.caption.44}\protected@file@percent }
+\newlabel{tab:pk_size}{{7}{19}{Phase~1 PK character limit ablation---RF test accuracy on gpt-4.1-mini (single-run)}{table.caption.44}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Phase~1 PK character limit ablation---RF test accuracy (single-run). The ordering is non-monotone; no cap consistently outperforms.}}{19}{figure.caption.45}\protected@file@percent }
+\newlabel{fig:pk_size}{{7}{19}{Phase~1 PK character limit ablation---RF test accuracy (single-run). The ordering is non-monotone; no cap consistently outperforms}{figure.caption.45}{}}
+\def\@LN@column{1}
+\@writefile{toc}{\contentsline {section}{\numberline {B}Causal Judgement: Cross-Seed Case Study Inventory}{19}{appendix.B}\protected@file@percent }
+\newlabel{sec:cj_casestudies}{{B}{19}{Causal Judgement: Cross-Seed Case Study Inventory}{appendix.B}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {C}Seed Variance Details}{19}{appendix.C}\protected@file@percent }
+\newlabel{sec:variance_appendix}{{C}{19}{Seed Variance Details}{appendix.C}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces Phase~2 case study count ablation---RF test accuracy on gpt-4.1-mini (single-run). ``---'' indicates Snarks had no pool excess under the unlimited condition.}}{20}{table.caption.46}\protected@file@percent }
+\newlabel{tab:cs_ablation}{{8}{20}{Phase~2 case study count ablation---RF test accuracy on gpt-4.1-mini (single-run). ``---'' indicates Snarks had no pool excess under the unlimited condition}{table.caption.46}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Phase~2 case study count ablation---RF test accuracy (single-run). GS test ordering reverses from train: unlimited wins. DQ shows best-of-3 performing worst. FF and Snarks are at ceiling across all conditions.}}{20}{figure.caption.47}\protected@file@percent }
+\newlabel{fig:cs_ablation}{{8}{20}{Phase~2 case study count ablation---RF test accuracy (single-run). GS test ordering reverses from train: unlimited wins. DQ shows best-of-3 performing worst. FF and Snarks are at ceiling across all conditions}{figure.caption.47}{}}
+\def\@LN@column{1}
+\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces CJ case studies generated across all three v3 pipeline seeds. Seed~1: 1 oracle-contaminated case study (free-form narrative, garden fertilizer paraphrase). Seeds 2--3: multiple structurally formatted case studies addressing joint-causation and redundancy patterns. All three seeds produce case studies that reduce transfer accuracy relative to CS-ICL, implicating both oracle contamination (seed~1) and failure-distribution heterogeneity (seeds 2--3) as contributing factors.}}{21}{table.caption.48}\protected@file@percent }
+\newlabel{tab:cj_casestudies}{{9}{21}{CJ case studies generated across all three v3 pipeline seeds. Seed~1: 1 oracle-contaminated case study (free-form narrative, garden fertilizer paraphrase). Seeds 2--3: multiple structurally formatted case studies addressing joint-causation and redundancy patterns. All three seeds produce case studies that reduce transfer accuracy relative to CS-ICL, implicating both oracle contamination (seed~1) and failure-distribution heterogeneity (seeds 2--3) as contributing factors}{table.caption.48}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Per-seed (dots) and 3-seed mean (bars) RF accuracy for two key ablation pairs. \textit  {Left}: EA Phase~1 raises GS PK-only accuracy by $+2$ to $+6$\,pp across models; EA seed-to-seed variance is substantially lower (Llama $\sigma =4.7\%$ vs.\ $10.4\%$). \textit  {Right}: Removing oracle access (E3) improves CJ full accuracy for all five models by $+1.9$ to $+3.8$\,pp, consistent with oracle contamination as a contributing factor; heterogeneous failure distribution is a plausible co-contributor (Section~\ref {sec:oracle}). Percentage labels show $\Delta $ (comparison minus v3 baseline).}}{22}{figure.caption.49}\protected@file@percent }
+\newlabel{fig:variance}{{9}{22}{Per-seed (dots) and 3-seed mean (bars) RF accuracy for two key ablation pairs. \textit {Left}: EA Phase~1 raises GS PK-only accuracy by $+2$ to $+6$\,pp across models; EA seed-to-seed variance is substantially lower (Llama $\sigma =4.7\%$ vs.\ $10.4\%$). \textit {Right}: Removing oracle access (E3) improves CJ full accuracy for all five models by $+1.9$ to $+3.8$\,pp, consistent with oracle contamination as a contributing factor; heterogeneous failure distribution is a plausible co-contributor (Section~\ref {sec:oracle}). Percentage labels show $\Delta $ (comparison minus v3 baseline)}{figure.caption.49}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {10}{\ignorespaces Per-seed RF accuracy for the two key comparisons (GS PK-only; CJ full). All values are test-set RF accuracy (\%). v3: standard Phase~1. EA: evolutionary Phase~1. E3: oracle-free (both phases).}}{22}{table.caption.50}\protected@file@percent }
+\newlabel{tab:seed_detail}{{10}{22}{Per-seed RF accuracy for the two key comparisons (GS PK-only; CJ full). All values are test-set RF accuracy (\%). v3: standard Phase~1. EA: evolutionary Phase~1. E3: oracle-free (both phases)}{table.caption.50}{}}
+\gdef \@abspage@last{22}

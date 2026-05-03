@@ -20,9 +20,11 @@ from utils.case_study import CaseStudy
 from utils.data import is_true
 from utils.llm_client import call_llm
 from utils.scorer import score_batch
+from utils.task_spec import TaskSpec
 from ..prompts.templates import (
     SIMILARITY_CHECK_PROMPT, SIMILARITY_MAX_TOKENS,
     MERGE_PROMPT, MERGE_MAX_TOKENS,
+    PRUNE_PROMPT, PRUNE_MAX_TOKENS,
 )
 
 _MIN_CS_FOR_SIMILARITY = 3   # skip similarity gate until this many CSes exist
@@ -42,6 +44,7 @@ def _mini_eval(
     reasoning_effort: str | None,
     cot_first: bool,
     label: str = "mini-eval",
+    task_spec: TaskSpec | None = None,
 ) -> float:
     """Score the failure batch with candidate injected. Returns fix_rate."""
     temp = Cheatsheet(
@@ -51,7 +54,7 @@ def _mini_eval(
     correct, _ = score_batch(
         failures, temp.render(), model_score, api_key,
         concurrency=concurrency, reasoning_effort=reasoning_effort, cot_first=cot_first,
-        progress_label=label,
+        progress_label=label, task_spec=task_spec,
     )
     return len(correct) / len(failures) if failures else 0.0
 
@@ -66,6 +69,7 @@ def _mini_eval_full(
     reasoning_effort: str | None,
     cot_first: bool,
     label: str = "mini-eval",
+    task_spec: TaskSpec | None = None,
 ) -> tuple[float, list[dict]]:
     """Score the failure batch with candidate injected. Returns (fix_rate, still_wrong)."""
     temp = Cheatsheet(
@@ -75,9 +79,14 @@ def _mini_eval_full(
     correct, wrong = score_batch(
         failures, temp.render(), model_score, api_key,
         concurrency=concurrency, reasoning_effort=reasoning_effort, cot_first=cot_first,
-        progress_label=label,
+        progress_label=label, task_spec=task_spec,
     )
-    return len(correct) / len(failures) if failures else 0.0, wrong
+    # Weighted fix_rate: ensemble-scored items carry _wrong_weight (0,1].
+    # Fixing a consensus failure (weight=1.0) counts more than fixing a
+    # single-model failure (weight=0.5).  Falls back to 1.0 for non-ensemble.
+    total_weight = sum(item.get("_wrong_weight", 1.0) for item in failures)
+    fixed_weight = sum(item.get("_wrong_weight", 1.0) for item in correct)
+    return fixed_weight / total_weight if total_weight > 0 else 0.0, wrong
 
 
 def _replace_eval(
@@ -90,6 +99,7 @@ def _replace_eval(
     concurrency: int,
     reasoning_effort: str | None,
     cot_first: bool,
+    task_spec: TaskSpec | None = None,
 ) -> float:
     """Score failures with CS at merge_idx replaced by merged_cs. Returns fix_rate."""
     new_studies = cheatsheet.case_studies[:]
@@ -98,7 +108,7 @@ def _replace_eval(
     correct, _ = score_batch(
         failures, temp.render(), model_score, api_key,
         concurrency=concurrency, reasoning_effort=reasoning_effort, cot_first=cot_first,
-        progress_label="merge-eval-merged",
+        progress_label="merge-eval-merged", task_spec=task_spec,
     )
     return len(correct) / len(failures) if failures else 0.0
 
@@ -112,6 +122,7 @@ def _regression_check(
     concurrency: int,
     reasoning_effort: str | None,
     cot_first: bool,
+    task_spec: TaskSpec | None = None,
 ) -> float:
     """Score the correct pool with candidate injected. Returns regression_rate."""
     if not correct_pool:
@@ -123,7 +134,67 @@ def _regression_check(
     _, wrong = score_batch(
         correct_pool, temp.render(), model_score, api_key,
         concurrency=concurrency, reasoning_effort=reasoning_effort, cot_first=cot_first,
-        progress_label="regression-check",
+        progress_label="regression-check", task_spec=task_spec,
+    )
+    # Correct-pool items from ensemble have _wrong_weight on them too (≈0 since
+    # they were correct on all models).  Use uniform 1.0 weight here — regression
+    # is measured only against the primary model, uniformly across the pool.
+    return len(wrong) / len(correct_pool)
+
+
+def _mini_eval_text(
+    text_section: str,
+    failures: list[dict],
+    cheatsheet: Cheatsheet,
+    model_score: str,
+    api_key: str,
+    concurrency: int,
+    reasoning_effort: str | None,
+    cot_first: bool,
+    label: str = "mini-eval-text",
+    task_spec: TaskSpec | None = None,
+) -> tuple[float, list[dict]]:
+    """Score failures with text_section appended to prior_knowledge. Returns (fix_rate, still_wrong)."""
+    temp = Cheatsheet(
+        roadmap=cheatsheet.roadmap,
+        case_studies=cheatsheet.case_studies,
+        prior_knowledge=cheatsheet.prior_knowledge + "\n\n" + text_section,
+        no_limit=cheatsheet.no_limit,
+    )
+    correct, wrong = score_batch(
+        failures, temp.render(), model_score, api_key,
+        concurrency=concurrency, reasoning_effort=reasoning_effort, cot_first=cot_first,
+        progress_label=label, task_spec=task_spec,
+    )
+    total_weight = sum(item.get("_wrong_weight", 1.0) for item in failures)
+    fixed_weight = sum(item.get("_wrong_weight", 1.0) for item in correct)
+    return fixed_weight / total_weight if total_weight > 0 else 0.0, wrong
+
+
+def _regression_check_text(
+    text_section: str,
+    correct_pool: list[dict],
+    cheatsheet: Cheatsheet,
+    model_score: str,
+    api_key: str,
+    concurrency: int,
+    reasoning_effort: str | None,
+    cot_first: bool,
+    task_spec: TaskSpec | None = None,
+) -> float:
+    """Score correct pool with text_section appended to prior_knowledge. Returns regression_rate."""
+    if not correct_pool:
+        return 0.0
+    temp = Cheatsheet(
+        roadmap=cheatsheet.roadmap,
+        case_studies=cheatsheet.case_studies,
+        prior_knowledge=cheatsheet.prior_knowledge + "\n\n" + text_section,
+        no_limit=cheatsheet.no_limit,
+    )
+    _, wrong = score_batch(
+        correct_pool, temp.render(), model_score, api_key,
+        concurrency=concurrency, reasoning_effort=reasoning_effort, cot_first=cot_first,
+        progress_label="regression-check-text", task_spec=task_spec,
     )
     return len(wrong) / len(correct_pool)
 
@@ -144,7 +215,8 @@ def _similarity_gate(
     api_key: str,
 ) -> tuple[str, int | None]:
     """
-    Check if candidate duplicates an existing case study.
+    Check if candidate duplicates an existing case study OR restates a rule
+    already in the roadmap/prior knowledge.
 
     Returns:
         ('ADD',   None)  — new pattern, add it
@@ -154,8 +226,14 @@ def _similarity_gate(
     if not cheatsheet.case_studies:
         return "ADD", None
 
+    roadmap_text = "\n\n".join(filter(None, [
+        cheatsheet.roadmap.strip(),
+        cheatsheet.prior_knowledge.strip() if hasattr(cheatsheet, "prior_knowledge") else "",
+    ])).strip() or "(none)"
+
     resp = call_llm(
         SIMILARITY_CHECK_PROMPT.format(
+            roadmap=roadmap_text,
             existing=_format_existing(cheatsheet.case_studies),
             candidate=candidate_cs.render(),
         ),
@@ -192,6 +270,68 @@ def _merge_case_studies(cs_a: CaseStudy, cs_b: CaseStudy, model_casestudy: str, 
     merged.creation_fix_rate = max(cs_a.creation_fix_rate, cs_b.creation_fix_rate)
     merged.historical_fix_rate = merged.creation_fix_rate
     return merged
+
+
+def _prune_cs_bank(
+    cheatsheet: Cheatsheet,
+    model: str,
+    api_key: str,
+    log_fn=None,
+) -> int:
+    """
+    Ask an LLM to identify redundant case studies and remove them.
+
+    Returns the number of case studies removed.
+    Called by the outer loop every `prune_every_n` accepted case studies.
+    """
+    if len(cheatsheet.case_studies) < 2:
+        return 0
+
+    numbered = "\n\n".join(
+        f"[{i + 1}] {cs.title}\n{cs.render()}"
+        for i, cs in enumerate(cheatsheet.case_studies)
+    )
+
+    resp = call_llm(
+        PRUNE_PROMPT.format(case_studies=numbered),
+        model, api_key,
+        temperature=0.0,
+        max_tokens=PRUNE_MAX_TOKENS,
+        reasoning_effort=None,
+    )
+    raw = resp.content.strip()
+
+    if raw.upper() == "KEEP ALL" or not raw:
+        if log_fn:
+            log_fn("  [prune] LLM found no redundant case studies.")
+        return 0
+
+    titles_to_remove: set[str] = set()
+    for line in raw.splitlines():
+        line = line.strip()
+        if line.upper().startswith("REMOVE:"):
+            title = line[len("REMOVE:"):].strip()
+            if title:
+                titles_to_remove.add(title.lower())
+
+    if not titles_to_remove:
+        if log_fn:
+            log_fn(f"  [prune] no parseable REMOVE lines in response:\n{raw}")
+        return 0
+
+    before = len(cheatsheet.case_studies)
+    cheatsheet.case_studies = [
+        cs for cs in cheatsheet.case_studies
+        if cs.title.strip().lower() not in titles_to_remove
+    ]
+    n_removed = before - len(cheatsheet.case_studies)
+
+    if log_fn:
+        log_fn(
+            f"  [prune] removed {n_removed} redundant CS "
+            f"(titles: {', '.join(repr(t) for t in titles_to_remove)})"
+        )
+    return n_removed
 
 
 # ---------------------------------------------------------------------------

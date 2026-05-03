@@ -26,6 +26,7 @@ from __future__ import annotations
 import json
 import re
 import sys
+from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import NamedTuple
@@ -37,9 +38,14 @@ from utils.case_study import CaseStudy
 # Query feature extraction — for routing case studies at inference time
 # ---------------------------------------------------------------------------
 
+# Sentinel form value returned for items that don't have equation fields (e.g. BBH tasks).
+# tokens() returns frozenset() for this value so relevance falls back to fix_rate only.
+_NULL_FORM = "NONE"
+
+
 class QueryFeatures(NamedTuple):
     """Structural features extracted from an (E1, E2) query pair."""
-    form_e1:   str   # TRIVIAL | SINGLETON | ABSORBING | STANDARD | GENERAL
+    form_e1:   str   # TRIVIAL | SINGLETON | ABSORBING | STANDARD | GENERAL | NONE
     form_e2:   str
     l_e1:      int   # number of * on the left side of = in E1
     l_e2:      int   # number of * on the left side of = in E2
@@ -61,7 +67,11 @@ class QueryFeatures(NamedTuple):
         """
         Token set for Jaccard similarity against CaseStudy.feature_signature tokens.
         Includes form names, variable-count markers, and left-op-count markers.
+        Returns frozenset() for NONE-form items (non-equation tasks) so relevance
+        falls back entirely to fix_rate with jaccard=0.
         """
+        if self.form_e1 == _NULL_FORM:
+            return frozenset()
         return frozenset([
             self.form_e1.lower(),
             self.form_e2.lower(),
@@ -77,9 +87,16 @@ def extract_query_features(item: dict) -> QueryFeatures:
     Extract structural features from an evaluation item dict.
 
     Reads item["equation1"] and item["equation2"] (strings like "x = y * z").
+    For items without equation fields (e.g. BBH tasks), returns a null-sentinel
+    QueryFeatures whose tokens() is empty — relevance ranking uses fix_rate only.
     Pure string parsing — no LLM calls, no regex-heavy dependencies.
     """
-    e1_raw = str(item.get("equation1", "")).strip()
+    if "equation1" not in item:
+        return QueryFeatures(
+            form_e1=_NULL_FORM, form_e2=_NULL_FORM,
+            l_e1=0, l_e2=0, vars_e1=0, vars_e2=0, depth_e1=0, depth_e2=0,
+        )
+    e1_raw = str(item["equation1"]).strip()
     e2_raw = str(item.get("equation2", "")).strip()
     return _features_from_pair(e1_raw, e2_raw)
 
@@ -201,7 +218,7 @@ def _relevance_score(cs: CaseStudy, qf: QueryFeatures) -> float:
 
 ROADMAP_MAX_CHARS      = 2_500   # ~600 tokens — covers 8-10 detailed steps
 CASE_STUDY_MAX_CHARS   =   600   # ~150 tokens — one focused rule + 2-3 examples
-TOTAL_RENDER_MAX_CHARS = 9_500   # leaves headroom under 10 kb after headers
+TOTAL_RENDER_MAX_CHARS = 50_000  # ~14 k tokens — safe for 28 k-token vLLM context
 
 # Backward-compat alias — external code that imported DECISION_TREE_MAX_CHARS still works
 DECISION_TREE_MAX_CHARS = ROADMAP_MAX_CHARS
@@ -222,14 +239,27 @@ ROADMAP_HEADER         = "=== REASONING ROADMAP ==="
 class Cheatsheet:
     roadmap: str
     case_studies: list[CaseStudy] = field(default_factory=list)
-    # Optional frozen prior knowledge (e.g. NeuriCo prompt).
+    # Optional frozen prior knowledge (e.g. NeuriCo prompt or CS-ICL bootstrap).
     # Rendered before the roadmap and never modified by ICR.
+    # When prior_knowledge_segments is non-empty this field is ignored at render
+    # time — use it only as a fallback / backward-compat string.
     prior_knowledge: str = ""
+    # Structured segments of prior_knowledge.  Each dict has keys:
+    #   id      : str   — stable identifier, e.g. "seg_0"
+    #   title   : str   — first heading in the block
+    #   content : str   — full text of the segment (including its heading)
+    #   enabled : bool  — False means the segment is excluded from render
+    # Populated by gen_icr_bootstrap.py; empty in all older Cheatsheet files.
+    prior_knowledge_segments: list[dict] = field(default_factory=list)
     # When True, render() skips ALL character caps: roadmap is not truncated,
     # every case study is included in full, and the total budget is unlimited.
     # Use --no-render-limit in ICR_select/pipeline.py to enable.
     # Not persisted to JSON — must be set explicitly after load().
     no_limit: bool = field(default=False, compare=False, repr=False)
+    # Hard cap on total rendered chars. When set, overrides TOTAL_RENDER_MAX_CHARS.
+    # Useful for cheatsheet-size ablations (--max-cheatsheet-chars).
+    # Not persisted to JSON — must be set explicitly after load().
+    render_max_chars: int | None = field(default=None, compare=False, repr=False)
 
     def __post_init__(self) -> None:
         # Accept list[str] or list[dict] for backward compatibility.
@@ -251,18 +281,44 @@ class Cheatsheet:
         """
         Produce the full cheatsheet text ready for injection into a prompt.
 
-        Includes all case studies newest-first until the character budget is
-        exhausted.  This is the global (non-routed) render used during training
-        and any context where the query is not known in advance.
+        Selection strategy (two passes):
+          1. Bin representatives — for each distinct feature_signature, include
+             the highest-fix-rate case study.  This guarantees every structural
+             bin that has at least one case study is represented in the render.
+          2. Remaining budget — fill with the remaining case studies sorted by
+             fix rate descending, so the weakest ones are dropped when the
+             character budget (TOTAL_RENDER_MAX_CHARS) runs out.
+
+        Fix rate is historical_fix_rate when available, falling back to
+        creation_fix_rate.  Case studies with no feature_signature are grouped
+        together as one "unclassified" bin.
 
         For inference-time routing, use render_for_query(item, top_k) instead.
         """
-        # Newest-first, preserving original 1-based display index
-        selected = [
-            (len(self.case_studies) - 1 - i, cs)
-            for i, cs in enumerate(reversed(self.case_studies))
-        ]
-        return self._render_with_selection(selected)
+        if not self.case_studies:
+            return self._render_with_selection([])
+
+        def _fix_rate(cs: CaseStudy) -> float:
+            return cs.historical_fix_rate or cs.creation_fix_rate or 0.0
+
+        # Group by feature_signature — each distinct signature is one bin
+        by_sig: dict[str, list[tuple[int, CaseStudy]]] = defaultdict(list)
+        for i, cs in enumerate(self.case_studies):
+            key = cs.feature_signature or "__unclassified__"
+            by_sig[key].append((i, cs))
+
+        # Pass 1: best representative from each bin, sorted by fix rate
+        representatives: list[tuple[int, CaseStudy]] = []
+        rest: list[tuple[int, CaseStudy]] = []
+        for group in by_sig.values():
+            group_sorted = sorted(group, key=lambda p: _fix_rate(p[1]), reverse=True)
+            representatives.append(group_sorted[0])
+            rest.extend(group_sorted[1:])
+
+        representatives.sort(key=lambda p: _fix_rate(p[1]), reverse=True)
+        rest.sort(key=lambda p: _fix_rate(p[1]), reverse=True)
+
+        return self._render_with_selection(representatives + rest)
 
     def render_for_query(
         self,
@@ -324,13 +380,12 @@ class Cheatsheet:
         _no_limit = self.no_limit
 
         parts: list[str] = []
-        if self.prior_knowledge.strip():
-            parts += [PRIOR_KNOWLEDGE_HEADER, "", self.prior_knowledge.strip(), ""]
+        pk = self._render_prior_knowledge()
+        if pk:
+            parts += [PRIOR_KNOWLEDGE_HEADER, "", pk, ""]
 
-        header = ROADMAP_HEADER
-        dt = self.roadmap.strip() if _no_limit else _truncate(self.roadmap.strip(), ROADMAP_MAX_CHARS)
-        parts += [header, "", dt]
-        budget = float("inf") if _no_limit else TOTAL_RENDER_MAX_CHARS - len("\n".join(parts))
+        _total_cap = TOTAL_RENDER_MAX_CHARS if self.render_max_chars is None else self.render_max_chars
+        budget = float("inf") if _no_limit else _total_cap - len("\n".join(parts))
 
         if selected:
             header_block = ["", CASE_STUDIES_HEADER]
@@ -364,6 +419,43 @@ class Cheatsheet:
         """Return the character count of the rendered cheatsheet."""
         return len(self.render())
 
+    def _render_prior_knowledge(self) -> str:
+        """
+        Return the prior-knowledge text to inject into the prompt.
+
+        If prior_knowledge_segments is populated, join only the enabled segments
+        (preserving the original --- separators between them).
+        Falls back to the raw prior_knowledge string for backward compatibility.
+        """
+        if self.prior_knowledge_segments:
+            enabled = [s["content"] for s in self.prior_knowledge_segments if s.get("enabled", True)]
+            return "\n\n---\n\n".join(enabled).strip()
+        return self.prior_knowledge.strip()
+
+    # ------------------------------------------------------------------
+    # Prior-knowledge segment ablation
+    # ------------------------------------------------------------------
+
+    def disable_prior_segment(self, segment_id: str) -> bool:
+        """Disable a prior-knowledge segment by id. Returns True if found."""
+        for seg in self.prior_knowledge_segments:
+            if seg["id"] == segment_id:
+                seg["enabled"] = False
+                return True
+        return False
+
+    def enable_prior_segment(self, segment_id: str) -> bool:
+        """Re-enable a prior-knowledge segment by id. Returns True if found."""
+        for seg in self.prior_knowledge_segments:
+            if seg["id"] == segment_id:
+                seg["enabled"] = True
+                return True
+        return False
+
+    def prior_segment_ids(self) -> list[str]:
+        """Return all segment ids in order."""
+        return [s["id"] for s in self.prior_knowledge_segments]
+
     # ------------------------------------------------------------------
     # Mutation
     # ------------------------------------------------------------------
@@ -380,6 +472,19 @@ class Cheatsheet:
                 f"studies will be excluded from render but remain in JSON.",
                 file=sys.stderr,
             )
+
+    def replace_case_study(self, target_title: str, new_cs: "CaseStudy") -> bool:
+        """
+        Replace the first case study whose title fuzzy-matches target_title.
+        Returns True if a match was found and replaced, False otherwise.
+        """
+        target = target_title.lower().strip()
+        for i, cs in enumerate(self.case_studies):
+            cs_title = cs.title.lower().strip()
+            if cs_title == target or target in cs_title or cs_title in target:
+                self.case_studies[i] = new_cs
+                return True
+        return False
 
     def patch_roadmap(self, patch_text: str) -> None:
         """
@@ -419,16 +524,17 @@ class Cheatsheet:
         path.parent.mkdir(parents=True, exist_ok=True)
 
         path.with_suffix(".txt").write_text(self.render(), encoding="utf-8")
+        payload: dict = {
+            "roadmap":         self.roadmap,
+            "case_studies":    [cs.to_dict() for cs in self.case_studies],
+            # Always write prior_knowledge as the current rendered text so older
+            # loaders can read it without understanding segments.
+            "prior_knowledge": self._render_prior_knowledge(),
+        }
+        if self.prior_knowledge_segments:
+            payload["prior_knowledge_segments"] = self.prior_knowledge_segments
         path.with_suffix(".json").write_text(
-            json.dumps(
-                {
-                    "roadmap":         self.roadmap,
-                    "case_studies":    [cs.to_dict() for cs in self.case_studies],
-                    "prior_knowledge": self.prior_knowledge,
-                },
-                indent=2,
-                ensure_ascii=False,
-            ),
+            json.dumps(payload, indent=2, ensure_ascii=False),
             encoding="utf-8",
         )
 
@@ -458,6 +564,7 @@ class Cheatsheet:
             roadmap=rm,
             case_studies=case_studies,
             prior_knowledge=data.get("prior_knowledge", ""),
+            prior_knowledge_segments=data.get("prior_knowledge_segments", []),
         )
 
     # ------------------------------------------------------------------

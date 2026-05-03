@@ -21,17 +21,32 @@ from pathlib import Path
 
 import requests
 from dotenv import load_dotenv
+from .run_logger import get_logger
 
 load_dotenv(Path(__file__).parent.parent / ".env")
 
 OPENROUTER_URL    = "https://openrouter.ai/api/v1/chat/completions"
 OPENAI_URL        = "https://api.openai.com/v1/chat/completions"
 MAX_TOKENS        = int(os.environ.get("ICR_MAX_TOKENS", 16_000))
-MAX_RETRIES       = 3
-RETRY_BASE_DELAY  = 2.0
-VLLM_READ_TIMEOUT = 600   # local inference can be slow — 10 min per request
+MAX_RETRIES       = 6
+RETRY_BASE_DELAY  = 10.0
+VLLM_READ_TIMEOUT = 1800  # local inference can be slow — 30 min per request
 
-_OPENAI_PREFIXES = ("gpt-4", "gpt-3", "o1", "o3", "o4")
+_OPENAI_PREFIXES  = ("gpt-4", "gpt-3", "o1", "o3", "o4")
+_OPENAI_REASONING = ("o1", "o3", "o4")  # o-series: no temperature, max_completion_tokens, reasoning_effort
+
+# Models that expose internal reasoning traces (thinking / reasoning_content fields).
+# Non-reasoning models need explicit justification elicitation in the scoring prompt.
+_REASONING_MODEL_SUBSTRINGS = ("deepseek-r1", "r1-0528", "claude-3-7-sonnet")
+
+
+def is_reasoning_model(model: str) -> bool:
+    """Return True for models that expose internal CoT traces (thinking/reasoning_content)."""
+    m = model.lower().split("/")[-1]
+    return (
+        any(m.startswith(p) for p in _OPENAI_REASONING)
+        or any(s in m for s in _REASONING_MODEL_SUBSTRINGS)
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -70,6 +85,14 @@ def _resolve_endpoint(model: str) -> tuple[str, str, bool, bool]:
     if vllm_url and vllm_model and model == vllm_model:
         return vllm_url, os.environ.get("VLLM_API_KEY", ""), False, True
 
+    # Secondary vLLM endpoint — used by ensemble scoring for the second model.
+    # Set VLLM_BASE_URL_2 and VLLM_MODEL_2 to route a specific model to a
+    # different vLLM server (e.g. different node/port on the cluster).
+    vllm_url_2   = os.environ.get("VLLM_BASE_URL_2", "")
+    vllm_model_2 = os.environ.get("VLLM_MODEL_2", "")
+    if vllm_url_2 and vllm_model_2 and model == vllm_model_2:
+        return vllm_url_2, os.environ.get("VLLM_API_KEY_2", ""), False, True
+
     openai_key = os.environ.get("OPENAI_API_KEY", "")
     bare = model.removeprefix("openai/")
     if openai_key and bare.startswith(_OPENAI_PREFIXES):
@@ -86,9 +109,11 @@ def call_llm(
     prompt: str,
     model: str,
     api_key: str,
-    temperature: float = 0.3,
+    temperature: float = 0.0,
     max_tokens: int = MAX_TOKENS,
     reasoning_effort: str | None = "low",
+    seed: int | None = 42,
+    _log_label: str = "",
 ) -> LLMResponse:
     """
     Send a single prompt and return LLMResponse(content, thinking).
@@ -102,17 +127,32 @@ def call_llm(
       {"reasoning": {"effort": ...}} for OpenRouter reasoning models. Omitted
       for vLLM and OpenAI (not supported).
     """
+    _t0 = time.monotonic()
     url, resolved_key, is_openai, is_vllm = _resolve_endpoint(model)
     model_name = model.removeprefix("openai/") if is_openai else model
+    is_openai_reasoning = is_openai and any(model_name.startswith(p) for p in _OPENAI_REASONING)
 
     payload: dict = {
-        "model":       model_name,
-        "messages":    [{"role": "user", "content": prompt}],
-        "max_tokens":  max_tokens,
-        "temperature": temperature,
+        "model":    model_name,
+        "messages": [{"role": "user", "content": prompt}],
     }
-    if reasoning_effort is not None and not is_openai and not is_vllm:
-        payload["reasoning"] = {"effort": reasoning_effort}
+    # o-series (o1/o3/o4) use max_completion_tokens and don't support temperature
+    if is_openai_reasoning:
+        payload["max_completion_tokens"] = max_tokens
+    else:
+        payload["max_tokens"]  = max_tokens
+        payload["temperature"] = temperature
+    if seed is not None and not is_openai_reasoning:
+        payload["seed"] = seed
+    # reasoning_effort: OpenRouter uses {"reasoning": {"effort": ...}};
+    # OpenAI o-series uses top-level "reasoning_effort"
+    if reasoning_effort is not None:
+        if is_openai_reasoning:
+            payload["reasoning_effort"] = reasoning_effort
+        elif not is_openai and not is_vllm:
+            payload["reasoning"] = {"effort": reasoning_effort}
+    if not is_openai and not is_vllm:
+        payload["provider"] = {"allow_fallbacks": True}
 
     headers = {"Content-Type": "application/json"}
     if resolved_key:
@@ -172,7 +212,20 @@ def call_llm(
                     content  = thinking
                     thinking = ""
 
-            return LLMResponse(content=content, thinking=thinking)
+            _resp = LLMResponse(content=content, thinking=thinking)
+            _log = get_logger()
+            if _log is not None:
+                _log.log_llm_call(
+                    model=model,
+                    prompt=prompt,
+                    response=content,
+                    thinking=thinking,
+                    elapsed_ms=(time.monotonic() - _t0) * 1000,
+                    label=_log_label,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                )
+            return _resp
 
         except requests.HTTPError as exc:
             # 4xx (except 429) are client errors — retrying won't help.
@@ -223,6 +276,7 @@ def call_llm_batch(
     concurrency: int = 10,
     progress_label: str = "",
     reasoning_effort: str | None = "low",
+    seed: int | None = 42,
 ) -> list[LLMResponse | None]:
     """
     Call the LLM for each prompt in parallel using a thread pool.
@@ -235,19 +289,22 @@ def call_llm_batch(
 
     def _call(idx: int, prompt: str) -> tuple[int, LLMResponse | None]:
         try:
-            return idx, call_llm(prompt, model, api_key, temperature, max_tokens, reasoning_effort)
+            return idx, call_llm(prompt, model, api_key, temperature, max_tokens,
+                                 reasoning_effort, seed, _log_label=progress_label)
         except Exception as exc:
             print(f"\n  [batch] item {idx} error: {exc}", file=sys.stderr)
             return idx, None
 
     with ThreadPoolExecutor(max_workers=concurrency) as pool:
-        futures = {pool.submit(_call, i, p): i for i, p in enumerate(prompts)}
+        futures = {}
+        for i, p in enumerate(prompts):
+            futures[pool.submit(_call, i, p)] = i
+            if i > 0 and i % concurrency == 0:
+                time.sleep(1.0)  # brief pause every batch to avoid burst 429s
         for future in as_completed(futures):
             idx, resp = future.result()
             results[idx] = resp
             done += 1
             label = f"  {progress_label} " if progress_label else "  "
-            print(f"\r{label}{done}/{len(prompts)}", end="", flush=True, file=sys.stderr)
-
-    print(file=sys.stderr)
+            print(f"{label}{done}/{len(prompts)}", flush=True, file=sys.stderr)
     return results
