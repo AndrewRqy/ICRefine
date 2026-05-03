@@ -38,9 +38,14 @@ from utils.case_study import CaseStudy
 # Query feature extraction — for routing case studies at inference time
 # ---------------------------------------------------------------------------
 
+# Sentinel form value returned for items that don't have equation fields (e.g. BBH tasks).
+# tokens() returns frozenset() for this value so relevance falls back to fix_rate only.
+_NULL_FORM = "NONE"
+
+
 class QueryFeatures(NamedTuple):
     """Structural features extracted from an (E1, E2) query pair."""
-    form_e1:   str   # TRIVIAL | SINGLETON | ABSORBING | STANDARD | GENERAL
+    form_e1:   str   # TRIVIAL | SINGLETON | ABSORBING | STANDARD | GENERAL | NONE
     form_e2:   str
     l_e1:      int   # number of * on the left side of = in E1
     l_e2:      int   # number of * on the left side of = in E2
@@ -62,7 +67,11 @@ class QueryFeatures(NamedTuple):
         """
         Token set for Jaccard similarity against CaseStudy.feature_signature tokens.
         Includes form names, variable-count markers, and left-op-count markers.
+        Returns frozenset() for NONE-form items (non-equation tasks) so relevance
+        falls back entirely to fix_rate with jaccard=0.
         """
+        if self.form_e1 == _NULL_FORM:
+            return frozenset()
         return frozenset([
             self.form_e1.lower(),
             self.form_e2.lower(),
@@ -78,9 +87,16 @@ def extract_query_features(item: dict) -> QueryFeatures:
     Extract structural features from an evaluation item dict.
 
     Reads item["equation1"] and item["equation2"] (strings like "x = y * z").
+    For items without equation fields (e.g. BBH tasks), returns a null-sentinel
+    QueryFeatures whose tokens() is empty — relevance ranking uses fix_rate only.
     Pure string parsing — no LLM calls, no regex-heavy dependencies.
     """
-    e1_raw = str(item.get("equation1", "")).strip()
+    if "equation1" not in item:
+        return QueryFeatures(
+            form_e1=_NULL_FORM, form_e2=_NULL_FORM,
+            l_e1=0, l_e2=0, vars_e1=0, vars_e2=0, depth_e1=0, depth_e2=0,
+        )
+    e1_raw = str(item["equation1"]).strip()
     e2_raw = str(item.get("equation2", "")).strip()
     return _features_from_pair(e1_raw, e2_raw)
 
@@ -240,6 +256,10 @@ class Cheatsheet:
     # Use --no-render-limit in ICR_select/pipeline.py to enable.
     # Not persisted to JSON — must be set explicitly after load().
     no_limit: bool = field(default=False, compare=False, repr=False)
+    # Hard cap on total rendered chars. When set, overrides TOTAL_RENDER_MAX_CHARS.
+    # Useful for cheatsheet-size ablations (--max-cheatsheet-chars).
+    # Not persisted to JSON — must be set explicitly after load().
+    render_max_chars: int | None = field(default=None, compare=False, repr=False)
 
     def __post_init__(self) -> None:
         # Accept list[str] or list[dict] for backward compatibility.
@@ -364,10 +384,8 @@ class Cheatsheet:
         if pk:
             parts += [PRIOR_KNOWLEDGE_HEADER, "", pk, ""]
 
-        header = ROADMAP_HEADER
-        dt = self.roadmap.strip() if _no_limit else _truncate(self.roadmap.strip(), ROADMAP_MAX_CHARS)
-        parts += [header, "", dt]
-        budget = float("inf") if _no_limit else TOTAL_RENDER_MAX_CHARS - len("\n".join(parts))
+        _total_cap = TOTAL_RENDER_MAX_CHARS if self.render_max_chars is None else self.render_max_chars
+        budget = float("inf") if _no_limit else _total_cap - len("\n".join(parts))
 
         if selected:
             header_block = ["", CASE_STUDIES_HEADER]
@@ -454,6 +472,19 @@ class Cheatsheet:
                 f"studies will be excluded from render but remain in JSON.",
                 file=sys.stderr,
             )
+
+    def replace_case_study(self, target_title: str, new_cs: "CaseStudy") -> bool:
+        """
+        Replace the first case study whose title fuzzy-matches target_title.
+        Returns True if a match was found and replaced, False otherwise.
+        """
+        target = target_title.lower().strip()
+        for i, cs in enumerate(self.case_studies):
+            cs_title = cs.title.lower().strip()
+            if cs_title == target or target in cs_title or cs_title in target:
+                self.case_studies[i] = new_cs
+                return True
+        return False
 
     def patch_roadmap(self, patch_text: str) -> None:
         """

@@ -89,6 +89,10 @@ def _build_parser() -> argparse.ArgumentParser:
     g.add_argument("--reasoning-effort", default="low",
                    choices=["low", "medium", "high", "none"],
                    help="Reasoning effort for scoring model. Use 'none' for non-reasoning models.")
+    g.add_argument("--max-cheatsheet-chars", type=int, default=None, metavar="N",
+                   help="Hard cap on rendered cheatsheet size (chars). Bin flushes are skipped once "
+                        "the rendered cheatsheet reaches this limit. Also caps the render budget so "
+                        "eval prompts never exceed this size.")
 
     g = p.add_argument_group("Models")
     g.add_argument("--model",           default=DEFAULT_MODEL, metavar="MODEL_ID")
@@ -200,6 +204,9 @@ def main() -> None:
         train_items = train_items[: args.limit]
         _log(f"\n[Stage 2] Limited to first {len(train_items)} training items (--limit {args.limit}).")
     _log(f"\n[Stage 2] Training loop over {len(train_items)} items ...")
+    if args.max_cheatsheet_chars is not None:
+        cheatsheet.render_max_chars = args.max_cheatsheet_chars
+        _log(f"  [size cap] render_max_chars={args.max_cheatsheet_chars:,}")
     result = run_training_loop(
         cheatsheet=cheatsheet,
         train_items=train_items,
@@ -216,6 +223,7 @@ def main() -> None:
         output_dir=output_dir,
         log=True,
         reasoning_effort=reasoning_effort,
+        max_cheatsheet_chars=args.max_cheatsheet_chars,
     )
 
     # ------------------------------------------------------------------

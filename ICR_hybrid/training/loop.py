@@ -13,10 +13,12 @@ Phase 1  (rule patching, skipped when initial_rule_set is None):
     4. Checkpoint.  Re-score active failures.  Refresh bins.
     5. Exit early when acc >= rule_acc_goal OR static_iters >= rule_static_iters.
 
-  NOTE: Phase 1 is currently magma-only. _rule_patch_pass uses score_batch_sair
-  internally (SAIR-style rendering) to evaluate patches, which requires the
-  scoring model to consume the NeuriCo jinja2 template directly.  For generic
-  tasks (BBH, etc.), set initial_rule_set=None to skip Phase 1 entirely.
+  NOTE: _rule_patch_pass (RuleSet mode) is magma-only — it requires the SAIR
+  jinja2 template.  For generic tasks (BBH, etc.) there are two Phase 1 modes:
+    • _pk_patch_phase (text mode): activated when cheatsheet.prior_knowledge is
+      non-empty but no RuleSet is provided.  Iterates on the PK text directly,
+      feeding failure post_think traces to the model to produce improved text.
+    • SKIPPED: when no RuleSet and no prior_knowledge exist.
 
 Optional ablation (both default OFF):
   run_initial_ablation  — ablate the initial RuleSet before Phase 1.
@@ -38,10 +40,12 @@ from __future__ import annotations
 
 import json
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from utils.cheatsheet import Cheatsheet
+from utils.llm_client import call_llm
 from utils.scorer import score_batch
 from utils.task_spec import TaskSpec
 from ICR_reasoning.core.oracle import OracleDict
@@ -55,6 +59,233 @@ from ICR_partition.training.loop import (
     run_partition_loop,
     PartitionTrainingResult,
 )
+
+
+# ---------------------------------------------------------------------------
+# Phase 1 alternative: iterative prior_knowledge text patching
+# ---------------------------------------------------------------------------
+
+def _pk_patch_phase(
+    cheatsheet:          Cheatsheet,
+    train_items:         list[dict],
+    model_patch:         str,
+    model_score:         str,
+    api_key:             str,
+    oracle:              "OracleDict | None",
+    max_iters:           int,
+    acc_goal:            float,
+    static_iters:        int,
+    fix_rate_threshold:  float,
+    regress_threshold:   float,
+    concurrency:         int,
+    log_fn,
+    task_spec:           "TaskSpec",
+    reasoning_effort:    "str | None",
+    cot_first:           bool,
+    n_failures_to_show:  int = 15,
+    inject_oracle:       bool = True,
+    max_pk_chars:        int | None = None,
+) -> tuple[int, float, int]:
+    """
+    Iteratively improve cheatsheet.prior_knowledge using failure post_think traces.
+
+    Each iteration:
+      1. Sample up to n_failures_to_show failures (with wrong CoT from post_think).
+      2. Call model_patch to produce an improved version of the PK text.
+      3. Gate: re-score failures → fix_rate; re-score correct sample → regression.
+      4. Accept if both gates pass; full-rescore for next iter.
+
+    Returns (n_patches_applied, final_accuracy, iters_done).
+    """
+    def _do_score(items, cs_text, label):
+        return score_batch(
+            items, cs_text, model_score, api_key,
+            concurrency=min(concurrency, len(items)),
+            reasoning_effort=reasoning_effort,
+            cot_first=cot_first,
+            progress_label=label,
+            task_spec=task_spec,
+        )
+
+    n_patches = 0
+    static_count = 0
+    iters_done = 0
+
+    log_fn(f"\n[pk_patch] Scoring {len(train_items)} items for Phase 1 PK patching ...")
+    correct, wrong = _do_score(train_items, cheatsheet.render(), "pk-init")
+    final_acc = len(correct) / len(train_items) if train_items else 0.0
+    log_fn(f"  initial accuracy = {final_acc:.1%}  ({len(wrong)} failures, {len(correct)} correct)")
+
+    for pk_iter in range(1, max_iters + 1):
+        iters_done = pk_iter
+        if final_acc >= acc_goal:
+            log_fn(f"  [pk_patch] acc_goal {acc_goal:.0%} reached after iter {pk_iter - 1}")
+            break
+        if not wrong:
+            log_fn("  [pk_patch] no failures remain")
+            break
+
+        log_fn(
+            f"\n[pk_patch / iter {pk_iter}/{max_iters}]  "
+            f"acc={final_acc:.1%}  failures={len(wrong)}"
+        )
+
+        shown = wrong[:n_failures_to_show]
+        pk_text = cheatsheet.prior_knowledge.strip()
+
+        # Build failure block (input + expected/got + post_think + oracle if available)
+        failure_blocks = []
+        for idx, item in enumerate(shown, 1):
+            inp = str(item.get("input", "")).strip()[:300]
+            exp = str(item.get("expected", item.get("answer", "?"))).strip()
+            got = str(item.get("predicted", "?"))
+            pt  = (item.get("post_think") or item.get("thinking") or "").strip()
+
+            lines = [
+                f"[{idx}]",
+                f"  Input:    {inp}",
+                f"  Expected: {exp}  |  Got: {got}",
+            ]
+            if pt:
+                lines.append(f"  Wrong reasoning:\n    {pt[:500]}")
+
+            # Oracle contrast — show correct reasoning so the patcher knows what good looks like.
+            # Priority: pre-baked _oracle_exact → item gold reason → external oracle dict.
+            # Controlled by inject_oracle; set False to ablate this signal.
+            if inject_oracle:
+                oracle_text = (
+                    item.get("_oracle_exact", "")
+                    or item.get("reason", "")
+                    or item.get("gold_reason", "")
+                )
+                if not oracle_text and oracle is not None:
+                    oracle_text = (oracle.get(str(item.get("id", ""))) or {}).get("explanation", "")
+                if oracle_text:
+                    lines.append(f"  Correct reasoning:\n    {oracle_text[:600]}")
+
+            failure_blocks.append("\n".join(lines))
+
+        _size_instruction = (
+            f"HARD LIMIT: the improved guide must be at most {max_pk_chars:,} characters "
+            f"(current: {len(pk_text):,} chars). Trim or remove existing rules if needed to stay under this limit."
+            if max_pk_chars is not None
+            else "Keep the improved guide focused and concise (no more than 50% longer than the original)"
+        )
+        prompt = (
+            f"You are refining a knowledge guide that helps a model answer questions correctly.\n\n"
+            f"=== CURRENT KNOWLEDGE GUIDE ({len(pk_text)} chars) ===\n"
+            f"{pk_text}\n"
+            f"=== END KNOWLEDGE GUIDE ===\n\n"
+            f"The model is making the following {len(shown)} errors "
+            f"(out of {len(wrong)} total failures):\n\n"
+            + "\n\n".join(failure_blocks)
+            + "\n\n---\n"
+            "Produce an IMPROVED version of the knowledge guide that helps avoid these mistakes.\n"
+            "You may:\n"
+            "  - ADD a new rule, clarification, or concrete example\n"
+            "  - MODIFY an existing rule to be more precise or correct\n"
+            "  - REMOVE a rule that is actively causing errors\n\n"
+            f"Requirements:\n"
+            f"  - {_size_instruction}\n"
+            "  - Preserve rules that are working correctly\n"
+            "  - Focus on ABSTRACT REASONING PRINCIPLES: do not reproduce specific input text, "
+            "entity names, or numbers from the failure examples above\n"
+            "  - Write principles that would help any capable model on new similar questions, "
+            "not just correct these specific items\n"
+            "  - Output ONLY the improved knowledge guide text — "
+            "no preamble, no commentary, no markdown fences"
+        )
+
+        log_fn(f"  Calling {model_patch} to patch prior_knowledge ({len(pk_text)} chars) ...")
+        # Cap max_tokens to ~1.3 chars/token headroom above the size limit, or default heuristic.
+        if max_pk_chars is not None:
+            max_tok = min(4000, max(400, int(max_pk_chars / 3)))
+        else:
+            max_tok = min(4000, max(800, int(len(pk_text) * 1.6)))
+        resp = call_llm(prompt, model=model_patch, api_key=api_key,
+                        max_tokens=max_tok, temperature=0.3)
+        candidate_pk = resp.content.strip()
+
+        if not candidate_pk:
+            log_fn("  [pk_patch] empty response — skipping")
+            static_count += 1
+            if static_count >= static_iters:
+                log_fn("  max_static_iters reached — exiting pk_patch")
+                break
+            continue
+
+        log_fn(f"  Candidate PK: {len(candidate_pk)} chars")
+
+        if max_pk_chars is not None and len(candidate_pk) > max_pk_chars:
+            log_fn(f"  [pk_size_cap] {len(candidate_pk):,} chars > {max_pk_chars:,} — rejecting oversized candidate")
+            static_count += 1
+            if static_count >= static_iters:
+                log_fn("  max_static_iters reached — exiting pk_patch")
+                break
+            continue
+
+        cand = Cheatsheet(
+            roadmap=cheatsheet.roadmap,
+            case_studies=list(cheatsheet.case_studies),
+            prior_knowledge=candidate_pk,
+            no_limit=getattr(cheatsheet, "no_limit", False),
+        )
+
+        # Fix-rate gate — re-score the shown failures with candidate PK
+        log_fn(f"  Fix-rate gate: scoring {len(shown)} failures ...")
+        new_correct_from_wrong, _ = _do_score(shown, cand.render(), "pk-fix-gate")
+        fix_rate = len(new_correct_from_wrong) / len(shown)
+        log_fn(f"  fix_rate = {fix_rate:.1%}  (threshold {fix_rate_threshold:.1%})")
+
+        if fix_rate < fix_rate_threshold:
+            log_fn("  fix_rate below threshold — rejecting candidate")
+            static_count += 1
+            if static_count >= static_iters:
+                log_fn("  max_static_iters reached — exiting pk_patch")
+                break
+            continue
+
+        # Regression gate — re-score a sample of the currently-correct items
+        regression = 0.0
+        regress_sample = correct[:min(40, len(correct))]
+        if regress_sample:
+            log_fn(f"  Regression gate: scoring {len(regress_sample)} correct items ...")
+            still_correct, regressed = _do_score(
+                regress_sample, cand.render(), "pk-regress-gate"
+            )
+            regression = len(regressed) / len(regress_sample)
+            log_fn(f"  regression = {regression:.1%}  (threshold {regress_threshold:.1%})")
+            if regression > regress_threshold:
+                log_fn("  regression too high — rejecting candidate")
+                static_count += 1
+                if static_count >= static_iters:
+                    log_fn("  max_static_iters reached — exiting pk_patch")
+                    break
+                continue
+
+        # Accept
+        cheatsheet.prior_knowledge = candidate_pk
+        n_patches += 1
+        static_count = 0
+        log_fn(
+            f"  [pk_patch] ACCEPTED patch #{n_patches}  "
+            f"fix={fix_rate:.1%}  regress={regression:.1%}  "
+            f"PK={len(candidate_pk)} chars"
+        )
+
+        # Full rescore after each accepted patch for accurate failure list next iter
+        log_fn("  Full rescore after acceptance ...")
+        correct, wrong = _do_score(
+            train_items, cheatsheet.render(), f"pk-iter{pk_iter}-rescore"
+        )
+        final_acc = len(correct) / len(train_items) if train_items else 0.0
+        log_fn(f"  new accuracy = {final_acc:.1%}  ({len(wrong)} failures remain)")
+
+    log_fn(
+        f"\n[pk_patch] Complete — {n_patches} patch(es) applied  "
+        f"iters={iters_done}  final_acc={final_acc:.1%}"
+    )
+    return n_patches, final_acc, iters_done
 
 
 # ---------------------------------------------------------------------------
@@ -153,9 +384,46 @@ def run_hybrid_loop(
     auto_rule_init:             bool = False,
     n_bootstrap_failures:       int  = 20,   # how many failures to seed the bootstrap
 
+    # ── CS-ICL auto-bootstrap ─────────────────────────────────────────────────
+    # When True (default) and no initial cheatsheet / prior_knowledge was
+    # provided, generate a CS-ICL style prior_knowledge from the first
+    # bootstrap_n_items training examples before Phase 1 runs.
+    # This ensures _pk_patch_phase always has a non-trivial starting point
+    # regardless of whether the task defines a bootstrap_ruleset.
+    auto_bootstrap:             bool = True,
+    bootstrap_n_items:          int  = 75,
+
     # ── Phase 2 regression guard ──────────────────────────────────────────────
     pk_regression_guard:        bool  = False,
     pk_regression_tolerance:    float = 0.03,
+
+    # ── Oracle injection per phase ────────────────────────────────────────────
+    # Phase 2 oracle injection (item["reason"] as correct-reasoning contrast in
+    # case study generation) was present from the beginning.  Phase 1 oracle
+    # injection was added in v5.  Both default True; set False to ablate.
+    phase1_inject_oracle:       bool = True,
+    phase2_inject_oracle:       bool = True,
+
+    # ── Size ablation ─────────────────────────────────────────────────────────
+    # max_pk_chars: reject Phase 1 PK candidates that exceed this char count.
+    # max_case_studies: stop Phase 2 once this many CS have been added.
+    # Both default to None (unlimited).
+    max_pk_chars:               int | None = None,
+    max_case_studies:           int | None = None,
+
+    # ── EA Phase 1 ────────────────────────────────────────────────────────────
+    # When True, replaces _pk_patch_phase with the evolutionary algorithm.
+    # EA params map directly to ea_pk_phase(); max_rule_iters becomes
+    # max_generations and rule_static_iters becomes static_gens_limit.
+    use_ea:                     bool  = False,
+    ea_population_size:         int   = 3,
+    ea_n_survivors:             int   = 2,
+    ea_lambda_min:              float = 1.0,
+    ea_lambda_max:              float = 2.0,
+    ea_regress_hard_cap:        int   = 3,
+    ea_pk_size_budget:          int   = 12_000,
+    ea_val_fraction:            float = 0.20,
+    ea_failure_sample_frac:     float = 0.60,
 
     # ── Output ────────────────────────────────────────────────────────────────
     output_dir:                 Path | None = None,
@@ -211,7 +479,9 @@ def run_hybrid_loop(
         f"\n{'='*65}\n"
         f"ICR_hybrid Training Loop\n"
         f"  items         : {len(train_items)}\n"
-        f"  Phase 1       : {'rule-patch (' + str(max_rule_iters) + ' iters, goal=' + f'{rule_acc_goal:.0%}' + ')' if rule_set is not None else 'SKIPPED (no initial_rule_set)'}\n"
+        f"  Phase 1       : "
+        f"{'rule-patch (' + str(max_rule_iters) + ' iters, goal=' + f'{rule_acc_goal:.0%}' + ')' if rule_set is not None else 'pk-text-patch (' + str(max_rule_iters) + ' iters)' if (initial_cheatsheet is not None and initial_cheatsheet.prior_knowledge.strip()) or auto_rule_init else 'SKIPPED (no rule set or prior knowledge)'}\n"
+        f"  auto-bootstrap: {'yes (' + str(bootstrap_n_items) + ' items)' if auto_bootstrap else 'no'}\n"
         f"  Phase 2       : case-study ({max_cs_iters} iters)\n"
         f"  ablation init : {'yes' if run_initial_ablation else 'no'}\n"
         f"  ablation mid  : {'yes' if run_midpoint_ablation else 'no'}\n"
@@ -230,55 +500,198 @@ def run_hybrid_loop(
         if task_spec.bootstrap_cheatsheet_fn is not None:
             # Concrete-example bootstrap: generates CS-ICL-style named scenarios and
             # populates cheatsheet.prior_knowledge directly.  Phase 1 is skipped.
-            _log("\n[bootstrap] Scoring sample to collect seed failures (concrete-example bootstrap) ...")
-            sample = train_items[:min(60, len(train_items))]
-            _, sample_wrong = _do_score(
-                sample, cheatsheet.render(),
-                concurrency=min(rule_concurrency, len(sample)),
-                progress_label="bootstrap-score",
-            )
-            seed_failures = sample_wrong[:n_bootstrap_failures]
-            if not seed_failures:
-                _log("  [bootstrap] no failures in sample — concrete bootstrap skipped.")
-            else:
+            # When --init-cheatsheet already provides prior_knowledge, skip entirely —
+            # auto_rule_init would overwrite the bootstrap content with a lower-quality
+            # replacement generated from a different failure distribution.
+            if initial_cheatsheet is not None and cheatsheet.prior_knowledge.strip():
                 _log(
-                    f"  [bootstrap] {len(seed_failures)} failures → "
-                    f"calling bootstrap_cheatsheet_fn ..."
+                    "\n[bootstrap] --init-cheatsheet provides prior_knowledge — "
+                    "skipping auto_rule_init to preserve bootstrap content."
                 )
-                text = task_spec.bootstrap_cheatsheet_fn(seed_failures, model_rule_patch, api_key)
-                cheatsheet.prior_knowledge = text
-                _log(f"  [bootstrap] prior_knowledge set ({len(text)} chars). Phase 1 will be skipped.")
-                if output_dir:
-                    (Path(output_dir) / "ruleset_bootstrap.txt").write_text(text, encoding="utf-8")
+            else:
+                _log("\n[bootstrap] Scoring sample to collect seed failures (concrete-example bootstrap) ...")
+                sample = train_items[:min(60, len(train_items))]
+                _, sample_wrong = _do_score(
+                    sample, cheatsheet.render(),
+                    concurrency=min(rule_concurrency, len(sample)),
+                    progress_label="bootstrap-score",
+                )
+                seed_failures = sample_wrong[:n_bootstrap_failures]
+                if not seed_failures:
+                    _log("  [bootstrap] no failures in sample — concrete bootstrap skipped.")
+                else:
+                    _log(
+                        f"  [bootstrap] {len(seed_failures)} failures → "
+                        f"calling bootstrap_cheatsheet_fn ..."
+                    )
+                    text = task_spec.bootstrap_cheatsheet_fn(seed_failures, model_rule_patch, api_key)
+                    cheatsheet.prior_knowledge = text
+                    _log(f"  [bootstrap] prior_knowledge set ({len(text)} chars). Phase 1 will be skipped.")
+                    if output_dir:
+                        (Path(output_dir) / "ruleset_bootstrap.txt").write_text(text, encoding="utf-8")
         elif task_spec.bootstrap_ruleset is None:
             _log(
                 "\n[bootstrap] auto_rule_init=True but task_spec has no bootstrap_ruleset — "
                 "Phase 1 will be skipped."
             )
         else:
-            _log("\n[bootstrap] Scoring sample to collect seed failures ...")
-            sample = train_items[:min(60, len(train_items))]
-            _, sample_wrong = _do_score(
-                sample, cheatsheet.render(),
-                concurrency=min(rule_concurrency, len(sample)),
-                progress_label="bootstrap-score",
-            )
-            seed_failures = sample_wrong[:n_bootstrap_failures]
-            if not seed_failures:
-                _log("  [bootstrap] no failures in sample — Phase 1 will be skipped.")
-            else:
+            # When --init-cheatsheet already provides prior_knowledge (e.g. from a
+            # CS-ICL bootstrap run), skip the ruleset bootstrap entirely and let
+            # _pk_patch_phase iteratively improve the existing text in Phase 1.
+            # Generating a RuleSet here would overwrite cheatsheet.prior_knowledge with
+            # auto-generated rules, discarding the higher-quality bootstrap content.
+            if initial_cheatsheet is not None and cheatsheet.prior_knowledge.strip():
                 _log(
-                    f"  [bootstrap] {len(seed_failures)} failures → "
-                    f"calling LLM to generate initial rule set ..."
+                    "\n[bootstrap] --init-cheatsheet provides prior_knowledge — "
+                    "skipping bootstrap_ruleset. _pk_patch_phase will refine it in Phase 1."
                 )
-                rule_set = task_spec.bootstrap_ruleset(
-                    seed_failures, model_rule_patch, api_key
+            else:
+                _log("\n[bootstrap] Scoring sample to collect seed failures ...")
+                sample = train_items[:min(60, len(train_items))]
+                _, sample_wrong = _do_score(
+                    sample, cheatsheet.render(),
+                    concurrency=min(rule_concurrency, len(sample)),
+                    progress_label="bootstrap-score",
                 )
-                _log(f"  [bootstrap] {rule_set.summary()}")
-                if output_dir:
-                    (Path(output_dir) / "ruleset_bootstrap.txt").write_text(
-                        rule_set.render(), encoding="utf-8"
+                seed_failures = sample_wrong[:n_bootstrap_failures]
+                if not seed_failures:
+                    _log("  [bootstrap] no failures in sample — Phase 1 will be skipped.")
+                else:
+                    _log(
+                        f"  [bootstrap] {len(seed_failures)} failures → "
+                        f"calling LLM to generate initial rule set ..."
                     )
+                    rule_set = task_spec.bootstrap_ruleset(
+                        seed_failures, model_rule_patch, api_key
+                    )
+                    _log(f"  [bootstrap] {rule_set.summary()}")
+                    if output_dir:
+                        (Path(output_dir) / "ruleset_bootstrap.txt").write_text(
+                            rule_set.render(), encoding="utf-8"
+                        )
+
+    # ── CS-ICL auto-bootstrap ─────────────────────────────────────────────────
+    # Fires when no init_cheatsheet / prior_knowledge was supplied AND neither
+    # the concrete bootstrap nor the ruleset bootstrap produced prior_knowledge.
+    # Mirrors CS-ICL's two-step pipeline: first enrich items with LLM-generated
+    # reasoning (if not already present), then summarise into a prior_knowledge
+    # cheat sheet so Phase 1 always has a non-trivial start.
+    if auto_bootstrap and rule_set is None and not cheatsheet.prior_knowledge.strip():
+        _log(
+            f"\n[auto-bootstrap] No prior knowledge — generating CS-ICL style "
+            f"cheatsheet from first {bootstrap_n_items} train items ..."
+        )
+        sample = list(train_items[:bootstrap_n_items])
+
+        # Step 1 — generate reasoning for items that lack it, mirroring
+        # CS-ICL's generate_reason_api.py (zero-shot explanation prompt).
+        needs_reason = [
+            (i, it) for i, it in enumerate(sample)
+            if not (it.get("reason") or it.get("gold_reason"))
+        ]
+        if needs_reason:
+            _log(
+                f"  [auto-bootstrap] {len(needs_reason)} of {len(sample)} items "
+                f"lack reasoning — generating via LLM ..."
+            )
+
+            def _gen_reason(idx: int, item: dict) -> tuple[int, str]:
+                prompt = (
+                    "Given the following question and its correct answer, "
+                    "provide a clear step-by-step explanation of how to arrive at the answer.\n\n"
+                    f"Question: {item.get('input', '')}\n"
+                    f"Answer: {item.get('answer', '')}\n"
+                    "Explanation:"
+                )
+                r = call_llm(
+                    prompt, model_rule_patch, api_key,
+                    temperature=0.0, max_tokens=500, reasoning_effort=None,
+                )
+                return idx, r.content.strip()
+
+            reason_map: dict[int, str] = {}
+            with ThreadPoolExecutor(max_workers=min(20, len(needs_reason))) as ex:
+                futs = {ex.submit(_gen_reason, i, it): i for i, it in needs_reason}
+                for fut in as_completed(futs):
+                    idx, reason = fut.result()
+                    reason_map[idx] = reason
+
+            # Shallow-copy items so train_items is not mutated
+            sample = [
+                {**it, "reason": reason_map[i]} if i in reason_map else it
+                for i, it in enumerate(sample)
+            ]
+            _log(f"  [auto-bootstrap] reasoning generated for {len(reason_map)} items.")
+
+        # Step 2 — format items with reasoning when available, then summarise
+        dataset_str = "\n\n".join(
+            (
+                f"Question: {it.get('input', '')}\n"
+                f"Reasoning: {it.get('reason') or it.get('gold_reason')}\n"
+                f"Answer: {it.get('answer', '')}"
+            )
+            if (it.get("reason") or it.get("gold_reason"))
+            else f"Question: {it.get('input', '')}\nAnswer: {it.get('answer', '')}"
+            for it in sample
+        )
+        _size_clause = (
+            f"\n\nIMPORTANT: Your cheat sheet MUST be at most {max_pk_chars:,} characters "
+            f"(including spaces). Be concise — prioritise the most critical points only."
+            if max_pk_chars is not None
+            else ""
+        )
+        bootstrap_prompt = (
+            "Create a cheat sheet based on the examples below. "
+            "You will be asked to answer questions similar to these examples during the test, "
+            "without being allowed to refer to the examples at that time. "
+            "Your task here is to make a cheat sheet that will help you answer such problems correctly. "
+            "First, carefully read the examples below and identify which ones you find most difficult to answer.\n\n"
+            f"{dataset_str}\n\n"
+            "Now, create a cheat sheet to help you solve the difficult examples. "
+            "Exclude any content that is easy for you, and only include specific, detailed points "
+            "to address the challenging ones."
+            f"{_size_clause}\n\n"
+        )
+        _bootstrap_max_tok = (
+            min(4000, max(400, int(max_pk_chars / 3))) if max_pk_chars is not None else 4000
+        )
+        _bootstrap_retries = 3
+        pk_text = ""
+        for _attempt in range(_bootstrap_retries):
+            _retry_clause = (
+                f"\n\nSTRICT LIMIT: your output must be ≤{max_pk_chars:,} characters. "
+                f"Your previous attempt was {len(pk_text):,} chars — too long. "
+                f"Cut aggressively: keep only the top rules, merge related points."
+                if (_attempt > 0 and max_pk_chars is not None)
+                else ""
+            )
+            resp = call_llm(
+                bootstrap_prompt + _retry_clause, model_rule_patch, api_key,
+                temperature=0.0, max_tokens=_bootstrap_max_tok, reasoning_effort=None,
+            )
+            pk_text = resp.content.strip()
+            if max_pk_chars is None or len(pk_text) <= max_pk_chars:
+                break
+            _log(
+                f"  [auto-bootstrap] attempt {_attempt + 1}: {len(pk_text):,} chars "
+                f"> {max_pk_chars:,} — retrying ..."
+            )
+        else:
+            # All retries exhausted — hard-truncate as last resort
+            _log(
+                f"  [auto-bootstrap] {_bootstrap_retries} retries exhausted — "
+                f"hard-truncating to {max_pk_chars:,} chars."
+            )
+            pk_text = pk_text[:max_pk_chars]
+        cheatsheet.prior_knowledge = pk_text
+        _log(
+            f"  [auto-bootstrap] prior_knowledge generated "
+            f"({len(cheatsheet.prior_knowledge)} chars)"
+        )
+        if output_dir:
+            (Path(output_dir) / "ruleset_bootstrap.txt").write_text(
+                cheatsheet.prior_knowledge, encoding="utf-8"
+            )
 
     # ── Optional initial ablation ─────────────────────────────────────────────
     if run_initial_ablation and rule_set is not None:
@@ -450,6 +863,69 @@ def run_hybrid_loop(
         if output_dir:
             _save_checkpoint(cheatsheet, update_log, output_dir, tag="phase1_final")
 
+    elif cheatsheet.prior_knowledge.strip():
+        # Phase 1 alternative: iteratively improve prior_knowledge text directly.
+        # Used when init-cheatsheet provides a CS-ICL bootstrap (no RuleSet available).
+        _log("\n[hybrid] ══════════════════ PHASE 1: Prior-Knowledge Text Patching ══════════════════")
+        if use_ea:
+            from ICR_hybrid.training.ea_phase1 import ea_pk_phase
+            _log("[hybrid] Using EA Phase 1 (evolutionary PK refinement)")
+            n_rule_patches, accuracy_after_rules, rule_iters_done = ea_pk_phase(
+                cheatsheet=cheatsheet,
+                train_items=train_items,
+                model_patch=model_rule_patch,
+                model_score=model_score,
+                api_key=api_key,
+                oracle=oracle,
+                max_generations=max_rule_iters,
+                acc_goal=rule_acc_goal,
+                static_gens_limit=rule_static_iters,
+                concurrency=rule_concurrency,
+                log_fn=_log,
+                task_spec=task_spec,
+                reasoning_effort=reasoning_effort,
+                cot_first=cot_first,
+                inject_oracle=phase1_inject_oracle,
+                val_fraction=ea_val_fraction,
+                population_size=ea_population_size,
+                n_survivors=ea_n_survivors,
+                lambda_min=ea_lambda_min,
+                lambda_max=ea_lambda_max,
+                regress_hard_cap=ea_regress_hard_cap,
+                pk_size_budget=ea_pk_size_budget,
+                failure_sample_frac=ea_failure_sample_frac,
+            )
+        else:
+            n_rule_patches, accuracy_after_rules, rule_iters_done = _pk_patch_phase(
+                cheatsheet=cheatsheet,
+                train_items=train_items,
+                model_patch=model_rule_patch,
+                model_score=model_score,
+                api_key=api_key,
+                oracle=oracle,
+                max_iters=max_rule_iters,
+                acc_goal=rule_acc_goal,
+                static_iters=rule_static_iters,
+                fix_rate_threshold=rule_fix_rate_threshold,
+                regress_threshold=rule_regress_threshold,
+                concurrency=rule_concurrency,
+                log_fn=_log,
+                task_spec=task_spec,
+                reasoning_effort=reasoning_effort,
+                cot_first=cot_first,
+                inject_oracle=phase1_inject_oracle,
+                max_pk_chars=max_pk_chars,
+            )
+        update_log.append({
+            "event":        "phase1_pk_patch_complete",
+            "phase":        1,
+            "accuracy":     round(accuracy_after_rules, 4),
+            "n_pk_patches": n_rule_patches,
+            "n_iters":      rule_iters_done,
+        })
+        if output_dir:
+            _save_checkpoint(cheatsheet, update_log, output_dir, tag="phase1_pk_final")
+
     # ── Optional mid-point ablation ───────────────────────────────────────────
     if run_midpoint_ablation and rule_set is not None:
         residual = [it for pb in bins.values() for it in pb.failures]
@@ -512,6 +988,8 @@ def run_hybrid_loop(
         log=log,
         pk_regression_guard=pk_regression_guard,
         pk_regression_tolerance=pk_regression_tolerance,
+        inject_gold_oracle=phase2_inject_oracle,
+        max_case_studies=max_case_studies,
     )
 
     update_log.extend([{**e, "phase": 2} for e in cs_result.update_log])

@@ -1,8 +1,26 @@
 # ICRefine — Iterative Cheatsheet Refinement
 
-Automatically improves a cheatsheet used to prompt LLMs on classification tasks. ICRefine supports **magma equation implication** (algebraic reasoning) and six **BBH** (BIG-Bench Hard) tasks: formal fallacies, logical deduction, web of lies, date understanding, navigate, and snarks.
+Automatically improves a cheatsheet used to prompt LLMs on classification tasks. ICRefine runs on **BIG-Bench Hard** classification tasks (11 tasks including geometric shapes, causal judgement, formal fallacies, disambiguation QA, and snarks) and supports **magma equation implication** (algebraic reasoning).
 
 ICRefine is a standalone project — it only needs a dataset (`.jsonl`) and an optional starting cheatsheet/prior-knowledge file.
+
+> **Paper:** *ICRefine: Diagnosing the Limits of Iterative Cheatsheet Transfer Across Model Families* (NeurIPS 2026 submission). See [`ICR_paper_prep/`](ICR_paper_prep/) for the full write-up and [`ICR_paper_prep/overleaf_upload.zip`](ICR_paper_prep/overleaf_upload.zip) for the Overleaf bundle.
+
+---
+
+## Pipeline overview
+
+ICRefine runs in three phases:
+
+| Phase | What it does |
+|---|---|
+| **Phase 0** | Bootstrap a prior-knowledge (PK) ruleset from the first 75 training examples in a single pass |
+| **Phase 1** | Iteratively patch the PK via a sample-and-accept loop (fix-rate gate + regression gate) |
+| **Phase 2** | Partition remaining failures by error type and generate one structured case study per coherent cluster (`ACTIVATE IF / WHY` format) |
+
+**EA Phase 1 (optional):** When the bootstrap PK already satisfies the Phase 1 acceptance gate, standard Phase 1 applies zero patches. The evolutionary algorithm variant replaces single-candidate patching with population-based search (3 members: conservative / generative / structural), producing +6.0 pp PK accuracy on geometric_shapes and eliminating the need for Phase 2 case studies on that task entirely. Enable with `--ea-phase1`.
+
+**Evaluation:** All eval scripts use *reasoning-first* (RF) scoring — the model reasons before emitting `VERDICT: (X)`. This eliminates format-sensitivity artifacts (web_of_lies: 42–66% verdict-first vs 99–100% RF). See `scripts/eval/` for reproducible eval and `scripts/plots/` for figure generation.
 
 ---
 
@@ -560,7 +578,14 @@ Same quality-gated partition-parallel loop as ICR_partition. Each failure partit
 
 ### Bootstrap+ICR approach
 
-Seed the pipeline with a CS-ICL style cheat sheet generated from a subset of training data, then run ICR to fill gaps and add targeted case studies. The CS-ICL text goes in `prior_knowledge` (not `roadmap`) so the 2500-char roadmap cap does not truncate it, and the empty `roadmap` slot is available for Phase 1 rule patches.
+**Auto-bootstrap (default):** When no `--init-cheatsheet` or `--prior-knowledge` is provided, ICR_hybrid automatically generates a CS-ICL style prior knowledge summary from the first `--bootstrap-n-items` training items (default: 75) before Phase 2 begins. This two-step process mirrors the original CS-ICL paper:
+
+1. Items that lack a `reason`/`gold_reason` field get concurrent LLM-generated reasoning (zero-shot explanation prompt, up to 20 parallel calls).
+2. All items are formatted as `Question / Reasoning / Answer` and passed to the CS-ICL cheat sheet prompt to produce `cheatsheet.prior_knowledge`.
+
+Use `--no-auto-bootstrap` to disable this behaviour (e.g. when providing your own `--init-cheatsheet`).
+
+**Manual bootstrap:** Alternatively, pre-generate a CS-ICL cheat sheet with segment ablation support and pass it explicitly:
 
 ```bash
 # Step 1: generate CS-ICL bootstrap cheat sheet for one or all tasks
@@ -573,6 +598,7 @@ python3 -m ICR_hybrid.pipeline \
     --dataset datasets/bbh/formal_fallacies_train.jsonl \
     --no-oracle \
     --init-cheatsheet runs/bbh_bootstrap/bootstrap_cheatsheets/formal_fallacies/bootstrap_cs.json \
+    --no-auto-bootstrap \
     --model openai/gpt-4.1-mini \
     --auto-rule-init --bootstrap-n 20 \
     --rule-acc-goal 0.95 --max-rule-iters 3 \
@@ -627,6 +653,8 @@ Segments are named `seg_0`, `seg_1`, … as split by `---` dividers in the CS-IC
 | `--auto-rule-init` | off | Bootstrap rules from initial failures before Phase 1 |
 | `--bootstrap-n N` | `20` | Failure examples used for rule bootstrap |
 | `--init-cheatsheet PATH` | off | Load a cheatsheet JSON as the Phase 2 starting point |
+| `--no-auto-bootstrap` | off | Disable CS-ICL auto-bootstrap (enabled by default when no prior knowledge exists) |
+| `--bootstrap-n-items N` | `75` | Training items sampled for auto-bootstrap |
 | `--prior-knowledge FILE` | off | Frozen knowledge prefix injected before the trainable roadmap |
 | `--ablate-prior-segments IDs` | off | Comma-separated segment IDs to disable from `prior_knowledge_segments` |
 
@@ -709,20 +737,44 @@ ICRefine/
 ├── ICR_hybrid/          # Two-phase rule-patch + case-study pipeline (recommended for all new experiments)
 │   └── training/
 │       └── loop.py      # run_hybrid_loop — Phase 1 rule patching + Phase 2 partition CS loop
-├── tasks/               # Task specs (scoring prompts, answer parsing, bootstrap rule init)
-│   ├── magma.py         # MAGMA equation implication task
-│   ├── bbh_boolean.py   # BBH boolean expressions
-│   ├── bbh_tasks.py     # BBH original tasks (causal judgement, sports, etc.)
-│   └── bbh_tasks_ext.py # BBH extended tasks (formal_fallacies, logical_deduction_three, web_of_lies,
-│                        #   date_understanding, navigate, snarks)
+├── prompts/             # Canonical prompt definitions (pipeline modules import from here)
+│   ├── templates.py     # Core scoring / generation / condensation / roadmap prompt templates
+│   ├── mechanisms.py    # ICR_select mechanism prompts (similarity, merge, prune, crossover, …)
+│   └── generation.py    # Versioned case-study generation prompts — get_prompt(task, version)
+│                        #   Versioned dicts (WOL_PROMPTS, DU_PROMPTS, GEO_PROMPTS) live in their
+│                        #   respective task files; generation.py re-exports them for ablation access.
+├── tasks/                        # Task specs — one file per task
+│   ├── magma.py                  # MAGMA equation implication task
+│   ├── boolean_expressions.py    # BBH boolean expressions
+│   ├── causal_judgement.py       # BBH causal judgement
+│   ├── sports_understanding.py   # BBH sports understanding
+│   ├── disambiguation_qa.py      # BBH disambiguation QA
+│   ├── movie_recommendation.py   # BBH movie recommendation
+│   ├── geometric_shapes.py       # BBH geometric shapes  (owns GEO_PROMPTS)
+│   ├── formal_fallacies.py       # BBH formal fallacies
+│   ├── logical_deduction.py      # BBH logical deduction (three objects)
+│   ├── web_of_lies.py            # BBH web of lies       (owns WOL_PROMPTS)
+│   ├── date_understanding.py     # BBH date understanding (owns DU_PROMPTS)
+│   ├── navigate.py               # BBH navigate
+│   ├── snarks.py                 # BBH snarks
+│   ├── registry.py               # Task registry — maps task name → (module, symbol)
+│   ├── utils/                    # Shared task helpers (parsing, scoring, bootstrap)
+│   │   └── __init__.py
+│   ├── bbh_tasks.py              # Backward-compat shim (re-exports from individual files)
+│   ├── bbh_tasks_ext.py          # Backward-compat shim (re-exports from individual files)
+│   └── bbh_boolean.py            # Backward-compat shim → tasks.boolean_expressions
 ├── datasets/bbh/        # BBH training data (150 items per task, 100 for snarks)
 ├── gen_icr_bootstrap.py    # Generate CS-ICL bootstrap cheat sheets for BBH tasks
 ├── gen_csicl_ext.py        # Generate CS-ICL cheat sheets for BBH extended tasks (baseline)
 ├── eval_bbh_comparison.py  # Evaluate ICR vs CS-ICL baseline on BBH test splits
 ├── run_bbh_bootstrap.sh    # Bootstrap+ICR for all 6 BBH tasks (skip-if-exists safe)
+├── run_bbh_v3.sh           # Parallel runner for 4 underperforming BBH tasks with live status board
 ├── run_formal_fallacies_bootstrap.sh  # Bootstrap+ICR for formal_fallacies only
 ├── smoke_partition.py      # Smoke tests for ICR_partition (no live LLM required)
+├── smoke_bbh_boolean.py    # Smoke tests for BBH boolean_expressions task spec
+├── smoke_bbh_tasks.py      # Smoke tests for BBH task generation prompts
 ├── smoke_test_gates.py     # Gate threshold smoke tests
+├── test_overfit_boolean.py # Measure train/test gap before and after CS bank prune
 ├── eval_oracle_quality.py  # Compare case study quality with vs without oracle injection
 ├── run_cluster_ensemble.sh # Submit Llama + Gemma vLLM jobs + training job on SLURM
 ├── compare_modes.sh

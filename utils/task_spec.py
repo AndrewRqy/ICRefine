@@ -142,3 +142,12 @@ class TaskSpec:
     # Signature: (failures: list[dict], cheatsheet_text: str,
     #             model: str, api_key: str) -> str | None
     concrete_cs_gen_fn: Callable[..., str | None] | None = None
+
+    # ── Evaluation-only prompt ────────────────────────────────────────────────
+    # Minimal verdict-only prompt used during test-set evaluation (no REASONING
+    # instruction).  The model sees the cheatsheet and question, then outputs
+    # only the verdict label — no reasoning scaffold, lower token cost, cleaner
+    # signal.
+    # Signature: (cheatsheet_text: str, item: dict) -> str
+    # If None, eval falls back to build_scoring_prompt(cot_first=False).
+    build_eval_prompt: Callable[[str, dict], str] | None = None

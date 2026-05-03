@@ -1,0 +1,48 @@
+This is BibTeX, Version 0.99e (TeX Live 2026)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: icrefine_paper.aux
+The style file: plainnat.bst
+Database file #1: references.bib
+Warning--empty booktitle in bai2022constitutional
+You've used 23 entries,
+            2773 wiz_defined-function locations,
+            697 strings with 11622 characters,
+and the built_in function-call counts, 19963 in all, are:
+= -- 1539
+> -- 2094
+< -- 13
++ -- 698
+- -- 675
+* -- 1889
+:= -- 3148
+add.period$ -- 71
+call.type$ -- 23
+change.case$ -- 294
+chr.to.int$ -- 23
+cite$ -- 47
+duplicate$ -- 615
+empty$ -- 1035
+format.name$ -- 698
+if$ -- 4050
+int.to.chr$ -- 1
+int.to.str$ -- 1
+missing$ -- 22
+newline$ -- 124
+num.names$ -- 92
+pop$ -- 637
+preamble$ -- 1
+purify$ -- 271
+quote$ -- 0
+skip$ -- 643
+stack$ -- 0
+substring$ -- 458
+swap$ -- 137
+text.length$ -- 13
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 253
+warning$ -- 1
+while$ -- 97
+width$ -- 0
+write$ -- 300
+(There was 1 warning)

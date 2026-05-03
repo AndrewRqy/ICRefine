@@ -146,6 +146,7 @@ def run_training_loop(
     output_dir: Path | None = None,
     log: bool = True,
     skip_final_val: bool = False,  # skip test_cheatsheet when outer pipeline will re-evaluate
+    max_case_studies: int | None = None,  # hard cap on CS added; None = unlimited
 ) -> TrainingResult:
 
     def _log(msg: str) -> None:
@@ -220,6 +221,11 @@ def run_training_loop(
     def _process_flush(failures: list[dict], batch_num: int) -> None:
         nonlocal n_added, n_discarded, n_skipped, n_merges, flush_count
         nonlocal n_utility_accepted_total, n_utility_fallbacks_total
+
+        if max_case_studies is not None and n_added >= max_case_studies:
+            _log(f"  [cs_cap] max_case_studies={max_case_studies} reached — skipping flush.")
+            n_skipped += 1
+            return
 
         _log(f"\n  [flush] {len(failures)} failures → generating {n_candidates} candidates ...")
 
@@ -438,6 +444,11 @@ def run_training_loop(
         """Retry flush — like _process_flush but retries up to candidate_rounds times."""
         nonlocal n_added, n_discarded, n_skipped, n_merges, flush_count
         nonlocal n_utility_accepted_total, n_utility_fallbacks_total
+
+        if max_case_studies is not None and n_added >= max_case_studies:
+            _log(f"  [cs_cap] max_case_studies={max_case_studies} reached — skipping flush.")
+            n_skipped += 1
+            return
 
         prev_attempt: dict | None = None
 

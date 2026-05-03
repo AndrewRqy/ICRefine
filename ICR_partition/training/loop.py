@@ -78,6 +78,7 @@ from ICR_select.training.gates import (
     _regression_check_text,
     _similarity_gate,
     _merge_case_studies,
+    _prune_cs_bank,
 )
 from ICR_rules.rules.rule import RuleSet
 from ICR_rules.rules.parser import parse_cheatsheet_text, identify_triggered_rule
@@ -162,6 +163,7 @@ def _solve_bin(
     cot_first:               bool,
     log_fn,
     task_spec:               TaskSpec | None = None,
+    inject_gold_oracle:      bool = True,
 ) -> dict:
     """
     Attempt to generate and accept one case study for this partition.
@@ -320,6 +322,18 @@ def _solve_bin(
                 (fr, cs) for fr, cs in pb.candidate_archive if cs is not arch_cand
             ]
             with cs_lock:
+                existing_titles = {cs.title.strip().lower() for cs in cheatsheet.case_studies}
+                if arch_cand.title.strip().lower() in existing_titles:
+                    log_fn(
+                        f"  [partition:{label}] archived CS '{arch_cand.title}' "
+                        f"is a title duplicate — skipping"
+                    )
+                    return {
+                        "partition": label,
+                        "event":     "bin_skipped",
+                        "reason":    "title_duplicate",
+                        "attempt":   0,
+                    }
                 arch_cand.creation_fix_rate  = arch_fr
                 arch_cand.historical_fix_rate = arch_fr
                 cheatsheet.add_case_study(arch_cand)
@@ -410,6 +424,7 @@ def _solve_bin(
                 failure_type_hint=failure_type_hint,
                 divergence_step_hint=divergence_step_hint,
                 task_spec=task_spec,
+                inject_gold_oracle=inject_gold_oracle,
             )
         except RuntimeError as exc:
             log_fn(f"  [partition:{label}] generation failed: {exc}")
@@ -544,12 +559,51 @@ def _solve_bin(
                         "attempt":         attempt,
                     }
 
-            # ADD case study + apply any accompanying roadmap patch (rules-based correction).
-            # The generation prompt always produces a ROADMAP PATCH alongside the case study,
-            # but prior versions discarded it.  Applying it here makes both the example-level
-            # fix (case study) and the rule-level fix (roadmap patch) take effect together.
+            # MODIFY or ADD case study + apply any accompanying roadmap patch.
             best_cand.creation_fix_rate   = best_fix_rate
             best_cand.historical_fix_rate  = best_fix_rate
+            if best_cand.modification_target:
+                replaced = cheatsheet.replace_case_study(best_cand.modification_target, best_cand)
+                if replaced:
+                    pb.n_flushes += 1
+                    log_fn(
+                        f"  [partition:{label}] modified CS "
+                        f"'{best_cand.modification_target}' → '{best_cand.title}' "
+                        f"fix_rate={best_fix_rate:.0%}  regress={reg_rate:.0%}  attempt={attempt}"
+                    )
+                    if best_cand.roadmap_patch:
+                        cheatsheet.patch_roadmap(best_cand.roadmap_patch)
+                        log_fn(f"  [partition:{label}] roadmap patch applied ({len(best_cand.roadmap_patch)} chars)")
+                    return {
+                        "partition":       label,
+                        "event":           "bin_modified",
+                        "title":           best_cand.title,
+                        "modified_from":   best_cand.modification_target,
+                        "fix_rate":        best_fix_rate,
+                        "regression_rate": reg_rate,
+                        "attempt":         attempt,
+                        "n_cs_total":      len(cheatsheet.case_studies),
+                    }
+                else:
+                    log_fn(
+                        f"  [partition:{label}] MODIFY target '{best_cand.modification_target}' "
+                        f"not found — falling back to ADD NEW"
+                    )
+                    best_cand.modification_target = ""
+
+            # ADD path (new case study, or fallback from failed MODIFY)
+            existing_titles = {cs.title.strip().lower() for cs in cheatsheet.case_studies}
+            if best_cand.title.strip().lower() in existing_titles:
+                log_fn(
+                    f"  [partition:{label}] CS '{best_cand.title}' "
+                    f"is a title duplicate — skipping"
+                )
+                return {
+                    "partition": label,
+                    "event":     "bin_skipped",
+                    "reason":    "title_duplicate",
+                    "attempt":   attempt,
+                }
             cheatsheet.add_case_study(best_cand)
             if best_cand.roadmap_patch:
                 cheatsheet.patch_roadmap(best_cand.roadmap_patch)
@@ -789,6 +843,7 @@ def run_partition_loop(
     regress_threshold:       float = 0.15,
     min_pool_for_regression: int   = 5,
     similarity_gate:         bool  = True,
+    prune_every_n:           int   = 5,   # run LLM prune pass every N accepted CS (0 = disabled)
     # Scoring
     reasoning_effort:        str | None = "low",
     cot_first:               bool  = True,
@@ -810,6 +865,12 @@ def run_partition_loop(
     # is restored.
     pk_regression_guard:     bool  = False,
     pk_regression_tolerance: float = 0.03,
+    # Gold oracle injection in Phase 2 case study generation.
+    # When True (default), item["reason"] is shown as correct-reasoning contrast
+    # alongside the model's wrong reasoning when generating case studies.
+    # Set False to ablate this signal.
+    inject_gold_oracle:      bool  = True,
+    max_case_studies:        int | None = None,  # hard cap on CS added; None = unlimited
 ) -> PartitionTrainingResult:
 
     def _log(msg: str) -> None:
@@ -889,6 +950,13 @@ def run_partition_loop(
     _prev_sigint  = signal.signal(signal.SIGINT,  _handle_signal)
     _prev_sigterm = signal.signal(signal.SIGTERM, _handle_signal)
 
+    # When best-of-N mode is active, loosen the collection gates so more
+    # candidates enter the pool; the top N are selected after the loop ends.
+    # Floors/ceilings prevent the effective thresholds from becoming meaningless.
+    _best_of_n = max_case_studies is not None
+    _pool_fix_rate  = max(0.15, fix_rate_threshold * 0.67) if _best_of_n else fix_rate_threshold
+    _pool_regress   = min(0.25, regress_threshold  * 1.33) if _best_of_n else regress_threshold
+
     _log(
         f"\n{'='*65}\n"
         f"ICR_partition Training Loop  (PID {os.getpid()})\n"
@@ -898,10 +966,12 @@ def run_partition_loop(
         f"partition_concurrency={partition_concurrency}\n"
         f"  concurrency={concurrency} (divided across active bins)\n"
         f"  n_candidates={n_candidates}  candidate_rounds={candidate_rounds}\n"
-        f"  fix_rate≥{fix_rate_threshold:.0%}  "
-        f"regress≤{regress_threshold:.0%}  "
+        f"  fix_rate≥{_pool_fix_rate:.0%}  "
+        f"regress≤{_pool_regress:.0%}  "
         f"min_pool={min_pool_for_regression}\n"
-        f"  oracle={'yes (' + str(len(oracle_index)) + ' entries)' if oracle_index else 'none'}\n"
+        + (f"  best-of-N={max_case_studies} (pool thresholds loosened from "
+           f"{fix_rate_threshold:.0%}/{regress_threshold:.0%})\n" if _best_of_n else "")
+        + f"  oracle={'yes (' + str(len(oracle_index)) + ' entries)' if oracle_index else 'none'}\n"
         f"  model_score={model_score}  model_casestudy={model_casestudy}\n"
         f"  rule_patch={'yes (model=' + model_patch + ')' if rule_set is not None else 'disabled'}\n"
         f"{'='*65}"
@@ -1027,6 +1097,7 @@ def run_partition_loop(
         )
 
         iter_results: list[dict] = []
+        _n_cs_before_iter = len(cheatsheet.case_studies)
 
         # Solve all active bins concurrently
         with ThreadPoolExecutor(max_workers=n_parallel) as ex:
@@ -1044,14 +1115,15 @@ def run_partition_loop(
                     model_casestudy,
                     api_key,
                     per_bin_concurrency,
-                    fix_rate_threshold,
-                    regress_threshold,
+                    _pool_fix_rate,
+                    _pool_regress,
                     min_pool_for_regression,
                     similarity_gate,
                     reasoning_effort,
                     cot_first,
                     _log,
                     task_spec,
+                    inject_gold_oracle,
                 ): pb.label
                 for pb in active_bins.values()
             }
@@ -1059,7 +1131,7 @@ def run_partition_loop(
                 result = fut.result()
                 iter_results.append({**result, "outer_iter": outer_iter})
                 event = result.get("event", "")
-                if event == "bin_added":
+                if event in ("bin_added", "bin_modified"):
                     n_added += 1
                 elif event == "bin_merged":
                     n_merges += 1
@@ -1069,6 +1141,25 @@ def run_partition_loop(
                     n_discarded += 1
 
         update_log.extend(iter_results)
+
+        # Periodic CS bank prune — fires when the total count crosses a multiple of prune_every_n
+        if prune_every_n and (
+            len(cheatsheet.case_studies) // prune_every_n
+            > _n_cs_before_iter // prune_every_n
+        ):
+            _log(
+                f"\n[iter {outer_iter}] CS bank prune triggered "
+                f"({_n_cs_before_iter}→{len(cheatsheet.case_studies)} CS, "
+                f"every_n={prune_every_n}) ..."
+            )
+            n_pruned = _prune_cs_bank(cheatsheet, model_casestudy, api_key, _log)
+            if n_pruned:
+                update_log.append({
+                    "event":      "cs_pruned",
+                    "outer_iter": outer_iter,
+                    "n_pruned":   n_pruned,
+                    "n_cs_total": len(cheatsheet.case_studies),
+                })
 
         # Checkpoint after all bins in this iteration are resolved
         if output_dir:
@@ -1132,7 +1223,7 @@ def run_partition_loop(
         print_partition_table(bins, title=f"PARTITION SUMMARY — after iter {outer_iter}")
 
         # Early stop: exit after cs_static_iters consecutive idle iterations
-        iter_added = sum(1 for r in iter_results if r.get("event") in ("bin_added", "bin_merged"))
+        iter_added = sum(1 for r in iter_results if r.get("event") in ("bin_added", "bin_modified", "bin_merged"))
         if iter_added == 0:
             static_cs_iters += 1
             _log(
@@ -1149,6 +1240,30 @@ def run_partition_loop(
     # Restore original signal handlers
     signal.signal(signal.SIGINT,  _prev_sigint)
     signal.signal(signal.SIGTERM, _prev_sigterm)
+
+    # ── Best-of-N post-hoc pruning ────────────────────────────────────────────
+    if _best_of_n and len(cheatsheet.case_studies) > max_case_studies:
+        ranked = sorted(
+            cheatsheet.case_studies,
+            key=lambda cs: cs.historical_fix_rate or cs.creation_fix_rate,
+            reverse=True,
+        )
+        kept   = ranked[:max_case_studies]
+        dropped = ranked[max_case_studies:]
+        _log(
+            f"\n[best-of-N] Pool has {len(ranked)} CS — selecting top {max_case_studies} "
+            f"by fix_rate, dropping {len(dropped)}:"
+        )
+        for cs in kept:
+            fr = cs.historical_fix_rate or cs.creation_fix_rate
+            _log(f"  KEEP  '{cs.title}'  fix_rate={fr:.0%}")
+        for cs in dropped:
+            fr = cs.historical_fix_rate or cs.creation_fix_rate
+            _log(f"  DROP  '{cs.title}'  fix_rate={fr:.0%}")
+        cheatsheet.case_studies = kept
+        n_added = len(kept)
+        if output_dir:
+            _save_checkpoint(cheatsheet, update_log, output_dir, tag="best_of_n")
 
     # ── Final accuracy on full train set ─────────────────────────────────────
     _log(f"\n[final] Scoring {len(train_items)} train items for final accuracy ...")

@@ -21,6 +21,7 @@ from pathlib import Path
 
 import requests
 from dotenv import load_dotenv
+from .run_logger import get_logger
 
 load_dotenv(Path(__file__).parent.parent / ".env")
 
@@ -33,6 +34,19 @@ VLLM_READ_TIMEOUT = 1800  # local inference can be slow — 30 min per request
 
 _OPENAI_PREFIXES  = ("gpt-4", "gpt-3", "o1", "o3", "o4")
 _OPENAI_REASONING = ("o1", "o3", "o4")  # o-series: no temperature, max_completion_tokens, reasoning_effort
+
+# Models that expose internal reasoning traces (thinking / reasoning_content fields).
+# Non-reasoning models need explicit justification elicitation in the scoring prompt.
+_REASONING_MODEL_SUBSTRINGS = ("deepseek-r1", "r1-0528", "claude-3-7-sonnet")
+
+
+def is_reasoning_model(model: str) -> bool:
+    """Return True for models that expose internal CoT traces (thinking/reasoning_content)."""
+    m = model.lower().split("/")[-1]
+    return (
+        any(m.startswith(p) for p in _OPENAI_REASONING)
+        or any(s in m for s in _REASONING_MODEL_SUBSTRINGS)
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -99,6 +113,7 @@ def call_llm(
     max_tokens: int = MAX_TOKENS,
     reasoning_effort: str | None = "low",
     seed: int | None = 42,
+    _log_label: str = "",
 ) -> LLMResponse:
     """
     Send a single prompt and return LLMResponse(content, thinking).
@@ -112,6 +127,7 @@ def call_llm(
       {"reasoning": {"effort": ...}} for OpenRouter reasoning models. Omitted
       for vLLM and OpenAI (not supported).
     """
+    _t0 = time.monotonic()
     url, resolved_key, is_openai, is_vllm = _resolve_endpoint(model)
     model_name = model.removeprefix("openai/") if is_openai else model
     is_openai_reasoning = is_openai and any(model_name.startswith(p) for p in _OPENAI_REASONING)
@@ -196,7 +212,20 @@ def call_llm(
                     content  = thinking
                     thinking = ""
 
-            return LLMResponse(content=content, thinking=thinking)
+            _resp = LLMResponse(content=content, thinking=thinking)
+            _log = get_logger()
+            if _log is not None:
+                _log.log_llm_call(
+                    model=model,
+                    prompt=prompt,
+                    response=content,
+                    thinking=thinking,
+                    elapsed_ms=(time.monotonic() - _t0) * 1000,
+                    label=_log_label,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                )
+            return _resp
 
         except requests.HTTPError as exc:
             # 4xx (except 429) are client errors — retrying won't help.
@@ -260,7 +289,8 @@ def call_llm_batch(
 
     def _call(idx: int, prompt: str) -> tuple[int, LLMResponse | None]:
         try:
-            return idx, call_llm(prompt, model, api_key, temperature, max_tokens, reasoning_effort, seed)
+            return idx, call_llm(prompt, model, api_key, temperature, max_tokens,
+                                 reasoning_effort, seed, _log_label=progress_label)
         except Exception as exc:
             print(f"\n  [batch] item {idx} error: {exc}", file=sys.stderr)
             return idx, None

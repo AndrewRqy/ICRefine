@@ -135,6 +135,7 @@ def _build_failure_lines(
     failures: list[dict],
     format_fn,
     oracle: OracleDict | None = None,
+    inject_gold_oracle: bool = True,
 ) -> str:
     """
     Format a failure list into the failure_lines block for the generation prompt.
@@ -143,6 +144,10 @@ def _build_failure_lines(
     `_oracle_exact` before passing to the per-item format_fn.  The format_fn
     (task_spec.format_failure) reads _oracle_exact and oracle_nearest from the
     item dict — no oracle reference inside format_fn itself.
+
+    inject_gold_oracle: when True (default), falls back to item["reason"] as a
+    correct-reasoning contrast signal for datasets that carry gold CoT.  Set to
+    False to disable this injection for ablation studies.
     """
     lines = []
     for i, item in enumerate(failures, 1):
@@ -156,7 +161,7 @@ def _build_failure_lines(
             except Exception:
                 pass
         # Fallback: use item["reason"] (gold CoT present in BBH and similar datasets)
-        if "_oracle_exact" not in item and item.get("reason"):
+        if inject_gold_oracle and "_oracle_exact" not in item and item.get("reason"):
             item = {**item, "_oracle_exact": item["reason"]}
         lines.append(f"--- Failure {i} ---")
         lines.append(format_fn(item))
@@ -176,6 +181,7 @@ def generate_candidates(
     failure_type_hint: str = "",    # "ABANDONMENT" or "WRONG_ANSWER"; auto-detected if empty
     divergence_step_hint: str = "", # last step before divergence; auto-detected if empty
     task_spec=None,                 # TaskSpec | None — defaults to MAGMA_TASK
+    inject_gold_oracle: bool = True,
 ) -> list[CaseStudy]:
     """
     Generate *n* candidate case study strings in parallel at different temperatures.
@@ -269,7 +275,8 @@ def generate_candidates(
     )
 
     # ── Format failure lines using task_spec ──────────────────────────────────
-    failure_lines = _build_failure_lines(failures, task_spec.format_failure, oracle=oracle)
+    failure_lines = _build_failure_lines(failures, task_spec.format_failure, oracle=oracle,
+                                         inject_gold_oracle=inject_gold_oracle)
 
     if prev_attempt:
         reason_desc = (
@@ -278,7 +285,8 @@ def generate_candidates(
             else "it broke too many previously-correct items (regression gate)"
         )
         still_wrong = prev_attempt["still_wrong"]
-        still_wrong_lines = _build_failure_lines(still_wrong, task_spec.format_failure)
+        still_wrong_lines = _build_failure_lines(still_wrong, task_spec.format_failure,
+                                                 inject_gold_oracle=inject_gold_oracle)
         prev_cand = prev_attempt["candidate"]
         prev_cand_text = prev_cand.render() if isinstance(prev_cand, CaseStudy) else str(prev_cand).strip()
         prev_section = RETRY_CONTEXT_TEMPLATE.format(
@@ -298,6 +306,36 @@ def generate_candidates(
         polarity_instruction=polarity_instruction,
         retry_context="",   # placeholder consumed by templates that include it
     )
+
+    # Prepend prior_knowledge so the generator sees the full cheatsheet context,
+    # not just roadmap + case_studies.  This is critical when prior_knowledge
+    # holds a CS-ICL bootstrap — without it the generator works blind and may
+    # duplicate or contradict existing principles.
+    _pk_text = cheatsheet._render_prior_knowledge().strip()
+    if _pk_text:
+        prompt = (
+            "=== PRIOR KNOWLEDGE (existing cheat sheet — read before deciding) ===\n"
+            f"{_pk_text}\n"
+            "=== END PRIOR KNOWLEDGE ===\n\n"
+            + prompt
+        )
+
+    # Append MODIFY/ADD choice instruction.  The model must choose on its first
+    # output line whether to refine an existing entry or write a new one.
+    _has_existing = bool(cheatsheet.case_studies) or bool(_pk_text)
+    if _has_existing:
+        prompt += (
+            "\n\n---\n"
+            "Before writing, state your CHOICE on the very first line of your response:\n\n"
+            "  CHOICE: MODIFY \"<exact title of the rule or case study to improve>\"\n"
+            "  — or —\n"
+            "  CHOICE: ADD NEW\n\n"
+            "Choose MODIFY when an existing entry is partially relevant but incomplete, "
+            "mis-scoped, or wrong for this failure pattern — the rewrite should replace "
+            "that entry entirely, not append to it.\n"
+            "Choose ADD NEW when no existing entry addresses this failure pattern.\n\n"
+            "Write your CHOICE line first, then the full case study in the standard format."
+        )
 
     _COMPLETION_RETRY_PROMPT = """\
 The case study below is INCOMPLETE — it is missing the following required fields: {missing}.
@@ -335,6 +373,18 @@ Output ONLY the completed case study starting with === CASE STUDY: ..."""
     _gen_effort       = "low" if _is_reasoning else None
     _gen_temps        = [temps[0]] if _is_reasoning else temps  # reasoning models ignore temp anyway
 
+    _CHOICE_RE = re.compile(
+        r'CHOICE:\s*(?:MODIFY\s+"([^"]+)"|ADD\s+NEW)',
+        re.IGNORECASE,
+    )
+
+    def _extract_modification_target(text: str) -> str:
+        m = _CHOICE_RE.search(text)
+        return m.group(1).strip() if (m and m.group(1)) else ""
+
+    def _strip_choice_line(text: str) -> str:
+        return re.sub(r"^CHOICE:.*\n?", "", text, count=1, flags=re.IGNORECASE | re.MULTILINE).strip()
+
     def _call(temp: float) -> CaseStudy | None:
         try:
             resp = call_llm(
@@ -343,14 +393,17 @@ Output ONLY the completed case study starting with === CASE STUDY: ..."""
                 max_tokens=_gen_max_tokens,
                 reasoning_effort=_gen_effort,
             )
-            result = _parse_response(resp.content)
+            modification_target = _extract_modification_target(resp.content)
+            clean_content = _strip_choice_line(resp.content)
+            result = _parse_response(clean_content)
             cs = result.case_study
             if cs is None:
                 return None
 
-            # Preserve the roadmap patch on the CaseStudy so the training loop
-            # can apply it to cheatsheet.roadmap when this candidate is accepted.
+            # Preserve the roadmap patch and modification choice on the CaseStudy
+            # so the training loop can apply both when this candidate is accepted.
             cs.roadmap_patch = result.roadmap_patch
+            cs.modification_target = modification_target
 
             ok, missing = cs.is_complete()
             if ok:

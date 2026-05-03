@@ -63,6 +63,8 @@ _TASK_MAP = {
     "date_understanding":            ("tasks.bbh_tasks_ext",  "DATE_UNDERSTANDING_TASK"),
     "navigate":                      ("tasks.bbh_tasks_ext",  "NAVIGATE_TASK"),
     "snarks":                        ("tasks.bbh_tasks_ext",  "SNARKS_TASK"),
+    "boolean_expressions":           ("tasks.boolean_expressions", "BBH_BOOLEAN_TASK"),
+    "gpqa_diamond":                  ("tasks.gpqa_diamond",   "GPQA_DIAMOND_TASK"),
 }
 
 
@@ -110,6 +112,10 @@ def _build_parser() -> argparse.ArgumentParser:
                    help="Number of failure examples used for rule bootstrap (default: 20).")
     g.add_argument("--init-cheatsheet", default=None, metavar="PATH",
                    help="Load a cheatsheet JSON as the starting point for Phase 2.")
+    g.add_argument("--no-auto-bootstrap", dest="auto_bootstrap", action="store_false", default=True,
+                   help="Disable automatic CS-ICL bootstrap when no prior knowledge is provided.")
+    g.add_argument("--bootstrap-n-items", type=int, default=75, metavar="N",
+                   help="Number of train items used for CS-ICL auto-bootstrap (default: 75).")
     g.add_argument("--prior-knowledge", default=None, metavar="FILE",
                    help="Frozen knowledge prefix injected into every scoring call.")
     g.add_argument("--ablate-prior-segments", default=None, metavar="IDS",
@@ -138,11 +144,34 @@ def _build_parser() -> argparse.ArgumentParser:
     g.add_argument("--rule-concurrency",        type=int,   default=25,   metavar="N")
     g.add_argument("--rule-partition-concurrency", type=int, default=8,   metavar="N")
 
+    g = p.add_argument_group("Phase 1 — EA mode (disabled by default)")
+    g.add_argument("--use-ea",                  action="store_true", default=False,
+                   help="Replace single-path PK patching with the evolutionary algorithm.")
+    g.add_argument("--ea-population-size",      type=int,   default=3,      metavar="N")
+    g.add_argument("--ea-n-survivors",          type=int,   default=2,      metavar="N")
+    g.add_argument("--ea-lambda-min",           type=float, default=1.0,    metavar="F")
+    g.add_argument("--ea-lambda-max",           type=float, default=2.0,    metavar="F")
+    g.add_argument("--ea-regress-hard-cap",     type=int,   default=3,      metavar="N")
+    g.add_argument("--ea-pk-size-budget",       type=int,   default=12_000, metavar="N")
+    g.add_argument("--ea-val-fraction",         type=float, default=0.20,   metavar="F")
+    g.add_argument("--ea-failure-sample-frac",  type=float, default=0.60,   metavar="F")
+
     g = p.add_argument_group("Ablation (both disabled by default)")
     g.add_argument("--initial-ablation",  action="store_true", default=False,
                    help="Ablate initial RuleSet before Phase 1.")
     g.add_argument("--midpoint-ablation", action="store_true", default=False,
                    help="Ablate refined RuleSet on residual failures between phases.")
+    g.add_argument("--no-phase1-oracle",  action="store_true", default=False,
+                   help="Disable gold-reasoning injection in Phase 1 (item['reason'] contrast). "
+                        "Use to ablate Phase 1 oracle vs v5 baseline.")
+    g.add_argument("--no-phase2-oracle",  action="store_true", default=False,
+                   help="Disable gold-reasoning injection in Phase 2 case study generation. "
+                        "Note: Phase 2 oracle was present in all runs including v3.")
+    g.add_argument("--max-pk-chars", type=int, default=None, metavar="N",
+                   help="Hard char cap for Phase 1 PK patching. The LLM is instructed to stay "
+                        "within this budget, and oversized candidates are rejected as insurance.")
+    g.add_argument("--max-case-studies", type=int, default=None, metavar="N",
+                   help="Hard cap on Phase 2 case studies added. Phase 2 stops once N CS exist.")
 
     g = p.add_argument_group("Phase 2 — Case study generation")
     g.add_argument("--max-cs-iters",               type=int,   default=5,    metavar="N")
@@ -190,6 +219,16 @@ def main() -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     reasoning_effort = None if args.reasoning_effort == "none" else args.reasoning_effort
 
+    # ── Run logger ────────────────────────────────────────────────────────────
+    from utils.run_logger import RunLogger, make_run_id, set_logger
+    _run_logger = RunLogger(
+        log_base=Path("runs/logs/train") / args.task,
+        run_id=make_run_id(args.task),
+        config=vars(args),
+    )
+    set_logger(_run_logger)
+    print(f"[log] {_run_logger.log_dir}", file=sys.stderr)
+
     task_spec = _load_task(args.task)
 
     # ── Oracle ────────────────────────────────────────────────────────────────
@@ -224,7 +263,7 @@ def main() -> None:
         rule_set = _load_rule_set(args.rule_set)
         print(f"[rule-set] {rule_set.summary()}", file=sys.stderr)
     else:
-        print("[rule-set] None provided — Phase 1 will be skipped.", file=sys.stderr)
+        print("[rule-set] None provided — rule-set patching skipped; PK-patch Phase 1 will run.", file=sys.stderr)
 
     # ── Cheatsheet initialisation ─────────────────────────────────────────────
     initial_cheatsheet: Cheatsheet | None = None
@@ -273,11 +312,14 @@ def main() -> None:
         f"  dataset          : {Path(args.dataset).name}  ({len(all_items)} items)\n"
         f"  rule-set         : {Path(args.rule_set).name if args.rule_set else 'none (Phase 1 skipped)'}\n"
         f"  oracle           : {'yes' if oracle else 'none'}\n"
+        f"  phase1-oracle    : {'off (ablation)' if args.no_phase1_oracle else 'on'}\n"
+        f"  phase2-oracle    : {'off (ablation)' if args.no_phase2_oracle else 'on'}\n"
         f"  model-score      : {model_score}\n"
         f"  model-rule-patch : {model_rule_patch}\n"
         f"  model-casestudy  : {model_casestudy}\n"
         f"  Phase 1 iters    : {args.max_rule_iters}  goal={args.rule_acc_goal:.0%}\n"
         f"  Phase 2 iters    : {args.max_cs_iters}\n"
+        f"  auto-bootstrap   : {'yes (' + str(args.bootstrap_n_items) + ' items)' if args.auto_bootstrap else 'no'}\n"
         f"  output-dir       : {output_dir}\n"
         f"{'='*65}",
         file=sys.stderr,
@@ -323,8 +365,23 @@ def main() -> None:
         prescore_map=prescore_map,
         auto_rule_init=args.auto_rule_init,
         n_bootstrap_failures=args.bootstrap_n,
+        auto_bootstrap=args.auto_bootstrap,
+        bootstrap_n_items=args.bootstrap_n_items,
         pk_regression_guard=args.pk_regression_guard,
         pk_regression_tolerance=args.pk_regression_tolerance,
+        phase1_inject_oracle=not args.no_phase1_oracle,
+        phase2_inject_oracle=not args.no_phase2_oracle,
+        use_ea=args.use_ea,
+        ea_population_size=args.ea_population_size,
+        ea_n_survivors=args.ea_n_survivors,
+        ea_lambda_min=args.ea_lambda_min,
+        ea_lambda_max=args.ea_lambda_max,
+        ea_regress_hard_cap=args.ea_regress_hard_cap,
+        ea_pk_size_budget=args.ea_pk_size_budget,
+        ea_val_fraction=args.ea_val_fraction,
+        ea_failure_sample_frac=args.ea_failure_sample_frac,
+        max_pk_chars=args.max_pk_chars,
+        max_case_studies=args.max_case_studies,
         output_dir=output_dir,
         log=True,
     )

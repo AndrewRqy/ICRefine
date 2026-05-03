@@ -246,6 +246,16 @@ def main() -> None:
     # Acquire run lock — prevents two processes from writing to the same directory
     lock_path = _acquire_lock(output_dir)
 
+    # ── Run logger ────────────────────────────────────────────────────────────
+    from utils.run_logger import RunLogger, make_run_id, set_logger
+    _run_logger = RunLogger(
+        log_base=Path("runs/logs/train") / args.task,
+        run_id=make_run_id(args.task),
+        config=vars(args),
+    )
+    set_logger(_run_logger)
+    _log(f"[log] {_run_logger.log_dir}")
+
     # ------------------------------------------------------------------
     # Oracle — ON by default
     # ------------------------------------------------------------------

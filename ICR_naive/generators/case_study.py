@@ -10,8 +10,8 @@ from __future__ import annotations
 
 import sys
 
-from ..core.data import is_true
-from ..core.llm_client import call_llm
+from utils.data import is_true
+from utils.llm_client import call_llm
 from ..prompts.templates import CASE_STUDY_PROMPT, CS_MAX_TOKENS
 
 

@@ -2,6 +2,360 @@
 
 ---
 
+## 2026-05-02
+
+### Paper preparation, EA Phase 1, reasoning-first evaluation, and eval script suite
+
+---
+
+#### ICR_paper_prep/: full NeurIPS 2026 submission
+
+A complete paper write-up of the ICRefine evaluation results.
+
+**Paper:** *ICRefine: Diagnosing the Limits of Iterative Cheatsheet Transfer Across Model Families*
+
+Key contents:
+
+| File | Description |
+|---|---|
+| `icrefine_paper.tex` | Main LaTeX source (NeurIPS 2026 format, 22 pages) |
+| `references.bib` | 21-entry bibliography |
+| `neurips_2026.sty` | NeurIPS style file |
+| `figures/fig1–fig9.png` | All figures (phase contribution, transfer gap, delta_cs heatmap, oracle gradient, variance, etc.) |
+| `findings_draft.tex` | Earlier findings-only draft (preserved) |
+| `overleaf_upload/` | Ready-to-upload Overleaf bundle (flat structure, `main.tex`) |
+| `overleaf_upload.zip` | Zipped version of the Overleaf bundle |
+
+**Paper contributions:**
+- Three-phase ICRefine pipeline (Phase 0 bootstrap, Phase 1 PK patching, Phase 2 case studies)
+- Cross-model transfer evaluation: 5 BBH tasks, 4 non-train evaluation model families (GPT-4.1, Claude-3.7, Gemini-2.0, Llama-3.3)
+- Three identified failure modes: oracle contamination, partition overfitting, bootstrap convergence limits
+- EA Phase 1 intervention (+6.0 pp GS PK accuracy) and oracle-free Phase 2 (+1.9–3.8 pp CJ accuracy)
+- Task-level bootstrap CIs (10,000-iteration resampling) for all main results
+- 3-seed means throughout; CS-ICL re-scored 3 times with RF prompting for apples-to-apples comparison
+
+---
+
+#### ICR_hybrid/training/ea_phase1.py: Evolutionary Algorithm Phase 1
+
+Population-based PK search replacing single-candidate patching when the bootstrap PK already satisfies the acceptance gate.
+
+**Design:**
+
+- Population of 3 members with distinct roles: `conservative` (temp 0.2, targeted edits), `generative` (temp 0.7, unconstrained rewrites), `structural` (temp 0.3, explicit TIGHTEN/SPLIT/ADD_GUARD ops)
+- 80/20 train/validation split; validation accuracy drives selection
+- Curriculum net-gain gate: `n_fixed >= λ(g) * n_regressed` where `λ(g)` ramps 1.0 → 2.0 over generations
+- Top-2 survivor selection + crossover into child PK each generation
+- Elite tracking (best-ever PK replaces weakest member each generation)
+- Exits on 2 consecutive static generations or 4-generation cap
+
+**Results:** GS PK-only accuracy +6.0 pp (72.7% → 78.7%, 3-seed mean); GS case studies eliminated entirely (Phase 2 acceptance gate rejects all candidates); Llama seed variance reduced σ=10.4% → 4.7%.
+
+---
+
+#### scripts/: evaluation and plotting script suite
+
+New directory with reproducible eval and figure-generation scripts used for the paper.
+
+**Eval scripts (`scripts/eval/`):**
+
+| Script | Purpose |
+|---|---|
+| `eval_cs_ablation.py` | RF scoring for all pipeline conditions (v3, E3, EA, EA+no-oracle) |
+| `eval_csicl_rescore.py` | Standalone CS-ICL rescoring with RF prompts (used for 3-seed CS-ICL means) |
+| `bootstrap_ci.py` | Task-resampling bootstrap CI (10,000 iterations) over 5-task averages |
+
+**Plot scripts (`scripts/plots/`):**
+
+| Script | Figure |
+|---|---|
+| `plot_transfer_fig2.py` | Fig 2: non-train transfer bar chart |
+| `plot_delta_cs_fig7.py` | Fig 7: Δ_cs heatmap (5 tasks × 5 models) |
+| `plot_oracle_gradient_fig8.py` | Fig 8: oracle contamination gradient (CJ + GS) |
+| `plot_variance_fig6.py` | Fig 6: per-seed variance for EA-GS and E3-CJ |
+| `plot_gs_oracle_variance_fig9.py` | Fig 9: GS cross-oracle per-seed variance |
+
+---
+
+#### Reasoning-first (RF) scoring
+
+All task modules updated with `_rf` scoring variants (`build_scoring_prompt` + `parse_verdict` overrides). RF scoring prompts the model to reason before emitting `VERDICT: (X)`, eliminating format-sensitivity artifacts (web_of_lies: 42–66% verdict-first → 99–100% RF).
+
+Affected files: `tasks/causal_judgement.py`, `tasks/geometric_shapes.py`, `tasks/formal_fallacies.py`, `tasks/disambiguation_qa.py`, `tasks/snarks.py`, `utils/scorer.py`.
+
+`utils/scorer.py` updated: new `cot_first` parameter passed through `score_batch`; `reasoning_effort` parameter added for o-series models.
+
+---
+
+#### runs/variance/: 3-seed evaluation results
+
+Seed 2 and seed 3 run outputs for v3, E3, and EA conditions used to compute 3-seed means throughout the paper:
+
+| File | Contents |
+|---|---|
+| `runs/variance/eval_results/v3_seed2_rf.json` | v3 seed 2, RF scoring, all 5 tasks × 5 models |
+| `runs/variance/eval_results/v3_seed3_rf.json` | v3 seed 3 |
+| `runs/variance/eval_results/ea_seed2_rf.json` | EA seed 2 |
+| `runs/variance/eval_results/ea_seed3_rf.json` | EA seed 3 |
+| `runs/variance/eval_results/e3_seed2_rf.json` | E3 seed 2 |
+| `runs/variance/eval_results/e3_seed3_rf.json` | E3 seed 3 |
+| `runs/variance/v3_3seed_mean.json` | Averaged v3 results |
+| `runs/csicl_seed2_rf.json` | CS-ICL rescore seed 2 |
+| `runs/csicl_seed3_rf.json` | CS-ICL rescore seed 3 |
+| `runs/bbh_v3_rf_canonical_5models.json` | Canonical v3 seed 1 (patched: Claude DQ cs_icl 0.62 → 0.93) |
+
+---
+
+#### Cleanup: removed obsolete scripts
+
+Deleted one-off ablation and run scripts that were superseded by the `scripts/` suite:
+`ablation_narrative.py`, `ablation_prompts.py`, `compare_modes.sh`, `download_bbh_tasks.py`, `eval_bbh_comparison.py`, `eval_oracle_quality.py`, `gen_csicl_*.py`, `gen_icr_bootstrap.py`, `oracle_generate.py`, `run_ablation.py`, `run_bbh_*.sh` (7 scripts), `score_eval.py`, `smoke_*.py`, `test_*.py`.
+
+---
+
+## 2026-04-30
+
+### Codebase reconstruction: per-task files, shared prompt modules, eval instrumentation
+
+A broad structural pass that splits monolithic task files, consolidates prompt templates into canonical locations, instruments all eval scripts with RunLogger, and fixes several import bugs found during the audit.
+
+---
+
+#### tasks/: one file per task
+
+**Motivation:** All 13 task specifications (scoring prompts, answer parsing, bootstrap helpers) were packed into two files — `bbh_tasks.py` and `bbh_tasks_ext.py`. Adding, editing, or reviewing one task required navigating the whole file. Imports were also misleading: `ICR_select` imported from `ICR_naive.core` indirectly.
+
+**New layout:**
+
+Each task is now its own module under `tasks/`:
+
+| File | Export |
+|---|---|
+| `tasks/causal_judgement.py` | `CAUSAL_JUDGEMENT_TASK`, `_causal_bootstrap`, `_CAUSAL_GEN_PROMPT` |
+| `tasks/sports_understanding.py` | `SPORTS_TASK`, `_SPORTS_GEN_PROMPT` |
+| `tasks/disambiguation_qa.py` | `DISAMBIGUATION_TASK` |
+| `tasks/movie_recommendation.py` | `MOVIE_TASK` |
+| `tasks/geometric_shapes.py` | `GEOMETRIC_TASK`, `GEO_PROMPTS`, `_GEO_GEN_PROMPT` |
+| `tasks/formal_fallacies.py` | `FORMAL_FALLACIES_TASK` |
+| `tasks/logical_deduction.py` | `LOGICAL_DEDUCTION_3_TASK` |
+| `tasks/web_of_lies.py` | `WEB_OF_LIES_TASK`, `WOL_PROMPTS` |
+| `tasks/date_understanding.py` | `DATE_UNDERSTANDING_TASK`, `DU_PROMPTS` |
+| `tasks/navigate.py` | `NAVIGATE_TASK` |
+| `tasks/snarks.py` | `SNARKS_TASK` |
+| `tasks/boolean_expressions.py` | `BBH_BOOLEAN_TASK` |
+
+**`tasks/utils/__init__.py` (new):**
+
+18 shared helper functions extracted from both old task files into a single shared module — `_make_eval_prompt`, `_parse_yesno`, `_parse_mc`, `_extract_reasoning`, `_yesno_correct`, `_yesno_label`, `_mc_correct`, `_mc_label`, `_rule_score_prompt`, `_gen_prompt`, `_bootstrap_ruleset`, `_format_failure`, `_parse_valid_invalid`, `_valid_invalid_correct`, `_valid_invalid_label`, `_trivial_key`, `_trivial_conds`, `_generic_polarity`. Duplicates between the two old files were deduplicated here.
+
+**`tasks/registry.py` updated:**
+
+All 12 non-magma entries now point to the new individual module paths (e.g. `"causal_judgement": ("tasks.causal_judgement", "CAUSAL_JUDGEMENT_TASK")`).
+
+**Backward-compat shims kept:**
+
+`bbh_tasks.py`, `bbh_tasks_ext.py`, and `bbh_boolean.py` are now pure re-export shims. All existing `from tasks.bbh_tasks import …` and `from tasks.bbh_tasks_ext import …` callers — including pipeline scripts, dev ablation scripts, and shell launchers — continue to work without modification.
+
+---
+
+#### prompts/: canonical prompt modules
+
+**Motivation:** Core prompt templates were defined separately inside `ICR_naive/prompts/templates.py`, `ICR_reasoning/prompts/templates.py`, and `ICR_select/prompts/templates.py`, causing drift between copies. Mechanism prompts (similarity gate, merge, prune, crossover) were mixed into the per-pipeline templates files.
+
+**New canonical files:**
+
+- `prompts/templates.py` — all core templates: `ROADMAP_PROMPT`, `DECISION_TREE_PROMPT`, `CASE_STUDIES_PROMPT`, `CASE_STUDY_PROMPT`, `SCORING_PROMPT`, `SCORING_PROMPT_COT_FIRST`, `CASE_STUDY_WITH_REASONING_PROMPT`, plus token-budget constants (`DT_MAX_TOKENS`, `CS_MAX_TOKENS`, `SCORING_MAX_TOKENS`, `FLUSH_MAX_TOKENS`).
+- `prompts/mechanisms.py` — ICR_select mechanism prompts: `SIMILARITY_CHECK_PROMPT`, `MERGE_PROMPT`, `PRUNE_PROMPT`, `CONDENSATION_PROMPT`, `DT_STEP_ANALYSIS_PROMPT`, `DT_REVISION_PROMPT`, `ROADMAP_SYNTHESIS_PROMPT`, plus their `_MAX_TOKENS` constants and `N_CANDIDATES`, `CANDIDATE_TEMPS`, `CORRECT_POOL_MAX`, `RETRY_CONTEXT_TEMPLATE`.
+
+Per-pipeline `prompts/templates.py` files are now shims that import from the canonical modules. `ICR_select/prompts/templates.py` additionally imports mechanism prompts from `prompts/mechanisms.py`.
+
+**Versioned generation prompts moved into task files:**
+
+`WOL_PROMPTS`, `DU_PROMPTS`, and `GEO_PROMPTS` (the v3/v4 versioned case-study generation prompts) now live inside their respective task files (`tasks/web_of_lies.py`, `tasks/date_understanding.py`, `tasks/geometric_shapes.py`). Each file selects the active version at import time via the `ICR_GEN_PROMPT_VERSION` env var.
+
+`prompts/generation.py` converted to a facade: imports the dicts from task files, keeps the `get_prompt(task, version)` API for ablation script access, adds `VERSIONS` dict.
+
+---
+
+#### utils/cheatsheet.py: `extract_query_features` null sentinel for non-magma tasks
+
+**Problem:** When `extract_query_features` was called on a BBH item (no `equation1` field), it fell back to `_features_from_pair("", "")` which returned TRIVIAL forms. These generated non-empty `tokens()` frozensets that produced spurious Jaccard hits in `render_for_query`, surfacing structurally-unrelated magma case studies for BBH queries.
+
+**Fix:**
+
+- Added `_NULL_FORM = "NONE"` sentinel constant.
+- `extract_query_features(item)` returns a null `QueryFeatures` (all fields set to `_NULL_FORM` / zero) when `"equation1" not in item`.
+- `QueryFeatures.tokens()` returns `frozenset()` when `form_e1 == _NULL_FORM`, so relevance scoring falls back to `historical_fix_rate` only (no structural component). This is correct: a BBH case study has no equation pair to match against.
+
+---
+
+#### Eval scripts: RunLogger wired to all five remaining scripts
+
+`RunLogger` (from `utils/run_logger`) was previously wired to the pipeline entry points but missing from eval scripts. Added to:
+
+- `scripts/eval/eval_transferability.py` — label `"eval_transfer"`
+- `scripts/eval/eval_cot_mode.py` — label `"eval_cot"`
+- `scripts/eval/eval_bbh_comparison.py` — label `"eval_bbh_compare"`
+- `scripts/eval/eval_oracle_quality.py` — label `"eval_oracle"`
+- `scripts/eval/score_eval.py` — label `"score_eval"`
+
+Each script creates a `RunLogger` after `get_api_key()`, calls `set_logger()`, and prints the log directory to stderr.
+
+---
+
+#### Dev script and import bug fixes
+
+Three bugs found during the shell-script / import path audit:
+
+**`scripts/dev/ablation_narrative.py`:**
+- `os.chdir(Path(__file__).parent)` pointed to `scripts/dev/`, making `DATA_DIR = Path("datasets/bbh")` resolve to a nonexistent path.
+- Fixed: `_ROOT = Path(__file__).resolve().parent.parent.parent`; `os.chdir(_ROOT)`.
+- Added missing `sys.path.insert(0, str(_ROOT))` before project-root imports.
+
+**`scripts/dev/ablation_prompts.py`:**
+- No `sys.path` anchor — project-root imports failed when run from any directory other than the root.
+- Fixed: same `_ROOT` + `sys.path.insert` pattern.
+
+**`scripts/dev/smoke_test_pk_patch.py`:**
+- `str(Path(__file__).resolve()…)` appeared on line 21 before `from pathlib import Path` was imported.
+- Fixed: moved `pathlib` import to the top. Removed a spurious `sys.path.insert(0, os.path.dirname(…))` that added `scripts/dev/` to the path.
+
+**`tasks/bbh_tasks.py` shim extended:**
+- The initial shim was missing `_CAUSAL_GEN_PROMPT`, `_SPORTS_GEN_PROMPT`, and `_GEO_GEN_PROMPT` re-exports needed by `scripts/dev/ablation_prompts.py`. Added explicit re-exports from the individual task files.
+
+**`ICR_naive/pipeline.py`:**
+- Three remaining `.core.*` shim imports (`from .core.cheatsheet`, `.core.data`, `.core.llm_client`) were still present after the `utils/` migration. Updated to `from utils.cheatsheet`, `from utils.data`, `from utils.llm_client`.
+
+---
+
+#### Smoke test: 64/64 checks passed
+
+All existing smoke tests plus new import-path checks passed after the reconstruction:
+- Pipelines: `ICR_naive`, `ICR_reasoning`, `ICR_select`, `ICR_partition`, `ICR_hybrid` entry points importable
+- Eval scripts: all 5 new RunLogger-wired scripts importable
+- Task files: all 13 individual task modules importable via new paths and via backward-compat shims
+- Registry: all 13 `tasks.registry.load_task(name)` lookups return the correct task spec
+- Prompt modules: `prompts/templates.py`, `prompts/mechanisms.py`, `prompts/generation.py` + 3 per-pipeline shims importable
+- Versioned prompts: `WOL_PROMPTS`, `DU_PROMPTS`, `GEO_PROMPTS` accessible from task files and via `get_prompt()`
+- Dev scripts: 7 scripts in `scripts/dev/` importable without errors
+
+---
+
+## 2026-04-28
+
+### ICR_hybrid: CS-ICL auto-bootstrap (default on)
+
+**Motivation:** BBH tasks with no `--init-cheatsheet` and no `--prior-knowledge` previously entered Phase 2 completely blind — the model had to rediscover general task principles from failure patterns alone. This caused overfitting on tasks like `geometric_shapes` (43% test accuracy) and `sports_understanding` (82% vs CS-ICL 96%).
+
+**Changes (`ICR_hybrid/training/loop.py`):**
+
+New parameters on `run_hybrid_loop`:
+- `auto_bootstrap: bool = True` — when `True` and no prior knowledge exists after Phase 1, fires the auto-bootstrap block before Phase 2.
+- `bootstrap_n_items: int = 75` — how many training items to sample.
+
+Two-step bootstrap (mirrors CS-ICL's `generate_reason_api.py` + `cheatsheet_api.py`):
+
+1. **Reasoning enrichment** — checks each sampled item for a `reason` or `gold_reason` field. Any items that lack one get a concurrent LLM call (`ThreadPoolExecutor`, up to 20 workers) using a zero-shot explanation prompt: *"Given the question and its correct answer, provide a clear step-by-step explanation…"*. This is a no-op for BBH tasks whose train JSONLs already carry a `reason` field.
+2. **Knowledge summary** — formats all items as `Question / Reasoning / Answer` triples (or `Question / Answer` for items still without reasoning) and calls the LLM with the original CS-ICL prompt: *"Create a cheat sheet based on the examples below… identify which ones you find most difficult… only include specific, detailed points."* The response becomes `cheatsheet.prior_knowledge`, seeding `_pk_patch_phase` so Phase 2 always starts with non-trivial background knowledge.
+
+The block is a no-op when any of these are true:
+- `auto_bootstrap=False`
+- A `--rule-set` was provided
+- `prior_knowledge` is already non-empty (from `--init-cheatsheet`, `--prior-knowledge`, `auto_rule_init`, or `_pk_patch_phase`)
+
+**Changes (`ICR_hybrid/pipeline.py`):**
+
+Two new CLI flags:
+- `--no-auto-bootstrap` — disables auto-bootstrap (sets `auto_bootstrap=False`). Default: bootstrap on.
+- `--bootstrap-n-items N` — override sample size (default: 75).
+
+Header banner updated to show `auto-bootstrap: yes (75 items)` or `no`.
+
+**Early results on v3 runs (4 tasks, bootstrap enabled):**
+
+| Task | v2 train acc | v3 train acc | v2 test acc |
+|---|---|---|---|
+| geometric_shapes | ~43% | 75%+ (iter 4) | 43% |
+| sports_understanding | ~82% | 95%+ (iter 5) | 82% |
+| formal_fallacies | ~65% | 74% (iter 4, 0 CS — bootstrap carrying it) | 65% |
+| causal_judgement | ~65% | 66% (iter 3) | 65.5% |
+
+---
+
+### ICR_partition: Duplicate title check on CS acceptance
+
+**Motivation:** The similarity gate uses an LLM call to detect near-duplicate case studies by content, but identical-title regenerations slipped through when the same partition was re-evaluated with a shifted failure set.
+
+**Changes (`ICR_partition/training/loop.py`):**
+
+Added a cheap exact title check (case-insensitive) at both CS acceptance points inside `_solve_bin`, under the `cs_lock`:
+- **Archive path** — before accepting an archived candidate from a previous iteration.
+- **Main ADD path** — before accepting any new candidate that passed all gates.
+
+When a title match is found, the bin is skipped with `event: bin_skipped, reason: title_duplicate` logged to the update log. No LLM calls are saved or wasted — the check runs before the candidate is staged.
+
+---
+
+### ICR_partition / ICR_select: Periodic CS bank prune
+
+**Motivation:** Long runs accumulated near-duplicate case studies with slightly different wordings that passed the title check and the LLM similarity gate individually but represented the same root failure pattern. The boolean expressions v2 run ended with 4 of 6 case studies being near-identical "Double Negation Cancellation" entries.
+
+**New: `_prune_cs_bank()` (`ICR_select/training/gates.py`):**
+
+Sends the full numbered case study bank to the LLM with `PRUNE_PROMPT` — instructs the model to output `REMOVE: <exact title>` for genuine duplicates or `KEEP ALL` if none. Filters `cheatsheet.case_studies` in-place and returns the count removed. Runs at temperature 0, `max_tokens=400`.
+
+**New: `PRUNE_PROMPT` / `PRUNE_MAX_TOKENS` (`ICR_select/prompts/templates.py`):**
+
+Single-shot prune prompt. Rules enforce that only genuine root-pattern duplicates are removed; cosmetically similar but mechanically distinct case studies must be kept.
+
+**Changes (`ICR_partition/training/loop.py`):**
+
+New parameter `prune_every_n: int = 5` on `run_partition_loop`. After each outer iteration's executor block, checks whether `len(cheatsheet.case_studies) // prune_every_n` crossed a new integer boundary since the start of the iteration — if so, fires `_prune_cs_bank`. Logged as `event: cs_pruned` in the update log.
+
+---
+
+### Remove: REASONING ROADMAP section from cheatsheet generation
+
+**Motivation:** The REASONING ROADMAP field was a leftover from the original ICR_naive design where a structured decision tree guided scoring. With BBH tasks this field was always empty (no rule set → no roadmap patch), so it added noise to generation prompts and wasted token budget. The field is still stored in the `Cheatsheet` dataclass for backward compatibility.
+
+**Changes:**
+
+`utils/cheatsheet.py` — `_render_with_selection()` no longer writes the `=== REASONING ROADMAP ===` section. The budget calculation that previously subtracted the roadmap's character count was updated accordingly.
+
+`tasks/bbh_tasks.py` and `tasks/bbh_tasks_ext.py` — removed from all 11 task generation prompts:
+- Input section: `=== REASONING ROADMAP ===\n{roadmap}\n=== END ROADMAP ===`
+- Output field: `TARGET_STEP: [roadmap step this corrects]`
+- Output section: `OUTPUT 2 — ROADMAP PATCH / === ROADMAP PATCH === … === END ROADMAP PATCH ===`
+
+`tasks/bbh_boolean.py` — same removals from `BBH_BOOLEAN_GENERATION_PROMPT`. Also removed the preamble paragraph "The cheatsheet the model uses has two parts:…" and added a TRANSFERABILITY REQUIREMENT block before `OUTPUT 1 — CASE STUDY`.
+
+**Smoke tests updated:** `smoke_bbh_boolean.py` Test 6 and `smoke_bbh_tasks.py` Test 1 now assert that `{roadmap}` is **absent** from the generation prompt template (was previously required).
+
+---
+
+### ICR_hybrid: Fix misleading Phase 1 log banner
+
+**Problem:** The training loop banner always printed `Phase 1: SKIPPED` when no `--rule-set` was provided, even when `_pk_patch_phase` (text-mode prior knowledge patching) was about to run.
+
+**Fix (`ICR_hybrid/training/loop.py`):** Banner now shows one of three states:
+- `rule-patch (N iters, goal=X%)` — when a `RuleSet` is provided.
+- `pk-text-patch (N iters)` — when `prior_knowledge` is non-empty or `auto_rule_init` will produce it.
+- `SKIPPED (no rule set or prior knowledge)` — truly skipped.
+
+---
+
+### New scripts
+
+**`run_bbh_v3.sh`** — parallel runner for the 4 most underperforming BBH tasks (`geometric_shapes`, `causal_judgement`, `formal_fallacies`, `sports_understanding`) with two monitoring modes:
+- Default: status board that refreshes every 10s showing state, last log line, current iter, accuracy, and CS count per task.
+- `--tail`: raw interleaved log stream across all 4 logs.
+
+Written for bash 3.2 (macOS default) — no associative arrays.
+
+**`test_overfit_boolean.py`** — evaluates the boolean expressions cheatsheet from `bbh_overnight_v2` on both train and test splits, applies `_prune_cs_bank`, evaluates again, and prints a before/after table comparing train accuracy, test accuracy, and train-test gap.
+
+---
+
 ## 2026-04-26
 
 ### ICR_hybrid: New hybrid rule-patch → case-study pipeline
@@ -1148,9 +1502,9 @@ Fix: Added a second format example (FORMAT EXAMPLE B) to `_FORMAT_BLOCK` showing
 
 ## Next Steps
 
-- Run `run_formal_fallacies_bootstrap.sh` to validate Bootstrap+ICR on formal_fallacies (CS-ICL: 60%, ICR-only: 65% — target: >65%)
-- Run `run_bbh_bootstrap.sh` for all 6 BBH tasks and compare Bootstrap+ICR vs ICR-base and CS-ICL
-- Run per-segment ablations on the formal_fallacies bootstrap cheat sheet to identify which sections drive accuracy
+- Evaluate `runs/bbh_v3/` results on test splits once `run_bbh_v3.sh` completes; compare to v2 and CS-ICL
+- Run the full v3 pipeline on remaining tasks (`web_of_lies`, `navigate`, `date_understanding`, `logical_deduction_three`, `snarks`) to build a complete comparison table
+- Re-run `boolean_expressions` with auto-bootstrap enabled to test whether seeded prior knowledge improves on both anti-overfit and v2 results
+- Run per-segment ablations on formal_fallacies bootstrap cheat sheet to identify which sections drive accuracy
 - Rerun MAGMA comparison with `openai/gpt-4.1` (gen/patch/casestudy) to measure model quality impact on the CS-ICL vs ICR gap
-- Fix similarity gate to catch semantic duplicates with different wording
 - Run ICR_adaptive on hard1 after the three bug fixes to measure impact

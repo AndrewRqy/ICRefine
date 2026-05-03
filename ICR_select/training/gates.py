@@ -24,6 +24,7 @@ from utils.task_spec import TaskSpec
 from ..prompts.templates import (
     SIMILARITY_CHECK_PROMPT, SIMILARITY_MAX_TOKENS,
     MERGE_PROMPT, MERGE_MAX_TOKENS,
+    PRUNE_PROMPT, PRUNE_MAX_TOKENS,
 )
 
 _MIN_CS_FOR_SIMILARITY = 3   # skip similarity gate until this many CSes exist
@@ -269,6 +270,68 @@ def _merge_case_studies(cs_a: CaseStudy, cs_b: CaseStudy, model_casestudy: str, 
     merged.creation_fix_rate = max(cs_a.creation_fix_rate, cs_b.creation_fix_rate)
     merged.historical_fix_rate = merged.creation_fix_rate
     return merged
+
+
+def _prune_cs_bank(
+    cheatsheet: Cheatsheet,
+    model: str,
+    api_key: str,
+    log_fn=None,
+) -> int:
+    """
+    Ask an LLM to identify redundant case studies and remove them.
+
+    Returns the number of case studies removed.
+    Called by the outer loop every `prune_every_n` accepted case studies.
+    """
+    if len(cheatsheet.case_studies) < 2:
+        return 0
+
+    numbered = "\n\n".join(
+        f"[{i + 1}] {cs.title}\n{cs.render()}"
+        for i, cs in enumerate(cheatsheet.case_studies)
+    )
+
+    resp = call_llm(
+        PRUNE_PROMPT.format(case_studies=numbered),
+        model, api_key,
+        temperature=0.0,
+        max_tokens=PRUNE_MAX_TOKENS,
+        reasoning_effort=None,
+    )
+    raw = resp.content.strip()
+
+    if raw.upper() == "KEEP ALL" or not raw:
+        if log_fn:
+            log_fn("  [prune] LLM found no redundant case studies.")
+        return 0
+
+    titles_to_remove: set[str] = set()
+    for line in raw.splitlines():
+        line = line.strip()
+        if line.upper().startswith("REMOVE:"):
+            title = line[len("REMOVE:"):].strip()
+            if title:
+                titles_to_remove.add(title.lower())
+
+    if not titles_to_remove:
+        if log_fn:
+            log_fn(f"  [prune] no parseable REMOVE lines in response:\n{raw}")
+        return 0
+
+    before = len(cheatsheet.case_studies)
+    cheatsheet.case_studies = [
+        cs for cs in cheatsheet.case_studies
+        if cs.title.strip().lower() not in titles_to_remove
+    ]
+    n_removed = before - len(cheatsheet.case_studies)
+
+    if log_fn:
+        log_fn(
+            f"  [prune] removed {n_removed} redundant CS "
+            f"(titles: {', '.join(repr(t) for t in titles_to_remove)})"
+        )
+    return n_removed
 
 
 # ---------------------------------------------------------------------------

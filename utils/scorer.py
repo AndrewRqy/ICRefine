@@ -21,9 +21,22 @@ from dataclasses import dataclass, field
 from typing import Callable, Iterator
 
 from .data import is_true
-from .llm_client import LLMResponse, call_llm, call_llm_batch
+from .llm_client import LLMResponse, call_llm, call_llm_batch, is_reasoning_model
+from .run_logger import get_logger
 from .task_spec import TaskSpec
-from ICR_naive.prompts.templates import SCORING_MAX_TOKENS
+
+SCORING_MAX_TOKENS = 8_192  # match competition setting: max output tokens 8192
+
+# Appended to scoring prompts for non-reasoning models to elicit a genuine
+# step-by-step justification rather than a one-line label.  The text goes
+# after the format spec so it overrides any brevity bias without changing
+# the expected output structure.
+_JUSTIFICATION_SUFFIX = (
+    "\n\nIMPORTANT: In your REASONING, explain your thinking step by step — "
+    "what you checked first, how you ruled out alternatives, and exactly "
+    "where your reasoning led you to your prediction. "
+    "Do not just restate the verdict; show the specific steps you took."
+)
 
 
 # ---------------------------------------------------------------------------
@@ -85,7 +98,13 @@ def score_batch(
                reasoning before stating the verdict.
     """
     ts = task_spec or _default_task()
-    prompts   = [ts.build_scoring_prompt(cheatsheet_text, item, cot_first) for item in items]
+    # Non-reasoning models produce no internal thinking trace; elicit a genuine
+    # step-by-step justification via prompt so post_think carries useful signal
+    # for the case study generator.
+    _use_cot = cot_first or not is_reasoning_model(model)
+    _suffix  = _JUSTIFICATION_SUFFIX if not is_reasoning_model(model) else ""
+    prompts  = [ts.build_scoring_prompt(cheatsheet_text, item, _use_cot) + _suffix
+                for item in items]
     responses = call_llm_batch(
         prompts,
         model=model,
@@ -150,6 +169,18 @@ def score_batch(
                 )
                 shown += 1
 
+    _log = get_logger()
+    if _log is not None:
+        n_total   = len(correct) + len(wrong)
+        n_correct = len(correct)
+        _log.log_scoring(
+            label=progress_label,
+            model=model,
+            n_correct=n_correct,
+            n_total=n_total,
+            accuracy=n_correct / n_total if n_total else 0.0,
+        )
+
     return correct, wrong
 
 
@@ -171,7 +202,10 @@ def _score_batch_ordered(
     Internal helper — used by score_batch_ensemble.
     """
     ts = task_spec or _default_task()
-    prompts   = [ts.build_scoring_prompt(cheatsheet_text, item, cot_first) for item in items]
+    _use_cot = cot_first or not is_reasoning_model(model)
+    _suffix  = _JUSTIFICATION_SUFFIX if not is_reasoning_model(model) else ""
+    prompts  = [ts.build_scoring_prompt(cheatsheet_text, item, _use_cot) + _suffix
+                for item in items]
     responses = call_llm_batch(
         prompts,
         model=model,

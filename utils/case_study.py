@@ -82,6 +82,10 @@ class CaseStudy:
     # making both the example-level (case study) and rule-level (roadmap) corrections.
     roadmap_patch: str = ""
 
+    # When the generator chose MODIFY instead of ADD NEW, this holds the title of
+    # the existing case study to replace.  Empty string means ADD NEW (default).
+    modification_target: str = ""
+
     # ------------------------------------------------------------------
     # Rendering — identical format to the existing prompt injection
     # ------------------------------------------------------------------

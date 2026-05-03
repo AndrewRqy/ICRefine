@@ -25,10 +25,10 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from ..core.cheatsheet import CASE_STUDY_MAX_CHARS, Cheatsheet
-from ..core.data import is_true, load_jsonl, sample_instances
-from ..core.llm_client import call_llm, get_api_key
-from ..core.parser import split_case_studies
+from utils.cheatsheet import CASE_STUDY_MAX_CHARS, Cheatsheet
+from utils.data import is_true, load_jsonl, sample_instances
+from utils.llm_client import call_llm, get_api_key
+from utils.parser import split_case_studies
 from utils.case_study import CaseStudy
 from ..prompts.templates import (
     CASE_STUDIES_PROMPT,

@@ -17,7 +17,7 @@ from pathlib import Path
 from utils.cheatsheet import Cheatsheet
 from utils.data import FailureBin, is_true
 from ..generators.case_study import generate_case_study_with_reasoning
-from .scorer import score_batch, test_cheatsheet
+from utils.scorer import score_batch, test_cheatsheet
 from utils.scorer import score_items_streaming
 
 
@@ -76,6 +76,7 @@ def run_training_loop(
     output_dir: Path | None = None,
     log: bool = True,
     reasoning_effort: str | None = "low",
+    max_cheatsheet_chars: int | None = None,
 ) -> TrainingResult:
     def _log(msg: str) -> None:
         if log:
@@ -91,7 +92,7 @@ def run_training_loop(
         f"\n{'='*60}\n"
         f"ICR_reasoning Training loop\n"
         f"  items={len(train_items)}  batch_size={batch_size} (log interval)\n"
-        f"  bin_threshold={bin_threshold}\n"
+        f"  bin_threshold={bin_threshold}  max_cheatsheet_chars={max_cheatsheet_chars or 'unlimited'}\n"
         f"  model_score={model_score}\n"
         f"  model_casestudy={model_casestudy}\n"
         f"{'='*60}"
@@ -119,6 +120,10 @@ def run_training_loop(
             )
 
         while bin_.is_full():
+            if max_cheatsheet_chars is not None and len(cheatsheet.render()) >= max_cheatsheet_chars:
+                _ = bin_.flush()  # drain bin to prevent repeated log spam
+                _log(f"  [cap] cheatsheet at {len(cheatsheet.render()):,} chars ≥ {max_cheatsheet_chars:,} — skipping flush.")
+                break
             failures = bin_.flush()
             running_acc = total_correct / total_scored
             _log(f"  [bin full] {len(failures)} failures → reasoning-aware case study + roadmap patch")
@@ -153,7 +158,9 @@ def run_training_loop(
             if output_dir:
                 _save_checkpoint(cheatsheet, update_log, output_dir, n_added)
 
-    if flush_remainder and len(bin_) > 0:
+    if flush_remainder and len(bin_) > 0 and (
+        max_cheatsheet_chars is None or len(cheatsheet.render()) < max_cheatsheet_chars
+    ):
         failures = bin_.flush()
         _log(f"\n[remainder] {len(failures)} failures → reasoning-aware case study + roadmap patch")
         result = generate_case_study_with_reasoning(
