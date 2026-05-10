@@ -25,6 +25,14 @@ _REGISTRY: dict[str, tuple[str, str]] = {
     "snarks":                          ("tasks.snarks",                 "SNARKS_TASK"),
     "web_of_lies":                     ("tasks.web_of_lies",            "WEB_OF_LIES_TASK"),
     "gpqa_diamond":                    ("tasks.gpqa_diamond",           "GPQA_DIAMOND_TASK"),
+    "agieval_lsat_ar":                 ("tasks.agieval",                "AGIEVAL_LSAT_AR_TASK"),
+    "agieval_lsat_lr":                 ("tasks.agieval",                "AGIEVAL_LSAT_LR_TASK"),
+    "agieval_logiqa_en":               ("tasks.agieval",                "AGIEVAL_LOGIQA_EN_TASK"),
+    "mmlu_formal_logic":               ("tasks.mmlu",                   "MMLU_FORMAL_LOGIC_TASK"),
+    "mmlu_professional_law":           ("tasks.mmlu",                   "MMLU_PROFESSIONAL_LAW_TASK"),
+    "mmlu_college_mathematics":        ("tasks.mmlu",                   "MMLU_COLLEGE_MATHEMATICS_TASK"),
+    "mmlu_moral_scenarios":            ("tasks.mmlu",                   "MMLU_MORAL_SCENARIOS_TASK"),
+    "mmlu_high_school_physics":        ("tasks.mmlu",                   "MMLU_HIGH_SCHOOL_PHYSICS_TASK"),
 }
 
 # Short aliases used in eval scripts

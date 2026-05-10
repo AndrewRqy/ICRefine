@@ -64,11 +64,7 @@ You are answering causal reasoning questions from the perspective of a typical p
 
 {question}
 
-Output format - use plain text only, no markdown bold or headers:
-REASONING: apply the cheatsheet rules step by step and explain your causal reasoning.
-VERDICT: YES
-
-(Replace YES above with NO if the answer is no. VERDICT must be the last line, must be followed immediately by YES or NO on the same line, and must appear exactly once.)"""
+Answer the question by following the provided cheatsheet. Ensure that your response ends with VERDICT: YES or NO"""
 
 
 def _causal_judgement_scoring_prompt_rf(cs: str, item: dict, cot: bool = True) -> str:
@@ -87,7 +83,57 @@ def _parse_causal_judgement_rf(text: str):
     return None
 
 
+_CJ_LABEL_PROMPT = """\
+Analyze this causal reasoning scenario and identify the causal structure type.
+
+SCENARIO:
+{scenario}
+
+Identify the PRIMARY causal reasoning pattern from the list below. Choose exactly one.
+- overdetermination: two or more independent sufficient causes; candidate may be redundant
+- preemption: candidate would have caused outcome but a faster independent cause acted first
+- background_condition: candidate is a routine expected factor; a different abnormal factor is the real cause
+- counterfactual_dependence: outcome depends specifically on candidate's action; counterfactuals are explicit
+- double_prevention: candidate prevented something that would have prevented the outcome (two negations)
+- joint_causation: multiple factors all required together; neither alone is sufficient
+- proximate_vs_distal: question turns on whether immediate vs background/distal actor caused outcome
+- intentional_causation: question turns on whether agent acted deliberately toward the outcome
+- other: scenario does not fit the above categories
+
+Output EXACTLY two lines:
+CAUSAL_PATTERN: <pattern name>
+REASON: <one sentence explanation>"""
+
+
+def _build_cj_label_prompt(item: dict) -> str:
+    return _CJ_LABEL_PROMPT.format(scenario=item.get("input", "").strip())
+
+
+_CJ_PATTERNS = {
+    "overdetermination", "preemption", "background_condition",
+    "counterfactual_dependence", "double_prevention", "joint_causation",
+    "proximate_vs_distal", "intentional_causation", "other",
+}
+
+
+def _parse_cj_label(text: str) -> str:
+    for line in text.strip().splitlines():
+        if line.upper().startswith("CAUSAL_PATTERN:"):
+            label = line.split(":", 1)[1].strip().lower()
+            if label in _CJ_PATTERNS:
+                return label
+            # fuzzy: check if any known pattern is a substring
+            for p in _CJ_PATTERNS:
+                if p in label:
+                    return p
+    return "other"
+
+
 def _causal_partition_key(item: dict) -> tuple:
+    # Prefer LLM semantic label injected by --pass1-partition
+    label = item.get("semantic_label")
+    if label and label != "(unknown)":
+        return (label,)
     t = item["input"].lower()
     has_cf = any(w in t for w in ["would have", "could have", "had not", "hadn't", "if not"])
     has_od = ("both" in t or "each" in t) and ("sufficient" in t or "alone" in t or "independently" in t)
@@ -96,6 +142,9 @@ def _causal_partition_key(item: dict) -> tuple:
 
 
 def _causal_key_to_conds(key: tuple) -> list[str]:
+    if len(key) == 1:
+        # Semantic label key
+        return [f"causal pattern: {key[0]}"]
     has_cf, has_complex = key
     conds = []
     conds.append("scenario involves counterfactual reasoning" if has_cf
@@ -303,6 +352,9 @@ CAUSAL_JUDGEMENT_TASK = TaskSpec(
     generation_prompt_template=_CAUSAL_GEN_PROMPT,
     build_polarity_instruction=_causal_polarity,
     task_name="causal_judgement",
+    build_scoring_prompt_rf=_causal_judgement_scoring_prompt_rf,
+    build_label_prompt=_build_cj_label_prompt,
+    parse_label=_parse_cj_label,
     build_rule_scoring_prompt=_rule_score_prompt,
     identify_triggered_rule=_causal_identify_rule,
     rule_id_regex=r"(CJ-\w+)",
@@ -310,4 +362,11 @@ CAUSAL_JUDGEMENT_TASK = TaskSpec(
     bootstrap_cheatsheet_fn=_causal_concrete_bootstrap,
     concrete_cs_gen_fn=_causal_concrete_cs_gen,
     build_eval_prompt=_make_eval_prompt("YES or NO"),
+    build_pass1_label_prompt=_build_cj_label_prompt,
+    parse_pass1_label=_parse_cj_label,
+    patch_domain="causal reasoning and everyday causal intuition",
+    patch_verdict_format="→  YES or →  NO  (two spaces before YES/NO)",
+    patch_rule_style="causal patterns a typical person would apply: overdetermination, "
+                     "preemption, proximate vs distal cause, double prevention, "
+                     "joint causation, counterfactual dependence, background condition",
 )
