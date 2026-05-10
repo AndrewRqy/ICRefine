@@ -63,11 +63,7 @@ You are resolving pronoun antecedents.
 
 {question}
 
-Output format - use plain text only, no markdown bold or headers:
-REASONING: identify the candidates and pronoun, apply the cheatsheet rules to determine the referent.
-VERDICT: (A)
-
-(Replace (A) above with (B) or (C) as appropriate. VERDICT must be the last line, must be followed immediately by the option on the same line, and must appear exactly once.)"""
+Answer the question by following the provided cheatsheet. Ensure that your response ends with VERDICT: (A), (B), or (C)"""
 
 
 def _disambiguation_qa_scoring_prompt_rf(cs: str, item: dict, cot: bool = True) -> str:
@@ -85,7 +81,53 @@ def _parse_disambiguation_qa_rf(text: str):
     return None
 
 
+_DQ_LABEL_PROMPT = """\
+Analyze this pronoun disambiguation question and identify the primary resolution strategy.
+
+QUESTION:
+{question}
+
+Identify which ONE strategy primarily determines the correct pronoun antecedent:
+- subjecthood: the pronoun refers to the grammatical subject of the main clause (subject preference)
+- recency: the pronoun refers to the most recently mentioned entity in context
+- gender_agreement: the pronoun is resolved purely by matching grammatical gender/number
+- thematic_role: the pronoun refers to the agent/patient/theme based on thematic role assignment
+- world_knowledge: resolution requires real-world knowledge about typical behavior or roles
+- genuinely_ambiguous: two or more cues conflict with genuinely equal strength; answer is "Ambiguous"
+- other: resolution depends on a different strategy not listed above
+
+Output EXACTLY two lines:
+RESOLUTION_STRATEGY: <strategy>
+REASON: <one sentence explanation>"""
+
+
+def _build_dq_label_prompt(item: dict) -> str:
+    return _DQ_LABEL_PROMPT.format(question=item.get("input", "").strip())
+
+
+_DQ_STRATEGIES = {
+    "subjecthood", "recency", "gender_agreement", "thematic_role",
+    "world_knowledge", "genuinely_ambiguous", "other",
+}
+
+
+def _parse_dq_label(text: str) -> str:
+    for line in text.strip().splitlines():
+        if line.upper().startswith("RESOLUTION_STRATEGY:"):
+            label = line.split(":", 1)[1].strip().lower()
+            if label in _DQ_STRATEGIES:
+                return label
+            for s in _DQ_STRATEGIES:
+                if s in label:
+                    return s
+    return "other"
+
+
 def _disambig_partition_key(item: dict) -> tuple:
+    # Prefer LLM semantic label injected by label pre-pass
+    label = item.get("semantic_label")
+    if label and label != "(unknown)":
+        return (label,)
     t = item["input"].lower()
     pronoun = ("they" if "they " in t or "their " in t else
                "she" if " she " in t or " her " in t else "he")
@@ -94,6 +136,8 @@ def _disambig_partition_key(item: dict) -> tuple:
 
 
 def _disambig_key_to_conds(key: tuple) -> list[str]:
+    if len(key) == 1:
+        return [f"resolution strategy: {key[0]}"]
     pronoun, has_ambig = key
     conds = [f"pronoun is '{pronoun}'"]
     if has_ambig:
@@ -173,9 +217,12 @@ DISAMBIGUATION_TASK = TaskSpec(
     generation_prompt_template=_DISAMBIG_GEN_PROMPT,
     build_polarity_instruction=_disambig_polarity,
     task_name="disambiguation_qa",
+    build_scoring_prompt_rf=_disambiguation_qa_scoring_prompt_rf,
     build_rule_scoring_prompt=_rule_score_prompt,
     identify_triggered_rule=_disambig_identify_rule,
     rule_id_regex=r"(DQ-\w+)",
     bootstrap_ruleset=None,  # MC tasks: use Phase 2 only by default
     build_eval_prompt=_make_eval_prompt("(A), (B), or (C)"),
+    build_label_prompt=_build_dq_label_prompt,
+    parse_label=_parse_dq_label,
 )
