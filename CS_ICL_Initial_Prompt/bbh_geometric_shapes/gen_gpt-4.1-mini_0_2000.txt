@@ -1,0 +1,246 @@
+**SVG Path Identification Cheat Sheet for Difficult Cases**
+
+---
+
+### 1. **Understanding SVG Commands**
+
+- **M x,y**: Move to coordinate (x,y) without drawing.
+- **L x,y**: Draw a straight line from the current point to (x,y).
+- **A rx,ry x-axis-rotation large-arc-flag,sweep-flag x,y**: Draw an elliptical arc from the current point to (x,y) with radii rx, ry, rotation, and flags.
+
+---
+
+### 2. **Identifying Polygon Types**
+
+- **Count Unique Points Connected by Lines**  
+  - The number of unique points connected in a closed loop = number of polygon sides.
+  - Examples:  
+    - 3 points → Triangle  
+    - 4 points → Quadrilateral (kite, rectangle, trapezoid)  
+    - 5 points → Pentagon  
+    - 6 points → Hexagon  
+    - 7 points → Heptagon  
+    - 8 points → Octagon
+
+- **Closed Shape**: The last point connects back to the first point.
+
+---
+
+### 3. **Distinguishing Quadrilaterals**
+
+When the shape has **4 sides**, distinguish between:
+
+- **Kite**  
+  - Two pairs of adjacent sides are equal in length.  
+  - Adjacent sides equal, opposite sides not necessarily equal.  
+  - Check side lengths:  
+    - If sides A & B adjacent equal, and sides C & D adjacent equal → Kite.
+
+- **Rectangle**  
+  - Opposite sides equal and all angles 90°.  
+  - Sides parallel to axes (horizontal/vertical) often indicate rectangle.  
+  - Check coordinates for equal x or y values for opposite sides.
+
+- **Trapezoid**  
+  - At least one pair of parallel sides.  
+  - Usually two sides parallel (check if y or x coordinates are equal or nearly equal for a pair).  
+  - Side lengths may differ; angles not necessarily 90°.  
+  - Rectangle is a special case of trapezoid, but if both present, prefer rectangle if all angles are right.
+
+---
+
+### 4. **Identifying Ellipses and Circles**
+
+- **Use of "A" (arc) commands with two arcs connecting start and end points**  
+  - Two "A" commands with same rx and ry, connecting start → mid → start, form a closed ellipse or circle.
+
+- **Circle vs Ellipse**  
+  - If rx = ry and rotation = 0°, it's a circle.  
+  - If rx ≠ ry or rotation ≠ 0°, it's an ellipse.  
+  - If rotation is nonzero but rx = ry, still considered ellipse (rotated circle).  
+  - When in doubt, answer "ellipse" if rotation or arc flags are nonzero.
+
+---
+
+### 5. **Identifying Sector (Pie Slice)**
+
+- **Combination of "M", "L", and "A" commands** forming:  
+  - Move to center point (M)  
+  - Line to arc start point (L)  
+  - Arc (A) to arc end point  
+  - Line back to center (L)  
+- This forms a sector (a slice of a circle or ellipse).
+
+---
+
+### 6. **Identifying Lines**
+
+- Only two points connected by a single "L" command after "M".  
+- No closed shape or multiple points.
+
+---
+
+### 7. **Step-by-Step Approach for Difficult Cases**
+
+1. **List all unique points connected by lines (ignore moves without lines).**
+
+2. **Count the number of unique points connected in a closed loop.**
+
+3. **If shape is closed:**
+
+   - If 3 points → Triangle  
+   - If 4 points → Check side lengths and parallelism for kite, rectangle, trapezoid  
+   - If 5+ points → Polygon with corresponding name (pentagon, hexagon, heptagon, octagon)
+
+4. **If arcs ("A") are present:**
+
+   - Two arcs forming a closed loop with equal radii → Ellipse (or circle if no rotation)  
+   - Arc plus two lines forming a wedge → Sector
+
+5. **If only two points connected → Line**
+
+---
+
+### 8. **Calculating Side Lengths (for Quadrilaterals)**
+
+Use distance formula between points (x1,y1) and (x2,y2):
+
+\[
+\text{distance} = \sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}
+\]
+
+- Compare adjacent sides for equality (kite).  
+- Compare opposite sides and angles for rectangle.  
+- Check for parallel sides by comparing y or x coordinates (trapezoid).
+
+---
+
+### 9. **Summary Table**
+
+| Shape     | Key Features in SVG Path                                  | Identification Tips                          |
+|-----------|-----------------------------------------------------------|----------------------------------------------|
+| **Line**  | 2 points, 1 line segment                                   | Only M and L with 2 points                    |
+| **Triangle** | 3 unique points connected in closed loop                 | 3 points, closed path                         |
+| **Kite**  | 4 points, 2 pairs of adjacent equal sides                 | Check side lengths, adjacent pairs equal     |
+| **Rectangle** | 4 points, opposite sides equal, right angles             | Parallel sides with equal length, right angles|
+| **Trapezoid** | 4 points, at least one pair of parallel sides            | Check for parallel sides, not rectangle or kite|
+| **Pentagon** | 5 unique points connected in closed loop                  | 5 points, closed path                         |
+| **Hexagon** | 6 unique points connected in closed loop                  | 6 points, closed path                         |
+| **Heptagon** | 7 unique points connected in closed loop                  | 7 points, closed path                         |
+| **Octagon** | 8 unique points connected in closed loop                  | 8 points, closed path                         |
+| **Ellipse** | 2 "A" commands with equal rx, ry, forming closed loop     | Elliptical arcs with rotation or flags       |
+| **Circle** | Ellipse with rx=ry and rotation=0                         | Special case of ellipse                        |
+| **Sector** | Combination of M, L, A commands forming wedge shape        | Arc plus two lines to center                   |
+
+---
+
+### 10. **Tips for Quick Recognition**
+
+- **Multiple "M" commands with immediate "L" to same point**: Path is split into subpaths; consider only connected points for polygon count.
+
+- **If path uses only M and L with 2 points**: It's a line.
+
+- **If path uses M, L, and two A commands forming a closed loop**: Ellipse or circle.
+
+- **If path uses M, L, and A commands forming a wedge (two lines + arc)**: Sector.
+
+- **For quadrilaterals, always check side lengths and parallelism to distinguish kite, rectangle, trapezoid.**
+
+---
+
+This cheat sheet focuses on the challenging cases involving:
+
+- Differentiating quadrilaterals (kite, rectangle, trapezoid)  
+- Recognizing ellipses vs circles from arc commands  
+- Identifying sectors from arcs plus lines  
+- Counting sides correctly when multiple subpaths exist  
+- Recognizing polygons with 5+ sides
+
+Use this structured approach to analyze SVG path data step-by-step during the test.
+
+Follow the format of the examples below in your response.
+
+Question: This SVG path element <path d="M 49.47,26.27 L 55.28,65.93 L 48.51,77.47 M 48.51,77.47 L 34.78,81.76 L 36.76,67.00 M 36.76,67.00 L 14.38,76.83 M 14.38,76.83 L 49.47,26.27"/> draws a
+Options:
+(A) circle
+(B) heptagon
+(C) hexagon
+(D) kite
+(E) line
+(F) octagon
+(G) pentagon
+(H) rectangle
+(I) sector
+(J) triangle
+Reasoning: Let's think step by step.
+
+This SVG path element contains "M" and "L" commands. "M" moves the current point to the given coordinates, and "L" draws a line to the next coordinates. The path is split into several subpaths by the "M" commands.
+
+Let's break down the commands:
+(1) M 49.47,26.27: Move to 49.47,26.27.
+(2) L 55.28,65.93: Line to 55.28,65.93.
+(3) L 48.51,77.47: Line to 48.51,77.47.
+(4) M 48.51,77.47: Move to 48.51,77.47 (this is the same as the previous point, so the path continues).
+(5) L 34.78,81.76: Line to 34.78,81.76.
+(6) L 36.76,67.00: Line to 36.76,67.00.
+(7) M 36.76,67.00: Move to 36.76,67.00.
+(8) L 14.38,76.83: Line to 14.38,76.83.
+(9) M 14.38,76.83: Move to 14.38,76.83.
+(10) L 49.47,26.27: Line to 49.47,26.27.
+
+Now, let's count the unique points that are connected by lines:
+- 49.47,26.27
+- 55.28,65.93
+- 48.51,77.47
+- 34.78,81.76
+- 36.76,67.00
+- 14.38,76.83
+
+Connecting these points in order, we see that each point is connected to the next, and the last point connects back to the first, forming a closed shape. There are six unique points, so the shape is a six-sided polygon.
+
+A six-sided polygon is a "hexagon." So the answer is (C).
+Answer: (C)
+###
+Question: This SVG path element <path d="M 12.89,27.63 L 16.46,21.41 M 16.46,21.41 L 23.97,19.93 M 23.97,19.93 L 28.27,16.91 L 36.05,18.39 L 35.28,28.22 M 35.28,28.22 L 27.40,36.33 L 25.21,26.77 L 12.89,27.63"/> draws a
+Options:
+(A) circle
+(B) heptagon
+(C) hexagon
+(D) kite
+(E) line
+(F) octagon
+(G) pentagon
+(H) rectangle
+(I) sector
+(J) triangle
+Reasoning: Let's think step by step.
+
+This SVG path element contains multiple "M" and "L" commands. "M" moves the current point to the specified coordinates, and "L" draws a line to the next point. Let's break down the path:
+
+(1) M 12.89,27.63: Move to 12.89,27.63.
+(2) L 16.46,21.41: Line to 16.46,21.41.
+(3) M 16.46,21.41: Move to 16.46,21.41 (this is the same as the previous point, so the path continues).
+(4) L 23.97,19.93: Line to 23.97,19.93.
+(5) M 23.97,19.93: Move to 23.97,19.93.
+(6) L 28.27,16.91: Line to 28.27,16.91.
+(7) L 36.05,18.39: Line to 36.05,18.39.
+(8) L 35.28,28.22: Line to 35.28,28.22.
+(9) M 35.28,28.22: Move to 35.28,28.22.
+(10) L 27.40,36.33: Line to 27.40,36.33.
+(11) L 25.21,26.77: Line to 25.21,26.77.
+(12) L 12.89,27.63: Line to 12.89,27.63.
+
+Now, let's count the unique points that are connected by lines:
+- 12.89,27.63
+- 16.46,21.41
+- 23.97,19.93
+- 28.27,16.91
+- 36.05,18.39
+- 35.28,28.22
+- 27.40,36.33
+- 25.21,26.77
+
+There are 8 unique points, and the lines connect them in a closed loop, forming an eight-sided polygon. An eight-sided polygon is called an "octagon." "Octagon" is option (F).
+
+So the answer is (F).
+Answer: (F)

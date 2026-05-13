@@ -1,0 +1,177 @@
+**Cheat Sheet for Answering Causation Questions (Focused on Difficult Cases)**
+
+---
+
+### 1. **Intentionality vs. Accident**
+
+- **Intention requires control and purpose over the outcome.**
+  - If the person *aimed* or *acted with knowledge* that a consequence would occur, even if they didn’t care about it, it is intentional.
+  - If the outcome happened due to *loss of control*, *accident*, or *luck*, it is **not** intentional.
+  
+- **Foreseen but indifferent consequences count as intentional.**
+  - Example: Shooter knows gunfire will alert enemies but shoots anyway → intentional alerting.
+  - Example: Hunter knows shooting deer will scare eagle but only wants deer → not intentional eagle disturbance.
+
+- **Mistaken or confused actions still count as intentional if the goal was to cause the outcome.**
+  - Example: Mark presses wrong button but wants to detonate bomb → intentional detonation.
+
+- **Unintended side effects are not intentional.**
+  - Example: Bullet hits unintended person → not intentional shooting of that person.
+
+---
+
+### 2. **Causation in Cases of Multiple Conditions (Logical AND / OR)**
+
+- **For OR conditions (either A or B causes outcome):**
+  - If one condition alone is sufficient, the other is *not* seen as causing the outcome.
+  - Example: Car starts if battery A or battery B present. If battery A alone is present, battery B’s presence is not a cause.
+  - Example: Coffee shop profits if anyone orders coffee. If others ordered anyway, one person’s order is not a cause.
+
+- **For AND conditions (both A and B needed):**
+  - Both conditions are necessary causes.
+  - Example: Building implodes if safety switch is off **and** knob A is on.
+    - If one condition was already met, and the other is changed to meet the second condition, the changer caused the implosion.
+  - Example: Circuit breaker fails if 3 people turn on lamps simultaneously.
+    - Each person who turned on their lamp is a cause if their action was necessary to reach the threshold.
+
+- **If a condition was already met before an action, that action may not be a cause.**
+  - Example: Safety switch off already, knob A off → turning knob A on causes implosion.
+  - But if safety switch off and knob A already on, not changing knob A is still a cause (inaction can be causal).
+
+---
+
+### 3. **Causation in Joint Actions / Shared Responsibility**
+
+- **If multiple agents act together and all are necessary for the outcome, all are causes.**
+  - Example: Two trains each heavy enough to collapse bridge alone → each caused collapse.
+  - Example: Two wires touching battery cause short circuit → both cause short circuit.
+
+- **If multiple agents act but only combined action causes outcome, individual actions alone are not causes.**
+  - Example: Two trains neither heavy enough alone → neither alone caused collapse.
+  - Example: Two fertilizers combined cause plant damage → neither alone causes damage.
+
+- **If one agent violates a rule and the other follows it, the violator is usually seen as cause.**
+  - Example: Zoe logs in when not permitted, Alice logs in as permitted → Zoe caused email.
+  - Exception: If both violate or both permitted, both can be causes.
+
+- **If one agent has responsibility and the other does not, responsibility matters for causation attribution.**
+  - Example: Janet responsible for oiling machines; Kate not responsible.
+    - If Janet fails, she caused breakdown.
+    - If Kate fails but not responsible, usually not seen as cause.
+  - If Kate notices Janet’s failure and still does not act when responsible, Kate can be cause.
+
+---
+
+### 4. **Causation and Foreseeability vs. Intention**
+
+- **Knowing a consequence will happen and proceeding anyway = intentional causation.**
+- **Not caring about a consequence but foreseeing it = intentional causation.**
+- **Not foreseeing or unaware = not intentional causation.**
+
+---
+
+### 5. **Causation in Chains and Underlying Causes**
+
+- **Immediate cause vs. underlying cause:**
+  - Immediate cause is the direct event leading to outcome.
+  - Underlying cause sets the stage but may not be seen as cause of immediate outcome.
+  
+- **Typical person tends to attribute cause to immediate event causing death or failure.**
+  - Example: John’s death caused by nurse’s medication error, not asbestos exposure, even though asbestos caused cancer.
+  - Exception: If underlying cause is necessary for vulnerability, some may say underlying cause contributed.
+
+---
+
+### 6. **Causation and Policy / Rules**
+
+- **Following official policy usually means no causation if outcome is negative.**
+  - Example: Alice logs in as permitted, Zoe violates policy → Zoe causes problem.
+- **Violating policy and causing outcome = cause.**
+- **If both violate or both permitted, both can be causes.**
+
+---
+
+### 7. **Causation and Knowledge of Rules**
+
+- **If an agent does not know a rule and acts accordingly, typical person may not blame them.**
+  - Example: Hedgehog unaware of pencil rule → not cause of problem.
+- **If agent knows rule and violates it, typical person attributes cause.**
+
+---
+
+### 8. **Causation and Multiple Sufficient Causes**
+
+- **If multiple independent sufficient causes exist, each is a cause.**
+  - Example: Two committees approve application; either approval sufficient → each approval is cause.
+- **If one cause is usual and the other unusual, typical person may discount the unusual as cause if usual alone suffices.**
+
+---
+
+### 9. **Causation and Inaction**
+
+- **Failure to act can be cause if there was a responsibility or duty to act.**
+  - Example: Kate notices Janet’s failure and does not oil machine → Kate caused breakdown.
+- **If no responsibility, inaction usually not cause.**
+
+---
+
+### 10. **Causation and Probability / Luck**
+
+- **Getting a lucky outcome without control is not intentional causation.**
+  - Example: Rolling a six on dice by chance → not intentional.
+- **If outcome depends on chance but agent acts to try to cause it, no intentional causation unless control is demonstrated.**
+
+---
+
+### Summary Table for Quick Reference
+
+| Scenario Type                          | Typical Person’s Causation Answer                         |
+|--------------------------------------|----------------------------------------------------------|
+| Intentional action with knowledge    | Yes                                                      |
+| Accident or loss of control           | No                                                       |
+| Foreseen but indifferent consequence  | Yes                                                      |
+| OR condition: one cause sufficient    | Only the sufficient cause(s) count                       |
+| AND condition: all necessary          | All necessary causes count                               |
+| Joint action: all necessary           | All are causes                                           |
+| Joint action: only combined cause     | Individual alone not cause                               |
+| Policy followed vs. violated          | Violator causes, follower does not                      |
+| Responsibility for action/inaction    | Responsible person’s failure can cause                   |
+| Unknown rule violation                 | Usually no cause                                         |
+| Immediate cause vs underlying cause   | Immediate cause usually attributed                       |
+| Multiple sufficient causes             | Each cause counts if sufficient                          |
+| Luck or chance outcome                 | No intentional causation                                 |
+
+---
+
+**Use this cheat sheet to analyze each question carefully:**
+
+- Identify if the outcome was intended or accidental.
+- Determine if the action was necessary and/or sufficient for the outcome.
+- Consider the role of rules, responsibilities, and knowledge.
+- Distinguish between immediate and underlying causes.
+- Evaluate if inaction counts as cause based on responsibility.
+- Assess if multiple causes are independent or combined.
+
+---
+
+This focused guide should help you confidently answer the more challenging causation questions without referring back to examples.
+
+Follow the format of the examples below in your response.
+
+Question: How would a typical person answer each of the following questions about causation?
+Jen sees some puppies playing next to her driveway again and wants to kill them. She decides to go to the hardware store to buy some rat poison that she thinks will work on the puppies. As she pulls out of her garage, the wheel slips in her hand and she drives off to the side of the driveway. All the puppies are crushed and killed under the car. With the puppies eliminated, Jen doesn't need to go to the hardware store. Did Jen intentionally kill the puppies?
+Options:
+- Yes
+- No
+Reasoning: Let's think step by step.  
+Here in this question, we are told that Jen wanted to kill the puppies and planned to buy rat poison, but as she was leaving, her wheel slipped and she accidentally ran over the puppies. A typical person would assume that, although Jen wanted the puppies dead, she did not intend to kill them by running them over; it was an accident caused by her hand slipping on the wheel. Therefore, Jen did not intentionally kill the puppies. So the answer is No.
+Answer: No
+###
+Question: How would a typical person answer each of the following questions about causation?
+Brown is playing a simple game of dice. The game requires that Brown roll a six to win. So, hoping to get a six, Brown throws a die onto the table. Unluckily for the other players, the die lands six-up and Brown wins the game. Did Brown intentionally roll a six?
+Options:
+- Yes
+- No
+Reasoning: Let's think step by step.  
+Here in this question, we are told that Brown "hopes" to get a six and throws the die, but there is no indication that Brown has any special control over the outcome of the roll. Rolling a six on a fair die is a matter of chance, not intention. A typical person would therefore conclude that Brown did not intentionally roll a six, but rather got lucky. So the answer is No.
+Answer: No

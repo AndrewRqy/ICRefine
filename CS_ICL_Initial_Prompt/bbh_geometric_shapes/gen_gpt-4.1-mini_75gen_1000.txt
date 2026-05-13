@@ -1,0 +1,122 @@
+**SVG Path Shapes Cheat Sheet for Difficult Examples**
+
+---
+
+### 1. **Understanding SVG Path Commands**
+
+- **M x,y**: Move to coordinate (x,y) without drawing.
+- **L x,y**: Draw a straight line from current point to (x,y).
+- **A rx,ry x-axis-rotation large-arc-flag,sweep-flag x,y**: Draw an elliptical arc from current point to (x,y) with radii rx, ry, rotation, and flags.
+
+---
+
+### 2. **Identifying Polygons by Number of Sides**
+
+- Count **unique points connected by lines** (ignore repeated moves without drawing).
+- Closed shape if path returns to starting point.
+- Polygon names by sides:
+  - 3 sides → **Triangle**
+  - 4 sides → **Quadrilateral** (see special cases below)
+  - 5 sides → **Pentagon**
+  - 6 sides → **Hexagon**
+  - 7 sides → **Heptagon**
+  - 8 sides → **Octagon**
+
+---
+
+### 3. **Distinguishing Quadrilaterals**
+
+When the shape has 4 sides, options usually include:
+
+- **Rectangle**:  
+  - Opposite sides equal and parallel.  
+  - All angles 90°.  
+  - Coordinates show vertical/horizontal lines with equal lengths.
+
+- **Kite**:  
+  - Two pairs of adjacent sides equal in length.  
+  - Not necessarily parallel sides.  
+  - Check side lengths: adjacent pairs equal, opposite sides usually unequal.
+
+- **Trapezoid**:  
+  - At least one pair of parallel sides.  
+  - Other sides not necessarily equal or parallel.  
+  - Coordinates often show two sides with same y or x values (horizontal or vertical), but not all sides parallel.
+
+**How to decide:**
+
+- Calculate distances between consecutive points to check side lengths.
+- Check if pairs of sides are parallel by comparing coordinates:
+  - Horizontal sides: y-coordinates equal.
+  - Vertical sides: x-coordinates equal.
+- Check angles if possible (right angles for rectangle).
+- If two pairs of adjacent sides equal → kite.
+- If only one pair of parallel sides → trapezoid.
+- If two pairs of parallel sides and right angles → rectangle.
+
+---
+
+### 4. **Identifying Curved Shapes (Arcs)**
+
+- Presence of **"A" commands** indicates arcs (elliptical or circular).
+- Two consecutive arcs with same radii and rotation, returning to start → **Ellipse**.
+- If radii equal and no rotation → **Circle** (special case of ellipse).
+- Arc combined with two straight lines forming a wedge → **Sector** (pie slice).
+- Arc with two straight lines returning to start → sector shape.
+
+---
+
+### 5. **Handling Multiple Subpaths (Multiple "M" commands)**
+
+- Multiple "M" commands split the path into subpaths.
+- To identify shape:
+  - Consider all connected points that form a closed loop.
+  - Ignore moves without drawing.
+  - Count unique points connected by lines in the closed loop.
+- Sometimes subpaths connect to form a polygon with multiple sides.
+
+---
+
+### 6. **Summary of Difficult Cases**
+
+| Shape Type | Key Identifiers | Notes |
+|------------|-----------------|-------|
+| **Heptagon (7 sides)** | 7 unique connected points forming closed path | Count carefully, include all connected points ignoring moves without drawing |
+| **Hexagon (6 sides)** | 6 unique connected points forming closed path | Same as above |
+| **Octagon (8 sides)** | 8 unique connected points forming closed path | Same as above |
+| **Pentagon (5 sides)** | 5 unique connected points forming closed path | Same as above |
+| **Trapezoid** | 4 sides, exactly one pair of parallel sides | Check coordinate equality for parallelism; side lengths may vary |
+| **Kite** | 4 sides, two pairs of adjacent equal sides | Calculate side lengths; adjacent pairs equal |
+| **Rectangle** | 4 sides, two pairs of parallel sides, all angles 90° | Coordinates show vertical/horizontal lines; equal opposite sides |
+| **Sector** | Path with arcs and two straight lines forming wedge | Look for "A" commands with two lines closing the shape |
+| **Ellipse** | Two arcs with same radii and rotation forming closed curve | "A" commands with equal rx, ry and rotation |
+| **Line** | Only two points connected by one line segment | Only one "M" and one "L" command, no closure |
+
+---
+
+### 7. **Tips for Quick Identification**
+
+- **Count points carefully**: Include all points connected by lines, ignore moves without drawing.
+- **Check closure**: Does the path return to the starting point?
+- **Look for arcs**: Presence of "A" commands means curved shapes (ellipse, sector).
+- **For quadrilaterals**:  
+  - Check side lengths and parallelism to distinguish kite, trapezoid, rectangle.
+- **Multiple subpaths**: Combine connected points to find polygon sides.
+- **If only two points and one line**: It's a line.
+
+---
+
+### 8. **Example Quick Checks**
+
+- Path with 7 unique points connected → **Heptagon**.
+- Path with 6 unique points connected → **Hexagon**.
+- Path with 8 unique points connected → **Octagon**.
+- Path with 4 points, two pairs of adjacent equal sides → **Kite**.
+- Path with 4 points, one pair of parallel sides → **Trapezoid**.
+- Path with arcs forming closed curve → **Ellipse**.
+- Path with arcs and two straight lines forming wedge → **Sector**.
+- Path with only two points and one line → **Line**.
+
+---
+
+Keep this cheat sheet handy in your mind to analyze SVG path elements quickly and accurately during the test!

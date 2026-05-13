@@ -1,0 +1,98 @@
+Certainly! Here’s a **cheat sheet** focused on the most challenging aspects of identifying sarcasm in statements, based on the examples above. This guide is designed to help you quickly and accurately spot sarcasm in similar test questions.
+
+---
+
+# Sarcasm Identification Cheat Sheet
+
+## 1. **Contradiction Between Literal Meaning and Context**
+- **Sarcasm often says the opposite of what is meant.**
+  - If a statement praises something that is clearly negative (or vice versa), it’s likely sarcastic.
+  - **Example:** “What a great transformation” after describing someone drinking every day.
+
+## 2. **Exaggeration or Absurdity**
+- **Sarcastic statements often use exaggeration to highlight absurdity.**
+  - If a statement is so extreme it’s obviously not meant literally, it’s probably sarcastic.
+  - **Example:** “We should start a petition to ban breathing.”
+
+## 3. **Ironic Praise or Blame**
+- **Sarcasm uses praise for bad things or blame for good things.**
+  - If someone is called “brilliant” or “the best” after doing something obviously bad, it’s sarcasm.
+  - **Example:** “What a brilliant person” for leaving space junk in orbit.
+
+## 4. **Mocking Common Sense or Reality**
+- **Sarcasm mocks what everyone knows to be true.**
+  - If a statement pretends not to know something obvious, it’s sarcastic.
+  - **Example:** “Impossible, as there’s no one on the internet.”
+
+## 5. **Rhetorical Questions with Obvious Answers**
+- **Sarcasm often uses rhetorical questions where the answer is obvious and the question is meant to mock.**
+  - **Example:** “How could government control of the internet be bad?” (implying it obviously is bad).
+
+## 6. **Absurd Solutions or Suggestions**
+- **Sarcasm proposes ridiculous solutions to serious problems.**
+  - **Example:** “Have you tried not being poor? It is much easier.”
+
+## 7. **Mismatch Between Description and Conclusion**
+- **Sarcasm describes something negative, then concludes with a positive statement (or vice versa).**
+  - **Example:** “It’s been a fun semester” after listing only stressful events.
+
+## 8. **Use of “Totally,” “Clearly,” “Obviously,” “Of course,” etc.**
+- **These words often signal sarcasm when used to exaggerate a point.**
+  - **Example:** “He only urged; totally different” (when the difference is being downplayed sarcastically).
+
+## 9. **Praise for the Absurd or Unpleasant**
+- **Calling something obviously unpleasant “beautiful,” “classy,” “fun,” etc. is usually sarcastic.**
+  - **Example:** “Concrete plates. Very beautiful.”
+
+## 10. **Agreement with an Absurd Premise**
+- **Sarcasm sometimes agrees with a ridiculous idea to mock it.**
+  - **Example:** “You mean Knuth up arrow notation isn’t normal for you?”
+
+---
+
+### **Quick Steps for Each Question:**
+1. **Look for contradiction** between the statement and reality/common sense.
+2. **Check for exaggeration** or absurdity.
+3. **See if praise or blame is being used ironically.**
+4. **Ask if the statement is mocking something obvious.**
+5. **Watch for rhetorical questions with obvious answers.**
+6. **Identify mismatches** between the description and the conclusion.
+7. **Notice if the statement proposes an absurd solution.**
+8. **Look for sarcastic signal words** (“totally,” “of course,” etc.).
+9. **Check if the statement agrees with an obviously bad idea.**
+
+---
+
+### **Common Patterns in Options:**
+- **Sarcastic option often uses positive words for negative things, or negative words for positive things.**
+- **Sarcastic option often contains an exaggeration or absurdity.**
+- **Sarcastic option often mocks or trivializes a serious issue.**
+- **Sarcastic option often uses irony to highlight the opposite of what is stated.**
+
+---
+
+**If stuck, ask yourself:**  
+*“Is this statement saying something that is obviously not true, or is it using praise/blame in a way that doesn’t fit the situation?”*  
+If yes, it’s probably sarcastic.
+
+---
+
+**Use this cheat sheet to quickly analyze options and pick the sarcastic statement!**
+
+Follow the format of the examples below in your response.
+
+Question: Which statement is sarcastic?
+Options:
+(A) You mean Knuth up arrow notation isn't unfamiliar for you?
+(B) You mean Knuth up arrow notation isn't normal for you?
+Reasoning: Let's think step by step.  
+We need to identify which statement is sarcastic. Option (A) says "You mean Knuth up arrow notation isn't unfamiliar for you?" — this suggests surprise that someone is actually familiar with a very obscure mathematical notation, which is a sincere expression of surprise. Option (B) says "You mean Knuth up arrow notation isn't normal for you?" — this implies that it is normal to be familiar with a highly specialized notation, which is an unreasonable expectation and thus sarcastic. The sarcasm comes from pretending that something obscure is actually common knowledge. So the answer is (B).
+Answer: (B)
+###
+Question: Which statement is sarcastic?
+Options:
+(A) Yeah, I've noticed he's been drinking every day recently, what a great transformation
+(B) Yeah, I've noticed he's been exercising every day recently, what a great transformation
+Reasoning: Let's think step by step.  
+We need to identify which statement is sarcastic. Option (A) says "he's been drinking every day recently, what a great transformation" — drinking every day is generally considered a negative change, so calling it a "great transformation" is clearly ironic and sarcastic. Option (B) says "he's been exercising every day recently, what a great transformation" — exercising daily is a positive change, so calling it a "great transformation" is sincere. Therefore, the sarcasm is in option (A). So the answer is (A).
+Answer: (A)

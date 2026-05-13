@@ -1,0 +1,452 @@
+**Cheat Sheet for Tackling Challenging Logical Reasoning Problems**
+
+---
+
+### 1. **Flaw Identification: Personal Interest vs. City’s Interest (Example: Mayor blocking fees)**
+
+- **Key Insight:**  
+  Just because an action benefits someone personally **does not mean** it harms the public interest.  
+- **Common Flaw:** Assuming personal advantage excludes public advantage.  
+- **How to Spot:**  
+  - Check if the argument assumes **mutual exclusivity** of personal and public benefits without proof.  
+  - Look for answer choices that say: *“Personal advantage ≠ conflict with public advantage.”*
+
+---
+
+### 2. **Weaken an Argument by Challenging the Mediating Factor (Example: Ginkgo reduces stress → better memory)**
+
+- **Key Insight:**  
+  To weaken an argument that claims *A causes B via C*, show that *C* is absent or irrelevant.  
+- **How to Spot:**  
+  - Identify the mediating factor (e.g., stress reduction).  
+  - Find answer choices that say the mediating factor was **not present** or **not relevant** in the scenario.  
+- **Typical Weakener:**  
+  - Both groups had normal levels of the mediating factor → no room for improvement via that factor.
+
+---
+
+### 3. **Parallel Reasoning: Disproving Necessity by Counterexample (Example: Retailers excelling in one area)**
+
+- **Key Insight:**  
+  The argument disproves that *both* conditions are necessary by showing success with *only one*.  
+- **How to Spot:**  
+  - Premise: Lack of excellence in both → failure.  
+  - Premise: Success with excellence in only one.  
+  - Conclusion: Excellence in both is *not necessary*.  
+- **Look for answer choices with:**  
+  - Two qualities, failure when both absent, success with one present, conclusion about necessity.
+
+---
+
+### 4. **Support for Hypothesis via Common Practice (Example: Use of scale drawings in ancient construction)**
+
+- **Key Insight:**  
+  To support a hypothesis about a method’s use, show that the method was **commonly used** in the relevant context.  
+- **How to Spot:**  
+  - Hypothesis: Method X was used.  
+  - Support: Method X was common in that era/region.  
+- **Avoid:**  
+  - Irrelevant facts (e.g., timeline that weakens hypothesis).  
+  - Modern attempts or unrelated comparisons.
+
+---
+
+### 5. **Flaw: Rejecting a Conclusion Solely Because the Supporting Argument is Weak (Example: Newspaper subscriber on Arnot’s editorial)**
+
+- **Key Insight:**  
+  Weakness of an argument **does not imply** the conclusion is false.  
+- **How to Spot:**  
+  - The respondent dismisses a conclusion just because the argument depends on a dubious assumption.  
+- **Answer Choice Clue:**  
+  - “Repudiates a claim merely because the argument is inadequate.”
+
+---
+
+### 6. **“Could be True” vs. “Cannot be True” Questions (Example: Party Chairperson’s statements about qualifications)**
+
+- **Key Insight:**  
+  Use the premises to check for **contradictions**.  
+- **How to Spot:**  
+  - Premise: Every member of Group A is better qualified than any member of Group B.  
+  - Check if the option contradicts this (e.g., someone from B better qualified than someone from A).  
+- **Tip:**  
+  - If an option contradicts a universal premise, it **cannot be true**.
+
+---
+
+### 7. **Disagreement Identification (Example: Sherrie vs. Fran on addictiveness and regulation)**
+
+- **Key Insight:**  
+  Identify the **core point of contention** between speakers.  
+- **How to Spot:**  
+  - One says “Addictiveness justifies regulation.”  
+  - The other says “If addictiveness justified regulation, then caffeine would be regulated, but it’s not.”  
+- **Answer Clue:**  
+  - Disagreement about whether scientific agreement on addictiveness **justifies** government restrictions.
+
+---
+
+### 8. **Causal Reasoning Flaw: Assuming Single Cause (Example: City geography and automobiles)**
+
+- **Key Insight:**  
+  Flaw is assuming that because cause A leads to effect B, B could only be caused by A.  
+- **How to Spot:**  
+  - Argument treats cause as **necessary and sufficient** without considering other causes.  
+- **Answer Clue:**  
+  - “Assumes the effect could only have resulted from that cause.”
+
+---
+
+### 9. **Must Be True from Conditional Statements (Example: World literature and national traditions)**
+
+- **Key Insight:**  
+  If a work is world literature, it must be received in **both** the writer’s and external national traditions.  
+- **How to Spot:**  
+  - Look for answer choices that say:  
+    - If only one tradition is affected, it’s not world literature.  
+    - Work must affect multiple traditions.  
+- **Avoid:**  
+  - Statements about influence or reception that are not about **both** traditions.
+
+---
+
+### 10. **Role of a Claim in an Argument (Example: Proliferation of arguments about mechanism and democracy)**
+
+- **Key Insight:**  
+  Identify if the claim is:  
+  - A hypothesis being challenged,  
+  - Evidence supporting the conclusion,  
+  - The conclusion itself, or  
+  - Background info.  
+- **How to Spot:**  
+  - If the argument **disputes** the claim, it’s a hypothesis being challenged.
+
+---
+
+### 11. **Assumption in Analogy-Based Arguments (Example: Club president inviting speaker without consultation)**
+
+- **Key Insight:**  
+  For analogy to hold, the precedent action must be **appropriate**.  
+- **How to Spot:**  
+  - The argument says “Previous similar action was done → current action is appropriate.”  
+  - Assumes previous action was appropriate.  
+- **Answer Clue:**  
+  - “Previous action was appropriate” is the key assumption.
+
+---
+
+### 12. **Strengthen/Weaken by Showing Mediating Factor Absent (Example: Stress reduction and memory)**
+
+- **Key Insight:**  
+  To weaken, show the mediating factor (stress) was **not present** or **not high**.  
+- **To strengthen,** show the mediating factor is **present** and relevant.
+
+---
+
+### 13. **Flawed Causal Inference: Assuming Correlation Implies Causation (Example: Algae and fish deaths)**
+
+- **Key Insight:**  
+  Correlation ≠ causation.  
+- **How to Spot:**  
+  - Argument assumes A causes B because A and B coincide.  
+  - Flaw: Could be a **common cause** causing both A and B.  
+- **Answer Clue:**  
+  - “Ignores possibility that both effects are independent results of a common cause.”
+
+---
+
+### 14. **Logical Fallacy: Affirming the Inverse (Example: No one has both A and B; person lacks B; conclude person has A)**
+
+- **Key Insight:**  
+  From “No one has both A and B” and “Person does not have B,” you **cannot** conclude “Person has A.”  
+- **How to Spot:**  
+  - The argument mistakes “If A then not B” for “If not B then A.”  
+- **Answer Clue:**  
+  - Look for answer choice that shows this invalid inference.
+
+---
+
+### 15. **Assumption for Generalizing from Experiment (Example: Neanderthal toolmaking and language)**
+
+- **Key Insight:**  
+  To generalize from an experiment, the experimental task must be **comparable in complexity** to the real-world task.  
+- **How to Spot:**  
+  - Weakener: The experimental task is **simpler** than the real task.  
+- **Answer Clue:**  
+  - “Tools taught were much simpler than actual Neanderthal tools.”
+
+---
+
+### 16. **Main Conclusion Identification (Example: Birds’ innate homing sense)**
+
+- **Key Insight:**  
+  Distinguish between premises (e.g., inconclusive studies) and the main conclusion (e.g., little reason to accept innate homing sense).  
+- **How to Spot:**  
+  - The conclusion is the **author’s main claim**, not just a fact or premise.
+
+---
+
+### 17. **Assumption Linking Measurement to Replication (Example: Counterfeit banknotes)**
+
+- **Key Insight:**  
+  For making counterfeits, **accurate measurement of images is necessary and sufficient** for replication.  
+- **How to Spot:**  
+  - Assumption: Once images are measured accurately, replication is straightforward.  
+- **Answer Clue:**  
+  - “No further impediment to exact replication after accurate measurement.”
+
+---
+
+### 18. **Explaining Paradox by Stress Transfer (Example: Bridge fractures not at high-stress points)**
+
+- **Key Insight:**  
+  Reinforcement at high-stress points transfers stress elsewhere, causing fractures away from those points.  
+- **How to Spot:**  
+  - Explanation involves **redistribution of stress** due to reinforcement.  
+- **Answer Clue:**  
+  - “Reinforcement prevents fractures at high-stress points but transfers stress to other points.”
+
+---
+
+### 19. **Assumption about Uniformity for Generalization (Example: Ball lightning cause)**
+
+- **Key Insight:**  
+  To generalize from observed instances to all instances, assume **all instances have the same cause**.  
+- **How to Spot:**  
+  - Argument generalizes from one observation to all cases.  
+- **Answer Clue:**  
+  - “All types of phenomenon have the same cause.”
+
+---
+
+### 20. **Flawed Conditional Reasoning: Mistaking Necessary for Sufficient (Example: Squirrels eating → few birds)**
+
+- **Key Insight:**  
+  From “Squirrels eat only if no cover” (Squirrels eat → no cover), you **cannot** infer “No cover → squirrels eat.”  
+- **How to Spot:**  
+  - The argument assumes the converse of a conditional.  
+- **Answer Clue:**  
+  - Look for answer choice showing this converse error.
+
+---
+
+### 21. **Pattern of Reasoning: Rejecting One Option Due to Risk, Choosing the Other (Example: Radio producer’s music choice)**
+
+- **Key Insight:**  
+  Two options; one is risky/problematic → choose the other.  
+- **How to Spot:**  
+  - Premise: Option A or B.  
+  - Option B has a negative consequence.  
+  - Conclusion: Choose Option A.  
+- **Answer Clue:**  
+  - Look for similar forced choice due to risk.
+
+---
+
+### 22. **Strengthen Argument by Showing Mechanism (Example: Copy protection leading to sales increase)**
+
+- **Key Insight:**  
+  Strengthen by showing **how** the new feature encourages legitimate purchases.  
+- **How to Spot:**  
+  - Look for answer explaining that the feature causes users to want to buy after trial.  
+- **Answer Clue:**  
+  - “Copied game playable briefly → users want to buy.”
+
+---
+
+### 23. **Weakness: Extrapolating Beyond Tested Range (Example: Fruit freshness and temperature)**
+
+- **Key Insight:**  
+  Flaw is extrapolating from a narrow tested range to all possible values.  
+- **How to Spot:**  
+  - Experiment tests limited conditions.  
+  - Conclusion applies broadly.  
+- **Answer Clue:**  
+  - “Extrapolates from narrow range to entire range.”
+
+---
+
+### 24. **Assumption about Popularity and Pleasure (Example: Book sales and truthfulness)**
+
+- **Key Insight:**  
+  Argument assumes **popularity implies pleasure**.  
+- **How to Spot:**  
+  - Argument says popular books give pleasure, so if pleasure implied untruth, popular books would be untrue.  
+- **Answer Clue:**  
+  - “A book will not be popular unless it gives pleasure.”
+
+---
+
+### 25. **Assumption about Accuracy of Perceptions (Example: Native speakers vs. travelers hearing language)**
+
+- **Key Insight:**  
+  Argument assumes **native speakers’ perception is not more accurate** than non-speakers’ perception of speech sounds.  
+- **How to Spot:**  
+  - Travelers hear continuous stream → native speakers perceive words.  
+  - To claim native perception is illusion, assume travelers’ perception is at least as accurate.  
+- **Answer Clue:**  
+  - “Native speakers’ perceptions are not more accurate than non-speakers’.”
+
+---
+
+### 26. **Flaw: Generalizing from Single Past Event (Example: Community cleanup participation)**
+
+- **Key Insight:**  
+  Flaw is predicting future based on one past instance.  
+- **How to Spot:**  
+  - Only one prior event used to predict similar outcome.  
+- **Answer Clue:**  
+  - “Generalizes from single observation.”
+
+---
+
+### 27. **Flaw: Assuming Student Preference for “Different Vendor” Means Preference for Specific Vendor (Example: University food vendor)**
+
+- **Key Insight:**  
+  Students may want a different vendor but not necessarily the *only* alternative available.  
+- **How to Spot:**  
+  - Argument assumes “different vendor” = “specific vendor.”  
+- **Answer Clue:**  
+  - “Students unaware only one alternative exists.”
+
+---
+
+### 28. **Flaw: Adding Percentages Without Considering Overlap (Example: Houses with drainage and structural defects)**
+
+- **Key Insight:**  
+  Adding percentages assumes disjoint sets; overlap reduces total.  
+- **How to Spot:**  
+  - Two problem groups may overlap → total less than sum.  
+- **Answer Clue:**  
+  - “Some houses have both problems.”
+
+---
+
+### 29. **Principle Justifying Risk Acceptance for Original Form Appreciation (Example: Art restoration)**
+
+- **Key Insight:**  
+  It is acceptable to risk future damage if it enables appreciation of original form.  
+- **How to Spot:**  
+  - Argument weighs risk vs. value of original appearance.  
+- **Answer Clue:**  
+  - “Acceptable to risk damage to enable appreciation of original.”
+
+---
+
+### 30. **Principle Justifying “Never Use” Based on Tastiness and Healthfulness (Example: Dried parsley)**
+
+- **Key Insight:**  
+  If an ingredient is less tasty and less healthful, it should never be used.  
+- **How to Spot:**  
+  - Argument moves from quality to usage prohibition.  
+- **Answer Clue:**  
+  - “Only tastiest ingredients should be used.”
+
+---
+
+### 31. **Main Point: Contradiction Between Universal Claim and Observed Exception (Example: Great art imitates nature)**
+
+- **Key Insight:**  
+  If universal claim conflicts with observed exceptions, then either the claim is false or exceptions are not members of the category.  
+- **How to Spot:**  
+  - “Either claim is false or exceptions are not included.”  
+- **Answer Clue:**  
+  - “Either claim is incorrect or exceptions are not members.”
+
+---
+
+### 32. **Weakener: Majority of Subscribers Are Individuals with Unchanged Rates (Example: Scholarly journal subscription rates)**
+
+- **Key Insight:**  
+  Increased rates for a minority (libraries) do not imply increased overall profitability if majority (individuals) rates unchanged.  
+- **How to Spot:**  
+  - Look for info about majority subscribers and their rates.  
+- **Answer Clue:**  
+  - “Most subscribers are individuals with unchanged rates.”
+
+---
+
+### 33. **Overestimation Due to Counting Paychecks Instead of People (Example: Employment estimate by paycheck count)**
+
+- **Key Insight:**  
+  Counting paychecks overcounts employees if multiple paychecks per employee exist.  
+- **How to Spot:**  
+  - Multiple paychecks per person → inflated employment numbers.  
+- **Answer Clue:**  
+  - “Government overestimated employment due to multiple paychecks.”
+
+---
+
+### 34. **Resolving Discrepancy by Alternative Function of Behavior (Example: Hissing in ancestor)**
+
+- **Key Insight:**  
+  Behavior may have served a different function (e.g., visual intimidation) if intended recipient couldn’t perceive it as expected (e.g., sound).  
+- **How to Spot:**  
+  - Behavior effective via other means than assumed sensory channel.  
+- **Answer Clue:**  
+  - “Behavior increased apparent size or had visual effect.”
+
+---
+
+### 35. **Difference in Profit Models Explains Different Executive Goals (Example: Movies vs. TV)**
+
+- **Key Insight:**  
+  Movie profits depend on number of viewers; TV profits depend on viewer demographics (purchasing power).  
+- **How to Spot:**  
+  - TV executives focus on quality/type of viewers, not just quantity.  
+- **Answer Clue:**  
+  - “TV profits depend on sponsors’ interest in viewers’ purchasing power.”
+
+---
+
+### 36. **Assumption Overlooked: Proposal Applies Only to Future Conduct (Example: Sigerson’s ethical guidelines)**
+
+- **Key Insight:**  
+  Past behavior does not invalidate proposals about future conduct.  
+- **How to Spot:**  
+  - Argument attacks proposer’s past, ignoring future applicability.  
+- **Answer Clue:**  
+  - “Proposal concerns future conduct, not past behavior.”
+
+---
+
+### 37. **Must Be True: Attachment Helps but Does Not Fully Compensate (Example: Whipping cream in blender)**
+
+- **Key Insight:**  
+  Attachment improves whipping somewhat but cannot fully compensate for poor air intake.  
+- **How to Spot:**  
+  - Look for statements about partial but insufficient help.  
+- **Answer Clue:**  
+  - “Attachment does not suffice for complete effective whipping.”
+
+---
+
+### 38. **Assumption: Accurate Measurement Enables Exact Replication (Example: Counterfeit banknotes)**
+
+- **Key Insight:**  
+  Accurate measurement is necessary and sufficient for exact replication.  
+- **How to Spot:**  
+  - Argument depends on measurement being the key step.  
+- **Answer Clue:**  
+  - “No further impediment after accurate measurement.”
+
+---
+
+### 39. **Strengthen by Showing Copy Protection Encourages Purchase (Example: Ditalgame’s new feature)**
+
+- **Key Insight:**  
+  Copy protection allows trial play, leading to purchase decision.  
+- **How to Spot:**  
+  - Look for mechanism linking protection to increased sales.  
+- **Answer Clue:**  
+  - “Copied game playable briefly → users want to buy.”
+
+---
+
+### 40. **Assumption: Native Speakers’ Perception Not More Accurate Than Non-Speakers’ (Example: Language perception)**
+
+- **Key Insight:**  
+  Travelers’ perception of continuous stream is at least as accurate as natives’ perception of words.  
+- **How to Spot:**  
+  - Argument depends on travelers’ perception reflecting reality.  
+- **Answer Clue:**

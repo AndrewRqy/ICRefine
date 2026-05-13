@@ -1,0 +1,175 @@
+**Cheat Sheet for Answering Causation Questions (Focused on Difficult Cases)**
+
+---
+
+### 1. **Causation in Cases of Joint or Multiple Causes**
+
+- **When an outcome requires multiple conditions simultaneously (e.g., both A and B must occur):**
+  - If the outcome only happens when *both* conditions are met, then each condition alone is **not sufficient** to cause the outcome.
+  - A typical person usually says **each alone did NOT cause** the outcome.
+  - Example: Machine short circuits only if black wire AND red wire touch battery simultaneously.
+    - Black wire alone → no short circuit → black wire did NOT cause short circuit.
+    - Red wire alone → no short circuit → red wire did NOT cause short circuit.
+  - However, if one condition is abnormal/unexpected and the other is normal/expected, people tend to attribute causation to the **abnormal factor**.
+    - E.g., black wire is supposed to touch battery, red wire is not → red wire seen as cause.
+
+- **When multiple agents contribute jointly but each alone is insufficient:**
+  - Typical person says **no single agent alone caused** the outcome.
+  - Example: Two trains together collapse a bridge, neither alone heavy enough → each alone did NOT cause collapse.
+
+- **When multiple agents contribute but each alone is sufficient:**
+  - Typical person says **each agent caused** the outcome.
+  - Example: Either train alone heavy enough to collapse bridge → each caused collapse.
+
+---
+
+### 2. **Causation in Cases of Redundant or Alternative Causes**
+
+- **When an outcome occurs if *either* of two conditions is met (logical OR):**
+  - If one condition is already sufficient, the other is **not necessary**.
+  - Typical person says the second condition did **not cause** the outcome if the first was already true.
+  - Example: Guitar plays if amplifier is on channel A OR power mixer is on.
+    - If amplifier is on channel A, power mixer being on or off does not cause the guitar to play.
+  - Similarly, if a person qualifies for a benefit by either condition, changing the second condition is not seen as causing the benefit if the first condition already applied.
+
+- **If both conditions are true, but one alone suffices:**
+  - Typical person attributes causation only to the condition that was necessary or first met.
+  - Example: Prof. Smith gets computers if IT committee OR budget committee approves.
+    - IT committee approves (usual), budget committee also approves.
+    - Budget committee approval did NOT cause the outcome.
+
+---
+
+### 3. **Causation in Cases of Foreseeable but Unintended Consequences**
+
+- **If an agent foresees a harmful side effect but does not care and proceeds anyway:**
+  - Typical person says the agent **intentionally caused** the side effect.
+  - Intention includes awareness and acceptance of the outcome, even if the agent's primary goal was different.
+  - Example: Hunter shoots deer knowing eagle will fly away → intentionally caused eagle to fly away.
+  - Example: Sniper shoots target knowing gunfire alerts enemies → intentionally alerted enemies.
+
+- **If an agent foresees a side effect but does not aim for it and does not care:**
+  - Typical person says the agent **did not intentionally cause** the side effect.
+  - The side effect is a known but unintended consequence.
+  - Example: Hunter shoots deer knowing eagle will fly away but only wants to kill deer → no intentional cause of eagle flying.
+  - Example: Lieutenant orders squad to hill knowing it will save soldiers but only cares about hill → no intentional saving of soldiers.
+
+---
+
+### 4. **Causation in Cases of Mistaken or Accidental Actions**
+
+- **If an agent intends a harmful outcome but acts mistakenly about how to achieve it:**
+  - Typical person says the agent **intentionally caused** the outcome.
+  - Intention is about the goal, not the precise means.
+  - Example: Mark wants to detonate bomb, presses wrong button but it detonates → intentional killing.
+
+- **If an agent wants a harmful outcome but the actual harm occurs accidentally (unintended means):**
+  - Typical person says the agent **did not intentionally cause** the harm by that means.
+  - Example: Jen wants to kill puppies with poison but accidentally runs them over → no intentional killing by running over.
+
+- **If an agent loses control and the outcome occurs accidentally:**
+  - Typical person says the outcome was **not intentional**.
+  - Example: George loses balance, dart slips and hits high point → no intentional hit.
+
+---
+
+### 5. **Causation in Cases of Responsibility and Duty**
+
+- **If a person is responsible for a task and fails to perform it, causing harm:**
+  - Typical person says the failure **caused** the harm.
+  - Example: Janet responsible for oiling machine, forgets, machine breaks → Janet caused breakdown.
+
+- **If another person knows of the failure and could have fixed it but is not responsible:**
+  - Typical person may say their failure **caused** the harm if they noticed and did nothing.
+  - If they did not notice or were not responsible, typical person says **no cause**.
+  - Example: Kate knows Janet forgot to oil and does not oil → Kate caused breakdown.
+  - If Kate did not notice → Kate did NOT cause breakdown.
+  - If Kate is not responsible and did not notice → no cause.
+
+---
+
+### 6. **Causation in Cases of Combined Actions Leading to Harm**
+
+- **When harm results from a combination of two actions (e.g., two chemicals):**
+  - Typical person attributes causation to **both parties** whose actions combined to cause harm.
+  - Even if one party was unaware or misinformed, their action is still a cause.
+  - Example: Plants dried out only where both fertilizers A and B applied → both gardeners caused harm.
+
+- **If one party followed instructions and the other did not:**
+  - Typical person may still say the one who followed instructions caused harm if their action was necessary for the harmful combination.
+  - However, if the harm only occurs due to the combination, and one party alone would not cause harm, the party acting alone is **not solely responsible**.
+
+---
+
+### 7. **Causation in Cases of Immediate vs. Underlying Causes of Death**
+
+- **Immediate cause of death vs. underlying cause:**
+  - Typical person focuses on **immediate cause** when asked about cause of death.
+  - Example: John exposed to asbestos → lung cancer → terminal.
+    - Wrong medication administered → allergic reaction → death.
+    - Immediate cause: medication error → job did NOT cause death.
+    - Medication error did cause death.
+  - However, when asked about **premature death** caused by exposure, typical person may say asbestos exposure **did cause** premature death because it set the chain in motion.
+
+---
+
+### 8. **Causation in Cases of Policy or Organizational Decisions**
+
+- **If decision-makers know harm will occur but do not care and proceed:**
+  - Typical person says they **intentionally caused** harm.
+  - Example: CEO or board implements program knowing it harms environment but only cares about profit → intentional harm.
+
+- **If decision-makers oppose the harmful action but are forced to comply:**
+  - Typical person says they did **not intentionally cause** harm.
+  - Example: Board members oppose program but must implement → no intentional harm.
+
+---
+
+### 9. **Causation in Cases of Norm Violations and Knowledge**
+
+- **If an agent violates a norm knowingly:**
+  - Typical person attributes causation to the violator.
+  - Example: Zoe logs in when not permitted → causes email to be sent.
+
+- **If an agent violates a norm unknowingly (did not know the rule):**
+  - Typical person less likely to attribute causation.
+  - Example: Hedgehog takes pencils not knowing rule → typically no cause assigned.
+
+---
+
+### 10. **Causation in Cases of Contribution vs. Necessity**
+
+- **If an action was necessary for the outcome (without it, outcome would not occur):**
+  - Typical person says action caused the outcome.
+  - Example: Jim turning on lamp caused breaker to fail because without him, only two lamps on → no failure.
+
+- **If an action was not necessary (outcome would occur anyway):**
+  - Typical person says action did not cause the outcome.
+  - Example: Drew ordering coffee when others ordered → shop would profit anyway → Drew did not cause profit.
+
+---
+
+### Summary Table for Quick Reference
+
+| Scenario Type                              | Typical Person's Causation Judgment                          |
+|--------------------------------------------|--------------------------------------------------------------|
+| Joint necessary causes (AND)                | Each alone did NOT cause                                     |
+| Joint sufficient causes (OR)                | Each alone caused if sufficient                              |
+| Foreseen but unintended side effect         | Not intentional cause                                       |
+| Foreseen and accepted side effect            | Intentional cause                                           |
+| Mistaken means but intended outcome          | Intentional cause                                           |
+| Accidental outcome due to loss of control    | Not intentional cause                                       |
+| Responsible person fails task causing harm   | Caused harm                                                |
+| Non-responsible person fails task             | Caused harm if noticed and could act; else no cause        |
+| Combined actions cause harm                    | Both caused harm                                           |
+| Immediate cause of death vs underlying cause  | Immediate cause seen as cause; underlying cause may be cause of premature death |
+| Decision makers indifferent to harm            | Intentional cause                                          |
+| Decision makers opposed but forced               | Not intentional cause                                     |
+| Norm violation with knowledge                    | Caused outcome                                            |
+| Norm violation without knowledge                 | Typically no cause                                        |
+| Necessary action for outcome                      | Caused outcome                                            |
+| Unnecessary action for outcome                    | Did not cause outcome                                     |
+
+---
+
+**Use this cheat sheet to analyze the facts carefully, identify whether the cause was necessary, sufficient, foreseen, intended, or accidental, and apply typical person reasoning accordingly.**

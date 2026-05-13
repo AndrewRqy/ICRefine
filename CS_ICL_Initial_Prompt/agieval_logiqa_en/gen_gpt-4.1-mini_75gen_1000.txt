@@ -1,0 +1,186 @@
+**Logical Reasoning & Critical Thinking Cheat Sheet**
+
+---
+
+### 1. **Conditional Reasoning & Contrapositives**
+
+- **If A then B**  
+  - Contrapositive: If not B then not A (valid)  
+  - Denying the antecedent or affirming the consequent is invalid.
+
+- When given conditions like:  
+  - "If codonopsis, then atractylodes"  
+  - "If Shouwu, then atractylodes"  
+  - And exclusivity constraints (e.g., ginseng and atractylodes macrocephala cannot coexist), analyze for contradictions by chaining conditions and contrapositives.
+
+- **Key:**  
+  - Identify necessary conditions and exclusivity.  
+  - Look for forced presence/absence of elements.  
+  - If contradictions arise, conclude which element cannot be present.
+
+---
+
+### 2. **Strengthening & Weakening Arguments**
+
+- To **strengthen** a necessity claim (e.g., "X must do Y"), find premises that make Y **necessary** for X’s success or goal.  
+  - Example: "If you do not take English tutoring, you cannot pass" → makes tutoring necessary.
+
+- To **weaken** an argument:  
+  - Challenge key assumptions (e.g., that a condition applies to the subject).  
+  - Provide counterexamples or alternative explanations.  
+  - Show that the premise does not guarantee the conclusion.
+
+- **Common patterns:**  
+  - Strengthen necessity by showing no alternative.  
+  - Weaken by showing exceptions or alternative causes.
+
+---
+
+### 3. **Deductive Reasoning with Multiple Constraints**
+
+- When selecting or assigning entities under multiple rules:  
+  - List all constraints clearly.  
+  - Use process of elimination and logical deduction.  
+  - Pay attention to "if-then" conditions and exclusivity.  
+  - Remember "at least one" or "at most" conditions.
+
+- **Example:**  
+  - "If E selected, then A and B selected."  
+  - "At least one Dingding selected."  
+  - "Max 2 people selected."  
+  - Use these to deduce who must or must not be selected.
+
+---
+
+### 4. **Logical Consistency in Statements**
+
+- When multiple statements are given and only one is true:  
+  - Test each statement as true, check if others become false.  
+  - The scenario where exactly one statement is true is the solution.
+
+- When statements contradict or overlap, use truth tables or elimination.
+
+---
+
+### 5. **Cause and Effect / Correlation vs Causation**
+
+- Beware of assuming causation from correlation or temporal sequence.  
+- To refute causation claims:  
+  - Ask if simultaneous or sequential events necessarily imply causation.  
+  - Provide alternative causes or confounding factors.  
+  - Show that correlation does not equal causation.
+
+---
+
+### 6. **Evaluating Experimental or Survey Data**
+
+- When comparing groups (e.g., test vs control):  
+  - Check if baseline conditions are equal (e.g., similar initial scores).  
+  - Look for confounding variables (e.g., family background).  
+  - Consider if outcome measures fully capture the effect.
+
+- When percentages add up to more than 100%, suspect overlapping categories or multiple responses.
+
+---
+
+### 7. **Logical Form of Arguments**
+
+- Recognize common logical forms:  
+  - Modus Ponens: If A then B; A; therefore B.  
+  - Modus Tollens: If A then B; not B; therefore not A.  
+  - Denying the antecedent or affirming the consequent are invalid.
+
+- Identify when arguments use indirect cause-effect chains to refute claims.
+
+---
+
+### 8. **Handling Ambiguous or Overlapping Relations**
+
+- When family or relational terms overlap, map relations carefully.  
+- Count distinct individuals by analyzing possible overlaps.
+
+---
+
+### 9. **Interpreting Quantifiers**
+
+- "All," "some," "none," "at least one," "at most one" have precise meanings.  
+- Use Venn diagrams or set logic to analyze statements involving quantifiers.
+
+---
+
+### 10. **Common Logical Fallacies to Watch For**
+
+- **Ignoring necessary conditions:** Assuming a condition is sufficient when it is only necessary.  
+- **False dichotomy:** Assuming only two options when more exist.  
+- **Hasty generalization:** Drawing conclusions from insufficient data.  
+- **Equivocation:** Using ambiguous terms inconsistently.  
+- **Confusing correlation with causation.**
+
+---
+
+### 11. **Approach to Complex Multi-Person/Entity Assignments**
+
+- Assign known facts first.  
+- Use "if-then" conditions to propagate constraints.  
+- Use elimination to narrow down possibilities.  
+- Check for consistency with all constraints.
+
+---
+
+### 12. **Evaluating Ethical or Social Arguments**
+
+- Identify the key assumption behind the argument (e.g., advertisers consider ethics).  
+- To weaken, show alternative motives or outcomes.  
+- To strengthen, show contrasting behavior or consequences supporting the assumption.
+
+---
+
+### 13. **Handling Paradoxical or Contradictory Statements**
+
+- When two premises lead to an absurd conclusion, at least one premise must be false.  
+- Use logical deduction to identify which premise is likely false.
+
+---
+
+### 14. **Interpreting Metaphors or Maxims**
+
+- Focus on the implied meaning rather than literal wording.  
+- Identify the underlying principle or moral.
+
+---
+
+### 15. **Evaluating Policy or Management Decisions**
+
+- Compare costs and benefits explicitly.  
+- Consider whether the action’s cost is justified by the expected benefit.  
+- Look for data on effectiveness and efficiency.
+
+---
+
+### 16. **Handling Statements About Necessity and Sufficiency**
+
+- "Only if" indicates necessity.  
+- "If" indicates sufficiency.  
+- "If and only if" indicates both necessity and sufficiency.
+
+---
+
+### 17. **Dealing with Overlapping Categories in Surveys**
+
+- When percentages exceed 100%, assume respondents can select multiple options.  
+- Understand that causes or opinions may be compound, not mutually exclusive.
+
+---
+
+### 18. **Key Tips for Test Situations**
+
+- **Read carefully:** Pay attention to qualifiers like "must," "may," "only," "at least," "at most."  
+- **Break down complex sentences:** Translate into logical statements or diagrams.  
+- **Check for contradictions:** If conditions conflict, identify which must be false or which element must be excluded.  
+- **Use elimination:** Rule out impossible options first.  
+- **Look for necessary assumptions:** Identify what must be true for the argument to hold.  
+- **Beware of absolute conclusions:** Often, arguments rely on probabilistic or conditional reasoning.
+
+---
+
+This cheat sheet focuses on the most challenging reasoning types encountered in the examples, emphasizing detailed logical analysis, handling multiple constraints, and evaluating argument strength and assumptions. Use it to systematically approach similar problems without referring back to examples.

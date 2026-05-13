@@ -1,0 +1,121 @@
+**LogiQA Logical Reading Comprehension Cheat Sheet**
+
+---
+
+### 1. Core Reasoning Strategies
+
+- **Identify Assumptions:**  
+  Determine what must be true for the argument to hold. Look for unstated premises that link evidence to conclusion (e.g., reading habits reflect cultural tradition, or similarity in behavior implies similarity in inner states).
+
+- **Distinguish Cause and Effect:**  
+  Check if the argument assumes causality rather than correlation (e.g., aluminum causes behavior disorder, not vice versa).
+
+- **Analyze Conditional Statements:**  
+  Carefully interpret “if-then” clauses and their contrapositive/negation to draw valid conclusions or identify contradictions.
+
+- **Evaluate Logical Consistency:**  
+  Look for contradictions or apparent inconsistencies and test if alternative interpretations resolve them (e.g., strategy vs. tactics in warfare).
+
+- **Use Elimination by Contradiction:**  
+  When given multiple statements with exclusivity conditions (e.g., only one true), analyze which statements invalidate others.
+
+- **Consider Alternative Explanations:**  
+  To weaken or challenge an argument, propose plausible alternative causes or factors that undermine the original reasoning.
+
+- **Check for Overgeneralization:**  
+  Identify if the argument unjustifiably extends from specific data to broad conclusions (e.g., judging living standards solely by GDP per capita).
+
+- **Understand Role of Authority:**  
+  Recognize when arguments rely on expert opinions or authority as evidence.
+
+- **Infer from Group and Set Conditions:**  
+  For allocation or grouping problems, apply all constraints systematically, test each option for compliance, and use elimination.
+
+- **Link Premises to Conclusions via Necessary Conditions:**  
+  Identify what must be true for the conclusion to follow (e.g., property rights must be tradable to reflect value).
+
+---
+
+### 2. Common Mistakes to Avoid
+
+- **Ignoring Hidden Assumptions:**  
+  Don’t accept conclusions without verifying what unstated premises they depend on.
+
+- **Confusing Correlation with Causation:**  
+  Just because two things coexist does not mean one causes the other.
+
+- **Overlooking Negations and Contrapositives:**  
+  Misreading “if-then” statements or ignoring their logical equivalents leads to wrong inferences.
+
+- **Assuming All Given Statements Can Be True Simultaneously:**  
+  Pay attention to exclusivity conditions (e.g., “only one statement is true”).
+
+- **Taking Single Indicators as Definitive:**  
+  Avoid judging complex phenomena (like living standards) based on one metric alone.
+
+- **Failing to Distinguish Between Strategy and Tactics or Different Levels of Analysis:**  
+  Different concepts may apply at different levels and are not necessarily contradictory.
+
+- **Ignoring the Impact of External Factors or Context:**  
+  Arguments often hinge on context (e.g., geopolitical pressure, historical connections).
+
+- **Misapplying Authority:**  
+  Authority supports premises but does not guarantee truth; check if the argument relies solely on it.
+
+- **Neglecting the Cost-Benefit or Trade-off Analysis:**  
+  When evaluating decisions, consider both benefits and costs explicitly.
+
+- **Confusing Group Membership Constraints:**  
+  Overlooking conditions like “cannot be in the same group” or “must be together” leads to invalid assignments.
+
+---
+
+### 3. Quick Decision Rules (If X → Do Y)
+
+- **If the argument concludes causality → Check if it assumes no prior difference or reverse causation.**  
+  (e.g., If music training causes brain changes → Assume musicians didn’t have larger corpus callosums before training.)
+
+- **If multiple statements are mutually exclusive and only one is true → Test each for contradictions with others.**
+
+- **If an argument relies on a single metric to judge a complex issue → Question if other relevant factors or data are missing.**
+
+- **If “if-then” condition is negated or contradicted → Infer negation of antecedent or consequent accordingly.**
+
+- **If expert opinion is cited → Recognize it as argument by authority, but verify if other evidence is needed.**
+
+- **If a conclusion depends on a behavior reflecting a deeper trait → Assume similarity in behavior implies similarity in inner states or causes.**
+
+- **If a premise involves property rights or control → Confirm that rights are clearly defined and tradable to reflect value.**
+
+- **If a decision involves cost and benefit → Compare cost of intervention with loss prevented to evaluate effectiveness.**
+
+- **If group allocation must satisfy multiple constraints → Assign fixed members first, then test options against all conditions systematically.**
+
+- **If an argument compares two conflicting theories → Consider if they apply at different levels or contexts to resolve apparent contradictions.**
+
+- **If a conclusion is weakened by alternative explanations → Identify which alternative most directly challenges the key assumption or causal link.**
+
+---
+
+**Use this cheat sheet to dissect arguments, identify hidden premises, evaluate logical flow, and avoid common pitfalls in LogiQA questions.**
+
+Follow the format of the examples below in your response.
+
+In today's economic globalization, Western cultural classics and traditions are still alive and continuing.In the United States, the President takes the oath of office under the Bible, and elementary school students recite the oath of "a country under the protection of God" by pressing the chest every week.In China, elementary school students have long ceased reading the Bible, and no one has sworn in according to the Analects.China has become a country that has almost lost its cultural classics and traditions.
+
+Which of the following statements is the assumption upon which the above argument relies?
+(A)With the rapid advancement of science and technology, Western cultural classics and traditions are declining.
+(B)Officials in Chinese history have never handed down the tradition of swearing on a classic.
+(C)Primary school reading is a symbol of a country and nation maintaining cultural classics and traditions.
+(D)The cultural classics and traditions of a country and nation have an irreplaceable role in science.
+Answer: (C)
+
+###
+In August 2011, China's first aircraft carrier "Varyag" went to sea for sea trials.China's aircraft carrier poses a potential challenge to the US Navy's sea-making power in the Western Pacific, and the US military is concerned and takes a precautionary attitude.However, a naval expert with rich actual combat experience wants China to build more aircraft carriers.
+
+If any of the following statements are true, can this best explain the expert ’s seemingly contradictory attitude?
+(A)In August 2011, Vietnam and the United States conducted joint military exercises in the South China Sea.
+(B)The United States, Japan, India and other countries took the opportunity of China ’s aircraft carrier trial flight to stir up new "China threat theory".
+(C)The Chinese navy has not fully deployed carrier and refueling vessels that support aircraft carriers.The destroyers and submarines that escort the aircraft carrier are also very fragile.
+(D)Aircraft carriers need support and escort.The more aircraft carriers are built, the less resources are used to manufacture other ships and aircraft that support the aircraft carriers.
+Answer: (B)

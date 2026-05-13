@@ -1,0 +1,206 @@
+**Deductive Validity Cheat Sheet for Challenging Logical Arguments**
+
+---
+
+### 1. **Understanding Implications and Their Contrapositives**
+
+- **If A is sufficient for B (A ⇒ B), then the contrapositive is: not B ⇒ not A.**  
+  *You can validly infer the contrapositive, but not the converse (B ⇒ A).*
+
+- **Common mistake:** Reversing an implication (inferring B ⇒ A from A ⇒ B) is invalid.
+
+- **Example:**  
+  - Premise: "Being a cousin of Chris is sufficient for not being a son of Kermit."  
+  - Invalid to conclude: "Whoever is not a son of Kermit is a cousin of Chris."
+
+---
+
+### 2. **Necessary vs. Sufficient Conditions**
+
+- **"A is necessary for B" means: B ⇒ A.**  
+  *If B is true, then A must be true.*
+
+- **"A is sufficient for B" means: A ⇒ B.**
+
+- **Do not confuse necessary and sufficient conditions or reverse them.**
+
+- **Example:**  
+  - Premise: "Being a regular consumer of Kiss My Face soap is necessary for being a regular user of Nag Champa soap."  
+  - This means: If regular user of Nag Champa, then regular consumer of Kiss My Face.  
+  - Invalid to conclude the converse.
+
+---
+
+### 3. **Disjunctions ("Or") and Negations**
+
+- **"No A is B or C" means: If A, then not B and not C.**
+
+- **From "If A then not B or not C," you cannot conclude "If not B or not C then A."**
+
+- **Be careful with negations of disjunctions and conjunctions.**
+
+- **Example:**  
+  - Premise: "Every fan of FC Lugano is neither a devotee of PFC CSKA Moskva nor an ex-supporter of SV Zulte Waregem."  
+  - Invalid to conclude: "Whoever is neither a devotee of PFC CSKA Moskva nor an ex-supporter of SV Zulte Waregem is a fan of FC Lugano."
+
+---
+
+### 4. **Existential Statements and Universal Conclusions**
+
+- **From "Some A is B," you cannot conclude "All A are B" or "All B are A."**
+
+- **Existential premises only guarantee existence, not universality.**
+
+- **Example:**  
+  - Premise: "Some sister of Doreen is a daughter of Melinda."  
+  - Invalid to conclude: "Some cousin of Leslie is not a sister of Doreen."
+
+---
+
+### 5. **Handling "At Least One" or "At Most One" Conditions**
+
+- **When premises say "everyone is at least one of A or B," then:**  
+  - If someone is not A, they must be B (valid).  
+  - But if someone is B, they may or may not be A.
+
+- **Example:**  
+  - Premise: "Nobody is neither an occasional purchaser of Yardley London soap nor an occasional purchaser of Paul Mitchell soap."  
+  - Valid to conclude: If not an occasional purchaser of Paul Mitchell soap, then an occasional purchaser of Yardley London soap.
+
+---
+
+### 6. **Transitive Reasoning**
+
+- **If A ⇒ B and B ⇒ C, then A ⇒ C (valid).**
+
+- **Use this to chain necessary or sufficient conditions.**
+
+- **Example:**  
+  - Premise 1: "Being an ingredient of Golden Slumbers is an ingredient of Cupid's Love Soap." (A ⇒ B)  
+  - Premise 2: "Being an ingredient of Chachabalm is necessary for being an ingredient of Cupid's Love Soap." (B ⇒ C)  
+  - Conclusion: "Being an ingredient of Chachabalm is necessary for being an ingredient of Golden Slumbers." (A ⇒ C)
+
+---
+
+### 7. **Negations and Contradictions**
+
+- **If premises lead to a contradiction under the assumption of the negation of the conclusion, then the conclusion is valid (proof by contradiction).**
+
+- **Example:**  
+  - Premises: "Justin is not an uncle of Roberto or not a workmate of Glenn."  
+  - "Every great-grandfather of Reyes is an uncle of Roberto and a workmate of Glenn."  
+  - Conclusion: "Justin is not a great-grandfather of Reyes."  
+  - Because assuming Justin is a great-grandfather leads to contradiction.
+
+---
+
+### 8. **Handling "Only If" Statements**
+
+- **"A only if B" means A ⇒ B.**
+
+- **Do not confuse with "if A then B" (which is the same), but be careful with the converse.**
+
+---
+
+### 9. **Dealing with "No One is Neither A Nor B"**
+
+- **"Nobody is neither A nor B" means everyone is A or B (inclusive or).**
+
+- **From this, if someone is not A, they must be B (valid).**
+
+---
+
+### 10. **Common Invalid Inferences to Avoid**
+
+- **Affirming the Consequent:** From "If A then B" and "B," conclude "A" (invalid).
+
+- **Denying the Antecedent:** From "If A then B" and "not A," conclude "not B" (invalid).
+
+- **Reversing Implications:** From "A ⇒ B," conclude "B ⇒ A" (invalid).
+
+- **Assuming Existential from Universal:** From "All A are B," conclude "Some B are A" (invalid).
+
+---
+
+### 11. **Handling "At Least One of These" Premises**
+
+- **If premise says: "Every X is at least one of A, B, or C," and you know X is not A or B, then X must be C.**
+
+- **Use this to deduce necessary conditions.**
+
+---
+
+### 12. **Dealing with Negations in Premises**
+
+- **"Nobody is neither A nor B" means "Everyone is A or B."**
+
+- **"No A is B" means "If A then not B."**
+
+- **"No A is both B and C" means "If A then not (B and C)" or equivalently "If A then (not B) or (not C)."**
+
+---
+
+### 13. **Existential Quantifiers and Negations**
+
+- **"Some A is not B" means there exists at least one A that is not B.**
+
+- **From this, you can conclude "Not all A are B."**
+
+---
+
+### 14. **Summary of Logical Equivalences**
+
+| Statement                          | Equivalent Contrapositive                 |
+|----------------------------------|------------------------------------------|
+| A ⇒ B                            | ¬B ⇒ ¬A                                 |
+| A if and only if B (A ⇔ B)       | (A ⇒ B) and (B ⇒ A)                      |
+| Not (A and B)                    | ¬A or ¬B                                |
+| Not (A or B)                     | ¬A and ¬B                               |
+| Everyone is A or B               | If not A then B                         |
+| No A is B                       | If A then not B                         |
+
+---
+
+### 15. **Practical Tips**
+
+- **Always rewrite premises and conclusions in "If... then..." form to clarify logical relations.**
+
+- **Check if the conclusion is the contrapositive of a premise (valid).**
+
+- **Look for premises that restrict the intersection of sets (e.g., no one is both A and B).**
+
+- **Be cautious with premises involving "some" or "no one" — they do not imply universality.**
+
+- **Use counterexamples mentally to test invalid inferences.**
+
+---
+
+This cheat sheet focuses on the most challenging logical reasoning patterns encountered in the examples, especially those involving:
+
+- Misinterpretation of necessary and sufficient conditions  
+- Invalid reversals of implications  
+- Incorrect handling of disjunctions and negations  
+- Confusion between existential and universal quantifiers  
+- Complex conditionals involving multiple premises and their logical chaining
+
+Keep this guide handy to systematically analyze and validate arguments under test conditions.
+
+Follow the format of the examples below in your response.
+
+Question: "Here comes a perfectly valid argument: First, every close friend of Krista is not a niece of Gwendolyn or not an ancestor of Terrie. Second, everyone who is a cousin of Laurie is a close friend of Krista, too. We may conclude that no cousin of Laurie is both an ancestor of Terrie and a niece of Gwendolyn."
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid
+Reasoning: Let's think step by step.  
+The first premise says "every close friend of Krista is not a niece of Gwendolyn or not an ancestor of Terrie," which means that no close friend of Krista can be both a niece of Gwendolyn and an ancestor of Terrie at the same time. The second premise says "everyone who is a cousin of Laurie is a close friend of Krista," so all cousins of Laurie are included among the close friends of Krista. Therefore, no cousin of Laurie can be both an ancestor of Terrie and a niece of Gwendolyn. The conclusion follows necessarily from the premises. So the answer is valid.
+Answer: valid
+###
+Question: "Is Titanium oxide an ingredient of my washing power? Which chemicals does my perfume contain? It is really difficult to keep track of all chemicals one is regularly exposed to. The following argument seeks to clarify some such relations: First premise: Being an ingredient of Totally Concealed is sufficient for not being an ingredient of Venus di Violet. All this entails that whatever is an ingredient of Venus di Violet is not an ingredient of Totally Concealed."
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid
+Reasoning: Let's think step by step.  
+The premise states "being an ingredient of Totally Concealed is sufficient for not being an ingredient of Venus di Violet," meaning if something is an ingredient of Totally Concealed, then it cannot be an ingredient of Venus di Violet. This is the same as saying "if X is in Totally Concealed, then X is not in Venus di Violet." The conclusion is "whatever is an ingredient of Venus di Violet is not an ingredient of Totally Concealed," which is the contrapositive: "if X is in Venus di Violet, then X is not in Totally Concealed." Since a statement and its contrapositive are logically equivalent, the conclusion follows necessarily from the premise. So the answer is valid.
+Answer: valid

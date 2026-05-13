@@ -1,0 +1,141 @@
+**Sarcasm Identification Cheat Sheet: Key Strategies for Difficult Examples**
+
+---
+
+### 1. **Look for Contradictions Between Statement and Reality**
+- Sarcasm often involves saying the opposite of what is true or expected.
+- Example cues:
+  - Praising something clearly negative or absurd (e.g., "A civil war with 500,000 deaths is essential to a healthy democracy").
+  - Calling something obviously bad "great," "brilliant," or "wonderful."
+  - Claiming something impossible or absurd as normal or expected (e.g., "Muslims love celebrating Christmas").
+  - Using positive words to describe negative events or vice versa.
+
+---
+
+### 2. **Detect Exaggeration or Hyperbole**
+- Sarcasm exaggerates to highlight absurdity or criticize.
+- Examples:
+  - Overstating consequences to ridiculous levels (e.g., "Ignoring emails will become a life-threatening issue").
+  - Extreme numbers or amounts used ironically (e.g., "Only applied to 200 internships this week").
+  - Overstating incompetence or difficulty (e.g., "Working the printer is too complex for me").
+
+---
+
+### 3. **Identify Irony in Praise or Criticism**
+- Sarcasm often uses praise to mock or criticism to ironically compliment.
+- Look for:
+  - Positive labels applied to negative actions or people (e.g., "He's a brilliant person for leaving space junk in orbit").
+  - Negative labels applied to positive actions (e.g., "He's a terrible person for promoting a charity stream").
+  - Calling rude or bad behavior "a great way" to get something.
+
+---
+
+### 4. **Watch for Rhetorical Questions or Statements That Mock Common Sense**
+- Sarcasm may use rhetorical questions or statements that imply the listener is missing obvious facts.
+- Examples:
+  - "You didn't realize bikes are stationary objects?"
+  - "Isn't it just the best? I've had less than enough sleep all week."
+
+---
+
+### 5. **Spot Use of Contradictory Modifiers or Qualifiers**
+- Phrases like "totally different" or "perfectly reasonable" used ironically when the context shows the opposite.
+- Examples:
+  - "He didn't threaten, he only urged; totally different."
+  - "$10 per mile for fuel, perfectly reasonable."
+
+---
+
+### 6. **Recognize When Sarcasm Mocks Stereotypes or Social Norms**
+- Sarcasm can highlight the absurdity of stereotypes or outdated beliefs by stating them bluntly or ironically.
+- Examples:
+  - "Everyone knows women can't earn profit."
+  - "Because women are totally incapable of pumping gas."
+
+---
+
+### 7. **Contextual Clues: When Positive Language Describes Negative Situations**
+- Sarcasm often uses upbeat or positive language to describe clearly negative or undesirable situations.
+- Examples:
+  - "Never had as much fun when the cops found my weed."
+  - "Good thing things aren't more expensive now than eight years ago."
+
+---
+
+### 8. **Sarcasm in “Obvious” or “Common Knowledge” Statements**
+- When a statement contradicts what is widely known or accepted, it is likely sarcastic.
+- Examples:
+  - "We all know diamonds are worthless."
+  - "Yeah, anarchism is taught as a prime example of a governing system."
+
+---
+
+### 9. **Sarcasm Through Absurd or Illogical Cause-Effect Claims**
+- Statements that link unrelated or absurd causes and effects are sarcastic.
+- Examples:
+  - "Evolution causes vaccines."
+  - "Losing money for winning? Sign me up!"
+
+---
+
+### 10. **Sarcasm in Mocking Political or Social Commentary**
+- Sarcasm often appears in critiques of politics or social issues by stating the opposite of what is reasonable.
+- Examples:
+  - "Late night vote on a bill written behind closed doors by one party. How democratic."
+  - "America is more free because they have guns to protect from tyranny."
+
+---
+
+### 11. **Sarcasm in Mocking Effort or Skill**
+- Praising poor performance or lack of effort as if it were excellent.
+- Examples:
+  - "He's clearly dedicated based on his lackluster play and hot dog eating."
+  - "Amazing display of individual skill" when the team did most of the work.
+
+---
+
+### 12. **Sarcasm in Mocking Absurd Solutions or Suggestions**
+- Suggesting obviously bad or outdated solutions as if they were good ideas.
+- Examples:
+  - "Let's get rid of trams and build carriages instead."
+  - "The best way to defeat a stronger force is by fighting on their terms."
+
+---
+
+### 13. **Sarcasm in Mocking Responsibility or Blame**
+- Blaming others for obviously self-inflicted problems.
+- Examples:
+  - "My laptop broke underwater, must be Asus's fault."
+  - "Kids should pay for school maintenance."
+
+---
+
+### 14. **Sarcasm in Mocking Emotional or Social Reactions**
+- Using positive language to describe negative emotional states or social behaviors.
+- Examples:
+  - "Just memeing about being racist, that's what keeps it okay."
+  - "Calling an electorate 'morons' is a great way to win them over."
+
+---
+
+### Summary of Key Indicators:
+| Indicator                          | What to Look For                                    | Example Phrase                              |
+|----------------------------------|----------------------------------------------------|---------------------------------------------|
+| Contradiction with reality       | Positive about negative, or vice versa             | "Great way to start the year" (about drownings) |
+| Exaggeration/Hyperbole           | Overstated numbers or consequences                 | "Only applied to 200 internships"           |
+| Irony in praise/criticism        | Praise used to mock, criticism used ironically     | "He's a brilliant person for leaving junk" |
+| Rhetorical questions             | Mocking obvious facts                               | "You didn't realize bikes are stationary?" |
+| Contradictory qualifiers         | "Totally different" when clearly not                | "He only urged; totally different"          |
+| Mocking stereotypes              | Exaggerated stereotypes                             | "Women can't pump gas"                       |
+| Positive language for negatives  | "Fun" used to describe anxiety                      | "Never had as much fun with cops"            |
+| Contradicting common knowledge  | Statements opposing widely accepted facts          | "Diamonds are worthless"                     |
+| Absurd cause-effect              | Illogical links                                     | "Evolution causes vaccines"                  |
+| Political/social irony           | Opposite of reasonable political commentary        | "How democratic" for undemocratic acts      |
+| Mocking effort/skill             | Praising poor performance                           | "Dedicated based on lackluster play"        |
+| Mocking bad solutions            | Suggesting absurd ideas as good                     | "Build carriages instead of trams"          |
+| Mocking responsibility           | Blaming others for own mistakes                     | "Laptop broke underwater, Asus's fault"     |
+| Mocking emotional/social reactions | Positive spin on negative social behavior          | "Meming about racism keeps it okay"          |
+
+---
+
+**Use this cheat sheet to analyze the tone, context, and logical consistency of statements. Sarcasm often hinges on irony, exaggeration, and contradiction, especially when positive language is applied to negative or absurd situations.**

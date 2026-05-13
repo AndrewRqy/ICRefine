@@ -1,0 +1,159 @@
+**Logic Games Cheat Sheet: Key Strategies & Constraints for Difficult Examples**
+
+---
+
+### 1. **Shelf/Placement Ordering with Multiple Constraints**
+
+- **Shelf order:** Top (highest), Middle, Bottom (lowest).
+- "Higher shelf" means physically above (top > middle > bottom).
+- **At least 2 items per shelf**, total items fixed.
+- **Bottom shelf has more items than top shelf** → use this to limit distributions.
+- When items must be on the same shelf or one above another, group accordingly.
+- Use inequalities and equalities to deduce exact placements.
+- When a new condition links two items (e.g., I and M on the same shelf), check if it fully determines the distribution.
+- **Key:** Translate "higher than" into numeric inequalities and use shelf capacity constraints to solve.
+
+---
+
+### 2. **Scheduling with Multiple Entities and No Consecutive Repeats**
+
+- When breeds or items cannot appear on consecutive days, alternate carefully.
+- If a breed appears exactly *n* times but not on certain days, distribute accordingly.
+- If a breed cannot appear on day 1 or day 7, and must appear *exactly* 3 times, place them in the middle days.
+- For breeds that cannot appear on days with certain other breeds, separate their placements.
+- Use the "no breed on consecutive days" to eliminate impossible adjacent placements.
+- When asked about pairs of days that cannot share the same breed, check adjacency and frequency constraints.
+
+---
+
+### 3. **Two-Day Testing with Restrictions on Assignments**
+
+- Each rider tests one bike per day; no repeats on the same bike per rider.
+- Some riders cannot test certain bikes.
+- Some bikes must be tested by specific riders on specific days.
+- When a bike tested by one rider on day 1 must be tested by another on day 2, link those assignments.
+- If a rider must test a bike on one of the two days, and is assigned a different bike on the other day, track these carefully.
+- When asked which pairings cannot be true, check for conflicts with "cannot test" or "must test" conditions.
+- **Key:** Map day 1 and day 2 assignments side-by-side and apply constraints.
+
+---
+
+### 4. **Wall Display with Position and Pairing Constraints**
+
+- Each wall has exactly two paintings: upper and lower.
+- No wall with only watercolors → at least one oil per wall.
+- No wall with paintings from only one student → each wall must have two different students.
+- Certain students cannot be on the same wall.
+- Some paintings must be placed relative to others (e.g., Greene's watercolor is upper on the same wall as Franz's oil).
+- Fixed positions (e.g., Isaacs's oil is lower on wall 4) help anchor the layout.
+- When a new condition places Greene's oil on the same wall as Franz's watercolor, deduce the implications for other walls.
+- **Key:** Use process of elimination and relative positioning to assign paintings.
+
+---
+
+### 5. **Service Targets with Inequality Constraints**
+
+- Each client has two targets: website and voicemail.
+- Website target ≤ voicemail target for each client.
+- Image's voicemail target < Solide's and Truvest's voicemail targets.
+- Solide's website target < Truvest's website target.
+- If a client's website target is given (e.g., Image's website = 2), then voicemail target must be ≥ website target.
+- Combine inequalities to deduce exact or limited possible values.
+- When asked which target must be a certain value, check which values satisfy all inequalities simultaneously.
+- **Key:** Use chain inequalities and minimal/maximal values to deduce forced assignments.
+
+---
+
+### 6. **Audition Ordering with Recorded/Unrecorded and Position Constraints**
+
+- Recorded auditions: Kammer and Lugo.
+- Positions 4 and 5 have special constraints (4th not recorded, 5th must be recorded).
+- Waite must audition before both recorded auditions.
+- Kammer before Trillo; Zinn before Yoshida.
+- When asked which position cannot be a certain singer, check if placing them there violates any ordering or recording constraints.
+- **Key:** Use position constraints and ordering to eliminate impossible placements.
+
+---
+
+### 7. **Sales Zone Assignments with Exclusive Conditions**
+
+- Exactly one of two people in a zone (e.g., Parra or Tiao in Zone 1, but not both).
+- Parra and Quinn together; Stuckey and Udall together.
+- More reps in Zone 3 than Zone 2.
+- When asked who cannot be with Quinn, check if that violates exclusive conditions or grouping.
+- When asked for possible Zone 3 groupings, ensure conditions on exclusivity and groupings are met.
+- **Key:** Use exclusive-or conditions and groupings to validate or eliminate options.
+
+---
+
+### 8. **Loading Dock Cargo Ordering and Adjacency**
+
+- Inequalities chain: textiles < livestock < grain.
+- Produce > fuel.
+- Textiles and produce are adjacent.
+- When asked about possible cargo in a bay, check if placing it there violates inequalities or adjacency.
+- For adjacency, remember bays are consecutive numbers.
+- **Key:** Use inequalities and adjacency to narrow down possible bay assignments.
+
+---
+
+### 9. **Concert Solo Ordering with Multiple Timing Constraints**
+
+- Guitarist ≠ 4th solo.
+- Percussionist before keyboard player.
+- Keyboard player after violinist and before guitarist.
+- Saxophonist after exactly one of percussionist or trumpeter (exclusive or).
+- When checking an order, verify all inequalities and exclusive-or conditions.
+- **Key:** Check each position against constraints, especially adjacency and ordering.
+
+---
+
+### 10. **Recruitment Order with Immediate Predecessor and Position Constraints**
+
+- Peters is 4th.
+- Villas immediately before White.
+- Stanton and Tao not adjacent.
+- Quinn before Rovero.
+- When given a candidate order, check adjacency and ordering constraints.
+- **Key:** Verify immediate predecessor and non-adjacency conditions carefully.
+
+---
+
+### 11. **Trade of Buildings with Class-Based Rules**
+
+- Trades allowed:
+  - One building for one building of same class.
+  - One class 1 for two class 2.
+  - One class 2 for two class 3.
+- Total buildings per class are fixed.
+- If Trustcorp ends with no class 2 buildings, it must have traded class 2 buildings for class 3 buildings.
+- Class 3 buildings initially only with RealProp.
+- Trustcorp must have acquired class 3 buildings from RealProp.
+- **Key:** Track class counts and trade rules to deduce possible ownership.
+
+---
+
+### 12. **No Two Consecutive Articles of Same Topic**
+
+- Articles grouped by topic; no two consecutive articles from same topic.
+- Order constraints (e.g., J < G < R, S < Y).
+- Special conditions on S and Q.
+- When asked if an article can be in a certain position, check if it violates topic adjacency or order constraints.
+- **Key:** Use topic alternation and order constraints to validate positions.
+
+---
+
+### 13. **General Tips for Difficult Logic Games**
+
+- **Translate verbal constraints into inequalities or adjacency relations.**
+- **Use process of elimination on positions or groupings.**
+- **Anchor fixed points first (e.g., fixed positions, known assignments).**
+- **Check for exclusivity and "if-then" conditions carefully.**
+- **When multiple conditions interact, look for contradictions to eliminate options.**
+- **Draw diagrams or tables to visualize adjacency and order.**
+- **For scheduling, remember to consider both order and grouping constraints.**
+- **For pairing or grouping constraints, consider the implications of "only if" and "if and only if" carefully.**
+
+---
+
+This cheat sheet focuses on the **most challenging reasoning patterns** encountered in the examples, emphasizing **inequality chains, adjacency, exclusivity, and multi-step conditional logic**. Use it to guide your approach when similar complex problems arise.

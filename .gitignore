@@ -18,3 +18,7 @@ runs/
 
 # Local scripts
 restart_vllm.sh
+
+# Paper prep (never upload)
+ICR_paper_prep/
+ICR_paper_v2/

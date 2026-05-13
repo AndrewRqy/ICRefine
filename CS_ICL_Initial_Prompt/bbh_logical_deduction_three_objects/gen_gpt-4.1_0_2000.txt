@@ -1,0 +1,133 @@
+Certainly! Here’s a **cheat sheet** focused on the types of reasoning and steps needed for the most challenging examples from above. This is designed to help you quickly and accurately solve 3-object ordering problems involving position (left/right, first/last/second), ranking (oldest/newest, most/least expensive), and similar logic puzzles.
+
+---
+
+## CHEAT SHEET: 3-Object Ordering & Ranking Problems
+
+### 1. **General Approach**
+- **List the objects:** Write down the three items (A, B, C).
+- **Translate statements into orderings:** For each statement, write the relationship as an inequality or position (e.g., "A is to the left of B" → A < B).
+- **Combine statements:** Use both statements to deduce the full order.
+- **Answer the specific question:** Once the order is clear, answer the question about position or ranking.
+
+---
+
+### 2. **Translating Statements**
+
+#### **A. Left/Right or Above/Below**
+- "X is to the left of Y" → X < Y
+- "X is to the right of Y" → X > Y
+- "X finished above Y" (in rankings) → X < Y (X is better)
+- "X finished below Y" → X > Y (X is worse)
+
+#### **B. Most/Least Expensive, Oldest/Newest**
+- "X is more expensive than Y" → X > Y
+- "X is less expensive than Y" → X < Y
+- "X is older than Y" → X > Y
+- "X is newer than Y" → X < Y
+
+#### **C. Position Statements**
+- "X is the leftmost" → X is first
+- "X is the rightmost" → X is last
+- "X is the second from the left" → X is in the middle
+
+---
+
+### 3. **Combining Statements: Step-by-Step**
+
+#### **A. Chain the Relations**
+- If you have "A < B" and "B < C", then the order is A < B < C.
+- If you have "A < B" and "C < A", then the order is C < A < B.
+
+#### **B. Use Given Positions**
+- If a statement says "X is the second from the left," place X in the middle, then use other clues to fill in the rest.
+
+#### **C. Ranking/Price/Age**
+- Arrange from least to greatest (or vice versa) based on the clues.
+- For "cheapest" or "oldest," remember:
+    - "Cheapest" = lowest price = leftmost in price order.
+    - "Oldest" = highest age = leftmost in age order.
+
+---
+
+### 4. **Sample Workflows**
+
+#### **A. Example: Books on a Shelf**
+- "Purple is to the left of Red." → Purple < Red
+- "Gray is to the left of Purple." → Gray < Purple
+- Combine: Gray < Purple < Red
+
+#### **B. Example: Golfers' Rankings**
+- "Eve finished below Amy." → Eve > Amy
+- "Eve finished above Joe." → Eve < Joe
+- Combine: Joe < Eve < Amy (Joe best, Amy worst)
+
+#### **C. Example: Fruit Prices**
+- "Loquats are the cheapest." → Loquats < others
+- "Plums are less expensive than apples." → Plums < Apples
+- Combine: Loquats < Plums < Apples
+
+---
+
+### 5. **Special Cases**
+
+#### **A. "Second from the left"/"Second-most expensive"**
+- Place the specified object in the middle.
+- Use other clues to determine the order of the remaining two.
+
+#### **B. "Oldest"/"Newest"**
+- "X is older than Y" → X > Y (in age)
+- "X is newer than Y" → X < Y (in age)
+- Arrange accordingly.
+
+---
+
+### 6. **Quick Reference Table**
+
+| Statement Type                | Translation/Action                |
+|-------------------------------|-----------------------------------|
+| X is to the left of Y         | X < Y                             |
+| X is to the right of Y        | X > Y                             |
+| X finished above Y            | X < Y (better)                    |
+| X finished below Y            | X > Y (worse)                     |
+| X is more expensive than Y    | X > Y                             |
+| X is less expensive than Y    | X < Y                             |
+| X is older than Y             | X > Y                             |
+| X is newer than Y             | X < Y                             |
+| X is the leftmost             | X is first                        |
+| X is the rightmost            | X is last                         |
+| X is the second from the left | X is in the middle                |
+
+---
+
+### 7. **Tips**
+- **Write out the order explicitly** (e.g., A < B < C).
+- **Double-check the direction** (left/right, above/below, more/less).
+- **If stuck, try all possible orders** and see which fits all clues.
+- **For "second-most expensive" or "second-newest,"** remember it's the middle item in the order.
+
+---
+
+**Practice:** For each problem, write the three items, translate each clue, combine, and answer the question about position or ranking.
+
+---
+
+**End of Cheat Sheet**
+
+Follow the format of the examples below in your response.
+
+Question: The following paragraphs each describe a set of three objects arranged in a fixed order. The statements are logically consistent within each paragraph. On a shelf, there are three books: a gray book, a purple book, and a red book. The purple book is to the left of the red book. The gray book is to the left of the purple book.
+Options:
+(A) The gray book is the leftmost
+(B) The purple book is the leftmost
+(C) The red book is the leftmost
+Reasoning: Let's think step by step. (1) The white book is to the left of the gray book: "(left) ? white ? gray ? (right)". (2) The red book is the second from the left: "(left) ? white red gray ? (right)". (3) Combining (1) and (2) we get the following ordering: "(left) white red gray (right)". According to this ordering, the leftmost book is the white book. The white book is the leftmost. So the answer is (C).
+Answer: (A)
+###
+Question: The following paragraphs each describe a set of three objects arranged in a fixed order. The statements are logically consistent within each paragraph. In a golf tournament, there were three golfers: Eve, Joe, and Amy. Eve finished below Amy. Eve finished above Joe.
+Options:
+(A) Eve finished first
+(B) Joe finished first
+(C) Amy finished first
+Reasoning: Let's think step by step. (1) The white book is to the left of the gray book: "(left) ? white ? gray ? (right)". (2) The red book is the second from the left: "(left) ? white red gray ? (right)". (3) Combining (1) and (2) we get the following ordering: "(left) white red gray (right)". According to this ordering, the leftmost book is the white book. The white book is the leftmost. So the answer is (C).
+Answer: (C)

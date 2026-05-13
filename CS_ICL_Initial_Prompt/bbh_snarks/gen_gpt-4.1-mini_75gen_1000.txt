@@ -1,0 +1,129 @@
+**Sarcasm Identification Cheat Sheet: Key Strategies for Difficult Examples**
+
+---
+
+### 1. **Look for Contradictions Between Description and Evaluation**
+
+- **Positive label applied to negative action or vice versa**  
+  - E.g., calling someone "a brilliant person" for doing something harmful or irresponsible.  
+  - E.g., praising a "great transformation" when the change is clearly negative (e.g., drinking daily).  
+  - E.g., calling a $50,000 scholarship "poor" or calling $10/mile fuel cost "perfectly reasonable."
+
+- **Mismatch between cause and effect or logic**  
+  - E.g., "He's over six feet, so he must be wonderful" (height ≠ wonderful).  
+  - E.g., "The best way to defeat a stronger force is by fighting on their terms" (illogical advice).
+
+---
+
+### 2. **Exaggeration or Absurdity**
+
+- **Statements that exaggerate to an absurd degree to mock or highlight a point**  
+  - E.g., "Have you tried not being poor? It is much easier" (trivializes poverty).  
+  - E.g., "We should start a petition to ban breathing" (impossible and absurd).  
+  - E.g., "I'm going to dumpster a $1000 phone" (unrealistic reaction).  
+  - E.g., "Two minute wait is too long" (exaggerated complaint).
+
+- **Ridiculous or impossible claims used ironically**  
+  - E.g., "No one is on the internet" (obviously false).  
+  - E.g., "People never foment wars to conquer territory" (contradicts history).
+
+---
+
+### 3. **Irony Through Opposite Meaning**
+
+- **Saying the opposite of what is true or expected to mock or criticize**  
+  - E.g., "Calling an electorate 'morons' is a great way to win them over" (obviously false).  
+  - E.g., "Blocking the river is such a smart move!" (when it causes harm).  
+  - E.g., "Late night vote on a bill written behind closed doors — how democratic!" (actually undemocratic).  
+  - E.g., "Corporate money equals free speech — big win for democracy" (criticism disguised as praise).
+
+- **Using praise sarcastically to highlight flaws**  
+  - E.g., "Their employees are always the best!" after describing laziness.  
+  - E.g., "Always glad to feed the trolls, that woefully endangered species" (trolls are common, not endangered).
+
+---
+
+### 4. **Mocking or Dismissive Tone**
+
+- **Statements that trivialize serious issues by oversimplifying or making light of them**  
+  - E.g., "Hey just be happy then you won't be depressed anymore" (trivializes depression).  
+  - E.g., "Have you tried not being poor? It is much easier" (dismisses poverty).  
+  - E.g., "Violence is a perfect way to unleash frustrations" (ironic endorsement of violence).
+
+- **Using sarcasm to criticize stereotypes or prejudices**  
+  - E.g., "Because women are totally incapable of doing everyday tasks..." (mocking sexist stereotypes).  
+  - E.g., "Muslims love celebrating Christmas" (contradicts religious facts to mock misunderstanding).
+
+---
+
+### 5. **Contextual Knowledge and Common Sense**
+
+- **Check if the statement contradicts common knowledge or reality**  
+  - E.g., "Plastic containers in takeout? Wow, that's crazy!" (plastic is common, so this is sarcastic).  
+  - E.g., "Knuth up arrow notation is normal for you?" (it's obscure, so this is sarcastic).  
+  - E.g., "Armed revolutionaries have been making a lot of change for middle class Americans lately" (unlikely, so sarcastic).
+
+- **Evaluate if the statement is logically consistent with the facts**  
+  - E.g., "Game is over after the first half" (false, sarcastic).  
+  - E.g., "No security cameras in the White House in the game, just like real life!" (ironic, sarcastic).
+
+---
+
+### 6. **Sarcasm Markers and Phrases**
+
+- **Look for phrases that signal sarcasm by exaggeration or irony**  
+  - "Totally different" when differences are minor or nonexistent.  
+  - "Perfectly reasonable" applied to unreasonable costs or situations.  
+  - "It's so classy" used to praise rude or mocking behavior.  
+  - "What a great transformation" applied to negative changes.
+
+- **Use of rhetorical questions or incredulous tone**  
+  - "Why would they have weapons drawn at a fire?" (obvious answer is no, so sarcastic when asked about shooting).  
+  - "Isn't it just the best?" when describing something unpleasant.
+
+---
+
+### 7. **Identify When the Statement is Mocking an Idea or Person**
+
+- **Sarcasm often targets an idea, stereotype, or behavior by pretending to agree or praise it**  
+  - E.g., "Only rich people can afford healthy food" (exaggerated to criticize).  
+  - E.g., "Let's crucify this company for making money" (companies are expected to make money, so this mocks the criticism).  
+  - E.g., "You're right, it's the first week of winter! It will definitely get warmer soon" (mocking unrealistic optimism).
+
+---
+
+### Summary Table for Quick Reference
+
+| Indicator                          | Example Pattern                                  | Sarcastic Option Usually Is...          |
+|----------------------------------|-------------------------------------------------|-----------------------------------------|
+| Positive label on negative act   | "What a brilliant person" for harmful action    | The option praising the negative act    |
+| Exaggeration/Absurdity           | "Ban breathing" or "Dumpster $1000 phone"       | The absurd or exaggerated statement     |
+| Opposite meaning / Irony          | "How democratic" for undemocratic action        | The option praising the negative event  |
+| Trivializing serious issues      | "Just be happy, then no depression"              | The oversimplifying or dismissive option|
+| Contradiction with common sense  | "No one on the internet"                         | The obviously false statement            |
+| Sarcasm markers (phrases)        | "Totally different" when not different           | The option using ironic phrases          |
+| Mocking stereotypes or ideas     | "Women totally incapable of pumping gas"         | The exaggerated stereotype               |
+
+---
+
+**Use this cheat sheet to:**
+
+- Identify **contradictions** between what is said and what is true or expected.  
+- Spot **exaggerations** or **absurd claims** that mock or ridicule.  
+- Recognize **ironic praise** or **mock compliments**.  
+- Apply **common sense** and **contextual knowledge** to test plausibility.  
+- Look for **sarcasm markers** and **rhetorical devices** signaling irony.
+
+---
+
+**Practice applying these points step-by-step:**
+
+1. Read both options carefully.  
+2. Identify if one option contains a contradiction or exaggeration.  
+3. Check if the positive/negative label matches the described action or fact.  
+4. Use real-world knowledge to assess plausibility.  
+5. Select the option that uses irony, exaggeration, or contradiction to mock or criticize.
+
+---
+
+This focused cheat sheet should help you confidently identify sarcasm in the more challenging examples.

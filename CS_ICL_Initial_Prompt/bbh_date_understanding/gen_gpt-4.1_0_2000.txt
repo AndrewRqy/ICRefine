@@ -1,0 +1,143 @@
+Certainly! Here’s a **cheat sheet** focused on the most challenging aspects of the above examples, especially those involving:
+
+- Counting days across months/years (especially with months of different lengths)
+- Leap years and February 28/29
+- UK vs US date formats
+- "Nth day after/before" calculations
+- Special dates (e.g., last day of month, holidays)
+- Anniversary calculations
+
+---
+
+## DATE CALCULATION CHEAT SHEET
+
+### 1. **Adding/Subtracting Days Across Months**
+- **To add/subtract days:**  
+  - If the result goes past the end of the month, move to the next month and subtract remaining days.
+  - If subtracting and you go before the 1st, move to the previous month and add the number of days in that month.
+- **Days in each month:**
+  - Jan: 31, Feb: 28 (29 if leap year), Mar: 31, Apr: 30, May: 31, Jun: 30, Jul: 31, Aug: 31, Sep: 30, Oct: 31, Nov: 30, Dec: 31
+
+#### **Example:**
+- May 9 + 40 days:
+  - May 9–May 31 = 23 days (May 9 counts as day 1)
+  - 40 - 23 = 17 days into June → June 17 is day 39, June 18 is day 40
+
+### 2. **Leap Year Rules**
+- Leap year if:
+  - Year divisible by 4 **and** (not divisible by 100 **or** divisible by 400)
+- **Feb 29 exists only in leap years.**
+- If adding/subtracting a year from Feb 29 and the result year is not a leap year, use Feb 28.
+
+#### **Examples:**
+- 2000 is leap (Feb 29 exists), 2001 is not (Feb 28 is last day)
+- 2016 is leap, 2017 is not
+
+### 3. **UK vs US Date Formats**
+- **UK:** DD/MM/YYYY (day first)
+- **US:** MM/DD/YYYY (month first)
+- When converting, swap day and month.
+
+#### **Example:**
+- UK: 02/01/1987 = Jan 2, 1987 (US: 01/02/1987)
+
+### 4. **Special Dates**
+- **Last day of month:**  
+  - Jan: 31, Feb: 28/29, Mar: 31, Apr: 30, May: 31, Jun: 30, Jul: 31, Aug: 31, Sep: 30, Oct: 31, Nov: 30, Dec: 31
+- **First day of year:** 01/01/YYYY
+- **Christmas Eve:** 12/24/YYYY
+- **Christmas Day:** 12/25/YYYY
+- **Thanksgiving (US):** 4th Thursday in November
+
+### 5. **Anniversary Calculations**
+- **N-year anniversary:** Add N years to the original date.
+- If original date is Feb 29 and anniversary year is not leap, use Feb 28.
+
+### 6. **"Nth day after/before"**
+- **"24 hours later"** = next day
+- **"One week from today"** = +7 days
+- **"One week ago"** = -7 days
+- **"A month ago"** = same day, previous month (if that day exists; otherwise, last day of previous month)
+- **"A year ago"** = same month/day, previous year (adjust for leap years)
+
+### 7. **Counting Days Example**
+- **To find date N days after a given date:**
+  1. Count remaining days in current month (including start day).
+  2. If N > days left, subtract days left, move to next month, repeat.
+  3. If N < days left, just add N to the day.
+
+#### **Example:**
+- Mar 20 + 176 days:
+  - Mar: 11 days (Mar 20–Mar 31)
+  - Apr: 30
+  - May: 31
+  - Jun: 30
+  - Jul: 31
+  - Aug: 31
+  - Total after Aug: 11+30+31+30+31+31 = 164
+  - 176 - 164 = 12 days into September → Sep 12
+
+### 8. **"Nth Visit" or "Nth Occurrence"**
+- If starting on a specific day each month, the Nth occurrence is N-1 months after the start.
+  - E.g., 1st: Oct 16, 2nd: Nov 16, 3rd: Dec 16, 4th: Jan 16, 5th: Feb 16
+
+### 9. **Holidays**
+- **Thanksgiving (US):** 4th Thursday in November
+  - Find the first Thursday, then add 21 days (3 weeks) to get the 4th Thursday.
+
+---
+
+## QUICK REFERENCE TABLE
+
+| Operation                | How to Calculate                                                                 |
+|--------------------------|----------------------------------------------------------------------------------|
+| Add/Subtract 1 day       | Next/previous calendar day                                                       |
+| Add/Subtract 7 days      | Next/previous week (same weekday)                                                |
+| Add/Subtract 1 month     | Same day, previous/next month (if day exists, else last day of month)            |
+| Add/Subtract 1 year      | Same month/day, previous/next year (adjust for leap years)                       |
+| UK to US date            | Swap day and month                                                               |
+| Last day of month        | See table above                                                                  |
+| Leap year                | Divisible by 4, not by 100 unless also by 400                                    |
+| Nth occurrence/month     | Start date + (N-1) months                                                        |
+| Counting days across months | Subtract days in current month, move to next, repeat as needed                |
+
+---
+
+## TIPS
+
+- **Always check if the month has enough days when adding/subtracting months.**
+- **For "a month ago" from March 31, use Feb 28/29 if February has no 31st.**
+- **For "one year ago" from Feb 29, use Feb 28 if not a leap year.**
+- **For "Nth day after/before," count carefully across month boundaries.**
+- **For UK dates, always check if the day is >12 to avoid confusion.**
+- **For holidays, look up the rule (e.g., Thanksgiving = 4th Thursday in November).**
+
+---
+
+**Use this sheet to break down any date calculation problem step by step!**
+
+Follow the format of the examples below in your response.
+
+Question: Yesterday was 12/31/1929. Today could not be 12/32/1929 because December has only 31 days. What is the date today in MM/DD/YYYY?
+Options:
+(A) 01/08/1930
+(B) 01/06/1930
+(C) 01/01/1930
+(D) 12/31/1929
+(E) 10/01/1930
+(F) 02/27/1930
+Reasoning: Let's think step by step.  
+We are told that "Yesterday was 12/31/1929." The day after December 31st is January 1st of the next year, since December only has 31 days. Therefore, today is 01/01/1930. In MM/DD/YYYY format this is 01/01/1930. So the answer is (C).
+Answer: (C)
+###
+Question: In the UK, people usually put the day before the month when formatting the date. Therefore, today is 02/01/1987 to them. What is the date yesterday in MM/DD/YYYY?
+Options:
+(A) 01/01/1987
+(B) 10/19/1986
+(C) 01/08/1987
+(D) 01/01/2015
+(E) 01/01/1934
+(F) 12/29/1986
+Reasoning: Let's think step by step.  
+In the UK, dates are written as day/month/year, so 02/01/1987 means January 2, 1987. Therefore, today is 01/02/1987 in MM/DD/YYYY format. Yesterday would be one day before that, which is January 1, 1987, or 01/01/1987 in MM/DD/YYYY format. So the answer is (A).
+Answer: (A)

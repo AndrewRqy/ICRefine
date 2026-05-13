@@ -1,0 +1,181 @@
+**Cheat Sheet for Deductive Validity in Logical Arguments**
+
+---
+
+### 1. **Understanding Implications and Their Direction**
+
+- **"A implies B" (A ⇒ B) does NOT imply "B implies A" (B ⇒ A).**  
+  - Example:  
+    - Premise: "Being a schoolmate of Sondra ⇒ not a stepsister of Pricilla."  
+    - Conclusion: "Not a stepsister of Pricilla ⇒ schoolmate of Sondra."  
+    - **Invalid** because the conclusion reverses the implication.
+
+- **Contrapositive is logically equivalent:**  
+  - From "A ⇒ B," you can validly infer "not B ⇒ not A."  
+  - Use this to check if the conclusion matches the contrapositive of the premise.
+
+---
+
+### 2. **Sufficient vs. Necessary Conditions**
+
+- **Sufficient condition:**  
+  - "Being A is sufficient for B" means A ⇒ B.  
+  - You cannot conclude B ⇒ A unless explicitly stated.
+
+- **Necessary condition:**  
+  - "Being A is necessary for B" means B ⇒ A.  
+  - You cannot conclude A ⇒ B unless explicitly stated.
+
+- **Common mistake:**  
+  - Confusing necessary with sufficient conditions leads to invalid conclusions.
+
+---
+
+### 3. **Handling "Or" Statements (Disjunctions)**
+
+- **"A or B" means at least one is true, not necessarily both.**  
+  - From "Every ingredient of X is not in Y or not in Z," you cannot conclude it is not in both Y and Z simultaneously.
+
+- **When combined with negations:**  
+  - If "No ingredient of X is in Z," and "Every ingredient of X is in Y or Z," then all ingredients of X must be in Y (valid).
+
+- **Beware of assuming exclusivity without premise support.**
+
+---
+
+### 4. **Dealing with "No" and "None" Statements**
+
+- **"No A is B" means A ∩ B = ∅.**  
+  - From "No son of Alexander who is an ancestor of Ahmed is a great-grandfather of Ronny," you cannot conclude "No great-grandfather of Ronny is an ancestor of Ahmed or a son of Alexander" (which is stronger).
+
+- **Negations of conjunctions vs. disjunctions:**  
+  - "No A is (B and C)" ≠ "No A is B or no A is C."
+
+---
+
+### 5. **Existential Statements and Universal Statements**
+
+- **Existential premise (e.g., "some X is Y") does not guarantee universal conclusions.**  
+  - From "Some backer of BSC Young Boys is a critic of Trabzonspor and expert of Bayer," you cannot conclude "some backer of BSC Young Boys is an ex-fan of NK Maribor" unless sufficiency/necessity is established.
+
+- **Universal premises (e.g., "every X is Y") allow stronger conclusions about all members of X.**
+
+---
+
+### 6. **Transitive Reasoning**
+
+- If:  
+  - A ⇒ B  
+  - B ⇒ C  
+  - Then: A ⇒ C (valid).
+
+- Use this to chain premises and check if the conclusion follows.
+
+---
+
+### 7. **Contrapositives and Negations**
+
+- To test if a conclusion follows, try to express premises and conclusions in terms of contrapositives.
+
+- Example:  
+  - Premise: "Not being an opponent to FC Utrecht ⇒ not an admirer of St Johnstone FC."  
+  - Contrapositive: "Admirer of St Johnstone FC ⇒ opponent to FC Utrecht."  
+  - If conclusion matches contrapositive, argument is valid.
+
+---
+
+### 8. **Set Inclusion and Ingredient Arguments**
+
+- "Every ingredient of A is an ingredient of B" means A ⊆ B.
+
+- From A ⊆ B and C ∈ B, you **cannot** conclude C ∈ A.
+
+- To conclude C ∈ A, you need B ⊆ A or C ∈ A explicitly.
+
+---
+
+### 9. **Handling "Necessary for" and "Sufficient for" in Chains**
+
+- If:  
+  - A is necessary for B (B ⇒ A)  
+  - C is sufficient for A (C ⇒ A)  
+  - You **cannot** conclude C ⇒ B unless A ⇔ B (equivalence).
+
+---
+
+### 10. **Dealing with Negations in Premises**
+
+- "Nothing is neither A nor B" means "Everything is A or B."
+
+- From this, you can infer:  
+  - "If not A, then B" (not A ⇒ B)  
+  - "If not B, then A" (not B ⇒ A)
+
+- Use this to infer necessary conditions.
+
+---
+
+### 11. **Avoiding Invalid Reverse Inferences**
+
+- Premise: "All A are B" (A ⇒ B)  
+- Invalid to conclude: "All B are A" (B ⇒ A)  
+- Invalid to conclude: "All non-B are non-A" unless contrapositive is used correctly.
+
+---
+
+### 12. **Existence of Counterexamples**
+
+- If premises allow for exceptions or do not exclude other possibilities, the conclusion is invalid.
+
+- Example:  
+  - Premise: "Being an expert of Aberdeen FC ⇒ not a follower of Club Atlético de Madrid."  
+  - Premise: "Every expert of Aberdeen FC is not a fan of AZ Alkmaar or not a follower of Club Atlético de Madrid."  
+  - Conclusion: "Every expert of Aberdeen FC is not a fan of AZ Alkmaar."  
+  - Invalid because the premises allow experts to be fans of AZ Alkmaar as long as they are not followers of Club Atlético de Madrid.
+
+---
+
+### 13. **Logical Equivalences to Remember**
+
+- **Contrapositive:** A ⇒ B ≡ ¬B ⇒ ¬A  
+- **De Morgan's Laws:**  
+  - ¬(A ∧ B) ≡ ¬A ∨ ¬B  
+  - ¬(A ∨ B) ≡ ¬A ∧ ¬B  
+- **Distributive Laws:**  
+  - A ∧ (B ∨ C) ≡ (A ∧ B) ∨ (A ∧ C)  
+  - A ∨ (B ∧ C) ≡ (A ∨ B) ∧ (A ∨ C)
+
+---
+
+### 14. **Summary of Common Invalid Moves**
+
+- Reversing implications without justification.  
+- Assuming "or" means "and."  
+- Inferring existence from universal statements without existential premises.  
+- Assuming necessary conditions are sufficient.  
+- Assuming sufficiency implies necessity.  
+- Ignoring the possibility of exceptions allowed by premises.
+
+---
+
+### 15. **Strategy to Evaluate Arguments**
+
+1. **Identify premises and conclusion clearly.**
+
+2. **Translate premises into logical form (implications, conjunctions, disjunctions).**
+
+3. **Check if conclusion matches a premise, its contrapositive, or follows by transitivity.**
+
+4. **Look for reversed implications or unjustified equivalences.**
+
+5. **Consider if premises allow counterexamples to conclusion.**
+
+6. **If premises only restrict a subset, do not generalize to all.**
+
+7. **Use set inclusion logic for ingredient/product arguments.**
+
+8. **For "no" or "none" statements, be careful about intersections vs. unions.**
+
+---
+
+Keep this cheat sheet handy to analyze the logical structure carefully and avoid common pitfalls in deductive validity problems.

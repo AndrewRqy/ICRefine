@@ -1,0 +1,121 @@
+Certainly! Here’s a **cheat sheet** focused on the challenging aspects of these "return to starting point" movement problems, especially those involving turns, facing directions, and "Always face forward" instructions.
+
+---
+
+## CHEAT SHEET: Return to Starting Point Movement Problems
+
+### 1. **Coordinate System & Facing Direction**
+- **Start:** (0, 0), facing positive y-axis (up).
+- **Directions:**
+  - **Forward:** +y (if facing up)
+  - **Backward:** -y (if facing up)
+  - **Right:** +x (if facing up)
+  - **Left:** -x (if facing up)
+- **Turning:**
+  - **Turn left:** 90° counterclockwise
+  - **Turn right:** 90° clockwise
+  - **Turn around:** 180° (reverse direction)
+
+#### **Facing Direction Table**
+| Facing | Forward | Backward | Right | Left |
+|--------|---------|----------|-------|------|
+| +y     | +y      | -y       | +x    | -x   |
+| -y     | -y      | +y       | -x    | +x   |
+| +x     | +x      | -x       | -y    | +y   |
+| -x     | -x      | +x       | +y    | -y   |
+
+---
+
+### 2. **"Always face forward"**
+- **Ignore all turns.** You always face +y.
+- **Interpret all steps as:**
+  - **Forward:** +y
+  - **Backward:** -y
+  - **Right:** +x
+  - **Left:** -x
+
+---
+
+### 3. **Step-by-Step Solution Method**
+1. **Initialize:** (x, y) = (0, 0), facing +y.
+2. **For each instruction:**
+   - **If "Always face forward":** Set facing to +y for all subsequent steps.
+   - **If "Turn":** Update facing direction.
+   - **If "Take N steps [direction]":** Move in the direction relative to current facing.
+3. **After all instructions:** If (x, y) = (0, 0), answer is **Yes**; else **No**.
+
+---
+
+### 4. **How to Calculate Movement**
+- **If "Always face forward":** Just sum all x and y moves.
+- **If turns are involved:**
+  - **Update facing** after each turn.
+  - **For each step instruction:** Use the table above to determine which axis and sign to update.
+
+#### **Example:**
+- Start at (0,0), facing +y.
+- "Turn left" → facing -x.
+- "Take 5 steps forward" → move -x by 5: (x, y) = (-5, 0).
+- "Turn right" → facing +y.
+- "Take 3 steps backward" → move -y by 3: (x, y) = (-5, -3).
+
+---
+
+### 5. **Common Pitfalls**
+- **Don’t forget to update facing after every turn.**
+- **"Always face forward" overrides all turns.**
+- **Right/Left are always relative to current facing (unless "Always face forward").**
+- **Sum all moves on each axis; if both sums are zero, you’re back at start.**
+
+---
+
+### 6. **Quick Axis Calculation (for "Always face forward")**
+- **Total x = (all right steps) - (all left steps)**
+- **Total y = (all forward steps) - (all backward steps)**
+- **If both totals are zero, answer is Yes.**
+
+---
+
+### 7. **Quick Axis Calculation (with turns)**
+- **Track facing direction after each turn.**
+- **For each step, update x or y according to current facing and direction of step.**
+- **At end, check if (x, y) = (0, 0).**
+
+---
+
+### 8. **Shortcuts**
+- **If only "Take N steps" and no turns:** Just sum all steps; if not zero, answer is No.
+- **If turns are present:** Must track facing and update axes accordingly.
+
+---
+
+### 9. **Sample Turn Sequence**
+- **Turn left from +y:** now facing -x.
+- **Turn right from -x:** now facing +y.
+- **Turn around from +y:** now facing -y.
+
+---
+
+### 10. **Practice:**
+- **Write down x and y after each instruction.**
+- **Keep a running total.**
+- **Don’t lose track of facing!**
+
+---
+
+**Use this sheet to break down each instruction, update your position and facing, and check if you return to (0,0).**
+
+Follow the format of the examples below in your response.
+
+Question: If you follow these instructions, do you return to the starting point? Take 8 steps. Take 5 steps. Take 5 steps. Take 10 steps. Take 5 steps.
+Options:
+- Yes
+- No
+Answer: No
+###
+Question: If you follow these instructions, do you return to the starting point? Always face forward. Take 2 steps backward. Take 8 steps backward.
+Options:
+- Yes
+- No
+Reasoning: Let's think step by step. We start at the origin (0, 0), facing the positive y-axis. (1) Always face forward: (0, 0), facing the positive y-axis. (2) Take 2 steps right: (0, 2), facing the positive y-axis. (3) Take 9 steps left: (0, -7), facing the positive y-axis. (4) Take 7 steps right: (0, 7), facing the positive y-axis. Since (0, 0) is (0, 0), we are indeed where we started. So the answer is Yes.
+Answer: No

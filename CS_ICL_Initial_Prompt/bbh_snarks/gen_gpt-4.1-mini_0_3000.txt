@@ -1,0 +1,108 @@
+**Cheat Sheet for Identifying Sarcasm in Challenging Examples**
+
+---
+
+### Key Indicators of Sarcasm
+
+1. **Contradiction Between Statement and Reality**
+   - The statement says the opposite of what is true or expected.
+   - Example: Praising something obviously bad or criticizing something obviously good.
+   - Look for exaggerated praise or blame that conflicts with common sense or facts.
+
+2. **Exaggeration or Hyperbole**
+   - Extreme overstatements that are clearly not meant literally.
+   - Example: Claiming a $50,000 scholarship is “poor” or a $10 per mile fuel cost is “reasonable.”
+
+3. **Irony Through Mismatched Labels or Descriptions**
+   - Positive labels applied to negative actions or vice versa.
+   - Example: Calling someone “a brilliant person” for doing something harmful or “the best” after describing laziness.
+
+4. **Mocking or Ridiculing Absurdity**
+   - Statements that mock unrealistic or absurd ideas by pretending to accept them.
+   - Example: Suggesting “banning breathing” or “kids paying for school maintenance.”
+
+5. **Rhetorical Questions or Statements That Pretend Ignorance**
+   - Asking questions or making statements that imply the opposite is obvious.
+   - Example: “How could government control of the internet be bad?” (implying it obviously is bad).
+
+6. **Use of Positive Language to Describe Negative Situations**
+   - Calling a negative event “the best,” “great,” or “fun” to highlight the absurdity.
+   - Example: “A wave of hypothermia and drownings will be a great way to start the year.”
+
+7. **Incongruity Between Cause and Effect**
+   - Linking unrelated or illogical cause and effect to mock reasoning.
+   - Example: “He’s over six feet, so he must be wonderful.”
+
+8. **Exaggerated Simplification of Complex Issues**
+   - Oversimplifying serious problems to mock naive or dismissive attitudes.
+   - Example: “Hey just be happy then you won’t be depressed anymore.”
+
+---
+
+### Specific Challenging Patterns & How to Spot Them
+
+| Pattern Description | How to Identify | Examples from Difficult Cases |
+|---------------------|-----------------|------------------------------|
+| **Absurd Positive Spin on Negative Actions** | Look for praise or positive adjectives applied to clearly negative or harmful actions. | - Calling someone “brilliant” for leaving space junk (Answer: sarcastic) <br> - “Such profits being made” after a big loss (Answer: sarcastic) <br> - “A true warrior” referring to Hitler (Answer: sarcastic) |
+| **Exaggerated Blame or Praise to Mock** | Statements that exaggerate blame or praise to an absurd degree. | - “Only rich people can afford healthy food” (Answer: sarcastic) <br> - “People these days are so rich… we didn’t have houses” (Answer: sarcastic) |
+| **Mocking Unrealistic Expectations or Stereotypes** | Statements that mock stereotypes or naive beliefs by exaggerating them. | - “Because women are totally incapable of pumping gas” (Answer: sarcastic) <br> - “Have you tried not being poor? It is much easier” (Answer: sarcastic) |
+| **Irony in Cause-Effect or Logic** | Illogical or reversed cause-effect relationships used to mock reasoning. | - “Bought stock at $1050 and sold at $100. Such profits being made” (Answer: sarcastic) <br> - “The best way to defeat a stronger force is by fighting on their terms” (Answer: sarcastic) |
+| **Contradictory Praise After Negative Description** | Positive summary or conclusion that contradicts a negative description. | - “Amazing display of individual skill” when team did most work (Answer: sarcastic) <br> - “So happy I pay for free shipping with Prime” after listing bad experiences (Answer: sarcastic) |
+| **Ridiculing by Suggesting Absurd Solutions** | Proposing obviously absurd or impossible solutions to mock an idea. | - “We should start a petition to ban breathing” (Answer: sarcastic) <br> - “He should put it all on bitcoin” when avoiding high risk (Answer: sarcastic) |
+| **Sarcastic Use of “Obviously” or “Everyone knows”** | Statements that claim something obviously false as if it were common knowledge. | - “Everyone knows salt is the highlight of gourmet sophistication” (Answer: sarcastic) <br> - “We all know diamonds are worthless” (Answer: sarcastic) |
+| **Sarcastic Rhetorical Questions** | Questions that imply the opposite of what is literally asked. | - “How could Government control of the internet be bad?” (Answer: sarcastic) <br> - “Why would they have weapons drawn at a shooting?” (Answer: sarcastic) |
+| **Mocking Contradictory Statements** | Using contradiction to highlight absurdity or criticize. | - “Calling an electorate ‘morons’ is a great way to win them over” (Answer: sarcastic) <br> - “Calling a felon ‘honest’” (Answer: sarcastic) |
+
+---
+
+### Tips for Applying This Cheat Sheet
+
+- **Focus on the mismatch between literal meaning and context:** If the statement’s literal meaning conflicts with common sense, reality, or the context, it’s likely sarcastic.
+
+- **Look for exaggerated praise or blame:** Sarcasm often uses over-the-top language to mock or criticize.
+
+- **Check if the statement mocks a stereotype or naive belief:** Sarcasm often targets oversimplifications or prejudices.
+
+- **Identify rhetorical devices:** Sarcasm frequently uses rhetorical questions or ironic statements to imply the opposite.
+
+- **Beware of positive words describing negative situations:** Words like “great,” “best,” “amazing,” or “fun” used in obviously negative contexts are strong sarcasm signals.
+
+- **Consider the tone implied by the statement:** Even if the words seem positive, the tone (mocking, ironic) can reveal sarcasm.
+
+---
+
+### Summary of Most Difficult Examples (with Sarcastic Option)
+
+| Example Summary | Sarcastic Option | Why? |
+|-----------------|------------------|-------|
+| Praising harmful or negative actions | Positive label for negative action (e.g., “brilliant” for space junk) | Contradiction between praise and negative action |
+| Exaggerated blame or praise to mock | Overstated claims (e.g., “Only rich people can afford healthy food”) | Exaggeration to highlight problem |
+| Mocking stereotypes or naive beliefs | Exaggerated negative stereotype (e.g., women incapable of pumping gas) | Ridiculing outdated or false beliefs |
+| Illogical cause-effect | Claiming profit after loss | Contradiction in logic |
+| Contradictory praise after negative description | “Amazing individual skill” when team did most work | Irony in praise |
+| Absurd solutions | “Ban breathing” | Ridiculing by absurdity |
+| “Obviously” false claims | “Everyone knows salt is gourmet highlight” | Irony in “common knowledge” |
+| Rhetorical questions implying opposite | “How could government control be bad?” | Sarcastic rhetorical device |
+| Mocking contradictory statements | “Calling electorate morons is a great way to win them over” | Contradiction to mock |
+
+---
+
+Use this cheat sheet to analyze the tone, context, and contradictions in statements to correctly identify sarcasm in challenging examples.
+
+Follow the format of the examples below in your response.
+
+Question: Which statement is sarcastic?
+Options:
+(A) You mean Knuth up arrow notation isn't unfamiliar for you?
+(B) You mean Knuth up arrow notation isn't normal for you?
+Reasoning: Let's think step by step.  
+We need to identify which statement is sarcastic. Option (A) says "You mean Knuth up arrow notation isn't unfamiliar for you?" — this suggests surprise that someone is actually familiar with a very obscure mathematical notation, which is a sincere expression of surprise. Option (B) says "You mean Knuth up arrow notation isn't normal for you?" — this implies that it is normal to be familiar with a highly specialized notation, which is an unreasonable expectation and thus sarcastic. The sarcasm comes from pretending that something obscure is actually common knowledge. So the answer is (B).
+Answer: (B)
+###
+Question: Which statement is sarcastic?
+Options:
+(A) Yeah, I've noticed he's been drinking every day recently, what a great transformation
+(B) Yeah, I've noticed he's been exercising every day recently, what a great transformation
+Reasoning: Let's think step by step.  
+We need to identify which statement is sarcastic. Option (A) says "he's been drinking every day recently, what a great transformation" — drinking every day is generally considered a negative change, so calling it a "great transformation" is clearly ironic and sarcastic. Option (B) says "he's been exercising every day recently, what a great transformation" — exercising daily is a positive change, so calling it a "great transformation" is sincere. Therefore, the sarcasm is in option (A). So the answer is (A).
+Answer: (A)

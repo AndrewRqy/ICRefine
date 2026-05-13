@@ -1,0 +1,96 @@
+Certainly! Here’s a **cheat sheet** focused on the most challenging aspects of identifying sarcasm in statements, based on the examples above. This guide is designed to help you quickly and accurately spot sarcasm, especially in tricky or subtle cases.
+
+---
+
+## Sarcasm Identification Cheat Sheet
+
+### 1. **Contradiction Between Literal Meaning and Context**
+- **Sarcasm often says the opposite of what is meant.**
+  - If a statement praises something that is clearly negative (or vice versa), it’s likely sarcastic.
+  - Example: “What a great transformation” after describing someone drinking every day.
+
+### 2. **Exaggeration to Absurdity**
+- **Sarcasm uses exaggeration to highlight absurdity.**
+  - If a statement takes something to an extreme that is obviously untrue or impossible, it’s probably sarcastic.
+  - Example: “We should start a petition to ban breathing.”
+
+### 3. **Ironic Praise or Blame**
+- **Positive words for negative situations, or negative words for positive situations.**
+  - If someone calls a bad thing “wonderful,” “brilliant,” “the best,” etc., or a good thing “terrible,” “horrible,” etc., check for sarcasm.
+  - Example: “A wave of hypothermia and drownings will be a great way to start the year.”
+
+### 4. **Mismatch Between Action and Description**
+- **The described action and the evaluation don’t logically fit.**
+  - If someone does something obviously bad and is called “great,” “dedicated,” “generous,” etc., it’s sarcasm.
+  - Example: “He’s such great relationship material when he’s drunk.”
+
+### 5. **Rhetorical Questions with Obvious Answers**
+- **Questions that mock the obviousness or stupidity of something.**
+  - Example: “How could Government control of the internet be bad?” (when it’s clear there are many concerns).
+
+### 6. **Mocking Stereotypes or Common Beliefs**
+- **Sarcasm often mocks stereotypes by pretending to agree with them.**
+  - Example: “Because women are totally incapable of doing everyday tasks like pumping gas without a partner taking over and doing it for her.”
+
+### 7. **Absurd Solutions or Suggestions**
+- **Suggesting an obviously ridiculous solution to a problem.**
+  - Example: “Have you tried not being poor? It is much easier.”
+
+### 8. **Use of “Only,” “Always,” “Never,” “Everyone,” “No one”**
+- **Sarcasm often uses absolute terms to exaggerate.**
+  - Example: “Only rich people can afford healthy food.”
+
+### 9. **Sarcastic Agreement**
+- **Pretending to agree with something obviously wrong.**
+  - Example: “You are right when you say that he should have just let them get away for assaulting him.”
+
+### 10. **Contextual Clues**
+- **Look for context that makes the literal meaning illogical.**
+  - If the context describes a negative situation and the statement is positive (or vice versa), it’s likely sarcastic.
+  - Example: “So happy I pay for free shipping with Prime” after listing all the problems with the service.
+
+### 11. **Comparisons That Don’t Make Sense**
+- **Comparing things that are not comparable or using mismatched logic.**
+  - Example: “Protein supplements are way more expensive than $1 breakfast burritos” (implying burritos are a better deal in a mocking way).
+
+### 12. **“Sure,” “Of course,” “Yeah,” “Right” as Sarcastic Markers**
+- **These words at the start of a statement can signal sarcasm, especially if what follows is obviously untrue.**
+  - Example: “Yeah, let’s crucify this company for making money, they shouldn’t be doing that.”
+
+---
+
+### **Quick Steps for the Test**
+1. **Read the context**: What is the situation? Is it positive or negative?
+2. **Check for contradiction**: Does the statement’s tone match the context? If not, suspect sarcasm.
+3. **Look for exaggeration or absurdity**: Is the statement over-the-top or impossible?
+4. **Spot ironic praise/blame**: Is something bad being called good, or vice versa?
+5. **Watch for rhetorical questions or absolute terms**: These often signal sarcasm.
+6. **Ask: Would a reasonable person sincerely say this?** If not, it’s probably sarcastic.
+
+---
+
+**Remember:**  
+- Sarcasm = saying the opposite, exaggerating, or mocking in a way that is not meant to be taken literally.
+- Sincere = matches the context, logical, and straightforward.
+
+---
+
+**Use this cheat sheet to quickly analyze options and pick the sarcastic statement!**
+
+Follow the format of the examples below in your response.
+
+Question: Which statement is sarcastic?
+Options:
+(A) It's easy to get into politics, all you have to do to is be outrageous
+(B) It's easy to get into politics, all you have to do to is be outrageous
+Reasoning: Let's think step by step.  
+We need to identify which statement is sarcastic. Both options are worded identically: "It's easy to get into politics, all you have to do is be outrageous." Since the wording is the same, the sarcasm would depend on the context or tone, but typically, this statement is sarcastic because it reduces the complex process of entering politics to simply "being outrageous," which is an oversimplification meant to mock the current state of politics. Since option (A) is selected as the answer, it is being interpreted as sarcastic for trivializing a serious subject. So the answer is (A).
+Answer: (A)
+###
+Question: Which statement is sarcastic?
+Options:
+(A) It's cultural celebration at its finest!
+(B) It's cultural appropriation at its finest!
+Reasoning: Let's think step by step.  
+We need to identify which statement is sarcastic. Option (A) says "It's cultural celebration at its finest!" — this is a positive statement that sincerely praises the event as a great example of celebrating culture. Option (B) says "It's cultural appropriation at its finest!" — calling something "appropriation at its finest" uses a negative term ("appropriation") in a way that mimics praise, which is ironic and sarcastic, since appropriation is generally criticized, not celebrated. So the answer is (B).
+Answer: (B)

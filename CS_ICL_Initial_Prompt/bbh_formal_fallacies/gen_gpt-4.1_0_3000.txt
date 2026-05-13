@@ -1,0 +1,135 @@
+Certainly! Here is a **cheat sheet** focused on the most challenging types of deductive validity problems from the examples above. This sheet is designed to help you quickly analyze and answer similar questions on your test.
+
+---
+
+# Deductive Validity Cheat Sheet
+
+## 1. **Implication Direction: "If A, then B" vs. "If B, then A"**
+- **Premise:** "Being X is sufficient for being Y" = If X, then Y.
+- **Contrapositive:** If not Y, then not X. (Valid to infer)
+- **Invalid to infer:** If Y, then X (converse is NOT valid).
+- **Invalid to infer:** If not X, then not Y (inverse is NOT valid).
+
+**Example:**
+- Premise: "Being a cousin of Chris is sufficient for not being a son of Kermit." (If cousin, then not son)
+- Invalid: "Whoever is not a son of Kermit is a cousin of Chris." (Not son ⇒ cousin is converse, NOT valid)
+
+---
+
+## 2. **Necessity vs. Sufficiency**
+- **"A is necessary for B"** = If B, then A.
+- **"A is sufficient for B"** = If A, then B.
+- **Be careful:** Do not reverse necessity and sufficiency.
+
+**Example:**
+- Premise: "Being a rare consumer of Nubian Heritage soap is necessary for being an owner of a Lever soap." (If Lever owner, then rare Nubian consumer)
+- Premise: "Being an infrequent user of American Crew shampoo is sufficient for being a rare consumer of Nubian Heritage soap." (If infrequent Crew user, then rare Nubian consumer)
+- **Invalid conclusion:** "Every infrequent user of American Crew shampoo is an owner of a Lever soap." (We only know infrequent Crew user ⇒ rare Nubian consumer, but not all rare Nubian consumers are Lever owners.)
+
+---
+
+## 3. **Disjunctions ("or") and Negations**
+- **"No X is Y or Z"** = For all X, at least one of (not Y, not Z) is true.
+- **"Every X is not Y or not Z"** = No X is both Y and Z.
+- **Contrapositive:** If both Y and Z, then not X.
+
+**Example:**
+- Premise: "Every close friend of Krista is not a niece of Gwendolyn or not an ancestor of Terrie." (No close friend is both niece and ancestor)
+- If all cousins of Laurie are close friends of Krista, then no cousin of Laurie is both niece and ancestor.
+
+---
+
+## 4. **Subset Relationships**
+- **"Every A is B"** = A ⊆ B.
+- **"Every B is A"** = B ⊆ A.
+- **If A ⊆ B and B ⊆ C, then A ⊆ C.**
+- **But:** If A ⊆ B, and x ∈ B, you CANNOT conclude x ∈ A.
+
+**Example:**
+- Premise: "Every ingredient of Golden Slumbers is an ingredient of Cupid's Love Soap."
+- Premise: "Being an ingredient of Chachabalm is necessary for being an ingredient of Cupid's Love Soap." (If in Cupid's Love Soap, then in Chachabalm)
+- Conclusion: "Being an ingredient of Chachabalm is necessary for being an ingredient of Golden Slumbers." (If in Golden Slumbers, then in Chachabalm) **Valid by transitivity.**
+
+---
+
+## 5. **Existential Statements ("Some")**
+- **"Some A is B"** = There exists at least one x such that x is both A and B.
+- **Be careful:** If "Some A is B," and "All B are C," then "Some A is C."
+- **But:** If "Some A is B," and "All C are B," you CANNOT conclude "Some A is C."
+
+**Example:**
+- Premise: "Some uncle of Dominic is a schoolmate of Earl."
+- Premise: "Everyone who is both an uncle of Reyes and an uncle of Corey is not a schoolmate of Earl."
+- Conclusion: "Some uncle of Dominic is not an uncle of Reyes or not an uncle of Corey." (Valid: the uncle who is a schoolmate of Earl cannot be both an uncle of Reyes and Corey.)
+
+---
+
+## 6. **Universal Statements and Their Converses**
+- **"Every A is B"** does NOT mean "Every B is A."
+- **"No A is B"** does NOT mean "No B is A."
+- **"If A, then B"** does NOT mean "If not A, then not B."
+
+---
+
+## 7. **Transitivity**
+- If "A is necessary for B" (B ⇒ A) and "C is necessary for A" (A ⇒ C), then "C is necessary for B" (B ⇒ C).
+- If "A is sufficient for B" (A ⇒ B) and "B is sufficient for C" (B ⇒ C), then "A is sufficient for C" (A ⇒ C).
+
+---
+
+## 8. **Negation of "Neither...nor..."**
+- "Nobody is neither A nor B" = For all x, x is A or x is B (or both).
+- If x is not B, then x must be A.
+
+---
+
+## 9. **"At least one" and "Not both"**
+- "Every X is not Y or not Z" = No X is both Y and Z.
+- "No X is both Y and Z" = For all X, at least one of (not Y, not Z) is true.
+
+---
+
+## 10. **Common Invalid Inferences**
+- **Affirming the Consequent:** If A ⇒ B, do NOT infer B ⇒ A.
+- **Denying the Antecedent:** If A ⇒ B, do NOT infer not A ⇒ not B.
+- **Reversing subset relationships:** If A ⊆ B, do NOT infer B ⊆ A.
+
+---
+
+## 11. **How to Analyze a Problem Step-by-Step**
+1. **Translate each premise into logical form.**
+2. **Identify the direction of each implication (sufficient/necessary).**
+3. **Check if the conclusion is a valid logical consequence (direct, contrapositive, or transitive).**
+4. **Watch for invalid reversals or unwarranted assumptions.**
+5. **For "some" statements, check if the existence is preserved through the logic.**
+6. **For "no" or "not both" statements, check if the conclusion is about the intersection or the union.**
+
+---
+
+## 12. **Quick Contrapositive Reference**
+- "If A, then B" ≡ "If not B, then not A"
+- "If not A, then not B" is NOT equivalent.
+
+---
+
+**Use this cheat sheet to check the logical structure of each argument and avoid the most common pitfalls!**
+
+Follow the format of the examples below in your response.
+
+Question: "Here comes a perfectly valid argument: First, every close friend of Krista is not a niece of Gwendolyn or not an ancestor of Terrie. Second, everyone who is a cousin of Laurie is a close friend of Krista, too. We may conclude that no cousin of Laurie is both an ancestor of Terrie and a niece of Gwendolyn."
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid
+Reasoning: Let's think step by step.  
+The first premise says "every close friend of Krista is not a niece of Gwendolyn or not an ancestor of Terrie," which means that no close friend of Krista can be both a niece of Gwendolyn and an ancestor of Terrie at the same time. The second premise says "everyone who is a cousin of Laurie is a close friend of Krista," so all cousins of Laurie are included among the close friends of Krista. Therefore, no cousin of Laurie can be both an ancestor of Terrie and a niece of Gwendolyn. The conclusion follows necessarily from the premises. So the answer is valid.
+Answer: valid
+###
+Question: "Is Titanium oxide an ingredient of my washing power? Which chemicals does my perfume contain? It is really difficult to keep track of all chemicals one is regularly exposed to. The following argument seeks to clarify some such relations: First premise: Being an ingredient of Totally Concealed is sufficient for not being an ingredient of Venus di Violet. All this entails that whatever is an ingredient of Venus di Violet is not an ingredient of Totally Concealed."
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid
+Reasoning: Let's think step by step.  
+The premise states "being an ingredient of Totally Concealed is sufficient for not being an ingredient of Venus di Violet," meaning if something is an ingredient of Totally Concealed, then it cannot be an ingredient of Venus di Violet. This is the same as saying "if X is in Totally Concealed, then X is not in Venus di Violet." The conclusion is "whatever is an ingredient of Venus di Violet is not an ingredient of Totally Concealed," which is the contrapositive: "if X is in Venus di Violet, then X is not in Totally Concealed." Since a statement and its contrapositive are logically equivalent, the conclusion follows necessarily from the premise. So the answer is valid.
+Answer: valid

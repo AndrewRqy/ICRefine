@@ -1,0 +1,221 @@
+**Pronoun Antecedent Resolution Cheat Sheet for Difficult Cases**
+
+---
+
+### 1. **Ambiguous Pronouns: When Both Referents Are Plausible**
+
+- **Scenario:** Two possible antecedents fit grammatically and contextually; no clear clues favor one.
+- **Examples:**
+  - *"The mechanic disliked the cashier because he/she is arrogant."*  
+    Both could be arrogant; no context to decide → **Ambiguous**
+  - *"Bailey planned to meet the director at her/his/their office."*  
+    Both offices plausible → **Ambiguous**
+  - *"The developer was unable to communicate with the writer because they used big words."*  
+    Both could use big words → **Ambiguous**
+  - *"The scientist collaborates with the artist, and she/he shares a story."*  
+    Both could share → **Ambiguous**
+  - *"The investigator wanted to interview the witness, but he/she was too late."*  
+    Both could be late → **Ambiguous**
+  - *"The developer met with the secretary because he/she made a mistake."*  
+    Both could have made a mistake → **Ambiguous**
+  - *"The surgeon warned the nurse that they needed more time."*  
+    Both could need more time → **Ambiguous**
+  - *"The nurse stayed away from the laborer because she/he was very busy."*  
+    Both could be busy → **Ambiguous**
+  - *"The developer argued with the designer because he/she liked the design."*  
+    Both could like the design → **Ambiguous**
+
+**How to Identify:**  
+- Both antecedents fit the action or description logically.  
+- No gender, number, or role-based clues to exclude one.  
+- No typical role-based expectations contradict either option.
+
+**Action:**  
+- Mark as **Ambiguous** unless further context is given.
+
+---
+
+### 2. **Role-Based or Contextual Clues Favor One Antecedent**
+
+- **Key:** Use typical roles, responsibilities, or logical expectations to assign pronouns.
+
+| Situation | Clue | Example | Correct Antecedent |
+|-----------|------|---------|--------------------|
+| **Professional roles** | Who usually performs the action or holds the attribute? | *"The patient was referred to the specialist because he is an expert."* | Specialist (expert) |
+| **Ownership or possession** | Who logically owns or possesses the item? | *"The mechanic called the customer that his car is ready."* | Customer (car owner) |
+| **Request or action initiator** | Who is likely to request or perform the action? | *"The cleaner called the guard and asked them to open the door."* | Guard (being asked) |
+| **Advice or instruction** | Who is likely to receive advice? | *"The hygienist told the patient that she should floss."* | Patient (advice recipient) |
+| **Gender/number agreement** | Pronoun gender/number matches only one antecedent | *"After meeting with the producers, Sam goes to her office."* (producers plural, "her" singular) | Sam |
+| **Logical causality** | The cause-effect relationship favors one antecedent | *"The janitor warned the child not to step on the wet floor, otherwise he would have to mop again."* | Janitor (responsible for mopping) |
+
+**How to Apply:**  
+- Identify roles and typical responsibilities.  
+- Check pronoun agreement (gender, number).  
+- Consider who benefits or suffers from the action.  
+- Use common sense about who would logically perform or be affected.
+
+---
+
+### 3. **Pronouns Referring to Collective or Plural Entities**
+
+- **Plural pronouns ("they," "their," "them")** can be ambiguous if multiple plural antecedents exist.
+
+- **Example:**  
+  *"After meeting with the producers, Sam went to their office."*  
+  - "Their" could refer to producers (plural) or Sam (singular, but sometimes used generically).  
+  - If pronoun is plural and one antecedent is plural, usually refers to plural antecedent.  
+  - But if sentence allows, could be ambiguous.
+
+**Tip:**  
+- If pronoun is plural and one antecedent is plural, default to plural antecedent unless context says otherwise.  
+- If singular antecedents only, plural pronoun is ambiguous or refers to a group including both.
+
+---
+
+### 4. **Pronouns with Gender-Neutral or Non-Binary Antecedents**
+
+- When pronouns like "they/them" are used singularly, consider if they refer to a singular person or a group.
+
+- **Example:**  
+  *"Alex tells us that they could not meet."*  
+  - "They" likely refers to Alex (singular, gender-neutral).  
+  - "They" rarely refers to "us" (listeners) in this context.
+
+**Tip:**  
+- Match pronoun number and person with antecedents.  
+- Consider social or stylistic usage of singular "they."
+
+---
+
+### 5. **Possessive Pronouns with Multiple Possible Owners**
+
+- When possessive pronouns ("his," "her," "their") appear, check who logically owns or is associated with the noun.
+
+- **Example:**  
+  *"The writer and her friends' support was crucial."*  
+  - "Her" most naturally refers to "the writer," not the friends or story.
+
+- **Example:**  
+  *"The educator was meeting with a student to discuss his grading policy."*  
+  - Grading policy logically belongs to educator, not student.
+
+**Tip:**  
+- Use domain knowledge about ownership or responsibility.  
+- If ambiguous, mark as such.
+
+---
+
+### 6. **Pronouns in Sentences with Multiple People of Same Gender**
+
+- When two people of the same gender are involved, pronouns like "he," "she," "his," "her" can be ambiguous.
+
+- **Example:**  
+  *"The reporter and the chef discussed his favorite dishes."*  
+  - "His" could refer to either; no context to decide → ambiguous.
+
+**Tip:**  
+- Without additional context, mark as ambiguous.
+
+---
+
+### 7. **Pronouns Referring to Subjects vs. Objects**
+
+- Often, pronouns refer back to the subject of the sentence or clause, especially when the pronoun is the subject of a following clause.
+
+- **Example:**  
+  *"After meeting with the producers, Sam goes to his office."*  
+  - "His" most naturally refers to Sam (subject), not producers (object).
+
+**Tip:**  
+- Check sentence structure: pronouns often refer to the subject unless context suggests otherwise.
+
+---
+
+### 8. **Pronouns in Causal Clauses ("because," "since")**
+
+- The cause or reason often relates to the subject performing the main action.
+
+- **Example:**  
+  *"The mechanic disliked the cashier because he is arrogant."*  
+  - Both possible; ambiguous.
+
+- **Example:**  
+  *"The developer was unable to communicate with the writer because he focuses on code."*  
+  - "He focuses on code" fits developer better → developer.
+
+**Tip:**  
+- Use logical causality and typical roles to assign pronouns in causal clauses.
+
+---
+
+### 9. **Pronouns Referring to People vs. Objects**
+
+- Sometimes pronouns refer to inanimate objects or abstract concepts, but usually pronouns like "he," "she," "they" refer to people.
+
+- **Example:**  
+  *"The pathologist obtained tissue samples from the victim to look at under her microscope."*  
+  - "Her" refers to pathologist, not victim.
+
+**Tip:**  
+- Consider who logically owns or uses the object.
+
+---
+
+### 10. **When Pronouns Refer to Groups or Individuals**
+
+- Plural pronouns ("they," "them," "their") can refer to groups or individuals (singular "they").
+
+- **Example:**  
+  *"The reporter and the chef will discuss their favorite dishes."*  
+  - Could mean dishes of both collectively → ambiguous if options don't include "both."
+
+**Tip:**  
+- If plural pronoun and multiple people mentioned, consider collective reference.  
+- If options don't allow "both," mark ambiguous.
+
+---
+
+### Summary Table for Quick Reference
+
+| Situation                              | Likely Antecedent Clue                         | Action                      |
+|--------------------------------------|-----------------------------------------------|-----------------------------|
+| Both antecedents plausible            | No clear context or role difference           | Ambiguous                   |
+| Role-based responsibility             | One role logically fits action/attribute      | Assign to logical role      |
+| Possessive pronouns                   | Ownership or association with noun             | Assign to logical owner     |
+| Pronoun number/gender mismatch        | Pronoun matches only one antecedent            | Assign to matching antecedent|
+| Causal clauses ("because")             | Cause linked to subject or logical actor       | Assign to logical cause     |
+| Plural pronouns with multiple people  | Plural pronoun likely refers to plural antecedent | Assign to plural antecedent or ambiguous |
+| Pronouns referring to objects         | Usually refer to person owning/using object    | Assign to logical owner     |
+| Same gender multiple people            | No context to distinguish                       | Ambiguous                   |
+
+---
+
+**Use this cheat sheet to analyze pronoun antecedents carefully, focusing on role logic, grammatical agreement, and context clues. When in doubt and no clear evidence exists, mark the pronoun as ambiguous.**
+
+Follow the format of the examples below in your response.
+
+Question: In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The mechanic disliked the cashier because he is arrogant.
+Options:
+(A) The mechanic is arrogant
+(B) The cashier is arrogant
+(C) Ambiguous
+Reasoning: Let's think step by step.  
+Here we need to determine who the pronoun "he" might be referring to. There are two possible referents for "he", namely the mechanic and the cashier. The sentence is of the form "X disliked Y because (X or Y) is arrogant."  
+Let's consider Y first: "X disliked Y because Y is arrogant." This makes sense, as it is common to dislike someone because of their arrogance.  
+Now, consider X: "X disliked Y because X is arrogant." This also makes sense, as sometimes people dislike others due to their own arrogance.  
+Because both interpretations are possible and the sentence does not provide enough context to decide between them, the antecedent of the pronoun is ambiguous. So the answer is (C).
+Answer: (C)
+###
+Question: In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The patient was referred to the specialist because he is an expert on rare skin conditions.
+Options:
+(A) The patient is an expert
+(B) The specialist is an expert
+(C) Ambiguous
+Reasoning: Let's think step by step.  
+Here we need to determine who the pronoun "he" refers to. There are two possible referents: the patient and the specialist. The sentence is of the form "The patient was referred to the specialist because (he) is an expert on rare skin conditions."  
+Let's consider the patient: "The patient was referred to the specialist because the patient is an expert on rare skin conditions." This does not make sense, because if the patient were the expert, there would be no need for a referral.  
+Now, consider the specialist: "The patient was referred to the specialist because the specialist is an expert on rare skin conditions." This makes sense, as it explains the reason for the referral.  
+Therefore, the pronoun "he" refers to the specialist. So the answer is (B).
+Answer: (B)

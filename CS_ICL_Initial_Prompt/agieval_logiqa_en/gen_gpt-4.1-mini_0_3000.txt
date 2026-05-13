@@ -1,0 +1,134 @@
+**LogiQA (Logical Reading Comprehension) Cheat Sheet**
+
+---
+
+### 1. Core Reasoning Strategies
+
+- **Identify Logical Structure:**  
+  Break down arguments into premises and conclusions. Understand whether the reasoning is deductive, inductive, or causal.
+
+- **Check Assumptions:**  
+  Determine what unstated assumptions the argument relies on. Ask: *What must be true for this conclusion to hold?*
+
+- **Evaluate Cause and Effect Carefully:**  
+  Avoid confusing correlation with causation. Verify if the argument mistakenly affirms the consequent or denies the antecedent.
+
+- **Distinguish Between Evidence and Conclusion:**  
+  Identify which statements serve as evidence (premises) and which are conclusions. Sometimes premises support intermediate conclusions.
+
+- **Consider Alternative Explanations:**  
+  When asked to weaken or explain inconsistencies, propose plausible alternative causes or factors that challenge the original reasoning.
+
+- **Use Contraposition and Logical Equivalence Correctly:**  
+  Recognize valid logical forms (e.g., modus ponens, modus tollens) and avoid invalid inferences like affirming the consequent.
+
+- **Apply Principle of Independence in Probability:**  
+  Past independent events do not affect future probabilities (e.g., coin tosses).
+
+- **Analyze Quantifiers and Universal Statements:**  
+  Pay attention to words like *all*, *none*, *some*, *only*, and how they affect the scope of conclusions.
+
+- **Test Hypotheticals and Conditionals:**  
+  For “if-then” statements, consider what happens if the antecedent or consequent is true or false.
+
+- **Distinguish Between Necessary and Sufficient Conditions:**  
+  Identify whether a premise is required (necessary) or enough (sufficient) for the conclusion.
+
+- **Look for Contradictions or Logical Inconsistencies:**  
+  When multiple statements are given, check which can be true simultaneously and which contradict.
+
+- **Infer from Comparative Data:**  
+  When statistics or comparisons are given, interpret what they imply logically (e.g., relative shares, growth rates).
+
+- **Recognize Logical Fallacies:**  
+  Examples include appeal to ignorance, affirming the consequent, false cause, slippery slope, and hasty generalization.
+
+---
+
+### 2. Common Mistakes to Avoid
+
+- **Assuming Past Events Affect Independent Future Events:**  
+  E.g., believing coin toss outcomes influence each other.
+
+- **Confusing Correlation with Causation:**  
+  Just because two things occur together doesn’t mean one causes the other.
+
+- **Overgeneralizing from Limited Data:**  
+  Drawing universal conclusions from insufficient or biased samples.
+
+- **Ignoring Alternative Explanations:**  
+  Accepting one explanation without considering others that fit the facts.
+
+- **Misinterpreting Quantifiers:**  
+  Treating “some” as “all” or “no” as “some” leads to wrong conclusions.
+
+- **Affirming the Consequent or Denying the Antecedent:**  
+  Invalid logical moves that reverse cause-effect relationships.
+
+- **Failing to Identify the Main Conclusion:**  
+  Confusing background information or examples with the argument’s core claim.
+
+- **Assuming Intent or Motivation Without Evidence:**  
+  Inferring reasons behind actions without explicit support.
+
+- **Ignoring Conditions or Restrictions in Statements:**  
+  Overlooking qualifications like “only if,” “must,” or “cannot.”
+
+- **Taking Statistical Data at Face Value Without Context:**  
+  Not questioning sample bias, measurement accuracy, or interpretation.
+
+- **Assuming All Relevant Information is Provided:**  
+  Sometimes key information is missing or implied; be cautious.
+
+---
+
+### 3. Quick Decision Rules (If X → Do Y)
+
+- **If the argument relies on a causal claim → Check for alternative causes or reverse causality.**
+
+- **If a universal statement is given (e.g., “all A are B”) and a negative instance is observed (not B) → Conclude the subject is not A.**
+
+- **If asked to weaken an argument → Identify and challenge key assumptions or provide counterexamples.**
+
+- **If asked to strengthen/support an argument → Provide evidence that eliminates alternative explanations or confirms assumptions.**
+
+- **If statistical data contradicts expectations → Look for sampling bias, measurement error, or external factors affecting data.**
+
+- **If premises conflict and only one can be true → Test each premise’s truth individually to find the consistent scenario.**
+
+- **If an argument uses absence of disproof as proof (appeal to ignorance) → Recognize this as a logical fallacy.**
+
+- **If conditional statements are involved → Use modus ponens (If P then Q; P is true; therefore Q) and modus tollens (If P then Q; Q is false; therefore P is false) correctly.**
+
+- **If multiple groups or categories are involved with membership conditions → Use process of elimination and cross-reference conditions to assign correctly.**
+
+- **If the argument depends on definitions or classifications → Verify that the definitions are consistently applied and assumptions about categories are explicit.**
+
+- **If the argument involves probability or chance → Remember that independent events do not influence each other’s outcomes.**
+
+- **If the argument involves trade-offs (e.g., cost vs. profit) → Identify conflicting interests and infer conditions under which conflicts arise or are resolved.**
+
+---
+
+**Use this cheat sheet to dissect, analyze, and evaluate logical reading comprehension questions efficiently and accurately.**
+
+Follow the format of the examples below in your response.
+
+According to probability theory, the probability of tossing a uniform coin with its front side up and its reverse side up is almost equal.I bet with people that if I flip a coin face up, I win; if it flips up, I lose.I tossed the coin 6 times, and the result was all turned upside down.I have lost 6 times in a row.Therefore, the next few tosses must be heads up and will definitely win back.
+
+Which of the following options is a proper evaluation of the "me" reasoning?
+(A)It makes sense, because God is fair and almost equal, he does not return bad luck.
+(B)It doesn't make sense, because each throw is an independent event and has nothing to do with the previous results.
+(C)The next few tossings turned out to be mostly up, which shows that the probability theory is correct.
+(D)This is just his personal conviction, which cannot be evaluated rationally or logically.
+Answer: (B)
+
+###
+There are five teams participating in the game.The audience had the following comments on the results? (1) The champion is either the Shannan team or the Jiangbei team.(2) The champion is neither Shanbei nor Jiangnan.(3) The champion is Jiangnan Team.(4) The champion is not the Shannan team.
+
+The result of the match showed that only one argument was correct, so who won the championship?
+A Shannan
+B Jiangnan
+C Shanbei
+D Jiangbei
+Answer: (C)

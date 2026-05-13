@@ -1,0 +1,113 @@
+Certainly! Here’s a **cheat sheet** focused on the reasoning steps and patterns needed to solve the most challenging examples from the above set. This is designed to help you answer similar "truth-teller/liar chain" logic puzzles **without referring to examples**.
+
+---
+
+# Truth-Teller/Liar Chain Cheat Sheet
+
+## 1. **General Approach**
+
+- **Start with the given fact** (e.g., "Amberly lies" or "Jim tells the truth").
+- **Work through each statement in order**, determining the truth/lie status of each person based on the previous person's status.
+- **Each statement is about the previous person's truthfulness or lying.**
+- **If someone says "X tells the truth"**:
+  - If X tells the truth, the statement is true → the speaker tells the truth.
+  - If X lies, the statement is false → the speaker lies.
+- **If someone says "X lies"**:
+  - If X lies, the statement is true → the speaker tells the truth.
+  - If X tells the truth, the statement is false → the speaker lies.
+
+---
+
+## 2. **Step-by-Step Reasoning Template**
+
+For each person in the chain:
+- **Identify the subject** of their statement (who are they talking about?).
+- **Determine the truth/lie status** of the subject (from previous steps).
+- **Apply the rule**:
+  - If the statement matches the subject's status, the speaker tells the truth.
+  - If the statement does not match the subject's status, the speaker lies.
+
+**Example Table:**
+
+| Person   | Statement about | Statement Type      | Subject's Status | Speaker's Status |
+|----------|----------------|--------------------|------------------|------------------|
+| Amberly  | (given)        | (given)            | (given)          | Liar             |
+| Shalonda | Amberly        | "tells the truth"  | Liar             | Liar             |
+| Helene   | Shalonda       | "tells the truth"  | Liar             | Liar             |
+| Sima     | Helene         | "tells the truth"  | Liar             | Liar             |
+| Christie | Sima           | "tells the truth"  | Liar             | Liar             |
+
+---
+
+## 3. **Key Patterns**
+
+### A. **Alternating Chains**
+- If the chain is all "tells the truth" statements, and the first person is a liar, **everyone in the chain is a liar**.
+- If the chain is all "tells the truth" statements, and the first person is a truth-teller, **everyone in the chain is a truth-teller**.
+
+### B. **"Lies" Statements**
+- If the statement is "X lies":
+  - If X is a liar, the speaker tells the truth.
+  - If X is a truth-teller, the speaker lies.
+
+### C. **Switching Statement Types**
+- When the statement type switches between "tells the truth" and "lies", **carefully apply the rule for each**.
+- **Keep a running list** of each person's status as you go.
+
+---
+
+## 4. **Common Pitfalls**
+
+- **Don’t assume alternation**: The truth/lie status does NOT always alternate down the chain. It depends on the statement type and the subject's status.
+- **Always check the subject's status** before deciding the speaker's status.
+- **If you get stuck, write out each step** in a table or list.
+
+---
+
+## 5. **Quick Reference Table**
+
+| Statement Type         | Subject's Status | Speaker's Status |
+|-----------------------|------------------|------------------|
+| "X tells the truth"   | Truth-teller     | Truth-teller     |
+| "X tells the truth"   | Liar             | Liar             |
+| "X lies"              | Liar             | Truth-teller     |
+| "X lies"              | Truth-teller     | Liar             |
+
+---
+
+## 6. **Sample Walkthrough**
+
+Given: **A lies. B says A tells the truth. C says B lies. D says C tells the truth. E says D lies. Does E tell the truth?**
+
+1. **A**: Liar (given)
+2. **B**: Says A tells the truth → A is a liar → B is a liar.
+3. **C**: Says B lies → B is a liar → C tells the truth.
+4. **D**: Says C tells the truth → C tells the truth → D tells the truth.
+5. **E**: Says D lies → D tells the truth → E is a liar.
+
+**Answer: No.**
+
+---
+
+## 7. **Tips for Test**
+
+- **Write down each person’s status as you go.**
+- **Don’t skip steps, even if it seems repetitive.**
+- **If you lose track, start over and double-check each link.**
+- **Use the reference table for each statement.**
+
+---
+
+**Keep this logic flow and table in mind, and you’ll be able to solve any chain of truth-teller/liar statements!**
+
+Follow the format of the examples below in your response.
+
+Question: Question: Amberly lies. Shalonda says Amberly tells the truth. Helene says Shalonda tells the truth. Sima says Helene tells the truth. Christie says Sima tells the truth. Does Christie tell the truth?
+Reasoning: Let's think step by step.  
+We are told that "Amberly lies," so Amberly is a liar. We are then told that "Shalonda says Amberly tells the truth" — since Amberly lies, Shalonda's claim is incorrect, so Shalonda lies. Next, we are told that "Helene says Shalonda tells the truth" — since Shalonda lies, Helene's claim is incorrect, so Helene lies. We are then told that "Sima says Helene tells the truth" — since Helene lies, Sima's claim is incorrect, so Sima lies. Finally, we are told that "Christie says Sima tells the truth" — since Sima lies, Christie's claim is incorrect, so Christie lies. So the answer is No.
+Answer: No
+###
+Question: Question: Elanor lies. Dallas says Elanor tells the truth. Fletcher says Dallas lies. Jamey says Fletcher tells the truth. Delfina says Jamey lies. Does Delfina tell the truth?
+Reasoning: Let's think step by step.
+We are told that "Elanor lies," so Elanor is a liar. We are then told that "Dallas says Elanor tells the truth" — since Elanor lies, Dallas's claim is incorrect, so Dallas lies. Next, we are told that "Fletcher says Dallas lies" — since Dallas does lie, Fletcher's claim is correct, so Fletcher tells the truth. We are then told that "Jamey says Fletcher tells the truth" — since Fletcher tells the truth, Jamey's claim is correct, so Jamey tells the truth. Finally, we are told that "Delfina says Jamey lies" — since Jamey tells the truth, Delfina's claim is incorrect, so Delfina lies. So the answer is No.
+Answer: No

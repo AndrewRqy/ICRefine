@@ -1,0 +1,130 @@
+Certainly! Here is a **cheat sheet** focused on the most challenging aspects from the examples above. This is designed to help you answer similar date calculation questions **without referring to the examples**.
+
+---
+
+# DATE CALCULATION CHEAT SHEET
+
+## 1. **Interpreting "Today" from Context**
+- If told "Tomorrow is X", then **Today = X - 1 day**.
+- If told "Yesterday was X", then **Today = X + 1 day**.
+- If told "The day before yesterday was X", then **Today = X + 2 days**.
+- If told "It was X a week ago", then **Today = X + 7 days**.
+- If told "Today is the nth anniversary of event on X", then **Today = X + n years**.
+- If told "Today is the last day of [month/year]", use the actual last day (e.g., Jan 31, Feb 28/29, Dec 31, etc.).
+- If told "Today is the palindrome day of 2020", **Today = 02/02/2020**.
+
+---
+
+## 2. **Date Arithmetic**
+### a. **Adding/Subtracting Days**
+- **Tomorrow**: Add 1 day.
+- **Yesterday**: Subtract 1 day.
+- **24 hours later**: Add 1 day.
+- **10 days ago**: Subtract 10 days.
+- **One week ago**: Subtract 7 days.
+- **One week from today**: Add 7 days.
+
+### b. **Adding/Subtracting Months**
+- **A month ago**: Subtract 1 month, keep the day if possible.
+    - If the previous month has fewer days, use the last day of that month (e.g., March 31 → Feb 28/29).
+- **A month from today**: Add 1 month, same rule as above.
+
+### c. **Adding/Subtracting Years**
+- **A year ago**: Subtract 1 year, keep the same month and day if possible.
+    - If the previous year doesn't have that date (e.g., Feb 29), use Feb 28.
+
+---
+
+## 3. **Special Cases**
+### a. **Leap Years**
+- Leap years: Years divisible by 4, except years divisible by 100 unless also by 400.
+- Feb 29 exists only in leap years (e.g., 2000, 2004, 2016, 2020).
+- If subtracting a year from Feb 29 (leap year), result is Feb 28 (non-leap year).
+
+### b. **Month Lengths**
+- Jan: 31, Feb: 28/29, Mar: 31, Apr: 30, May: 31, Jun: 30, Jul: 31, Aug: 31, Sep: 30, Oct: 31, Nov: 30, Dec: 31.
+
+### c. **UK Date Format**
+- If told "Today is 02/01/1987 in UK format", interpret as **2nd Jan 1987** (MM/DD/YYYY: 01/02/1987).
+
+### d. **US Thanksgiving**
+- Fourth Thursday in November.
+    - Find the first Thursday, then add 21 days.
+
+### e. **Counting Days Across Months**
+- When adding/subtracting days that cross months, count the days in each month carefully.
+    - Example: From Mar 20, add 176 days:
+        - Days left in March: 31 - 20 = 11
+        - Subtract from total, then move through each month in order.
+
+---
+
+## 4. **Anniversaries and Recurring Events**
+- **nth anniversary**: Add n years to the original date.
+- **nth visit on the same day each month**: Start from the first event, add (n-1) months.
+
+---
+
+## 5. **Common Pitfalls**
+- **Year/Month/Day Mismatches**: Always check if the answer options have the correct year.
+- **Off-by-One Errors**: Double-check if "today" is the day before or after the reference date.
+- **Nonexistent Dates**: E.g., Dec 32, Feb 29 in non-leap years—adjust accordingly.
+
+---
+
+## 6. **Step-by-Step Approach**
+1. **Identify "today"** based on the context.
+2. **Determine the operation** (add/subtract days, weeks, months, years).
+3. **Account for month/year boundaries** (e.g., Dec 31 + 1 day = Jan 1 next year).
+4. **Check for leap years** if dealing with February.
+5. **Format the answer** as MM/DD/YYYY.
+6. **Match your result to the closest option** if there are typos or mismatches in the options.
+
+---
+
+## 7. **Quick Reference Table**
+
+| Operation                | Example Input                | Calculation                        | Example Output      |
+|--------------------------|-----------------------------|-------------------------------------|---------------------|
+| Tomorrow                 | "Tomorrow is 11/12/2019"    | Today = 11/11/2019                  | 11/12/2019          |
+| Yesterday                | "Yesterday was 12/31/1929"  | Today = 01/01/1930                  | 12/31/1929          |
+| One week ago             | "Today is 3/5/1973"         | 03/05/1973 - 7 days = 02/26/1973    | 02/26/1973          |
+| One week from today      | "Today is 3/5/1973"         | 03/05/1973 + 7 days = 03/12/1973    | 03/12/1973          |
+| A month ago              | "Today is 3/5/1973"         | 03/05/1973 - 1 month = 02/05/1973   | 02/05/1973          |
+| A year ago               | "Today is 02/29/2016"       | 02/29/2016 - 1 year = 02/28/2015    | 02/28/2015          |
+| 10 days ago              | "Today is 03/12/2002"       | 03/12/2002 - 10 days = 03/02/2002   | 03/02/2002          |
+| 24 hours later           | "Today is 03/05/1973"       | 03/05/1973 + 1 day = 03/06/1973     | 03/06/1973          |
+
+---
+
+**Tip:** When in doubt, write out the days on a calendar or count on your fingers to avoid mistakes!
+
+---
+
+**End of Cheat Sheet**
+
+Follow the format of the examples below in your response.
+
+Question: Jane booked a flight for tomorrow, Jul 29, 2002. What is the date a month ago in MM/DD/YYYY?
+Options:
+(A) 06/27/2002
+(B) 06/21/2002
+(C) 10/28/2001
+(D) 10/28/2002
+(E) 06/28/2002
+(F) 08/25/2002
+Reasoning: Let's think step by step.
+We are told that "Jane booked a flight for tomorrow, Jul 29, 2002," so tomorrow is 07/29/2002, which means today is 07/28/2002. A month ago from today would be one month before 07/28/2002, which is 06/28/2002. In MM/DD/YYYY format this is 06/28/2002. So the answer is (E).
+Answer: (E)
+###
+Question: In the US, Thanksgiving is on the fourth Thursday of November. Today is the US Thanksgiving of 2001. What is the date tomorrow in MM/DD/YYYY?
+Options:
+(A) 11/09/2002
+(B) 12/07/2002
+(C) 11/23/2002
+(D) 06/23/2002
+(E) 10/15/2002
+(F) 08/29/2002
+Reasoning: Let's think step by step.
+Thanksgiving in the US is on the fourth Thursday of November. In 2001, the fourth Thursday was November 22, 2001. So today is 11/22/2001. Tomorrow is one day after that: 11/23/2001. Looking at the options, the only one that matches the month and day is (C) 11/23/2002, but the year is 2002, not 2001. However, since the question asks for the date tomorrow in MM/DD/YYYY and the closest matching option is (C), it appears there may be a typo in the options. Based on the logic, the answer should be 11/23/2001, but according to the options, (C) is the intended answer. So the answer is (C).
+Answer: (C)

@@ -1,0 +1,82 @@
+**Cheat Sheet for Identifying Sarcasm in Statements**
+
+---
+
+### Key Indicators of Sarcasm
+
+1. **Contradiction Between Description and Conclusion**  
+   - When the statement describes a negative or undesirable situation but concludes with a positive or praising phrase (or vice versa).  
+   - Example pattern: Negative facts + positive praise = sarcasm.  
+   - Example: Listing stressful events then calling it a "fun semester."
+
+2. **Exaggeration or Absurdity**  
+   - Statements that exaggerate to an unrealistic or absurd degree to mock or highlight a point.  
+   - Example: Suggesting banning breathing, or that a $1000 phone should be dumpstered for bad battery life.  
+   - Look for hyperbole that no one would sincerely endorse.
+
+3. **Opposite of Common Sense or Reality**  
+   - Statements that claim something obviously false or contrary to common knowledge as if it were true.  
+   - Example: Claiming "no one is on the internet," or "armed revolutionaries have been making a lot of positive change lately."  
+   - Sarcasm often uses this to highlight the absurdity of a situation.
+
+4. **Praise for Negative Traits or Actions**  
+   - When a statement praises or calls "brilliant," "wonderful," or "classy" something widely regarded as negative, harmful, or ridiculous.  
+   - Example: Calling someone "brilliant" for polluting space with junk, or "classy" for mocking people trying to get healthier.
+
+5. **Mocking Unrealistic or Oversimplified Solutions**  
+   - When a statement trivializes complex issues by suggesting absurdly simple solutions or dismissive advice.  
+   - Example: "Have you tried not being poor? It is much easier."  
+   - This mocks the idea that complex problems have easy fixes.
+
+6. **Use of Rhetorical Questions or Phrases That Imply the Opposite**  
+   - Phrases like "What a great transformation" when describing a negative change, or rhetorical questions that imply the opposite of what is stated.  
+   - Example: "Removing tax breaks for students will be helpful, right?" when it clearly would not be.
+
+7. **Incongruity Between Subject and Predicate**  
+   - Linking unrelated or illogical cause and effect, or mismatched qualities.  
+   - Example: "He's over six feet, so he must be wonderful." Height does not logically imply being wonderful.
+
+8. **Dismissive or Mocking Tone Indicators**  
+   - Use of dismissive interjections like "Psshh," "Yeah, sure," or "Welp," combined with statements that contradict reality or common sense.  
+   - These often signal sarcasm.
+
+---
+
+### How to Apply These Indicators to Difficult Examples
+
+| Difficulty Aspect | What to Look For | Examples from Difficult Cases |
+|-------------------|------------------|------------------------------|
+| **Contradiction Between Description and Conclusion** | Check if the conclusion contradicts the described facts or events. | - Stressful semester called "fun" <br> - Charity promoter called "terrible person" <br> - Calling a dictator "pragmatic" for naive behavior |
+| **Exaggeration or Absurdity** | Identify if the statement exaggerates beyond reasonable limits to mock or ridicule. | - Petition to ban breathing <br> - Dumpstering a $1000 phone <br> - Wheel wobbling several feet not unsafe |
+| **Opposite of Common Sense or Reality** | Look for claims that blatantly contradict known facts or common knowledge. | - No one on the internet <br> - Armed revolutionaries making positive change <br> - No security cameras in White House |
+| **Praise for Negative Traits or Actions** | Spot positive labels applied to negative actions or traits. | - Calling space junk polluter "brilliant" <br> - Mocking mocking as "classy" <br> - Calling lazy employees "the best" |
+| **Mocking Oversimplified Solutions** | Watch for trivializing complex issues with unrealistic advice. | - "Have you tried not being poor?" <br> - "Just be happy then you won't be depressed" |
+| **Rhetorical Questions or Opposite Implications** | Identify rhetorical questions or statements that imply the opposite of their literal meaning. | - "Removing tax breaks for students will be helpful, right?" <br> - "Why would they have weapons drawn at a shooting?" |
+| **Incongruity Between Subject and Predicate** | Check if the conclusion logically follows from the premise. | - "He's over six feet, so he must be wonderful" <br> - "Bitcoin for someone who doesn't want high risk" |
+| **Dismissive or Mocking Tone Indicators** | Look for interjections or phrases that signal sarcasm. | - "Psshh, everyone knows women can't earn profit" <br> - "Yeah, let's crucify this company for making money" |
+
+---
+
+### Additional Tips
+
+- **Context Matters:** Sarcasm often relies on shared knowledge or social norms. If a statement contradicts widely accepted facts or norms, it’s likely sarcastic.
+
+- **Look for Irony:** Sarcasm is a form of verbal irony where the intended meaning is opposite to the literal meaning.
+
+- **Check for Implied Criticism:** Sarcasm often serves to criticize or mock indirectly.
+
+- **Beware of Literal vs. Figurative Language:** Sarcastic statements often use literal words to express figurative or opposite meanings.
+
+---
+
+### Summary: Quick Checklist for Difficult Cases
+
+1. Does the statement praise something negative or criticize something positive? → Sarcastic  
+2. Is there an obvious exaggeration or absurdity? → Sarcastic  
+3. Does the statement contradict common sense or reality? → Sarcastic  
+4. Is a complex issue trivialized with an unrealistic solution? → Sarcastic  
+5. Is a rhetorical question implying the opposite of the literal meaning? → Sarcastic  
+6. Is there a mismatch between cause and effect or subject and predicate? → Sarcastic  
+7. Is the tone dismissive or mocking? → Sarcastic  
+
+Use this cheat sheet to analyze the statements carefully and identify sarcasm even without the examples at hand.

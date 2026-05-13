@@ -1,0 +1,144 @@
+**Cheat Sheet for Ordering and Ranking Logic Problems**
+
+---
+
+### 1. **Basic Approach**
+
+- Identify the three objects/entities involved.
+- Determine the type of order: spatial (left/right), temporal (newer/older), ranking (most/least expensive, finishing position).
+- Translate the given statements into relative positions or rankings.
+- Use the transitive property to deduce the full order.
+- Map the order to the question asked (e.g., who is second from the left, who is the oldest, who is the second-most expensive).
+
+---
+
+### 2. **Key Logical Relations**
+
+| Relation Type | Meaning | Example | Interpretation |
+|---------------|---------|---------|----------------|
+| "X is to the right of Y" | X is positioned after Y | Falcon is to the right of Blue Jay | Y < X (left to right) |
+| "X is to the left of Y" | X is positioned before Y | Orange book is to the left of Blue book | X < Y (left to right) |
+| "X is newer than Y" | X is more recent than Y | Motorcycle is newer than Limousine | Y < X (oldest to newest) |
+| "X is older than Y" | X is less recent than Y | Tractor is older than Truck | X < Y (oldest to newest) |
+| "X is more expensive than Y" | X costs more than Y | Peaches are more expensive than Apples | Y < X (cheapest to most expensive) |
+| "X is less expensive than Y" | X costs less than Y | Mangoes are less expensive than Peaches | X < Y (cheapest to most expensive) |
+| "X finished above Y" | X ranked better than Y | Mel finished above Ada | Y < X (worst to best) |
+| "X finished below Y" | X ranked worse than Y | Rob finished below Mel | X < Y (worst to best) |
+| "X is the second from the left" | X is in the middle position | - | Position 2 in order |
+| "X is the second-newest" | X is in the middle position | - | Position 2 in order (oldest to newest) |
+| "X is the second-most expensive" | X is in the middle position | - | Position 2 in order (cheapest to most expensive) |
+
+---
+
+### 3. **Transitive Reasoning**
+
+- If A < B and B < C, then A < B < C.
+- If A is to the right of B, and B is to the right of C, then order is C < B < A (left to right).
+- If A is newer than B, and B is newer than C, then order is C < B < A (oldest to newest).
+- If A is more expensive than B, and B is more expensive than C, then order is C < B < A (cheapest to most expensive).
+- If A finished above B, and B finished above C, then order is C < B < A (worst to best).
+
+---
+
+### 4. **Handling "Second" Positions**
+
+- When told "X is second from the left" or "X is second-newest" or "X is second-most expensive," place X in the middle.
+- Use other relations to place the remaining two objects on either side.
+- Confirm consistency with all given statements.
+
+---
+
+### 5. **Common Difficult Patterns and How to Resolve Them**
+
+#### A. **Circular or Confusing Relative Positions**
+
+- Example: "Falcon is to the right of Blue Jay. Blue Jay is to the right of Quail."
+- Translate: Quail < Blue Jay < Falcon (left to right).
+- The middle is Blue Jay.
+- Answer accordingly.
+
+#### B. **Statements About "Second" Position and Relative Order**
+
+- Example: "The hatchback is the second-newest. The convertible is older than the tractor."
+- Place hatchback in the middle.
+- Use "convertible is older than tractor" → convertible < tractor.
+- Since hatchback is second-newest, order is: oldest < hatchback < newest.
+- Assign accordingly.
+
+#### C. **Ranking with Mixed "More" and "Less" Expensive**
+
+- Example: "Mangoes are less expensive than peaches. Apples are less expensive than mangoes."
+- Translate: Apples < Mangoes < Peaches (cheapest to most expensive).
+- The second-most expensive is Mangoes.
+
+#### D. **Finishing Positions with "Above" and "Below"**
+
+- "Rob finished below Mel. Mel finished below Eve."
+- Order (worst to best): Rob < Mel < Eve.
+- Eve finished first (best).
+
+#### E. **When Given "X is the second from the left" and Other Relative Positions**
+
+- Place X in the middle.
+- Use other "to the left/right" statements to place the other two.
+- Check for consistency.
+
+---
+
+### 6. **Step-by-Step Solving Strategy**
+
+1. **List all objects**: A, B, C.
+2. **Write down all relations**: e.g., A < B, B < C.
+3. **Use transitivity** to find full order.
+4. **Place any object explicitly stated to be in a certain position** (e.g., second from left).
+5. **Check for contradictions**.
+6. **Answer the question based on the final order**.
+
+---
+
+### 7. **Examples of Applying the Cheat Sheet**
+
+- **Example 1:**  
+  "Falcon is to the right of Blue Jay. Blue Jay is to the right of Quail."  
+  Order: Quail < Blue Jay < Falcon  
+  Second from left: Blue Jay.
+
+- **Example 2:**  
+  "Motorcycle is newer than Limousine. Convertible is newer than Motorcycle."  
+  Order (oldest to newest): Limousine < Motorcycle < Convertible  
+  Oldest: Limousine.
+
+- **Example 3:**  
+  "Mangoes are less expensive than Peaches. Apples are less expensive than Mangoes."  
+  Order (cheapest to most expensive): Apples < Mangoes < Peaches  
+  Second-most expensive: Mangoes.
+
+- **Example 4:**  
+  "Rob finished below Mel. Mel finished below Eve."  
+  Order (worst to best): Rob < Mel < Eve  
+  First place: Eve.
+
+---
+
+### 8. **Tips for Avoiding Common Mistakes**
+
+- **Do not confuse "to the right of" with "to the left of"** — always keep track of direction.
+- **Remember that "newer" means higher rank (to the right in time), so older < newer.**
+- **"More expensive" means higher rank (to the right in price), so cheaper < more expensive.**
+- **When given a "second" position, place that object in the middle and arrange others accordingly.**
+- **If given contradictory statements, re-check assumptions or consider that the problem states statements are consistent.**
+
+---
+
+### 9. **Summary Table for Positioning**
+
+| Statement Type | Order Direction | Positioning Example | Position of "Second" |
+|----------------|-----------------|--------------------|---------------------|
+| "X is to the right of Y" | Y < X (left to right) | Quail < Blue Jay < Falcon | Blue Jay is second from left |
+| "X is newer than Y" | Y < X (oldest to newest) | Limousine < Motorcycle < Convertible | Motorcycle is second-newest |
+| "X is more expensive than Y" | Y < X (cheapest to most expensive) | Apples < Mangoes < Peaches | Mangoes are second-most expensive |
+| "X finished above Y" | Y < X (worst to best) | Rob < Mel < Eve | Mel finished second |
+
+---
+
+Use this cheat sheet to carefully analyze the relations, deduce the full order, and answer questions about positions or rankings confidently.

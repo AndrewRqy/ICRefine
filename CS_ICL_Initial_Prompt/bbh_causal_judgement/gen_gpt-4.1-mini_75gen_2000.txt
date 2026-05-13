@@ -1,0 +1,210 @@
+**Causation Cheat Sheet for Difficult Examples**
+
+---
+
+### 1. **Causation in Cases of Multiple Sufficient Causes (Overdetermination)**
+
+- **Key idea:** If an outcome would have happened due to one cause alone, the other cause(s) are *not* seen as causing the outcome.
+
+- **Example:**  
+  - *Alex wins if dice > 11 OR spinner lands green.*  
+  - Both happen, but dice > 11 alone suffices.  
+  - **Answer:** Spinner landing green did **not** cause the win.
+
+- **How to apply:**  
+  - Identify if one cause alone would have produced the outcome.  
+  - If yes, other simultaneous causes are not considered causes of the outcome.
+
+---
+
+### 2. **Causation in Cases of Joint or Combined Causes (Conjunctive Conditions)**
+
+- **Key idea:** When an outcome requires *both* conditions to be met (AND), each condition is a cause if it was necessary for the outcome.
+
+- **Example:**  
+  - *Building implodes if safety switch OFF AND knob A ON.*  
+  - Safety switch is OFF, knob A is OFF. Tom turns knob A ON → building implodes.  
+  - **Answer:** Tom’s action caused the implosion.
+
+- **How to apply:**  
+  - Check if both conditions are necessary.  
+  - If one condition was missing and the outcome would not occur, the action that fulfilled that condition is a cause.
+
+---
+
+### 3. **Causation in Cases of Neglect or Omission**
+
+- **Key idea:** Failure to act can be a cause if:  
+  - The person had responsibility or duty to act, and  
+  - Their omission directly led to the outcome.
+
+- **Example:**  
+  - *Janet responsible for oiling machine; she forgets; machine breaks down.*  
+  - Kate knows but is not responsible and does not oil.  
+  - **Answer:** Janet’s omission caused breakdown; Kate’s omission does **not** cause breakdown if no responsibility.
+
+- **When responsibility shifts:**  
+  - If primary responsible person fails, and secondary responsible person *has* duty to act, their omission can also be a cause.
+
+---
+
+### 4. **Causation and Knowledge/Intent**
+
+- **Intentional causation:**  
+  - Person is aware that their action will cause an outcome and proceeds anyway.  
+  - Even if they do not care about the outcome, foreknowledge + action = intentional causation.
+
+- **Unintentional causation:**  
+  - Outcome is a side effect or accident, not the person’s goal or intention.  
+  - Loss of control (e.g., hand slips) means no intentional causation.
+
+- **Examples:**  
+  - *Lieutenant orders soldiers into line of fire knowing some will die → intentional.*  
+  - *Hunter shoots deer knowing eagle will fly away but does not care → not intentional for eagle flying.*  
+  - *Jake’s hand slips but bullet hits heart → not intentional.*
+
+---
+
+### 5. **Causation in Cases of Rule Violation and Norms**
+
+- **If a person violates a rule knowingly and their action contributes to the outcome, they are seen as causing the problem.**
+
+- **If a person is unaware of the rule and acts accordingly, typical people tend to *not* blame them for causing the problem.**
+
+- **Example:**  
+  - *Hedgehog absent when pencil rule announced, takes pencils → causes problem.*  
+  - *Hedgehog present and knows rule, still takes pencils → less likely to be seen as cause.*
+
+---
+
+### 6. **Causation in Cases of Policy Compliance vs. Violation**
+
+- **If one person follows policy and another violates it, and the outcome depends on both, typical people blame the violator.**
+
+- **Example:**  
+  - *Suzy logs in at permitted time; Billy logs in when not permitted; emails deleted.*  
+  - **Answer:** Billy caused deletion, Suzy did not.
+
+---
+
+### 7. **Causation in Cases of Multiple Contributors with Different Roles**
+
+- **If harm results from a combination of actions, each necessary contributor is a cause.**
+
+- **If one contributor followed instructions and the other did not, both may be causes if their combined actions caused harm.**
+
+- **Example:**  
+  - *Alex uses chemical A; Benni uses chemical B; plants dry out only where both applied.*  
+  - Alex forgot to tell Benni → both caused harm.  
+  - If Alex followed instructions and Benni knowingly used wrong chemical → Benni caused harm, Alex did not alone.
+
+---
+
+### 8. **Causation in Cases of Foreseeable but Unintended Side Effects**
+
+- **Foreseeing a side effect but not intending it does not count as intentional causation.**
+
+- **Example:**  
+  - *Bob robs bank, knows neurotoxin will improve town health but does not care → not intentional improvement.*
+
+---
+
+### 9. **Causation in Cases of Multiple People Contributing to a Threshold**
+
+- **If an outcome occurs only when a threshold number of people act, each person whose action was necessary to reach that threshold is a cause.**
+
+- **Example:**  
+  - *Account suspended if 3 people log in simultaneously.*  
+  - Todd, Anne, Jason log in together → Todd caused suspension because without him only 2 would be logged in.
+
+- **If the person’s action was usual and the outcome depends on others joining, typical people may not blame the usual actor.**
+
+---
+
+### 10. **Causation in Cases of Intent vs. Mistake**
+
+- **If a person acts with the goal to cause an outcome, even if mistaken about details, they are seen as intentional.**
+
+- **Example:**  
+  - *Mark wants to detonate bomb, presses wrong button but it detonates → intentional.*
+
+---
+
+### 11. **Causation in Cases of Foreseeable Harm but Indifference**
+
+- **Knowing harm will occur and proceeding anyway counts as intentional causation, even if the person is indifferent.**
+
+- **Example:**  
+  - *Man pumps poisoned water knowing it will kill → intentional poisoning.*
+
+---
+
+### 12. **Causation in Cases of Outcome Already Guaranteed**
+
+- **If an outcome would have happened regardless of a particular action, that action is not seen as causing the outcome.**
+
+- **Example:**  
+  - *Laurie already qualified for free sample by previous purchase; subscribing to email list not necessary → not cause.*
+
+---
+
+### 13. **Causation in Cases of Accidental Success**
+
+- **If success occurs despite loss of control or accident, typical people do not see it as intentional.**
+
+- **Example:**  
+  - *Jake’s hand slips but hits bull’s-eye → not intentional.*
+
+---
+
+### 14. **Causation in Cases of Foreseeable but Unintended Collateral Damage**
+
+- **If a person foresees collateral damage but does not intend it, typical people say the collateral damage was not intentional.**
+
+- **Exception:** If the person acts with disregard and foreknowledge, some may say intentional (see bird-watcher example).
+
+---
+
+### 15. **Causation in Cases of Responsibility Transfer**
+
+- **If primary responsible person fails, and secondary responsible person has duty to act, failure of secondary person can be cause.**
+
+- **If secondary person has no responsibility, their omission is not cause.**
+
+---
+
+### Summary Table
+
+| Situation Type                          | Cause? (Typical Person)                         | Notes                                                                                  |
+|---------------------------------------|------------------------------------------------|----------------------------------------------------------------------------------------|
+| Multiple sufficient causes             | No (if outcome guaranteed by one cause alone)  | Other causes are redundant                                                            |
+| Joint necessary causes (AND)            | Yes                                            | Each necessary condition is a cause                                                  |
+| Omission with responsibility            | Yes (if responsible)                            | Duty to act matters                                                                   |
+| Omission without responsibility         | No                                             | No duty, no cause                                                                     |
+| Intentional action with foreknowledge   | Yes                                            | Even if indifferent                                                                   |
+| Unintentional side effect                | No                                             | Foreseen but not intended                                                             |
+| Rule violation known                      | Yes                                            | Violator blamed                                                                       |
+| Rule violation unknown                    | No                                             | Ignorance reduces blame                                                               |
+| Policy compliance vs violation           | Violator blamed                                 | Compliant person not blamed                                                           |
+| Combined harmful actions                  | Both causes if both necessary                   | Harm from combination                                                                 |
+| Threshold outcomes                        | Each necessary actor is cause                    |                                                                                      |
+| Mistaken but intentional                  | Yes                                            | Intention to cause outcome counts                                                    |
+| Outcome guaranteed regardless of action | No                                             | Action not cause if outcome inevitable                                               |
+| Accidental success                        | No                                             | Lack of control negates intention                                                    |
+| Collateral damage foreseen but unintended| Usually No (unless reckless disregard)          |                                                                                      |
+| Responsibility transfer                   | Secondary cause if duty exists                   |                                                                                      |
+
+---
+
+**Use this cheat sheet to analyze each question step-by-step:**
+
+1. Identify the **type of causation scenario** (multiple causes, omission, intent, etc.).  
+2. Determine if the action was **necessary and/or sufficient** for the outcome.  
+3. Check if the person had **responsibility or duty** to act.  
+4. Assess if the person had **knowledge and intention** regarding the outcome.  
+5. Consider if the outcome would have happened **regardless** of the action.  
+6. Apply the typical person’s reasoning based on the above principles.
+
+---
+
+**Keep these principles in mind to answer causation questions accurately without referring back to examples.**

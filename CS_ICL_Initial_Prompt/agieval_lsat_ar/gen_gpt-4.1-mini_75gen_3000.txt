@@ -1,0 +1,184 @@
+**Logic Games & Sequencing Cheat Sheet: Key Points for Difficult Problems**
+
+---
+
+### 1. **Conditional Assignments & Ordering**
+
+- **If A assigned → B assigned**  
+  Always include both or exclude A to avoid contradiction.
+
+- **If A assigned → A assigned to specific subset of positions**  
+  Restrict A’s possible positions accordingly.
+
+- **"If X assigned, then Y must be immediately prior to X"**  
+  Y must be placed exactly one position before X.
+
+- **"Only A or B can be assigned to position P"**  
+  Position P ∈ {A, B} if either assigned.
+
+- **"If A assigned, then B assigned" + "If B assigned, then C assigned"**  
+  Chain implications: A → B → C.
+
+---
+
+### 2. **Relative Ordering Constraints**
+
+- For inequalities like:  
+  \( \text{grain} > \text{livestock} > \text{textiles} \)  
+  The bay numbers or positions must strictly increase in that order.
+
+- For adjacency:  
+  \( | \text{position}(X) - \text{position}(Y) | = 1 \)  
+  X and Y must be next to each other.
+
+- When multiple inequalities chain, write them out explicitly and use to eliminate impossible placements.
+
+---
+
+### 3. **Exclusive Or (XOR) Conditions**
+
+- "Saxophonist performs after either Percussionist or Trumpeter, but not both" means:  
+  Exactly one of these is true:  
+  - S > P and S < T  
+  - S < P and S > T
+
+- Use XOR to test each option carefully.
+
+---
+
+### 4. **Multiple Constraints on Same Positions**
+
+- When a position is restricted (e.g., 4th audition cannot be recorded, 5th must be recorded), assign accordingly and eliminate options violating these.
+
+- If a person must be before another (e.g., K < T), ensure order respects this.
+
+- If a person must be immediately before another (e.g., Villas immediately before White), they must be consecutive in that order.
+
+---
+
+### 5. **Handling "Must be False Except One"**
+
+- For statements that "must be false except one," test each against constraints, especially ordering and adjacency.
+
+- Use direct contradictions (e.g., violinist before keyboard player but keyboard player before violinist is impossible).
+
+---
+
+### 6. **Handling "If X is in position Y"**
+
+- Fix X at position Y, then apply all constraints to deduce forced placements or contradictions.
+
+- Use this to eliminate impossible options or confirm possible ones.
+
+---
+
+### 7. **Handling "Exactly N of X"**
+
+- When told "exactly three students review Undulation," use this to limit who can or cannot review it.
+
+- Combine with "no overlap" or "disjoint sets" conditions to narrow down possibilities.
+
+---
+
+### 8. **Handling "At least one between"**
+
+- For conditions like "At least one composition is performed either after O and before S, or after S and before O," interpret as:  
+  There must be at least one composition strictly between O and S, regardless of order.
+
+---
+
+### 9. **Handling "No two consecutive of same type"**
+
+- For sequences where no two consecutive items can be of the same category, alternate categories or place unique items to separate.
+
+---
+
+### 10. **Handling "If A and B both assigned, then..."**
+
+- When two people must be assigned to different ceremonies or days, ensure they are never placed together.
+
+- If both assigned, split them accordingly.
+
+---
+
+### 11. **Handling "Must be on same day/wall/position"**
+
+- If two items must be on the same day or wall, group them and treat as a unit for placement.
+
+- Use this to reduce complexity.
+
+---
+
+### 12. **Handling "Cannot be on same day/wall/position"**
+
+- If two items cannot be together, ensure they are assigned to different days/walls/positions.
+
+---
+
+### 13. **Handling "At least/At most" counts**
+
+- Use counts to limit how many of a certain type can be assigned to a group or position.
+
+- For example, "At least two reports on Tuesday" means Tuesday must have exactly two reports.
+
+---
+
+### 14. **Handling "If X is assigned, then Y must be assigned" + "If Y is assigned, then Z must be assigned"**
+
+- Chain these implications to deduce forced assignments.
+
+---
+
+### 15. **Handling "If X is assigned, then Y must be assigned to the next day"**
+
+- If X is on day d, Y must be on day d+1.
+
+- Use this to place Y relative to X.
+
+---
+
+### 16. **Handling "No overlap" or "Disjoint sets"**
+
+- If two sets must be disjoint, ensure no common elements.
+
+- Use to eliminate assignments where overlap occurs.
+
+---
+
+### 17. **Handling "Exactly two students have identical sets"**
+
+- Exactly one pair shares the same set; no other pairs do.
+
+- Use to identify possible pairs and eliminate others.
+
+---
+
+### 18. **Handling "If X is in season A, then Y must be in season B"**
+
+- Use to fix relative seasons and deduce others.
+
+---
+
+### 19. **Handling "Must be earlier than" with exact gaps**
+
+- For "T must be before W with exactly two chapters separating," if T is in chapter i, W is in chapter i+3.
+
+- Use to fix positions of T and W.
+
+---
+
+### 20. **General Tips**
+
+- **Draw timelines or grids** to visualize order and adjacency.
+
+- **Mark fixed positions first**, then fill in flexible ones.
+
+- **Use process of elimination** aggressively.
+
+- **Check all conditions after tentative assignments** to avoid contradictions.
+
+- **When stuck, test extreme cases** (e.g., earliest/latest possible positions).
+
+---
+
+This cheat sheet focuses on the nuanced, conditional, and ordering constraints that are common stumbling blocks in logic games and sequencing problems. Use it to systematically analyze and eliminate impossible scenarios, and to confirm possible assignments.
