@@ -1,0 +1,148 @@
+**LSAT Logical Reasoning Cheat Sheet**
+
+---
+
+### 1. Core Reasoning Strategies
+
+- **Identify the Conclusion and Premises**  
+  Pinpoint the main claim the argument is trying to establish and the evidence or reasons offered in support.
+
+- **Analyze Assumptions**  
+  Determine what unstated premise(s) the argument depends on for its conclusion to hold. Look for gaps between premises and conclusion.
+
+- **Evaluate Conditional Reasoning**  
+  Recognize "if-then" structures and apply formal logic:  
+  - Affirming the antecedent (If A then B; A; therefore B) is valid.  
+  - Denying the consequent (If A then B; not B; therefore not A) is valid.  
+  - Avoid affirming the consequent or denying the antecedent fallacies.
+
+- **Distinguish Between Sufficient and Necessary Conditions**  
+  Clarify whether a condition guarantees an outcome (sufficient) or is required for it (necessary). Confusing these weakens arguments.
+
+- **Spot Overgeneralizations and Hasty Conclusions**  
+  Beware conclusions drawn from limited or unrepresentative evidence.
+
+- **Identify Analogies and Evaluate Their Strength**  
+  Check whether the compared cases are truly parallel and whether key differences undermine the analogy.
+
+- **Recognize Causal Reasoning and Test for Alternative Explanations**  
+  Confirm that cause-effect claims are supported and consider other possible causes or confounding factors.
+
+- **Detect Principle-Application Reasoning**  
+  Understand the general principle and verify whether the application correctly follows from it.
+
+- **Understand Role of Evidence and Authority**  
+  Assess whether reliance on expert opinion or data is justified and whether the source is reliable.
+
+- **Infer Logical Consequences**  
+  Use given premises to deduce what must or can be true, avoiding unwarranted assumptions.
+
+- **Resolve Apparent Contradictions**  
+  Look for explanations that reconcile conflicting information by introducing new relevant facts.
+
+---
+
+### 2. Common Mistakes to Avoid
+
+- **Assuming Past Patterns Always Predict Future Outcomes**  
+  Don’t generalize from a single instance or limited data without considering changes or exceptions.
+
+- **Confusing Necessary and Sufficient Conditions**  
+  Mistaking a requirement for a guarantee (or vice versa) leads to flawed conclusions.
+
+- **Ignoring Alternative Explanations or Confounding Variables**  
+  Accepting one cause without ruling out others weakens causal claims.
+
+- **Overlooking the Role of Motivation or Intent**  
+  Justification or blameworthiness often depends on intent or motive, which arguments may hinge upon.
+
+- **Taking Analogies at Face Value Without Scrutinizing Differences**  
+  Analogies fail if key relevant differences exist between compared cases.
+
+- **Misinterpreting Statistical or Survey Data**  
+  Beware of social desirability bias, unrepresentative samples, or ambiguous measures.
+
+- **Failing to Identify the Argument’s Assumptions**  
+  Neglecting to uncover what the argument takes for granted can cause misreading or incorrect answer choices.
+
+- **Confusing Correlation with Causation**  
+  Just because two things occur together does not mean one causes the other.
+
+- **Ignoring the Conditional Structure in Arguments Based on Reliable Sources**  
+  Reliable sources often provide conditional statements; affirming the consequent or denying the antecedent is invalid.
+
+- **Overlooking the Importance of Context or Scope**  
+  Applying a principle or generalization beyond its intended scope leads to errors.
+
+---
+
+### 3. Quick Decision Rules (If X → Do Y)
+
+- **If the argument predicts a future outcome based on a single past event →**  
+  Question whether the generalization is justified (watch for overgeneralization).
+
+- **If the argument uses a conditional ("if-then") statement and affirms the antecedent →**  
+  Accept the consequent as likely true.
+
+- **If the argument uses a conditional and denies the consequent →**  
+  Deny the antecedent as likely true.
+
+- **If the argument confuses necessary and sufficient conditions →**  
+  Identify the error and choose answers that clarify or correct this confusion.
+
+- **If the argument relies on an analogy →**  
+  Check for relevant similarities and differences; weaken analogy by highlighting dissimilarities.
+
+- **If the argument makes a causal claim →**  
+  Look for alternative causes or evidence that links cause and effect; strengthen by confirming no confounders.
+
+- **If the argument depends on a principle →**  
+  Verify that the application fits all parts of the principle; strengthen by showing principle’s relevance.
+
+- **If the argument cites expert testimony or a reliable source →**  
+  Confirm the source’s reliability and that the argument correctly interprets the conditional claims.
+
+- **If the argument’s conclusion depends on an unstated assumption →**  
+  Identify and test that assumption; it is often the correct answer to strengthen or weaken.
+
+- **If the argument’s conclusion is challenged by alternative explanations →**  
+  Choose answers that offer alternative causes or undermine the exclusivity of the proposed cause.
+
+- **If the argument draws a broad conclusion from limited examples →**  
+  Recognize overgeneralization and select answers that highlight insufficient evidence.
+
+- **If the argument involves blame or justification →**  
+  Consider the role of knowledge, intent, and reasonable foreseeability in assigning blame.
+
+- **If the argument involves conflicting expert opinions →**  
+  Recognize that jury or decision-maker may not be able to assess reliability; conclusions may not rest solely on expert testimony.
+
+- **If the argument’s conclusion depends on the size or scope of a condition (e.g., majority of a forest) →**  
+  Support with evidence that the condition applies broadly enough to justify the conclusion.
+
+---
+
+**Use this cheat sheet to systematically dissect Logical Reasoning questions, avoid common pitfalls, and apply formal logic and critical thinking to select the best answer.**
+
+Follow the format of the examples below in your response.
+
+Community organizer: Before last year's community cleanup, only 77 of the local residents signed up to participate, but then well over 100 actually participated. This year, 85 residents have signed up to participate. Since our community cleanup will be a success if we have at least 100 participants, we can be confident that this year's cleanup will be a success.
+
+The reasoning in the community organizer's argument is most vulnerable to criticism on the grounds that the argument
+(A)generalizes about the outcome of an event based on a single observation of a similar situation
+(B)takes for granted that people who participated in last year's cleanup will participate this year
+(C)confuses a condition that is required for an outcome with one that is sufficient for that outcome
+(D)overlooks the possibility that the cleanup will attract participants who are not residents in the community
+(E)defines a term in such a way as to ensure that whatever the outcome, it will be considered a positive outcome
+Answer: (A)
+
+###
+A person who knowingly brings about misfortune should be blamed for it. However, in some cases a person who unwittingly brings about misfortune should not be blamed for it. For example, a person should never be blamed for unwittingly bringing about misfortune if the person could not reasonably have foreseen it.
+
+The principles above, if valid, most help to justify the reasoning in which one of the following?
+(A)Although he would have realized it if he had thought about it, it did not occur to Riley that parking his car in the center lane of Main Street could lead to a traffic accident. So, if a traffic accident does result from Riley's parking his car in the center lane of Main Street, he should not be blamed for it.
+(B)Oblicek had no idea that suggesting to her brother that he take out a loan to expand his business was likely to cause the business to go bankrupt, nor could she have reasonably foreseen this. So, if the loan does cause her brother's business to go bankrupt, Oblicek should not be blamed for it.
+(C)Gougon had no reason to think that serving the hollandaise sauce would make his guests ill, but he was concerned that it might. Thus, if the hollandaise sauce does make Gougon's guests ill, Gougon should be blamed for it.
+(D)When Dr. Fitzpatrick gave his patient the wrong medicine, he did not know that it would cause the patient to experience greatly increased blood pressure. So, if no one else knowingly did anything that contributed to the patient's increase in blood pressure, no one other than Dr. Fitzpatrick is to blame for it.
+(E)Any reasonable person could have foreseen that dropping a lit cigarette in dry leaves would start a fire. Thus, even if Kapp did not realize this, she is to blame for starting a fire on Rodriguez's farm since she dropped a lit cigarette in dry leaves there.
+Answer: (B)

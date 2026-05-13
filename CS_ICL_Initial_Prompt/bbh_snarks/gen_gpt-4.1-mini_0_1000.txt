@@ -1,0 +1,174 @@
+**Cheat Sheet for Identifying Sarcasm in Statements**
+
+---
+
+### Key Principles for Detecting Sarcasm
+
+1. **Sarcasm often involves saying the opposite of what is true or expected.**  
+   - The sarcastic statement usually contradicts reality, common sense, or the positive/negative context established by the other option.
+
+2. **Look for exaggerated praise or criticism that doesn’t fit the context.**  
+   - Sarcasm often uses over-the-top positive or negative words ironically.
+
+3. **Sarcasm frequently uses understatement or overstatement to highlight absurdity.**  
+   - For example, calling something obviously bad “great” or something obviously good “terrible.”
+
+4. **Sarcasm can be identified by the mismatch between the literal meaning and the implied meaning.**  
+   - The literal meaning is positive, but the context or tone implies negativity, or vice versa.
+
+5. **Sarcasm often targets something widely recognized as negative or undesirable but praises it ironically.**
+
+---
+
+### Specific Patterns & Tips for Difficult Examples
+
+#### 1. **Sarcasm via Contradiction of Common Knowledge or Logic**
+
+- When one option states a fact or common truth, and the other option contradicts it in a way that is obviously false or absurd, the false/absurd one is sarcastic.
+
+  - *Example:*  
+    - (A) "He's a terrible person, trying to promote a charity stream that has raised millions..." (sarcastic because promoting charity is positive, calling him terrible is ironic)  
+    - (B) "He's a generous person..." (not sarcastic)
+
+- *Tip:* Identify which statement contradicts what is generally accepted or logical.
+
+---
+
+#### 2. **Sarcasm via Irony in Tone or Word Choice**
+
+- Sarcasm often uses positive words to describe something negative or vice versa.
+
+  - *Example:*  
+    - "What a great transformation" said about someone drinking every day (negative behavior) is sarcastic.  
+    - "What a great transformation" about exercising (positive behavior) is not sarcastic.
+
+- *Tip:* Check if the positive/negative adjective fits the behavior or situation described.
+
+---
+
+#### 3. **Sarcasm via Implied Criticism or Mocking**
+
+- Sarcasm can be a subtle way to mock or criticize by pretending to praise.
+
+  - *Example:*  
+    - "Such profits being made" when the stock was bought high and sold low (loss) is sarcastic.  
+    - "Such profits being made" when the stock was bought low and sold high is not sarcastic.
+
+- *Tip:* Look for praise that is clearly inappropriate or ironic given the facts.
+
+---
+
+#### 4. **Sarcasm via Absurd or Illogical Suggestions**
+
+- When a statement suggests something obviously wrong or absurd as if it were good or normal.
+
+  - *Example:*  
+    - "Let's get rid of trams and build carriages instead" (carriages are outdated, so this is sarcastic).  
+    - "Let's get rid of trams and build lightrail instead" (logical, not sarcastic).
+
+- *Tip:* Identify if the suggestion is outdated, harmful, or nonsensical but presented as positive.
+
+---
+
+#### 5. **Sarcasm via Contradictory Cause-Effect or Outcome**
+
+- Sarcasm can appear when the cause-effect relationship is reversed or illogical.
+
+  - *Example:*  
+    - "I lose money for winning? Sign me up!" (losing money for winning is illogical, so sarcastic).  
+    - "I earn money for winning? Sign me up!" (logical, not sarcastic).
+
+- *Tip:* Check if the outcome described contradicts the expected or logical result.
+
+---
+
+#### 6. **Sarcasm via Mocking Exaggeration of Negative Traits**
+
+- Sarcasm can exaggerate negative traits or situations by pretending they are positive.
+
+  - *Example:*  
+    - "He's such great relationship material when he's drunk" (usually negative, so sarcastic).  
+    - "He's such terrible relationship material when he's drunk" (direct, not sarcastic).
+
+- *Tip:* Identify if the statement praises a known negative behavior.
+
+---
+
+#### 7. **Sarcasm via Ridiculous or Impossible Claims**
+
+- Sarcasm sometimes involves stating something impossible or ridiculous as if it were true.
+
+  - *Example:*  
+    - "Impossible, as there's no one on the internet" (obviously false, sarcastic).  
+    - "Impossible, as there's no one on the Moon" (true, not sarcastic).
+
+- *Tip:* Evaluate the factual accuracy of the statement.
+
+---
+
+#### 8. **Sarcasm via Contradictory or Absurd Comparisons**
+
+- Sarcasm can be detected when a comparison is made that is obviously wrong or ironic.
+
+  - *Example:*  
+    - "Everyone knows salt is the highlight of gourmet sophistication" (salt is common, not gourmet, so sarcastic).  
+    - "Everyone knows caviar is the highlight of gourmet sophistication" (true, not sarcastic).
+
+- *Tip:* Check if the comparison elevates something mundane or negative as if it were superior.
+
+---
+
+#### 9. **Sarcasm via Mocking False Praise of Negative Outcomes**
+
+- Sarcasm often praises negative outcomes as if they were positive.
+
+  - *Example:*  
+    - "Good thing things aren't more expensive now than they were eight years ago" (when they actually are, sarcastic).  
+    - "Good thing things aren't more expensive now than they were eight days ago" (plausible, not sarcastic).
+
+- *Tip:* Look for praise that contradicts known facts or expectations.
+
+---
+
+#### 10. **Sarcasm via Contradictory or Absurd Explanations**
+
+- Sarcasm can be present when an explanation or justification is obviously flawed or ironic.
+
+  - *Example:*  
+    - "My laptop didn't work underwater, so it must be Asus's fault" (obviously user error, sarcastic).  
+    - "My laptop didn't work underwater, so it must be my fault" (logical, not sarcastic).
+
+- *Tip:* Identify if blame or credit is assigned illogically.
+
+---
+
+### Summary Table of Common Sarcasm Indicators
+
+| Indicator                          | Example Phrase                              | Sarcastic if...                          |
+|----------------------------------|--------------------------------------------|-----------------------------------------|
+| Opposite meaning                 | "He's a terrible person promoting charity" | Charity is positive, calling him terrible is ironic |
+| Positive words for negative acts | "Great transformation" (drinking daily)    | Drinking daily is negative, so praise is sarcastic |
+| Praise for failure or loss       | "Such profits being made" (sold at loss)   | Loss is praised, so sarcastic            |
+| Absurd suggestions               | "Build carriages instead of trams"          | Carriages outdated, so sarcastic         |
+| Illogical cause-effect           | "I lose money for winning"                   | Losing money for winning is illogical    |
+| Praise for negative traits       | "Great relationship material when drunk"   | Drunkenness is negative, so praise is sarcastic |
+| Impossible claims                | "No one on the internet"                      | Factually false, so sarcastic             |
+| Ridiculous comparisons           | "Salt is gourmet sophistication"             | Salt is common, so sarcastic              |
+| Praise contradicting facts       | "Good thing prices aren't higher than 8 years ago" | Prices are higher, so sarcastic          |
+| Illogical blame or credit        | "Laptop broke underwater, Asus's fault"      | User error, so sarcastic                   |
+
+---
+
+### Final Tips
+
+- **Context matters:** Sarcasm often relies on shared knowledge or common sense. If a statement contradicts what is widely known or expected, it’s likely sarcastic.
+
+- **Look for tone clues:** Words like "Wow," "Yeah, right," "Such a great..." often signal sarcasm when paired with negative or absurd content.
+
+- **Check for exaggeration or understatement:** Sarcasm often uses hyperbole or downplaying to mock.
+
+- **If unsure, ask:** Does the statement make sense literally? If not, it’s probably sarcastic.
+
+---
+
+Use this cheat sheet to analyze the options carefully, focusing on contradictions, irony, exaggeration, and context to identify the sarcastic statement correctly.

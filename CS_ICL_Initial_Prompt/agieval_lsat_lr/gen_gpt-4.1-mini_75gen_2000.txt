@@ -1,0 +1,139 @@
+**Cheat Sheet for Tackling Difficult Logical Reasoning Questions**
+
+---
+
+### 1. **Must-Be-True / Inference Questions**
+
+- **Key challenge:** Avoid overgeneralizing or assuming more than what is stated.
+- **Strategy:**
+  - Identify exactly what is stated.
+  - Check if the option is *necessarily* true given the premises.
+  - Watch for qualifiers like "always," "generally," or "most"—these often make an option too strong.
+  - Beware of confusing correlation with causation.
+  - Example flaw to avoid: Assuming *all* ineffective whipping results in a thick, velvety substance when only blender whipping is discussed.
+
+---
+
+### 2. **Flaw Questions (Common Flaws to Recognize)**
+
+- **Ignoring alternative explanations:**  
+  - Example: Correlation between algae and fish deaths may be due to a third factor causing both.
+- **Assuming past conditions apply unchanged to present:**  
+  - Example: Assuming "latest safety technology" 30 years ago is equivalent to today's.
+- **Confusing absence of evidence with evidence of absence:**  
+  - Not having proof that something is false does not prove it true.
+- **Appeal to authority/reputation instead of evidence:**  
+  - Trusting a study because the author is reputable, ignoring methodological flaws.
+- **Overgeneralization from small or unrepresentative samples:**  
+  - Drawing broad conclusions from 11 volunteers or only older subjects.
+- **Confusing cause and effect:**  
+  - Assuming regulation caused lower exposure without ruling out other factors.
+- **Assuming right to do something implies obligation to do it:**  
+  - Having a right to publish ≠ obligation to publish.
+- **Assuming correlation implies causation:**  
+  - Just because two things occur together does not mean one causes the other.
+
+---
+
+### 3. **Assumption Questions**
+
+- **Look for the missing link that must be true for the conclusion to hold.**
+- **Common assumption types:**
+  - **Equivalence assumptions:**  
+    - E.g., Explaining basics of composting *must* include explaining hot vs. cold composting.
+  - **Exclusivity or appropriateness assumptions:**  
+    - E.g., Previous president acted appropriately, so current president’s similar action is justified.
+  - **Causal assumptions:**  
+    - E.g., Refusing competitor’s coupons when it costs nothing and satisfies customers must be motivated solely by desire to hurt competitor.
+  - **Category membership assumptions:**  
+    - E.g., Anger is a visceral emotion (to apply a general claim about visceral emotions to anger).
+  - **Linking right and obligation:**  
+    - E.g., Having a right to do something entails having an obligation to do it.
+
+---
+
+### 4. **Strengthen/Weaken Questions**
+
+- **To strengthen:**  
+  - Provide evidence that supports the causal link or key assumption.
+  - Show that the criticized factor actually has the effect claimed.
+  - Example: Showing bacteria in sludge without heavy metals are not antibiotic resistant strengthens the claim that heavy metals promote resistance.
+- **To weaken:**  
+  - Provide alternative explanations.
+  - Show that the key assumption is false or incomplete.
+  - Example: Showing managers donate with owners’ tacit consent weakens the stealing analogy.
+
+---
+
+### 5. **Parallel Reasoning / Pattern Matching**
+
+- Identify the logical form of the argument:
+  - Conditional reasoning (If P then Q; Not Q; therefore Not P) — watch for hidden assumptions.
+  - Reasoning from "usually does X that can only be done at Y" to "sometimes must be at Y."
+  - Analogies based on precedent or similarity require assuming the precedent was appropriate.
+- Match the pattern exactly, including the strength of the conclusion (some vs. all, sometimes vs. always).
+
+---
+
+### 6. **Evaluating Causal Arguments**
+
+- Check for overlooked alternative causes or confounding factors.
+- Beware of adding percentages without considering overlap.
+- Example: 30% have drainage problems + 30% have structural defects ≠ 60% total if some houses have both.
+
+---
+
+### 7. **Evaluating Arguments Involving Scientific or Technical Claims**
+
+- Distinguish between:
+  - Changes in knowledge vs. changes in reality.
+  - Correlation vs. causation.
+  - Sample representativeness.
+- Watch for assumptions about the uniqueness of biomarkers or the exclusivity of biological origins.
+
+---
+
+### 8. **Dialogue / Disagreement Questions**
+
+- Identify the exact point of disagreement, not just related issues.
+- Often the disagreement is about:
+  - Whether a claim is true or false.
+  - Whether a practice is valuable or not.
+  - Whether a condition is necessary or sufficient.
+- Avoid choosing options that are agreed upon or irrelevant.
+
+---
+
+### 9. **Logical Connectors and Conditional Reasoning**
+
+- Understand the difference between:
+  - Necessary vs. sufficient conditions.
+  - If-then statements vs. biconditionals.
+- Avoid assuming that failure of the consequent proves failure of the antecedent without ruling out other causes.
+
+---
+
+### 10. **Common Logical Reasoning Pitfalls**
+
+- **Equivocation:** Using a term in two different senses.
+- **Circular reasoning:** Assuming what you are trying to prove.
+- **Straw man:** Misrepresenting the opponent’s argument.
+- **Ad hominem:** Attacking the person instead of the argument.
+- **False dichotomy:** Presenting two options as the only possibilities.
+
+---
+
+### 11. **Key Tips for Difficult Questions**
+
+- **Break down complex arguments into premises and conclusions.**
+- **Identify what is explicitly stated vs. what is assumed or implied.**
+- **Look for hidden assumptions that connect premises to conclusions.**
+- **Be wary of strong language in answer choices ("always," "never," "only").**
+- **For must-be-true questions, test the answer choice against the stimulus to see if it must hold.**
+- **For flaw questions, identify the gap or error in reasoning.**
+- **For strengthen/weaken, focus on the causal link or key assumption.**
+- **For parallel reasoning, diagram the argument’s logical form before matching.**
+
+---
+
+This cheat sheet focuses on the nuanced reasoning and common pitfalls found in the most challenging examples you identified. Use it to guide your analysis and avoid common traps during the test.

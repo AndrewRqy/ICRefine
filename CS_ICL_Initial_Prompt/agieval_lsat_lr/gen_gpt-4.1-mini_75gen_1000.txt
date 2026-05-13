@@ -1,0 +1,143 @@
+**Cheat Sheet for Tackling Difficult Logical Reasoning Questions**
+
+---
+
+### 1. **Assumption Questions (Necessary Assumptions)**  
+- **Key:** Identify what must be true for the argument’s conclusion to hold.  
+- **Strategy:**  
+  - Find the gap between premises and conclusion.  
+  - Ask: *What is the unstated premise that bridges this gap?*  
+  - Use the negation test: if negating the choice destroys the argument, it’s necessary.  
+- **Common traps:**  
+  - Confusing sufficient assumptions with necessary ones.  
+  - Choosing statements that are true but not required for the argument.  
+- **Example:**  
+  - Editorial on school calendar assumes that removing long breaks benefits children (E).  
+  - Psychologist on insomnia assumes cases treated are representative of all insomnia (E).  
+  - Archaeologist assumes only archaeological considerations matter (A).  
+  - Consumer advocate assumes convenience outweighs other factors for some consumers (A).  
+  - Gardening books assume explaining hot vs. cold composting is part of basics (C).  
+  - Economist assumes large corporations promote communal ties (D).  
+  - Editorialist on tree rights assumes no obligation to entities other than trees (D).  
+  - Lawyer on jury instructions assumes simple language can adequately describe jurors’ role (C, E).  
+
+---
+
+### 2. **Flawed Reasoning / Logical Fallacies**  
+- **Common flawed patterns:**  
+  - **Confusing necessary and sufficient conditions:**  
+    - E.g., "If A then B" does not imply "If not B then not A."  
+    - Parallel example: Calcium necessary for healthy bones → concluding no healthy bones means no calcium (B).  
+  - **Circular reasoning:**  
+    - The conclusion is assumed in the premise.  
+    - E.g., cereal health claims justified by health-conscious consumers buying it because they are health-conscious (B).  
+  - **Confusing correlation with causation / Reverse causality:**  
+    - E.g., discipline causes misbehavior vs. misbehavior causes discipline (A).  
+  - **Overgeneralization from limited examples:**  
+    - E.g., concluding all foods will be reported healthful based on two examples (C).  
+  - **Assuming motivation equals outcome:**  
+    - E.g., assuming technology motivated by personal gain cannot benefit society (D).  
+  - **Assuming group majority overlaps:**  
+    - E.g., most mechanics have experience, most experienced understand circuits → most mechanics understand circuits (E).  
+  - **Attacking the person instead of the argument (ad hominem):**  
+    - E.g., rejecting proposal because proposer acted inconsistently in past (E).  
+
+---
+
+### 3. **Strengthen / Weaken Questions**  
+- **Strengthen:**  
+  - Look for evidence that supports the causal link or key assumption.  
+  - Eliminate alternative explanations.  
+  - Provide direct support for the argument’s main claim.  
+- **Weaken:**  
+  - Introduce alternative causes or explanations.  
+  - Show the key assumption is false or unsupported.  
+  - Provide counterexamples or contradictory evidence.  
+- **Examples:**  
+  - Magnet experiment weakened by placebo effect (A).  
+  - Microbiologist strengthened by bacteria in sludge without heavy metals lacking resistances (B).  
+  - Psychologist strengthened by supervisors not influenced by noticed flattery (E).  
+  - City jury fairness weakened by expert jurors’ bias (B).  
+  - Local resident’s algae-fish deaths argument weakened by common cause possibility (D).  
+
+---
+
+### 4. **Parallel Reasoning**  
+- **Match the logical structure, not the topic.**  
+- **Look for:**  
+  - Similar argument form (e.g., necessary condition confusion, circular reasoning, causal inference).  
+  - Similar flaw or pattern of reasoning.  
+- **Examples:**  
+  - Calcium and cake flour necessary condition confusion (B).  
+  - Mechanics and snow-removal companies majority overlap error (E).  
+  - Cereal health claims and card game intellectual challenge circular reasoning (B).  
+
+---
+
+### 5. **Inference / Must Be True Questions**  
+- **Only choose what must be true based on the passage.**  
+- **Avoid:**  
+  - Overgeneralizing or assuming facts not stated.  
+  - Introducing new information or speculation.  
+- **Examples:**  
+  - Museum prints must include all permanent collection works (C).  
+  - Florida panthers need larger habitat to be self-sustaining (C).  
+  - Government’s financial predicament depends on computer modeling investment (B).  
+
+---
+
+### 6. **Principle Questions**  
+- **Identify the general rule that underlies the argument.**  
+- **Match the principle that best captures the reasoning pattern.**  
+- **Example:**  
+  - Chairperson’s caution about political instability → principle that corporations should be cautious expanding into unstable countries (D).  
+  - Artistic period understanding requires knowledge of influential earlier periods → principle about understanding intellectual antecedents (E).  
+
+---
+
+### 7. **Role of a Statement / Function Questions**  
+- **Determine how a particular statement functions in the argument:** premise, conclusion, assumption, objection, illustration, etc.  
+- **Example:**  
+  - Zooplankton feeding on phytoplankton shows indirect effect of temperature on larger sea animals (C).  
+  - Statement about recent scientific research’s esoteric language establishes relevance of analogy to Newton’s Principia (D).  
+  - Assertion about strength and coordination is one reason for supporting athletics, to which another reason is added (A).  
+
+---
+
+### 8. **Conditional Reasoning and Contrapositives**  
+- **Remember:**  
+  - "If P then Q" → contrapositive "If not Q then not P" is logically equivalent.  
+  - Converse "If Q then P" is not necessarily true.  
+- **Use this to analyze must-be-true and assumption questions.**  
+- **Example:**  
+  - Keyboarding skills → computer use → word processing → being able to write essays implies some keyboarding skills (C).  
+
+---
+
+### 9. **Common Logical Moves to Watch For**  
+- **Assuming exclusivity:**  
+  - E.g., only brothers could have given the gift → ignoring other possibilities (D).  
+- **Assuming uniformity:**  
+  - E.g., all ball lightning has the same cause (E).  
+- **Assuming representativeness:**  
+  - E.g., cases treated by psychologists represent all cases (E).  
+- **Assuming causation from correlation:**  
+  - E.g., discipline causes misbehavior without considering reverse causation (A).  
+- **Assuming rights imply obligations or vice versa:**  
+  - E.g., having a right means having an obligation (B).  
+
+---
+
+### 10. **Test-Taking Tips for Difficult Questions**  
+- **Read carefully:** Identify conclusion and premises clearly.  
+- **Look for hidden assumptions:** What must be true for the argument to work?  
+- **Use process of elimination:** Remove choices that are irrelevant, too strong, or unrelated.  
+- **Apply negation test for assumption questions:** Negate the choice; if argument falls apart, it’s necessary.  
+- **For weaken questions:** Find alternative explanations or challenge key assumptions.  
+- **For strengthen questions:** Find evidence that supports the causal link or assumption.  
+- **For parallel reasoning:** Focus on logical form, not content.  
+- **For inference:** Only choose what is directly supported by the passage.  
+
+---
+
+**Keep this cheat sheet handy to recall key strategies and common pitfalls when facing challenging logical reasoning problems!**

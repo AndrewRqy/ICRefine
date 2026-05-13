@@ -1,0 +1,128 @@
+**LSAT Analytical Reasoning Cheat Sheet**
+
+---
+
+### 1. Core Reasoning Strategies
+
+- **Diagram and Organize Early:**  
+  Create clear, visual representations (grids, charts, timelines, shelves, slots) to track elements, positions, and relationships. Use shorthand for entities and constraints.
+
+- **Identify and Apply Hard Constraints First:**  
+  Pin down absolute rules (e.g., “exactly one per day,” “must be before,” “cannot be adjacent”) before exploring possibilities. These reduce the solution space drastically.
+
+- **Use Conditional Logic to Narrow Options:**  
+  Translate “if-then” statements into direct implications and contrapositives. For example, if *A before B*, then *B cannot be before A*; if *X not on day 1*, then *X can’t be on day 7* if stated.
+
+- **Leverage Ordering and Spacing Rules:**  
+  When clues specify order or spacing (e.g., “exactly two chapters apart,” “no adjacent repeats”), list all possible placements and eliminate those violating spacing.
+
+- **Track Groupings and Mutual Exclusivity:**  
+  Note when elements must or must not be together (e.g., “K and F on same shelf,” “Franco and Garcia not on same day”). Use these to limit combinations.
+
+- **Count and Balance Constraints:**  
+  Pay attention to numeric limits (e.g., “exactly two per shelf,” “at least three novels,” “no more than four French works”). Use these to eliminate impossible distributions.
+
+- **Use “Must Be True” vs. “Could Be True” Reasoning:**  
+  For “must be true,” look for unavoidable conclusions from all possibilities. For “could be true,” find at least one consistent scenario.
+
+- **Work Backwards from Fixed Points:**  
+  When certain elements or positions are fixed (e.g., “Iturbe testifies Wednesday,” “Kammer’s oil on wall 2”), use these anchors to deduce others.
+
+- **Consider Symmetry and Exclusivity:**  
+  When choices are mutually exclusive (e.g., “Either Parra or Tiao, but not both”), test both options separately to see which fit.
+
+- **Use Process of Elimination on Answer Choices:**  
+  Test each choice against the rules and your diagram; eliminate those that cause contradictions or violate constraints.
+
+---
+
+### 2. Common Mistakes to Avoid
+
+- **Ignoring the Contrapositive:**  
+  Failing to apply the reverse implication of conditional statements leads to missed deductions.
+
+- **Overlooking “No Consecutive” or “No Adjacent” Rules:**  
+  Forgetting that certain elements cannot be next to each other often causes invalid arrangements.
+
+- **Miscounting or Misallocating Numbers:**  
+  Not respecting exact counts (e.g., number of items per shelf, number of days a breed appears) leads to impossible solutions.
+
+- **Assuming Flexibility Where There Is None:**  
+  Treating “must be before” or “must be on the same shelf” as optional weakens deductions.
+
+- **Failing to Track Multiple Attributes Simultaneously:**  
+  Overlooking that elements have multiple linked features (e.g., person + day + item) can cause errors.
+
+- **Mixing Up “Must” and “Could” Conditions:**  
+  Confusing what must happen in all scenarios with what could happen in some leads to incorrect conclusions.
+
+- **Neglecting to Update Diagrams After Each Deduction:**  
+  Not revising your working diagram with new inferences wastes time and causes oversight.
+
+- **Forgetting to Check All Constraints Against Each Answer Choice:**  
+  Sometimes an answer seems plausible until tested against all rules.
+
+- **Ignoring the Impact of “If X, then Y” on Other Elements:**  
+  Conditional rules often cascade; missing these chains causes incomplete reasoning.
+
+---
+
+### 3. Quick Decision Rules (If X → Do Y)
+
+- **If a person/item must be before another → List all possible earlier positions for the first and eliminate later ones for the second.**
+
+- **If two elements cannot be adjacent → Ensure at least one element separates them in your diagram.**
+
+- **If a quantity must be equal across two categories → Match counts exactly and adjust assignments accordingly.**
+
+- **If an element must be on a higher/lower shelf or position → Assign relative rankings and eliminate impossible placements.**
+
+- **If two elements must be on the same shelf/slot/day → Group them together and treat as a unit for other constraints.**
+
+- **If an element cannot be on the same day/slot as another → Place them in separate groups or positions immediately.**
+
+- **If a breed/item cannot appear on consecutive days → Alternate or space out occurrences accordingly.**
+
+- **If a condition states “either A or B but not both” → Test scenarios separately; exclude any arrangement violating exclusivity.**
+
+- **If a person/item must be assigned a higher-numbered space than another → Order assignments strictly and eliminate conflicts.**
+
+- **If a condition requires “at least one” or “exactly n” of something → Use counting to confirm or eliminate options.**
+
+- **If a choice fixes a key element’s position (e.g., “I and M on the same shelf”) → Use it to cascade and fully determine other placements.**
+
+- **If a person/item must be earlier than two others → Place that person/item as early as possible and the others later.**
+
+- **If a condition requires no repeats of a breed/item on consecutive days → Track previous day’s breed to avoid repeats.**
+
+- **If a pair must be separated by at least two others → Place them with at least two slots between.**
+
+- **If a person must test a bike on day 1 and another must test the same bike on day 2 → Link those days and riders accordingly.**
+
+---
+
+**Summary:**  
+Master LSAT Analytical Reasoning by diagramming clearly, applying hard constraints first, translating conditions into direct implications, and carefully tracking order, adjacency, and counts. Avoid common pitfalls by rigorously testing each answer choice against all rules and maintaining updated diagrams. Use quick decision rules to streamline deductions and spot contradictions early.
+
+Follow the format of the examples below in your response.
+
+Exactly eight books—F, G, H, I, K, L, M, O—are placed on a bookcase with exactly three shelves—the top shelf, the middle shelf, and the bottom shelf. At least two books are placed on each shelf. The following conditions must apply: More of the books are placed on the bottom shelf than the top shelf. I is placed on the middle shelf. K is placed on a higher shelf than F. O is placed on a higher shelf than L. F is placed on the same shelf as M.
+
+It is fully determined which of the shelves each of the books is placed on if which one of the following is true?
+(A)I and M are placed on the same shelf as each other.
+(B)K and G are placed on the same shelf as each other.
+(C)L and F are placed on the same shelf as each other.
+(D)M and H are placed on the same shelf as each other.
+(E)H and O are placed on the same shelf as each other.
+Answer: (A)
+
+###
+On each of exactly seven consecutive days (day 1 though day 7), a pet shop features exactly one of three breeds of kitten—Himalayan, Manx, Siamese—and exactly one of three breeds of puppy—Greyhound, Newfoundland, Rottweiler. The following conditions must apply: Greyhounds are featured on day 1. No breed is featured on any two consecutive days. Any breed featured on day 1 is not featured on day 7. Himalayans are featured on exactly three days, but not on day 1. Rottweilers are not featured on day 7, nor on any day that features Himalayans.
+
+If Himalayans are not featured on day 7, then which one of the following pairs of days CANNOT feature both the same breed of kitten and the same breed of puppy?
+(A)day 1 and day 3
+(B)day 2 and day 6
+(C)day 3 and day 5
+(D)day 4 and day 6
+(E)day 5 and day 7
+Answer: (B)

@@ -1,0 +1,365 @@
+**Cheat Sheet for Difficult Logic Problems**
+
+---
+
+### 1. **Oral Reports Scheduling (6 students, 3 days, 2 reports/day)**
+
+**Key Constraints:**
+- George only on Tuesday.
+- Olivia & Robert never afternoon.
+- If Nina reports (not Wednesday), then *next day* Helen & Irving both report.
+- Exactly 6 students report, 2 per day.
+
+**Difficult Points:**
+
+- **Nina’s conditional:**  
+  - If Nina reports on Mon or Tue, then Helen & Irving must both report *together* the next day (Tue or Wed).  
+  - Since only 2 reports per day, Helen & Irving must be the only two that day.  
+  - If Nina and Helen report same day, that day must be Wednesday (no next day to trigger Helen & Irving).
+
+- **Scheduling George, Nina, Robert on different days:**  
+  - George fixed Tuesday.  
+  - Nina cannot be Monday (would force Helen & Irving on Tuesday with George, exceeding 2 reports).  
+  - Nina on Wednesday avoids triggering Helen & Irving condition.  
+  - Robert then on Monday.
+
+- **Morning/Afternoon restrictions:**  
+  - Olivia & Robert never afternoon.  
+  - George only Tuesday (morning or afternoon).  
+  - Helen, Kyle, Lenore morning reports fill all morning slots → Olivia & Robert cannot report (no morning slots left).
+
+- **If Kyle is Tuesday afternoon and Helen Wednesday afternoon:**  
+  - Morning reports must fit constraints: George only Tuesday morning, Robert morning Monday, Irving morning Wednesday.  
+  - Nina not reporting → no Nina condition triggered.
+
+---
+
+### 2. **Reading Club Selection (5 or 6 works from 9 total)**
+
+**Key Constraints:**
+- Max 4 French works total.
+- 3–4 novels total.
+- French novels ≥ Russian novels.
+- If both French plays selected → Russian play not selected.
+
+**Difficult Points:**
+
+- **Minimum French novels:**  
+  - At least 2 French novels must be selected to satisfy French novels ≥ Russian novels and total novels ≥ 3.
+
+- **Selections that cannot happen:**  
+  - No Russian novels + exactly one play → would force too many French works (violates max 4 French works).  
+  - Both French plays + Russian play → forbidden.
+
+- **Play selection dependencies:**  
+  - French plays together exclude Russian play.  
+  - French novels must balance Russian novels.
+
+---
+
+### 3. **Concert Composition Order (8 compositions, slots 1–8)**
+
+**Key Constraints:**
+- T immediately before F or immediately after R.
+- At least two compositions between F and R.
+- O is 1st or 5th.
+- 8th is L or H.
+- P before S.
+- At least one composition between O and S.
+
+**Difficult Points:**
+
+- **P cannot be 7th:**  
+  - Because S must come after P, and 8th is L or H, S cannot be 8th → P cannot be 7th.
+
+- **If T is 5th and F is 6th:**  
+  - R must be 1st–4th to have two compositions between F and R.  
+  - O must be 1st (since 5th is T).  
+  - S must be 4th or 7th to satisfy P before S and compositions between O and S.
+
+- **If S is 4th:**  
+  - O must be 1st (since O is 1st or 5th, and 5th is T).  
+  - P must be before S (positions 2 or 3).  
+  - T must be placed to satisfy adjacency with F or R.
+
+---
+
+### 4. **Pet Shop Daily Features (7 days, kittens & puppies)**
+
+**Key Constraints:**
+- Greyhounds on day 1.
+- No breed repeats on consecutive days.
+- Breed on day 1 not on day 7.
+- Himalayans exactly 3 days, not day 1.
+- Rottweilers not on day 7 or any Himalayan day.
+
+**Difficult Points:**
+
+- **If Himalayans not on day 2:**  
+  - Day 2 kitten is Manx or Siamese.  
+  - Siamese on day 4 possible.
+
+- **If Himalayans not on day 7:**  
+  - Some pairs of days cannot share same kitten and puppy breed (e.g., day 2 and 6).  
+  - Because of Rottweiler and Himalayan restrictions, Newfoundland is the only puppy breed that can appear twice non-consecutively, but adjacency rules limit this.
+
+---
+
+### 5. **Research Team Selection (8 employees, conditions)**
+
+**Key Constraints:**
+- If Myers on team → no Ortega or Paine.
+- If Schmidt on team → Paine & Thomson must be on team.
+- If Wong on team → Myers & Yoder must be on team.
+- Team size ≥ 4.
+
+**Difficult Points:**
+
+- **Schmidt and Wong cannot both be on team:**  
+  - Wong requires Myers & Yoder.  
+  - Schmidt requires Paine & Thomson.  
+  - Myers and Paine cannot be together → conflict.
+
+- **If Yoder not on team:**  
+  - Wong cannot be on team (needs Yoder).  
+  - Myers cannot be on team (needs Wong to be on team to be included).
+
+- **If Paine not on team:**  
+  - Schmidt cannot be on team (needs Paine).  
+  - Myers can be on team, but Ortega cannot (Myers excludes Ortega).
+
+- **At least one of Thomson or Yoder must be on team:**  
+  - Otherwise, team size and constraints cannot be met.
+
+---
+
+### 6. **Editing Order of Articles (7 articles, 3 topics)**
+
+**Key Constraints:**
+- No two consecutive articles share topic.
+- S earlier than Q only if Q is 3rd.
+- S earlier than Y.
+- J before G before R.
+
+**Difficult Points:**
+
+- **If Y is 4th:**  
+  - J must be 2nd to satisfy J < G < R and no consecutive topics.
+
+- **If G is 4th:**  
+  - Y can be 6th without conflict.
+
+- **If J is 3rd:**  
+  - G cannot be 4th (would be consecutive finance).  
+  - Y can be 5th.
+
+- **H can be 2nd:**  
+  - Possible to arrange without violating constraints.
+
+---
+
+### 7. **Concert Band Solo Order (6 members)**
+
+**Key Constraints:**
+- Guitarist not 4th.
+- Percussionist before keyboard player.
+- Keyboard player after violinist and before guitarist.
+- Saxophonist after exactly one of percussionist or trumpeter.
+
+**Difficult Points:**
+
+- **Acceptable order example:**  
+  - Violinist, trumpeter, saxophonist, percussionist, keyboard player, guitarist.
+
+- **Keyboard player cannot be first:**  
+  - Must be after violinist.
+
+- **Guitarist before percussionist is impossible:**  
+  - Percussionist must be before keyboard, keyboard before guitarist.
+
+- **Keyboard player before saxophonist can be true.**
+
+- **If violinist is 4th:**  
+  - Trumpeter before saxophonist is not necessarily true.
+
+---
+
+### 8. **Art Historians Lectures (4 lectures, 4 topics)**
+
+**Key Constraints:**
+- Oil paintings & watercolors before lithographs.
+- Farley before oil paintings.
+- Holden before Garcia & Jiang.
+
+**Difficult Points:**
+
+- **Holden must be before lithographs.**
+
+- **Farley cannot give lithographs** (since Farley before oil paintings, and oil paintings before lithographs).
+
+- **If watercolors is 3rd:**  
+  - Jiang can give lithographs 4th.
+
+---
+
+### 9. **Rugs Weaving Colors**
+
+**Key Constraints:**
+- White used only in multicolored rugs (with 2 other colors).
+- Olive used only with peach.
+- Forest & turquoise not together.
+- Peach & turquoise not together.
+- Peach & yellow not together.
+
+**Difficult Points:**
+
+- **If forest & peach together in a rug:**  
+  - Rug is multicolored.  
+  - Turquoise & yellow cannot be in same rug as peach & forest.  
+  - White cannot be used (would require 2 other colors, but peach & forest already 2 colors).  
+  - So white not used at all is possible.
+
+---
+
+### 10. **Photography Business Graduation Ceremonies**
+
+**Key Constraints:**
+- Frost & Heideck together at same ceremony.
+- If Lai & Mays both assigned → different ceremonies.
+- If Gonzalez at Silva → Lai at Thorne.
+- If Knutson not at Thorne → Heideck & Mays must be at Thorne.
+
+**Difficult Points:**
+
+- **If Heideck with Lai:**  
+  - Frost also with them.  
+  - Mays must be at other ceremony or not assigned.  
+  - Knutson must be assigned to Thorne to avoid violating condition about Heideck & Mays.
+
+---
+
+### 11. **Shopping Center Business Locations**
+
+**Key Constraints:**
+- Pharmacy at one end; restaurant at other end.
+- Restaurants separated by at least two businesses.
+- Pharmacy next to optometrist or veterinarian.
+- Toy store not next to veterinarian.
+
+**Difficult Points:**
+
+- **If shoe store at space 2:**  
+  - Optometrist can be at space 5 without conflict.
+
+- **If veterinarian at space 5:**  
+  - Pharmacy must be at space 7.  
+  - Restaurant at space 1.
+
+- **If optometrist next to shoe store:**  
+  - Businesses immediately adjacent to this pair must be restaurant and toy store.
+
+- **If shoe store at space 4:**  
+  - Pharmacy must be next to veterinarian.
+
+---
+
+### 12. **Sales Representatives Zones**
+
+**Key Constraints:**
+- Exactly one of Parra or Tiao in Zone 1.
+- Exactly one of Tiao or Udall in Zone 2.
+- Parra & Quinn together.
+- Stuckey & Udall together.
+- Zone 3 has more reps than Zone 2.
+
+**Difficult Points:**
+
+- **Valid assignments:**  
+  - Parra & Quinn in Zone 3; Stuckey & Udall in Zone 2; Tiao in Zone 1.
+
+- **Quinn cannot be in same zone as Tiao.**
+
+- **Zone 1 can include Vegemite, Wellspring, Yardsign (concert analogy).**
+
+---
+
+### 13. **Maintenance Company Service Targets**
+
+**Key Constraints:**
+- Website target ≤ voicemail target for each client.
+- Image’s voicemail < Solide’s and Truvest’s voicemail.
+- Solide’s website < Truvest’s website.
+
+**Difficult Points:**
+
+- **If Truvest’s website < voicemail:**  
+  - Solide’s website must be 1 day.
+
+- **If Image’s website is 2 days:**  
+  - Image’s voicemail must be 2 days.
+
+- **Targets that cannot be duplicated:**  
+  - 3-day website target cannot be assigned to more than one client.
+
+---
+
+### 14. **Repertory Theater Movie Schedule**
+
+**Key Constraints:**
+- Western before horror.
+- Sci-fi not on screen 3.
+- Romance not on screen 2.
+- Horror & mystery on different screens.
+- Screen 3 shows one movie at 8 P.M.
+- Screens 1 & 2 show two movies each at 7 & 9 P.M.
+
+**Difficult Points:**
+
+- **Western & horror on same screen 2 at 7 & 9 P.M. possible.**
+
+- **If romance before western:**  
+  - Romance at 7 P.M. on screen 1.  
+  - Sci-fi must be on screen 2.
+
+- **If sci-fi & romance on same screen:**  
+  - Both on screen 1.  
+  - Western must begin at 7 P.M. on screen 2.
+
+---
+
+### 15. **Naturalist Lectures (5 lectures, 2 locations)**
+
+**Key Constraints:**
+- First lecture in Gladwyn Hall (GH).
+- Fourth lecture in Howard Auditorium (HA).
+- Exactly 3 lectures in GH.
+- Sandpipers in HA before oystercatchers.
+- Terns before petrels; petrels in GH.
+
+**Difficult Points:**
+
+- **Cannot have 3 lectures in HA (2 required).**
+
+- **Second & third lectures both in HA is impossible.**
+
+---
+
+### **General Tips for Difficult Problems:**
+
+- **Track conditional dependencies carefully:**  
+  E.g., "If X then Y and Z," or "If Nina reports on Monday, then Helen & Irving must report Tuesday."
+
+- **Use process of elimination for impossible pairs or sequences.**
+
+- **Pay attention to exclusivity and adjacency constraints:**  
+  E.g., no two same breeds on consecutive days, no two same topics consecutively.
+
+- **When multiple conditions involve ordering, map out possible sequences to check feasibility.**
+
+- **Remember to check total counts (e.g., number of reports, number of works selected, number of lectures per location).**
+
+- **For "must be true" or "cannot be true" questions, focus on what is forced by the constraints, not just what is possible.**
+
+---
+
+This cheat sheet focuses on the nuanced, conditional, and ordering constraints that are most challenging. Use it to recall key logical dependencies and avoid common pitfalls in these problem types.

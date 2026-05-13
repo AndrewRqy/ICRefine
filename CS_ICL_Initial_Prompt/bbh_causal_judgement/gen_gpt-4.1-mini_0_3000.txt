@@ -1,0 +1,223 @@
+**Cheat Sheet for Difficult Causation Questions**
+
+---
+
+### 1. **Causation in Cases of Multiple Sufficient Causes (Overdetermination)**
+
+- When **two or more independent causes** are each sufficient to bring about an effect, **no single cause alone is seen as the sole cause**.
+- Example:  
+  - *Bridge collapse if either train alone is heavy enough → each train alone causes collapse (Yes)*  
+  - *Bridge collapse only if both trains together are too heavy → neither alone causes collapse (No)*  
+- **Key:** Identify if the cause was **necessary** or just one of multiple sufficient causes.
+
+---
+
+### 2. **Causation in Cases of Multiple Conjunctive Causes (Joint Necessity)**
+
+- When an effect requires **all conditions to be met simultaneously** (AND condition), each cause is necessary for the effect.
+- Example:  
+  - *Building implodes if safety switch OFF AND knob A ON.*  
+  - If Tom switches knob A ON while safety switch is already OFF → Tom caused implosion (Yes).  
+  - If safety switch is OFF already, knob A ON or OFF → implosion happens anyway → Tom switching knob A ON not cause (No).  
+- **Key:** Check if the cause completed the necessary conditions.
+
+---
+
+### 3. **Causation in Cases of Multiple Alternative Causes (Disjunctive Causes)**
+
+- When an effect occurs if **any one of several conditions is met** (OR condition), a cause is only seen as causal if it was **necessary** or **made a difference**.
+- Example:  
+  - *Coffee shop profits if anyone orders coffee.*  
+  - If others ordered anyway, one person’s order is **not necessary** → no cause (No).  
+  - If that person’s order was needed to reach the threshold → cause (Yes).  
+- **Key:** Determine if the cause was **necessary** or just coincidental.
+
+---
+
+### 4. **Causation by Omission and Responsibility**
+
+- **Responsibility matters:**  
+  - If a person is **responsible** for an action and fails to act, their omission is a cause.  
+  - If a person is **not responsible**, their omission is typically **not** seen as a cause.  
+- Example:  
+  - Janet responsible for oiling machines → her omission causes breakdown (Yes).  
+  - Kate not responsible → her omission does not cause breakdown (No).  
+  - If responsibility shifts (e.g., Janet fails, then Kate is responsible but also fails) → Kate’s omission causes breakdown (Yes).  
+- **Key:** Identify who had the duty or responsibility.
+
+---
+
+### 5. **Causation in Cases of Intentionality**
+
+- **Intentional causation requires:**  
+  - Awareness that the action will bring about the effect.  
+  - Acting with the purpose or at least acceptance of the effect.  
+- **Foreseen but not desired side effects:**  
+  - If the effect is foreseen but not the goal, and the actor does not care, typical people say **not intentional**.  
+- **Foreseen and accepted consequences:**  
+  - If the actor knows the effect will happen and proceeds anyway, typical people say **intentional**.  
+- Examples:  
+  - Hunter shoots deer knowing bullet will hit bird-watcher → intentional shooting of bird-watcher (Yes).  
+  - Hunter shoots deer knowing gunfire will scare eagle → not intentional to scare eagle (No).  
+  - CEO ignores law violation to increase profit → intentional violation (Yes).  
+  - CEO ignores law fulfillment to increase profit → not intentional fulfillment (No).  
+- **Key:** Distinguish between **intended**, **foreseen but indifferent**, and **unintended** outcomes.
+
+---
+
+### 6. **Causation in Cases of Mistake or Lack of Control**
+
+- If the actor **lacks control** over the outcome (e.g., slips, accident), typical people say **no intentional causation**.  
+- Example:  
+  - Jake’s hand slips, bullet hits target → no intentional shooting (No).  
+  - Jake aims and shoots → intentional (Yes).  
+- **Key:** Control and deliberate aiming matter for intentionality.
+
+---
+
+### 7. **Causation in Cases of Combined Actions Leading to Harm**
+
+- When harm results from **combination of actions**, each action that contributed to the harmful combination is a cause.  
+- If one action alone would not cause harm, but combined with another it does, both are causes.  
+- Example:  
+  - Fertilizer A + Fertilizer B cause plants to dry out.  
+  - Alex uses A, Benni uses B → both fertilizations cause drying (Yes).  
+  - If only one used harmful fertilizer → no drying (No).  
+- If one person **misinforms** another leading to harmful combination, the misinformer’s action is also a cause.  
+- **Key:** Identify if the action was part of the harmful combination.
+
+---
+
+### 8. **Causation in Cases of Foreseeable but Unintended Side Effects**
+
+- If an effect is a **side effect** and not the actor’s goal or accepted consequence, typical people say **no intentional causation**.  
+- Example:  
+  - Sniper shoots commander, gunfire alerts enemies → intentional shooting, but not intentional alerting (No).  
+  - Bob steals money, neurotoxin improves health → no intentional health improvement (No).  
+- **Key:** Distinguish between **intended effects** and **mere side effects**.
+
+---
+
+### 9. **Causation in Cases of Underlying vs Immediate Cause of Death**
+
+- Immediate cause (e.g., allergic reaction) is the direct cause of death.  
+- Underlying cause (e.g., cancer from asbestos) is a contributing cause.  
+- Typical people may say:  
+  - Immediate cause caused death (Yes).  
+  - Underlying cause caused death (Yes), if it set the stage for death.  
+  - But if immediate cause is unrelated to underlying cause, underlying cause may not be seen as cause of death (No).  
+- Example:  
+  - John’s cancer made him vulnerable → asbestos exposure caused premature death (Yes).  
+  - Nurse’s medication caused immediate death (Yes).  
+  - Plastic division relocation caused death? No, only indirectly (No).  
+- **Key:** Differentiate between **proximate/immediate** and **underlying** causes.
+
+---
+
+### 10. **Causation by Inaction When There Is a Duty to Act**
+
+- If a person has a **duty to act** after another’s failure and fails to act, their omission is a cause.  
+- If no duty exists, omission is not a cause.  
+- Example:  
+  - Janet forgets to oil → Kate responsible to oil if Janet fails → Kate’s failure causes breakdown (Yes).  
+  - If Kate not responsible → no cause (No).  
+- **Key:** Duty to act is crucial for omission to be causal.
+
+---
+
+### 11. **Causation in Cases of Policy or Rule Violations**
+
+- If a person violates a policy and that violation is necessary for the harmful effect, they are seen as causing the effect.  
+- If another person follows policy and their action alone would not cause the effect, they are not seen as causing it.  
+- Example:  
+  - Zoe logs in early violating policy → causes empty email (Yes).  
+  - Alice logs in at permitted time → does not cause email (No).  
+- **Key:** Responsibility and violation matter.
+
+---
+
+### 12. **Causation in Cases of Coincidental or Redundant Actions**
+
+- If an action is redundant (not necessary) for the effect, typical people say it did not cause the effect.  
+- Example:  
+  - Laurie already qualified for free sample by purchase → subscription status change not cause (No).  
+  - Laurie only qualified by subscription → subscription status change cause (Yes).  
+- **Key:** Check if the action was necessary or just coincidental.
+
+---
+
+### 13. **Causation in Cases of Simultaneous Actions**
+
+- When multiple people act simultaneously causing an effect that requires all of them, each is a cause.  
+- When effect requires only one, and multiple act, only those necessary are causes.  
+- Example:  
+  - Circuit breaker fails if 4 lamps on → Jim turning on lamp among 4 causes failure (Yes).  
+  - Circuit breaker fails if 2 lamps on → Jim turning on lamp among 2 causes failure (Yes).  
+  - Circuit breaker fails if 3 lamps on → Jim turning on lamp among 3 causes failure (Yes).  
+- **Key:** Identify the threshold and whether the action was necessary to reach it.
+
+---
+
+### 14. **Causation in Cases of Intent vs Outcome**
+
+- Intention is about the **goal** of the action, not just the outcome.  
+- If the outcome was not the goal or accepted consequence, no intentional causation.  
+- Example:  
+  - CEO wants profit, knows law violation → intentional violation (Yes).  
+  - CEO wants profit, knows law fulfillment → not intentional fulfillment (No).  
+- **Key:** Focus on actor’s goal, not just knowledge of outcome.
+
+---
+
+### Summary Table for Quick Reference
+
+| Scenario Type                          | Cause? (Typical Person) | Notes                                                                                  |
+|--------------------------------------|------------------------|----------------------------------------------------------------------------------------|
+| Multiple sufficient causes (OR)      | No if cause not necessary | Only causes if necessary for effect                                                    |
+| Multiple conjunctive causes (AND)    | Yes if cause completes condition | Cause if completes necessary condition                                               |
+| Omission with responsibility         | Yes if responsible      | Duty to act is key                                                                    |
+| Omission without responsibility      | No                      | No duty → no cause                                                                    |
+| Intentional harm                      | Yes if aware and accepts | Foreseen and accepted consequences = intentional                                    |
+| Foreseen but indifferent side effect | No                      | Not intended, just foreseen                                                          |
+| Mistake/lack of control               | No                      | No control → no intentional causation                                                |
+| Combined harmful actions              | Yes if part of combination | Each necessary part of harmful combo is cause                                        |
+| Underlying vs immediate cause of death | Both can be causes      | Immediate cause direct; underlying cause contributing                                  |
+| Policy violation causing harm        | Yes if violation necessary | Following policy alone not cause                                                     |
+| Redundant action                     | No                       | Not necessary for effect                                                              |
+| Simultaneous actions                  | Yes if necessary         | Necessary to reach threshold                                                          |
+| Intention vs knowledge                | Intentional only if goal | Knowledge alone insufficient                                                         |
+
+---
+
+**Use this cheat sheet to analyze each question carefully:**
+
+- Identify the **type of causation** (omission, multiple causes, intentionality, etc.).
+- Determine if the action was **necessary** or just coincidental.
+- Check if the actor had **responsibility or duty**.
+- Assess if the actor **intended or accepted** the outcome.
+- Consider if the outcome was a **side effect or the goal**.
+- Evaluate if the cause was **immediate or underlying**.
+
+---
+
+This cheat sheet focuses on the nuanced, challenging cases where causation is not straightforward. Use it to guide your reasoning step-by-step.
+
+Follow the format of the examples below in your response.
+
+Question: How would a typical person answer each of the following questions about causation?
+Janet is an employee in a factory. Since she works in the maintenance department, she knows how to grease and oil all of the machines in the factory. It is her responsibility to put oil into the machines. Kate is also an employee at the factory. While she works in the human resources department, she knows how to grease and oil all of the machines in the factory. If Janet does not put oil in the machines, it is not Kate's responsibility to do so. One day, Janet forgets to put oil in an important machine. Kate noticed that Janet did not put oil in the machine, and Kate also did not put oil in the machine. The machine broke down a few days later. Did Kate not putting oil in the machine cause it to break down?
+Options:
+- Yes
+- No
+Reasoning: Let's think step by step.  
+Here in this question, we are told that Janet was responsible for oiling the machine but forgot, and Kate, although not responsible, noticed the problem and also did not put oil in the machine. A typical person might reason that if Kate had put oil in the machine, the breakdown could have been prevented, so her inaction contributed to the outcome. Therefore, Kate not putting oil in the machine is seen as a cause of the breakdown. So the answer is Yes.
+Answer: Yes
+###
+Question: How would a typical person answer each of the following questions about causation?
+Imagine that there is a man out in the woods who is participating in a hunting competition. After spending hours waiting for a deer to cross his path, the hunter suddenly sees the largest deer he has ever seen. If he can only kill this deer, he will surely win the competition. So, the hunter gets the deer in his sights -- but at the last second, he notices that there is a group of bird-watchers just on the other side of the deer. The hunter realizes that if he shoots the deer, the bullet will definitely hit one of the birdwatchers as well. But he does not care at all about the bird watchers -- he just wants to win the competition. So, he shoots and kills the deer. And as expected, the bullet ends up hitting one of the bird-watchers as well. Did the man intentionally shoot the bird-watcher?
+Options:
+- Yes
+- No
+Reasoning: Let's think step by step.  
+In this question, we are told that the hunter "realizes that if he shoots the deer, the bullet will definitely hit one of the birdwatchers as well," but he "does not care at all about the bird watchers" and shoots anyway. A typical person would interpret this as the hunter being fully aware that his action would result in shooting a bird-watcher, and he proceeds regardless. Even though he did not care about the bird-watcher, he knowingly brought about that outcome. Therefore, a typical person would say that the man intentionally shot the bird-watcher. So the answer is Yes.
+Answer: Yes

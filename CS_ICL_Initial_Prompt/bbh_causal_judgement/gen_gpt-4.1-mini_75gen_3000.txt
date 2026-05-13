@@ -1,0 +1,164 @@
+**Cheat Sheet for Answering Causation Questions (Focus on Difficult Cases)**
+
+---
+
+### 1. **Causation in Cases of Multiple Sufficient Causes (Overdetermination)**
+
+- When **two or more independent causes** each alone would have produced the effect:
+  - Example: Two trains each heavy enough to collapse a bridge.
+  - Typical person usually says **each cause alone did cause the effect**.
+  - *Key*: If a cause alone suffices, it is a cause even if others also contributed.
+
+- When causes are **jointly sufficient but neither alone suffices**:
+  - Example: Bridge collapses only if both trains are on it.
+  - Typical person usually says **neither cause alone caused the effect**.
+  - *Key*: Each cause is necessary but not sufficient alone → neither alone caused the effect.
+
+---
+
+### 2. **Causation in Cases of Alternative or Redundant Causes**
+
+- When **either of two causes alone suffices** to produce the effect, and both occur:
+  - Example: Prof. Smith’s computer approved if IT or Budget committee approves; IT committee approved, so Budget committee’s approval is redundant.
+  - Typical person says **redundant cause did NOT cause the effect**.
+  - *Key*: If outcome would have happened without a cause, that cause is not seen as causing the effect.
+
+- When **multiple people contribute but only one is necessary**:
+  - Example: Coffee shop profits if anyone orders coffee; multiple order but only one needed.
+  - Typical person says **only those whose action was necessary caused the effect**.
+  - *Key*: If outcome would have happened without a person’s action, that person did not cause it.
+
+---
+
+### 3. **Causation in Cases of Omissions and Responsibility**
+
+- When **person A is responsible, and person B is not responsible** for an action:
+  - If A fails and B fails to act but B is not responsible, typical person says **B’s omission did NOT cause the effect**.
+  - *Key*: Responsibility matters; omission by non-responsible party usually not seen as cause.
+
+- When **responsibility shifts after failure**:
+  - If A fails and responsibility shifts to B, and B also fails, typical person says **B’s omission caused the effect**.
+  - *Key*: Responsibility transfer makes omission by second party a cause.
+
+---
+
+### 4. **Causation in Cases of Foreseen but Unintended Consequences (Intentionality)**
+
+- If actor **knows an outcome will definitely happen** as a result of their action and proceeds anyway:
+  - Typical person says **actor intentionally caused the outcome**, even if they do not care about it.
+  - Example: Hunter shoots deer knowing bullet will hit birdwatcher → intentional shooting of birdwatcher.
+  - *Key*: Knowledge + deliberate action = intentional causation.
+
+- If actor **foresees but does not aim for the side effect**, and side effect is not their goal:
+  - Typical person says **not intentional**.
+  - Example: Hunter shoots deer knowing eagle will fly away, but only wants deer → not intentional eagle disturbance.
+  - *Key*: Intention requires aiming for or desiring the outcome, not just foreseeing it.
+
+---
+
+### 5. **Causation in Cases of Complex Chains and Underlying vs Immediate Causes**
+
+- When **immediate cause differs from underlying cause**:
+  - Example: John’s job caused cancer (underlying), but death caused by nurse’s medication error (immediate).
+  - Typical person distinguishes:
+    - Immediate cause = direct trigger of death → medication error caused death.
+    - Underlying cause = condition leading to vulnerability → asbestos exposure caused cancer.
+  - *Key*: Immediate cause is usually seen as cause of death; underlying cause may be seen as cause of premature death or contributing cause.
+
+- When asked about **premature death caused by underlying condition**:
+  - Typical person says **yes**, underlying condition caused premature death, even if immediate cause was different.
+  - When asked about **cause of death at that moment**, typical person says **immediate cause**.
+
+---
+
+### 6. **Causation in Cases of Combined Actions Leading to Harm**
+
+- When **harm results from combination of two actions** (e.g., two chemicals):
+  - If harm only occurs when both actions happen together:
+    - Each action alone is **not sufficient**.
+    - Typical person may differ:
+      - Some say **both caused harm** (each necessary part of combination).
+      - Some say **only combination caused harm**, so neither alone caused harm.
+  - If one action was done unknowingly or mistakenly:
+    - Typical person tends to **not blame the unaware actor alone**.
+    - But if question is about fertilization by that actor causing harm (as part of combination), typical person may say **yes**.
+
+---
+
+### 7. **Causation in Cases of Inaction (Not Changing a Condition)**
+
+- When **inaction maintains a condition that causes an effect**:
+  - Example: Tom does not switch knob A off, so building implodes.
+  - Typical person says **inaction caused the effect** if inaction allowed the condition to persist.
+  - *Key*: Not acting to prevent a known cause can be seen as causing the effect.
+
+- When **action is redundant because another cause already suffices**:
+  - Example: Safety switch off already causes implosion, Tom switches knob A on unnecessarily.
+  - Typical person says **Tom’s action did not cause the effect** because it would have happened anyway.
+
+---
+
+### 8. **Causation in Cases of Intentionality vs Accident**
+
+- If actor **intends to cause harm or outcome**, even if outcome is accidental in detail:
+  - Typical person says **intentional**.
+  - Example: Frank T. shoots neighbor intentionally.
+
+- If actor **intends to act but loses control over outcome** (accidental result):
+  - Typical person says **not intentional**.
+  - Example: Jake’s hand slips, bullet hits bull’s-eye → not intentional.
+
+- If actor **wants outcome but action is accidental**:
+  - Typical person says **not intentional** for specific outcome.
+  - Example: Jake’s hand slips, shot goes wild but hits heart → not intentional shooting in heart.
+
+---
+
+### 9. **Causation in Cases of Knowledge and Indifference**
+
+- If actor **knows action will cause harm but is indifferent**:
+  - Typical person says **intentional causation**.
+  - Example: CEO knows program harms environment, proceeds anyway → intentional harm.
+
+- If actor **does not know or is misinformed**:
+  - Typical person says **not intentional** and may not see as cause if unaware.
+
+---
+
+### 10. **Causation in Cases of Necessary vs Sufficient Conditions**
+
+- If cause is **necessary** but not sufficient alone:
+  - Typical person may or may not see it as cause depending on context (see multiple sufficient causes).
+
+- If cause is **sufficient alone**:
+  - Typical person sees it as cause.
+
+- If cause is **neither necessary nor sufficient** (redundant):
+  - Typical person does not see it as cause.
+
+---
+
+### Summary Table for Quick Reference
+
+| Scenario Type                          | Typical Person’s Causation Judgment                          | Notes                                      |
+|--------------------------------------|-------------------------------------------------------------|--------------------------------------------|
+| Multiple sufficient causes            | Each cause alone caused effect                               | Overdetermination                           |
+| Jointly sufficient causes (both needed) | Neither cause alone caused effect                            | Both necessary, neither sufficient alone   |
+| Redundant cause                      | Redundant cause did NOT cause effect                         | Outcome same without it                      |
+| Omission by non-responsible party    | Omission NOT cause                                           | Responsibility matters                      |
+| Omission by responsible party        | Omission cause                                              | Responsibility shifts matter                |
+| Foreseen but unintended side effect  | Not intentional                                            | Intention requires aiming for outcome      |
+| Foreseen and indifferent side effect | Intentional                                                | Knowledge + deliberate action               |
+| Immediate vs underlying cause         | Immediate cause caused death; underlying cause caused premature death | Distinguish immediate vs underlying        |
+| Combined actions causing harm         | Both caused harm if both necessary; unaware actor less blamed | Combination necessary                        |
+| Inaction maintaining harmful condition | Inaction caused effect                                      | Failure to prevent known cause              |
+| Action redundant due to other cause   | Action did NOT cause effect                                  | Outcome would happen anyway                  |
+| Intentional vs accidental outcome     | Intentional if control and aim; accidental if loss of control | Intent matters                               |
+| Knowledge + indifference               | Intentional                                                | Awareness + disregard                        |
+| Necessary but not sufficient cause    | May or may not be cause depending on context                | Context-dependent                            |
+| Sufficient cause alone                 | Cause                                                      | Clear causation                              |
+| Neither necessary nor sufficient      | Not cause                                                 | Redundant or irrelevant                      |
+
+---
+
+**Use this cheat sheet to analyze the facts carefully, identify responsibility, necessity, sufficiency, intention, and knowledge, and then apply typical person reasoning accordingly.**

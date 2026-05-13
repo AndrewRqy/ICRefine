@@ -1,0 +1,112 @@
+Certainly! Here’s a **cheat sheet** focused on the reasoning steps and patterns needed to solve the more challenging "truth-teller/liar chain" problems, based on the examples above.
+
+---
+
+## Cheat Sheet: Truth-Teller/Liar Chain Reasoning
+
+### 1. **General Approach**
+- **Always start with the person whose truthfulness is given.**
+- **Work step by step, one statement at a time, in the order given.**
+- **At each step, determine if the current person's statement is correct (truth-teller) or incorrect (liar) based on the previous person's status.**
+- **Continue until you reach the person in question.**
+
+---
+
+### 2. **Key Rules**
+
+#### A. **If a person says "X tells the truth":**
+- If X is a truth-teller, the statement is true → the speaker is a truth-teller.
+- If X is a liar, the statement is false → the speaker is a liar.
+
+#### B. **If a person says "X lies":**
+- If X is a liar, the statement is true → the speaker is a truth-teller.
+- If X is a truth-teller, the statement is false → the speaker is a liar.
+
+---
+
+### 3. **Chain Reasoning Patterns**
+
+#### **Pattern 1: All "tells the truth" statements**
+- If the chain is all "A says B tells the truth", and the first person is a truth-teller, **everyone in the chain is a truth-teller**.
+- If the first person is a liar, **everyone in the chain is a liar**.
+
+#### **Pattern 2: All "lies" statements**
+- If the chain is all "A says B lies", and the first person is a truth-teller, **the truth/lie status alternates at each step**.
+- If the first person is a liar, **the truth/lie status also alternates at each step**.
+
+#### **Pattern 3: Mixed statements**
+- **Apply the rules above at each step.**
+- **Keep a running list of each person's status as you go.**
+
+---
+
+### 4. **Step-by-Step Example Template**
+
+Suppose you have:
+- "A tells the truth."
+- "B says A lies."
+- "C says B tells the truth."
+- "D says C lies."
+- "E says D tells the truth."
+- Does E tell the truth?
+
+**Step-by-step:**
+1. A is a truth-teller.
+2. B says "A lies" → A is a truth-teller, so B is lying → B is a liar.
+3. C says "B tells the truth" → B is a liar, so C is lying → C is a liar.
+4. D says "C lies" → C is a liar, so D is telling the truth → D is a truth-teller.
+5. E says "D tells the truth" → D is a truth-teller, so E is telling the truth → **E is a truth-teller**.
+
+---
+
+### 5. **Tips for Difficult Chains**
+
+- **Write down each person’s status as you go.**
+- **If you get stuck, try working backward from the person in question.**
+- **If the chain loops or is long, keep a list:**
+  - A: Truth
+  - B: Lie
+  - C: Lie
+  - D: Truth
+  - E: Truth
+
+---
+
+### 6. **Common Pitfalls**
+
+- **Don’t assume alternation unless all statements are "lies".**
+- **Don’t skip steps; each depends on the previous.**
+- **Be careful with double negatives: "X says Y lies" when Y says "Z lies".**
+
+---
+
+### 7. **Quick Reference Table**
+
+| Statement Type         | Previous Person | Current Person |
+|-----------------------|-----------------|---------------|
+| "X tells the truth"   | Truth-teller    | Truth-teller  |
+| "X tells the truth"   | Liar            | Liar          |
+| "X lies"              | Truth-teller    | Liar          |
+| "X lies"              | Liar            | Truth-teller  |
+
+---
+
+### 8. **Practice: Try to Paraphrase Each Step**
+
+- After each step, say: "Since [previous person] is a [truth-teller/liar], [current person's] statement is [true/false], so [current person] is a [truth-teller/liar]."
+
+---
+
+**Use this cheat sheet to systematically work through each chain, writing down each person's status as you go.**
+
+Follow the format of the examples below in your response.
+
+Question: Question: Jerry lies. Millicent says Jerry tells the truth. Sal says Millicent tells the truth. Amberly says Sal tells the truth. Shenna says Amberly lies. Does Shenna tell the truth?
+Reasoning: Let's think step by step.
+We are told that "Jerry lies," so Jerry is a liar. We are then told that "Millicent says Jerry tells the truth" — since Jerry lies, Millicent's claim is incorrect, so Millicent lies. Next, we are told that "Sal says Millicent tells the truth" — since Millicent lies, Sal's claim is incorrect, so Sal lies. We are then told that "Amberly says Sal tells the truth" — since Sal lies, Amberly's claim is incorrect, so Amberly lies. Finally, we are told that "Shenna says Amberly lies" — since Amberly does lie, Shenna's claim is correct, so Shenna tells the truth. So the answer is Yes.
+Answer: Yes
+###
+Question: Question: Delfina tells the truth. Fletcher says Delfina lies. Amberly says Fletcher lies. Audrie says Amberly tells the truth. Lorine says Audrie tells the truth. Does Lorine tell the truth?
+Reasoning: Let's think step by step.
+We are told that "Delfina tells the truth," so Delfina is a truth-teller. Next, "Fletcher says Delfina lies" — since Delfina tells the truth, Fletcher's claim is incorrect, so Fletcher lies. Then, "Amberly says Fletcher lies" — since Fletcher does lie, Amberly's claim is correct, so Amberly tells the truth. Next, "Audrie says Amberly tells the truth" — since Amberly tells the truth, Audrie's claim is correct, so Audrie tells the truth. Finally, "Lorine says Audrie tells the truth" — since Audrie tells the truth, Lorine's claim is correct, so Lorine tells the truth. So the answer is Yes.
+Answer: Yes

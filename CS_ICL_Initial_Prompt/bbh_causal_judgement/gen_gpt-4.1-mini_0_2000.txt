@@ -1,0 +1,217 @@
+**Causation Cheat Sheet for Difficult Cases**
+
+---
+
+### 1. **Causation in Cases of Multiple Sufficient Causes (Overdetermination & Redundancy)**
+
+- **"OR" conditions (disjunctive causation):**  
+  If outcome happens because *either* condition A *or* condition B is sufficient, and both occur, then:  
+  - The cause is the condition that was *necessary* or *not redundant*.  
+  - If one condition alone would have caused the outcome, the other is *not* seen as causing it.  
+  - Example:  
+    - Dice roll > 11 OR spinner lands green → Alex wins.  
+    - If dice roll > 11 alone suffices, spinner landing green is *not* a cause.  
+  - **Answer:** No, the redundant condition did not cause the outcome.
+
+- **"AND" conditions (conjunctive causation):**  
+  If outcome requires *both* conditions A and B, then:  
+  - Both A and B are causes if both were present.  
+  - Even if one was accidental or unknown, if the outcome depends on both, both are causes.  
+  - Example:  
+    - Building implodes if safety switch off AND knob A on.  
+    - Both conditions present → both cause implosion.  
+  - **Answer:** Yes, both caused the outcome.
+
+- **Multiple agents contributing to a combined harmful effect:**  
+  - If harm occurs only when two different agents’ actions combine, both are causes.  
+  - If one agent followed instructions and the other deviated, but harm requires both actions, both cause harm.  
+  - If one agent intentionally misleads the other to cause harm, the deceived agent alone is *not* seen as cause.  
+  - **Answer:**  
+    - Both cause harm if both actions combined cause it.  
+    - Deceived agent alone is *not* cause if unaware and misled.
+
+---
+
+### 2. **Causation and Knowledge / Intent**
+
+- **Intentionality requires:**  
+  - Awareness of the consequence.  
+  - Acting with purpose or at least accepting the consequence as a known outcome.  
+  - Indifference to the consequence still counts as intentional if the actor *knows* the consequence will happen and proceeds anyway.  
+  - Example:  
+    - CEO knows program harms environment but proceeds → intentional harm.  
+    - Sniper knows gunfire alerts enemies but shoots anyway → intentional alerting.  
+  - **Answer:** Yes, intentional if aware and proceeds regardless.
+
+- **No intentionality if:**  
+  - Outcome is a side effect, not the goal or purpose.  
+  - Actor is unaware or mistaken about the consequence.  
+  - Actor loses control (accident, slips, etc.).  
+  - Example:  
+    - Bob robs bank but health improvement is side effect → no intentional health improvement.  
+    - Jake’s hand slips, bullet hits target → no intentional shooting.  
+    - Hunter shoots deer, bullet accidentally hits bird-watcher → no intentional shooting of bird-watcher.  
+  - **Answer:** No, not intentional if unaware, accidental, or side effect.
+
+---
+
+### 3. **Causation in Cases of Omissions and Responsibilities**
+
+- **Responsibility matters:**  
+  - If person A is responsible for an action (e.g., oiling machines) and fails, causing harm, A caused the harm.  
+  - If person B is *not* responsible and fails to act, generally B is *not* seen as causing harm.  
+  - If responsibility shifts (e.g., if A fails, B must act), and B fails, B causes harm.  
+  - If B notices A’s failure and could prevent harm but does not act, B causes harm.  
+  - If B does not notice and does not act, B usually *not* cause.  
+  - **Answer:**  
+    - Cause if responsible or if duty shifts and fails.  
+    - Cause if notices and fails to act.  
+    - No cause if no responsibility and no knowledge.
+
+---
+
+### 4. **Causation in Cases of Policy Violations and Rule Following**
+
+- **If one person follows policy and another violates it, causing harm:**  
+  - The violator is typically seen as cause.  
+  - The person following policy is *not* seen as cause, even if their action is part of the combined cause.  
+  - Example:  
+    - Suzy logs in as permitted; Billy logs in when not permitted → Billy causes harm.  
+    - Zoe logs in when not permitted; Alice logs in as permitted → Zoe causes harm.  
+  - **Answer:** No, the rule follower is not cause; violator is cause.
+
+- **If both violate or both follow policy and harm occurs:**  
+  - Both can be causes if both actions are necessary for harm.  
+  - If only one action is sufficient, that one is cause.
+
+---
+
+### 5. **Causation in Cases of Multiple Contributors to a Threshold Effect**
+
+- **Threshold effects (e.g., circuit breakers, account suspensions):**  
+  - If harm occurs only when a certain number of actors act simultaneously, then:  
+    - If actor’s action is necessary to reach threshold, actor caused harm.  
+    - If actor’s action is not necessary (threshold reached without them), actor did not cause harm.  
+  - Example:  
+    - Breaker fails if 4 lamps on; 4 people turn on lamps including Jim → Jim caused failure.  
+    - Breaker fails if 4 lamps on; 4 people turn on lamps all allowed → Jim did not cause failure alone (all together caused).  
+    - Streaming account suspended if 3 laptop logins; Todd logs in with Anne and Jason → Todd caused suspension.  
+    - Todd logs in alone or with only one other → no suspension, so no cause.  
+  - **Answer:** Cause if action necessary to reach threshold; no cause if not.
+
+---
+
+### 6. **Causation in Cases of Prior Conditions vs Immediate Causes**
+
+- **Distinguish between underlying cause and immediate cause:**  
+  - Immediate cause is the direct event leading to outcome (e.g., medication error causing death).  
+  - Underlying cause is a prior condition that made outcome possible or likely (e.g., asbestos exposure causing cancer).  
+  - Typical person sees immediate cause as cause of death, but underlying cause as cause of premature death or vulnerability.  
+  - Example:  
+    - John dies from allergic reaction to medication (immediate cause), but asbestos exposure caused cancer (underlying cause).  
+    - Both can be seen as causes in different senses.  
+  - **Answer:**  
+    - Immediate cause caused death.  
+    - Underlying cause caused premature death or vulnerability.
+
+---
+
+### 7. **Causation in Cases of Intent vs Mistake or Ignorance**
+
+- **If actor intends outcome or acts with knowledge of outcome → intentional cause.**  
+- **If actor acts mistakenly or is ignorant but outcome occurs → not intentional cause.**  
+- Example:  
+  - Mark presses wrong button but intends to detonate bomb → intentional cause.  
+  - CEO unaware that changes fulfill law → not intentional fulfillment.  
+- **Answer:** Intentional cause requires knowledge and purpose, not mere accident or ignorance.
+
+---
+
+### 8. **Causation in Cases of Side Effects and Foreseen but Unintended Outcomes**
+
+- **Foreseen but unintended side effects are not intentional causes.**  
+- Actor may be aware of side effect but only intends primary outcome.  
+- Example:  
+  - Hunter shoots deer knowing eagle will fly away but only intends to kill deer → no intentional cause of eagle flying.  
+- **Answer:** No intentional cause of side effect.
+
+---
+
+### 9. **Causation in Cases of Simultaneous Actions**
+
+- **If two actions occur simultaneously and both are necessary for outcome:**  
+  - Both are causes.  
+- **If one action alone suffices:**  
+  - Only that action is cause.  
+- Example:  
+  - Bridge collapses if both trains on it → both cause collapse.  
+  - Bridge collapses if either train alone → each alone cause collapse.  
+- **Answer:** Both cause if both necessary; otherwise only necessary one.
+
+---
+
+### 10. **Causation in Cases of Intentional Deception Leading to Harm**
+
+- **If person A deceives person B to cause harm, B is not typically seen as cause.**  
+- A’s deception and action is cause.  
+- Example:  
+  - Alex lies to Benni to use wrong fertilizer → Alex causes harm, Benni does not.  
+- **Answer:** No cause for deceived party if unaware.
+
+---
+
+# Summary Table
+
+| Situation Type                              | Cause? Typical Person Answer                         | Key Reasoning Points                                    |
+|---------------------------------------------|----------------------------------------------------|---------------------------------------------------------|
+| Multiple sufficient causes (OR)              | No for redundant cause                              | Outcome would occur without redundant cause             |
+| Multiple necessary causes (AND)               | Yes for all necessary causes                        | All conditions needed for outcome                        |
+| Intentional harm with knowledge               | Yes                                                | Actor aware and proceeds despite harm                    |
+| Side effect or accidental outcome             | No                                                 | Actor unaware or outcome unintended                      |
+| Omission with responsibility                   | Yes if responsible or duty shifted                  | Failure to act when responsible causes harm             |
+| Omission without responsibility                | No                                                 | No duty, no cause                                        |
+| Policy violation vs following policy           | Violator causes harm; follower does not            | Violator breaks rule causing harm                        |
+| Threshold effects (e.g., breaker, suspension) | Cause if action necessary to reach threshold       | Action needed to cause harm                              |
+| Immediate vs underlying cause                  | Immediate cause causes death; underlying cause causes vulnerability/premature death | Both relevant but different causal roles                 |
+| Intent vs mistake/ignorance                     | Intentional only if knowledge and purpose present  | Mistakes not intentional causes                          |
+| Foreseen but unintended side effects           | No                                                 | Side effects not intended causes                         |
+| Simultaneous necessary actions                  | Both cause if both needed                           | Both contribute to outcome                               |
+| Deception causing harm                           | Deceiver causes harm; deceived party does not      | Intentional deception shifts cause                       |
+
+---
+
+**Use this cheat sheet to analyze each question carefully:**
+
+- Identify if the outcome requires one or multiple conditions (AND vs OR).  
+- Determine if the questioned action was necessary or redundant.  
+- Assess the actor’s knowledge and intention regarding the outcome.  
+- Check responsibility and duty for omissions.  
+- Consider policy adherence and violations.  
+- Evaluate if the action was necessary to reach a threshold causing harm.  
+- Distinguish immediate cause from underlying cause.  
+- Recognize if harm was a side effect or direct intention.  
+- Account for deception and misinformation affecting causation.
+
+---
+
+This cheat sheet focuses on the nuanced, challenging cases involving multiple causes, intention, responsibility, and policy adherence, which are often the hardest to judge correctly.
+
+Follow the format of the examples below in your response.
+
+Question: How would a typical person answer each of the following questions about causation?
+Alex is playing a board game. Every turn in the game, you simultaneously roll two six-sided dice and spin a spinner. Alex will either win or lose the game on his next turn. Alex will only win the game if the total of dice roll is greater than 11 or the spinner lands on green. It is very unlikely that he will roll higher than 11. Normally, the spinner does land on green. Alex rolls his dice and spins the spinner at exactly the same time. He rolls a 12, so amazingly, he rolled greater than 11, and the spinner lands on green. Alex wins the game. Did Alex spinning result cause him to win the game?
+Options:
+- Yes
+- No
+Reasoning: Let's think step by step.  
+Here, Alex wins the game if either the dice total is greater than 11 or the spinner lands on green. In this case, both happened: he rolled a 12 (greater than 11) and the spinner landed on green. However, since rolling greater than 11 alone was already enough for him to win, the spinner landing on green was not necessary for his win. A typical person would say that the spinning did not cause him to win, because he would have won even if the spinner had landed on a different color. So the answer is No.
+Answer: No
+###
+Question: How would a typical person answer each of the following questions about causation?
+A bear and a hedgehog were shown a box full of colored pencils. Only bears were allowed to take pencils, whereas hedgehogs were not allowed to take them. The hedgehog was absent when the new rule about pencil use was announced. Therefore, the hedgehog does not know about the new norm. Both animals alternately took pencils out of the box six times. At last, the hedgehog and the bear came to the box and simultaneously took a pencil. A short time later, another animal, a polar bear, approached the box seeking a pencil to do his homework with. However, there were no pencils left in the box. The polar bear could not finish his homework. Did the hedgehog cause the problem?
+Options:
+- Yes
+- No
+Reasoning: Let's think step by step.  
+Here in this question, we are told that the hedgehog was not present when the rule about only bears being allowed to take pencils was announced, so the hedgehog did not know about the new norm. Both the bear and the hedgehog took pencils, but the hedgehog was unaware that this was not allowed. A typical person would likely think that, since the hedgehog did not know the rule and was not supposed to be restricted, the hedgehog is not to blame for the problem. Therefore, the answer is No.
+Answer: No

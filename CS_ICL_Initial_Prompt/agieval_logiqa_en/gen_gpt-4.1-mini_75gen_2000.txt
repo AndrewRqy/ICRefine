@@ -1,0 +1,383 @@
+**Cheat Sheet for Difficult Logical Reasoning Problems**
+
+---
+
+### 1. **Identifying Assumptions in Arguments**
+
+- **Assumption** = an unstated premise that must be true for the argument to hold.
+- To find assumptions:
+  - Identify the conclusion.
+  - Identify the premises.
+  - Ask: What must be true for the premises to support the conclusion?
+- **Example:**  
+  - If argument compares presence/absence of a practice (e.g., reading classics) to cultural vitality, assumption is that practice (e.g., primary school reading) is a valid symbol of cultural maintenance.
+
+---
+
+### 2. **Explaining Seemingly Contradictory Attitudes**
+
+- When an expert’s attitude seems contradictory (e.g., wanting more carriers despite US concerns), look for statements that explain strategic or political reasons, such as:
+  - External countries stirring up threat theories.
+  - The expert’s attitude is a response to external pressure or narrative.
+- Avoid options that only state facts without explaining motivation.
+
+---
+
+### 3. **Personnel Allocation Logic Problems**
+
+- **Stepwise approach:**
+  1. List all constraints clearly.
+  2. Check each option against all constraints.
+  3. Use contrapositive logic for conditional constraints (e.g., If X in sales → W in production means if W not in production → X not in sales).
+  4. Pay attention to "must be in same/different group" and "cannot be in same group" conditions.
+- **Common pitfalls:**
+  - Overlooking conditional constraints.
+  - Ignoring group size requirements.
+
+---
+
+### 4. **Evaluating Cause-Effect Arguments (e.g., Aluminum and Behavior Disorder)**
+
+- Key assumption: The factor identified (e.g., aluminum) is the **cause**, not the effect.
+- If the factor is a result, removing it won’t treat the disorder.
+- Safety or dosage assumptions are not necessary for the logical validity of the argument.
+
+---
+
+### 5. **Weakening Arguments by Clarifying Levels of Strategy**
+
+- When two views seem contradictory (e.g., quick war vs. protracted war), check if they refer to different levels:
+  - Tactics (short-term, battle-level)
+  - Strategy (long-term, campaign-level)
+- Showing that the two views address different levels weakens the claim of inconsistency.
+
+---
+
+### 6. **Historical/Scientific Migration or Origin Arguments**
+
+- When current geography contradicts origin claims, look for historical or geological explanations (e.g., past river connections, glacial melt forming lakes connected to oceans).
+- Size or survival rates of species are irrelevant to migration origin.
+- Experimental breeding success far away supports viability but not origin.
+
+---
+
+### 7. **Must-Be-True Conditions for Conclusions**
+
+- To conclude "more people dine out because more restaurants open," must assume:
+  - New restaurants open only if demand exceeds existing capacity.
+- Popularity or total number of restaurants alone is insufficient.
+- Look for assumptions linking supply increase to demand increase.
+
+---
+
+### 8. **Patent and Control Arguments**
+
+- When foreign patents are involved, the key concern is **control over resources**.
+- The strongest support for loss of control is that foreign patent holders can restrict seed saving and force repeated purchases.
+- Economic burden or lack of yield advantage does not directly support control loss.
+
+---
+
+### 9. **Causality in Brain Structure Changes**
+
+- To claim training causes brain changes, assume no pre-existing difference before training.
+- If difference existed before training, causality is questionable.
+- Uniformity among trainees or absence of other activities is not necessary.
+
+---
+
+### 10. **Appeal to Authority**
+
+- When an argument relies on an expert’s claim to reject a premise, it is an **appeal to authority**.
+- No experimental data or direct evidence is presented.
+- Recognize this as a reasoning technique.
+
+---
+
+### 11. **Logical Contrapositives in Economic Arguments**
+
+- If "Return of capital cost to reasonable level → control of economic diseases," then contrapositive is:  
+  "If diseases not controlled → capital cost not reasonable."
+- Use contrapositive to evaluate must-be-true statements.
+
+---
+
+### 12. **Flaws in Using Single Indicators (e.g., GDP per capita)**
+
+- GDP per capita is an average and does not reflect income distribution or living standards.
+- Judging overall living standards solely by GDP per capita is unreliable.
+- Look for flaws related to ignoring inequality, poverty, or other social factors.
+
+---
+
+### 13. **Hypotheses Underlying Arguments About Civilization**
+
+- When argument hinges on suppressing instinct via foresight, the key hypothesis is:  
+  **Greater suppression of instinct → greater tolerance of immediate pain → higher civilization level.**
+- Other options about animal behavior or external laws are not necessary assumptions.
+
+---
+
+### 14. **Hypotheses in Complaints About English Proficiency**
+
+- If students admitted meet English entry requirements, the complaint assumes:  
+  **English proficiency required for entry = English proficiency required to pass courses.**
+- Without this, complaint about English skills is invalid.
+
+---
+
+### 15. **Logic Puzzles with Exactly One True Statement**
+
+- When given multiple statements and told only one is true, check for logical consistency:
+  - If statement A implies statement B is true, both cannot be true if only one is allowed.
+  - Use this to eliminate impossible options.
+- Carefully analyze implications and contradictions.
+
+---
+
+### 16. **Salary Comparison and Assumptions**
+
+- To conclude state-owned airline salaries are too low based on salary differences, assume:  
+  **If pilots who stayed moved to private airlines, they would also earn more.**
+- This rules out differences due to pilot ability or rank.
+
+---
+
+### 17. **Inferring Inner States from External Signs**
+
+- The key assumption is:  
+  **Similar external behaviors imply similar internal experiences.**
+- This justifies inferring others’ feelings from one’s own experience.
+
+---
+
+### 18. **Identifying Non-Criticisms in Multiple-Choice**
+
+- When asked which option is NOT a criticism, look for statements that do not question or doubt the original claim.
+- Statements that acknowledge benefits or neutral facts are usually NOT criticisms.
+
+---
+
+### 19. **Group Assignment with Multiple Conditions**
+
+- Translate all conditions into inequalities or logical relations.
+- Use adjacency and ordering constraints to eliminate impossible assignments.
+- Check each candidate assignment against all conditions.
+
+---
+
+### 20. **Evaluating Cost-Benefit Decisions**
+
+- To evaluate if a decision to reduce theft via monitoring is worthwhile, compare:  
+  **Losses prevented by theft reduction vs. cost of monitoring and staff.**
+- This ratio or comparison is the key evaluation metric.
+
+---
+
+### 21. **Evaluating Survey Data with Overlapping Percentages**
+
+- If percentages sum to more than 100%, likely respondents selected multiple options.
+- This explains apparent contradictions in data.
+
+---
+
+### 22. **Reasoning by Example and Generalization**
+
+- When an argument lists examples and then generalizes, the reasoning is inductive.
+- Look for options that similarly use examples to support a general conclusion.
+
+---
+
+### 23. **Freedom of Thought and Intellectual Progress**
+
+- To argue freedom of thought alone is insufficient, assume:  
+  **Thinkers in free societies lack necessary rules/laws of thinking.**
+- This shows freedom without structure cannot guarantee progress.
+
+---
+
+### 24. **Moral Arguments on Genetic Testing**
+
+- Strongest support comes from principles of equality and inherent value of all humans, regardless of sex or defects.
+- Practical or social consequences are weaker supports.
+
+---
+
+### 25. **Weakening Ecological Arguments**
+
+- To weaken a claim that species A does not cause decline in species B because A rarely eats B, show indirect effects such as competition for shared food.
+- Direct predation is not the only ecological interaction.
+
+---
+
+### 26. **Evaluating Gambler’s Fallacy**
+
+- Recognize that independent events (coin tosses) do not influence each other.
+- Past outcomes do not affect future probabilities.
+
+---
+
+### 27. **Assumptions About Influence of Views on Behavior**
+
+- If changing views is claimed to prevent behavior (e.g., suicide), assume:  
+  **Views have decisive influence on behavior occurrence.**
+
+---
+
+### 28. **Logical Fallacy: Rejecting Imperfect Solutions**
+
+- Arguments rejecting a method because it is imperfect commit the fallacy of demanding perfection.
+- Similar to rejecting police help because they cannot stop all crime.
+
+---
+
+### 29. **Assumptions in Price and Profit Arguments**
+
+- To conclude high prices imply high profits, assume prices reflect profit margins, not just high base prices or market distortions.
+
+---
+
+### 30. **Questioning Generalizations Based on Past Examples**
+
+- To question a conclusion that a pattern will repeat, provide examples where the pattern did not hold or show unique factors in the current case.
+
+---
+
+### 31. **Logical Consistency in Truth-Telling Puzzles**
+
+- Translate statements into logical conditions.
+- Use truth tables or logical deduction to find consistent truth assignments.
+
+---
+
+### 32. **Determining Full Assignments from Partial Info**
+
+- Use given assignments and constraints to deduce unique assignments.
+- If multiple possibilities remain, the info is insufficient.
+
+---
+
+### 33. **Evaluating Necessity of Free Speech**
+
+- Statements that say free speech alone is insufficient do NOT weaken the conclusion that free speech is essential.
+- Statements that deny the government’s function or claim officials already know needs do weaken the conclusion.
+
+---
+
+### 34. **Hypotheses for Safety Conclusions**
+
+- To conclude non-green/non-sprouted potatoes are safe, assume:  
+  **Potatoes that are neither green nor sprouted are safe to eat.**
+
+---
+
+### 35. **Economic Hypotheses in Industry Transfer**
+
+- Hypothesis: Developed countries value environment more than developing countries, explaining transfer of polluting industries.
+
+---
+
+### 36. **Questioning Post-Event Economic Predictions**
+
+- To question a predicted recession after an event (e.g., Olympics), provide evidence of lasting benefits or alternative growth drivers.
+
+---
+
+### 37. **Interpreting Survey Data on Parental Support**
+
+- Total support = absolute support + support after persuasion.
+- Remaining percentage = parents who do not support.
+
+---
+
+### 38. **Behavioral Ecology Reasoning**
+
+- Animals follow others carrying prey only if prey is social/group-living.
+- Solitary prey does not signal more food nearby.
+
+---
+
+### 39. **Determining Non-Red Costume Athletes**
+
+- Use constraints on finishing order and red costume distribution.
+- Identify athletes who cannot be red due to position and red distribution rules.
+
+---
+
+### 40. **Evaluating Logical Reasoning in Debates**
+
+- Flaw: Ignoring objective standards beyond subjective opinions leads to "invincible" stalemate.
+- Recognize missing external criteria for truth.
+
+---
+
+### 41. **Supporting Expert Opinions on Experiment Rigor**
+
+- Show that human exposure differs from experimental conditions (e.g., distance, frequency).
+- Plant experiments do not directly translate to human health effects.
+
+---
+
+### 42. **Evaluating Risk Arguments**
+
+- To evaluate if hospital visits increase death risk for cancer patients, ask:  
+  **What percentage would die of cancer anyway without medical accidents?**
+
+---
+
+### 43. **Logical OR Statements from Conditional Outcomes**
+
+- If two mutually exclusive actions lead to two different outcomes, then at least one outcome must occur (logical OR).
+
+---
+
+### 44. **Market Behavior and Consumer Knowledge**
+
+- Sensible consumers buy only if price advantage exists.
+- If price advantage does not exist, sensible consumers do not buy abroad.
+- Buyers abroad despite no advantage lack market knowledge.
+
+---
+
+### 45. **Maximizing Group Assignments Under Constraints**
+
+- Translate conditions into inequalities.
+- Use adjacency and exclusivity to find maximum group size.
+
+---
+
+### 46. **Corollaries from Comparative Data**
+
+- Avoid overgeneralization.
+- Corollaries must be directly supported by data, not assumptions.
+
+---
+
+### 47. **Evaluating Critics’ Rebuttals**
+
+- If original claim is about possibility ("some farms can succeed"), critics’ demand for representativeness is irrelevant.
+- Distinguish between showing possibility vs. generalization.
+
+---
+
+### 48. **Raising Doubts About Expert Opinions**
+
+- Introduce alternative explanations (e.g., environmental changes) to challenge single-cause claims.
+
+---
+
+### 49. **Logical Fallacies: Gambler’s Fallacy**
+
+- Recognize independence of events.
+- Past outcomes do not affect future probabilities.
+
+---
+
+### 50. **Logical Consistency in Truth-Telling**
+
+- Translate statements into logical conditions.
+- Use contradiction and consistency to find who lies or tells truth.
+
+---
+
+**Use this cheat sheet to focus on the key logical structures, assumptions, and reasoning patterns that are challenging. Practice applying these principles to similar problems for mastery.**

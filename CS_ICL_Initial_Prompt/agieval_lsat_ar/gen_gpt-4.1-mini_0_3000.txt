@@ -1,0 +1,148 @@
+**LSAT Analytical Reasoning Cheat Sheet**
+
+---
+
+### 1. Core Reasoning Strategies
+
+- **Diagram and Organize Early**  
+  Create a clear visual representation (e.g., ordering, grouping, grid) of elements and constraints before answering. This helps track relationships and avoid confusion.
+
+- **Identify and Use Conditional Chains**  
+  Pay attention to "if-then" statements and their logical consequences. Follow chains fully to see forced assignments or eliminations.
+
+- **Focus on Absolute Restrictions First**  
+  Prioritize constraints that fix positions (e.g., “only X can be assigned to Y,” “must be before/after,” “cannot be adjacent”) to narrow possibilities early.
+
+- **Look for Exclusive Conditions**  
+  Recognize “only,” “exactly,” or “must be one but not both” conditions to eliminate options quickly.
+
+- **Use Process of Elimination**  
+  Test answer choices against all constraints systematically; eliminate any that violate even one rule.
+
+- **Track Relative Ordering Carefully**  
+  For sequencing, note not just who comes before or after, but also adjacency and exact spacing requirements.
+
+- **Consider the Impact of Assignments on Others**  
+  Assigning one element often triggers forced placements or exclusions for others; always check ripple effects.
+
+- **Pay Attention to Quantity Constraints**  
+  When exact numbers or minimums/maximums are given (e.g., “exactly two,” “at least three”), use them to limit distributions.
+
+- **Use Symmetry and Pairings**  
+  When pairs or identical sets are involved, identify which elements must or cannot share attributes.
+
+- **Confirm Feasibility of “Could be True” vs. “Must be False”**  
+  For “could be true,” find at least one consistent scenario; for “must be false,” find any contradiction.
+
+---
+
+### 2. Common Mistakes to Avoid
+
+- **Ignoring Conditional Dependencies**  
+  Missing that one assignment forces another (e.g., if Tiffany assigned → Ryan assigned → Onyx assigned immediately before Ryan).
+
+- **Misapplying “Only” and “Exactly”**  
+  Confusing “only Louis or Tiffany can be assigned to 1923” with “either Louis or Tiffany must be assigned to 1923” leads to wrong eliminations.
+
+- **Overlooking Position Restrictions**  
+  Forgetting fixed positions (e.g., “fourth audition cannot be recorded”) or adjacency requirements.
+
+- **Assuming Flexibility Where There Is None**  
+  Treating “must be before” as “can be anywhere before” without considering spacing or adjacency rules.
+
+- **Failing to Account for All Constraints Simultaneously**  
+  Checking conditions in isolation rather than in combination can lead to accepting invalid options.
+
+- **Neglecting the Impact of “If X, then Y” on Non-Assignments**  
+  Sometimes the absence of an element triggers constraints; ignoring these can cause errors.
+
+- **Miscounting or Misallocating Quantities**  
+  For example, assigning more or fewer items to a group than allowed.
+
+- **Confusing “Must be false” with “Could be false”**  
+  Only eliminate answers that cannot possibly be true under any scenario.
+
+- **Ignoring Mutual Exclusivity**  
+  Assigning one element to two incompatible categories or locations.
+
+- **Overlooking the “No Overlap” Rules**  
+  Such as “no photographer assigned to both ceremonies” or “no two batches of the same kind on the same day.”
+
+---
+
+### 3. Quick Decision Rules (If X → Do Y)
+
+- **If “Only X or Y can be assigned to Z,” then:**  
+  Assign Z to X or Y; eliminate others from Z.
+
+- **If “If A is assigned, then B must be assigned,” then:**  
+  Whenever A appears, include B; if B is missing, exclude A.
+
+- **If “If B is assigned, then C must be immediately before B,” then:**  
+  Place C directly before B whenever B is assigned.
+
+- **If “Element A must be before Element B,” then:**  
+  Eliminate any orderings where B precedes A.
+
+- **If “Exactly N elements have property P,” then:**  
+  Count assignments carefully; if more or fewer than N appear, eliminate.
+
+- **If “Two elements cannot be adjacent,” then:**  
+  Eliminate any orderings where those two are consecutive.
+
+- **If “Element A must be adjacent to Element B,” then:**  
+  Place A and B consecutively in any acceptable order.
+
+- **If “Element A must be earlier than Element B and exactly two chapters separate them,” then:**  
+  Place A and B with exactly two positions between (e.g., A in 2, B in 5).
+
+- **If “Element A must be assigned earlier than both recorded auditions,” then:**  
+  Place A before all recorded auditions.
+
+- **If “Element A cannot be assigned to position X,” then:**  
+  Eliminate any assignment placing A at X.
+
+- **If “Two elements must be on different teams/ceremonies,” then:**  
+  Assign them to separate groups; eliminate any grouping placing both together.
+
+- **If “Element A must be assigned on day D only,” then:**  
+  Fix A’s assignment to day D; eliminate options placing A elsewhere.
+
+- **If “Element A must be assigned before Element B, and Element B must be before Element C,” then:**  
+  Enforce the order A < B < C.
+
+- **If “Element A must be assigned earlier than Element B, and Element B must be assigned earlier than Element C,” then:**  
+  Eliminate any order violating A < B < C.
+
+- **If “Element A and B must be assigned to the same shelf/day/section,” then:**  
+  Assign both together; eliminate options separating them.
+
+- **If “Element A and B cannot be assigned to the same shelf/day/section,” then:**  
+  Assign them separately; eliminate options placing both together.
+
+---
+
+**Use this cheat sheet to systematically analyze constraints, avoid common pitfalls, and apply logical deductions efficiently for LSAT Analytical Reasoning questions.**
+
+Follow the format of the examples below in your response.
+
+Four students will be assigned to a history project in which they will search archives from the years 1921, 1922, 1923, and 1924. Each of the four years will have exactly one student assigned to it. Six students—Louis, Mollie, Onyx, Ryan, Tiffany, and Yoshio—are available for this project. The following conditions apply: Only Louis or Tiffany can be assigned to 1923. If Mollie is assigned to the project, then she must be assigned to either 1921 or 1922. If Tiffany is assigned to the project, then Ryan must be assigned to the project. If Ryan is assigned to the project, then Onyx must be assigned to the year immediately prior to Ryan's.
+
+Which one of the following students CANNOT be assigned to 1922?
+(A)Louis
+(B)Mollie
+(C)Onyx
+(D)Ryan
+(E)Yoshio
+Answer: (A)
+
+###
+A concert is given by a six-member band—guitarist, keyboard player, percussionist, saxophonist, trumpeter, violinist. During the concert, each member performs exactly one solo. The following restrictions apply: The guitarist does not perform the fourth solo. The percussionist performs a solo at some time before the keyboard player does. The keyboard player performs a solo at some time after the violinist does and at some time before the guitarist does. The saxophonist performs a solo at some time after either the percussionist does or the trumpeter does, but not both.
+
+Which one of the following is an acceptable ordering of solos from first to last?
+(A)violinist, percussionist, saxophonist, guitarist, trumpeter, keyboard player
+(B)percussionist, violinist, keyboard player, trumpeter, saxophonist, guitarist
+(C)violinist, trumpeter, saxophonist, percussionist, keyboard player, guitarist
+(D)keyboard player, trumpeter, violinist, saxophonist, guitarist, percussionist
+(E)guitarist, violinist, keyboard player, percussionist, saxophonist, trumpeter
+Answer: (C)

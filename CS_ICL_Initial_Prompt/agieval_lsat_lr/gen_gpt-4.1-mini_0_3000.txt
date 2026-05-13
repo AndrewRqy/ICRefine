@@ -1,0 +1,139 @@
+**LSAT Logical Reasoning Cheat Sheet**
+
+---
+
+### 1. Core Reasoning Strategies
+
+- **Identify the Conclusion and Premises**  
+  Distinguish the main point (conclusion) from supporting evidence (premises). The conclusion is often signaled by words like *therefore*, *thus*, *hence*, or implied by the argument’s direction.
+
+- **Spot Assumptions**  
+  Determine what the argument takes for granted but does not state explicitly. Assumptions bridge gaps between premises and conclusion; identifying them is key for strengthen/weaken/assumption questions.
+
+- **Recognize Common Logical Flaws**  
+  - **Confusing correlation with causation**: Just because two events coincide doesn’t mean one causes the other.  
+  - **Overgeneralization**: Drawing broad conclusions from limited or unrepresentative evidence.  
+  - **False dichotomy**: Presenting only two options when others exist.  
+  - **Reversing conditionals**: Mistaking “if P then Q” for “if Q then P.”  
+  - **Ignoring alternative explanations**: Failing to consider other reasons for observed data.  
+  - **Circular reasoning**: Using the conclusion as a premise.  
+  - **Attacking a weak version of the argument (straw man)**.
+
+- **Use Parallel Reasoning**  
+  When asked to find an argument with similar structure, focus on the logical form rather than content. Look for:  
+  - Similar conditional relationships  
+  - Analogies or comparisons  
+  - Similar assumptions or flaws
+
+- **Evaluate Strength of Evidence**  
+  Check if evidence truly supports the conclusion or if it is irrelevant, insufficient, or contradictory.
+
+- **Consider Alternative Explanations or Hypotheses**  
+  Good arguments anticipate and rule out alternatives; weak arguments ignore them.
+
+- **Understand Role of Statements**  
+  Identify if a statement is a premise, conclusion, counterargument, or background information.
+
+- **Watch for Conditional Logic**  
+  Pay attention to necessary vs. sufficient conditions and avoid confusing them.
+
+- **Assess Causal Claims Carefully**  
+  Confirm that the argument does not assume causation without ruling out other factors.
+
+---
+
+### 2. Common Mistakes to Avoid
+
+- **Assuming Personal Interest Equals Conflict of Interest**  
+  Personal advantage does not necessarily mean acting against public or organizational interest.
+
+- **Treating Necessary Conditions as Sufficient**  
+  Just because condition A is necessary for B doesn’t mean A guarantees B.
+
+- **Ignoring That Multiple Causes May Exist**  
+  Failure to consider that an outcome may have several contributing factors.
+
+- **Overlooking That Evidence May Be Inconclusive or Ambiguous**  
+  Drawing firm conclusions from inconclusive or incomplete data.
+
+- **Confusing the Direction of Logical Implications**  
+  For example, from “If P then Q,” do not infer “If Q then P.”
+
+- **Rejecting a Conclusion Solely Because the Supporting Argument Is Weak**  
+  A conclusion can still be true even if the argument for it is flawed.
+
+- **Failing to Recognize When an Argument Relies on a Flawed Analogy or Comparison**  
+  Analogies require that compared cases be sufficiently similar in relevant respects.
+
+- **Assuming Uniformity in All Cases Based on Some Observations**  
+  Generalizing from specific instances without justification.
+
+- **Misinterpreting the Role of Evidence or Claims**  
+  Confusing background info or hypotheses with conclusions.
+
+- **Ignoring the Possibility That Observed Correlations Are Coincidental or Due to a Common Cause**
+
+---
+
+### 3. Quick Decision Rules (If X → Do Y)
+
+- **If an argument concludes that a cause is responsible because the expected effect occurred, but the effect did not occur →**  
+  *Question the assumption that the cause is the only possible explanation.* (Avoid denying the antecedent fallacy)
+
+- **If an argument attacks a conclusion solely by pointing out a weak premise or assumption →**  
+  *Recognize the flaw of rejecting a conclusion just because the argument is weak.*
+
+- **If an argument uses a comparison to justify a conclusion →**  
+  *Check if the comparison assumes the analogous case was appropriate or valid.*
+
+- **If an argument relies on a conditional statement (“If P then Q”) →**  
+  *Do not assume the converse (“If Q then P”) or the inverse (“If not P then not Q”) without support.*
+
+- **If an argument presents two options and rejects one due to a negative consequence →**  
+  *Conclude the other option is preferable only if the options are exhaustive and mutually exclusive.*
+
+- **If an argument claims a correlation implies causation →**  
+  *Look for alternative explanations or common causes.*
+
+- **If an argument’s conclusion depends on an unstated premise →**  
+  *Identify and test assumptions that must be true for the conclusion to hold.*
+
+- **If asked to weaken an argument that claims an effect is due to a cause →**  
+  *Look for evidence that the cause did not occur, or that the effect can occur without the cause.*
+
+- **If asked to strengthen an argument →**  
+  *Look for evidence that rules out alternative explanations or confirms key assumptions.*
+
+- **If an argument involves definitions or criteria →**  
+  *Pay close attention to the exact conditions stated and whether the argument respects them.*
+
+- **If an argument draws a conclusion about all cases based on some cases →**  
+  *Check for overgeneralization or unrepresentative samples.*
+
+---
+
+**Summary:**  
+Mastering LSAT Logical Reasoning means mastering the identification of argument structure, spotting assumptions and flaws, understanding conditional logic, and carefully evaluating evidence and alternative explanations. Avoid common traps like reversing conditionals, confusing necessary and sufficient conditions, and rejecting conclusions solely due to weak support. Use these strategies and decision rules to analyze arguments rigorously and select the best answer confidently.
+
+Follow the format of the examples below in your response.
+
+City council member: Despite the city's desperate need to exploit any available source of revenue, the mayor has repeatedly blocked council members' attempts to pass legislation imposing real estate development fees. It is clear that in doing so the mayor is sacrificing the city's interests to personal interests. The mayor cites figures to show that, in the current market, fees of the size proposed would significantly reduce the number of building starts and thus, on balance, result in a revenue loss to the city. But the important point is that the mayor's family is heavily involved in real estate development and thus has a strong financial interest in the matter.
+
+The reasoning in the city council member's argument is flawed because
+(A)the issue of the mayor's personal interest in the proposed legislation is irrelevant to any assessment of the mayor's action with respect to that legislation
+(B)the mayor's course of action being personally advantageous is not inconsistent with the mayor's action being advantageous for the city
+(C)the council member's own absence of personal interest in the proposed legislation has not been established
+(D)that a person or a municipality has a need for something does not, in itself, establish that that person or that municipality has a right to that thing
+(E)the possibility remains open that the mayor's need to avoid loss of family revenue is as desperate as the city's need to increase municipal revenue
+Answer: (B)
+
+###
+In an experiment, two groups of mice—one whose diet included ginkgo extract and one that had a normal diet—were taught to navigate a maze. The mice whose diet included ginkgo were more likely to remember how to navigate the maze the next day than were the other mice. However, the ginkgo may not have directly enhanced memory. Other studies have found that ginkgo reduces stress in mice, and lowering very high stress levels is known to improve recall.
+
+Which one of the following, if true, would most weaken the argument?
+(A)The doses of ginkgo in the diet of the mice in the experiment were significantly higher than the doses that have been shown to reduce stress in mice.
+(B)Neither the mice who received the ginkgo nor the other mice in the experiment exhibited physiological signs of higher-than-normal stress.
+(C)Some chemical substances that reduce stress in mice also at least temporarily impair their memory.
+(D)Scientists have not yet determined which substances in ginkgo are responsible for reducing stress in mice.
+(E)The mice who received the ginkgo took just as long as the other mice to learn to navigate the maze.
+Answer: (B)

@@ -1,0 +1,210 @@
+**Pronoun Antecedent Resolution Cheat Sheet for Difficult Cases**
+
+---
+
+### 1. **Ambiguous Pronouns Between Two People (Both Possible)**
+- When a pronoun (he, she, they, them, his, her, their) could logically refer to either person mentioned, and no contextual clues favor one:
+  - Example structures:
+    - "X did not know Y until he/she/they sent a letter."
+    - "X argued with Y because he/she liked the design."
+    - "X met with Y because he/she made a mistake."
+    - "X and Y discussed his/her favorite dishes."
+  - **Key:** Both interpretations are plausible; answer = **Ambiguous (C)**.
+  - **Tip:** Check if both subjects could logically perform the action or possess the attribute.
+
+---
+
+### 2. **Pronouns Referring to the Subject vs. Object in Reporting or Informing Contexts**
+- In sentences like "X told Y that he/she/they..." or "X informed Y that he/she/they...":
+  - Usually, the pronoun refers to the **subject (X)** if the action or attribute logically belongs to the subject.
+  - Usually, the pronoun refers to the **object (Y)** if the content is about Y (e.g., diagnosis, advice, feedback).
+  - **Examples:**
+    - "The technician told the customer that he had completed the repair." → Technician (subject) completed the repair.
+    - "The hygienist told the patient that she should floss." → Patient (object) should floss.
+    - "The physician told the baker that she had cancer." → Baker (object) had cancer.
+  - **Tip:** Consider who would logically possess or perform the action described in the clause after "that."
+
+---
+
+### 3. **Pronouns Referring to the Person Being Asked or Requested**
+- In sentences like "X called Y and asked him/her/them to do something":
+  - The pronoun usually refers to the **person being asked (Y)**, not the caller (X).
+  - Example: "The cleaner called the guard and asked them to open the door." → "them" = guard.
+  - **Tip:** It is unlikely for someone to ask themselves to do something immediately after calling another person.
+
+---
+
+### 4. **Possessive Pronouns with Multiple Possible Antecedents**
+- When possessive pronouns (his, her, their) appear with two or more people:
+  - If the pronoun is singular (his/her) and two people are mentioned, it usually refers to the person matching the pronoun’s gender and number.
+  - If the pronoun is plural (their) and two people are mentioned, it can be ambiguous if both are plural or if it could refer to either.
+  - **Examples:**
+    - "The writer and her friends' support" → "her" refers to the writer (singular female).
+    - "The reporter and the chef will discuss their favorite dishes" → "their" could refer to both collectively or either individually → ambiguous.
+  - **Tip:** Check gender and number agreement; if plural, consider if it could mean both or just one.
+
+---
+
+### 5. **Pronouns Referring to the Person Who Would Logically Need or Perform an Action**
+- When the pronoun is in a clause explaining a reason or consequence (because, otherwise, etc.):
+  - The pronoun usually refers to the person who logically would be responsible for or affected by the action.
+  - **Examples:**
+    - "The janitor warned the child not to step on the wet floor, otherwise she would have to mop again." → "she" = janitor (responsible for mopping).
+    - "The surgeon warned the patient that she needed more rest." → "she" = patient (who needs rest).
+  - **Tip:** Consider roles and responsibilities to assign pronouns.
+
+---
+
+### 6. **Pronouns Referring to the Subject When Both Subject and Object Are Possible**
+- When the pronoun could refer to either subject or object, but the subject is more likely due to sentence structure or logic:
+  - Example: "The carpenter told the onlooker that they had been working on the house." → "they" = carpenter (subject, sharing info about self).
+  - **Tip:** If the subject is the one sharing information or performing the main action, pronouns in subordinate clauses often refer back to the subject.
+
+---
+
+### 7. **Pronouns Referring to the Person Who Initiated Contact or Action**
+- In sentences like "X called Y and told him/her/them something":
+  - The pronoun usually refers to the person being told (Y), not the caller (X).
+  - Example: "The construction worker called the editor and told him the whole story." → "him" = editor.
+  - **Tip:** The recipient of the call is usually the recipient of the information.
+
+---
+
+### 8. **Pronouns Referring to the Person Who Has the Relevant Attribute or Role**
+- When the pronoun is linked to a specific attribute or role (e.g., "culinary training," "lab assistant," "grading policy"):
+  - Assign the pronoun to the person who logically fits the attribute.
+  - Examples:
+    - "The customer and the chef discuss his culinary training." → "his" = chef (culinary training fits chef).
+    - "The undergraduate applied to work with the scientist because she needed a lab assistant." → "she" = scientist (needs assistant).
+    - "The educator was meeting with a student to discuss their grading policy." → "their" = educator (sets grading policy).
+  - **Tip:** Use domain knowledge about roles and attributes to assign pronouns.
+
+---
+
+### 9. **Pronouns with Plural Antecedents but Singular Pronouns**
+- When two singular people are mentioned but the pronoun is plural (they/them/their):
+  - Could refer to either person singularly (singular they) or both collectively.
+  - If context does not clarify, answer is ambiguous.
+  - Example: "The scientist collaborates with the artist, and they share a story." → "they" could be both or either → ambiguous.
+  - **Tip:** Without clear context, treat as ambiguous.
+
+---
+
+### 10. **Pronouns Referring to the Person Who Would Logically Need Help or Assistance**
+- In sentences like "X asked Y if he/she/they needs help":
+  - The pronoun usually refers to the person being asked (Y).
+  - Example: "The assistant asked the physician if she needs any help." → "she" = physician.
+  - **Tip:** The asker offers help to the other person, so pronoun refers to the other person.
+
+---
+
+### 11. **Pronouns Referring to the Person Who Is the Subject of the Main Clause**
+- When the pronoun is in a clause explaining the subject’s motivation or state:
+  - Example: "The cook is always teaching the assistant new techniques because they like to teach others." → "they" = cook (subject, motivation).
+  - **Tip:** The subject’s motivation or state is often the antecedent.
+
+---
+
+### 12. **Pronouns Referring to the Person Who Is the Object of the Main Clause**
+- When the pronoun is in a clause explaining the object’s state or attribute:
+  - Example: "The hygienist told the patient that she should floss every day." → "she" = patient (object, recipient of advice).
+  - **Tip:** The object’s attribute or state is often the antecedent.
+
+---
+
+### 13. **Pronouns Referring to the Person Who Is the Logical Recipient of an Action**
+- When the pronoun is the recipient of an action (e.g., "gave him a discount"):
+  - Usually refers to the person receiving the action, not the doer.
+  - Example: "The carpenter made a desk for the clerk and gave him a discount." → "him" = clerk.
+  - **Tip:** The recipient of the action is the antecedent.
+
+---
+
+### 14. **Pronouns Referring to the Person Who Is the Logical Subject of a Clause**
+- When the pronoun is the subject of a subordinate clause:
+  - Example: "The developer met with the secretary because she made a mistake." → ambiguous if both could have made a mistake.
+  - **Tip:** If both subjects could logically be the subject of the subordinate clause, answer is ambiguous.
+
+---
+
+### 15. **Pronouns Referring to the Person Who Is the Logical Agent of the Verb**
+- When the pronoun is the agent of a verb in the subordinate clause:
+  - Example: "The developer was unable to communicate with the writer because she used big words." → ambiguous if both could have used big words.
+  - **Tip:** If both could logically be the agent, answer is ambiguous.
+
+---
+
+### 16. **Pronouns Referring to the Person Who Is the Logical Recipient of a Warning or Advice**
+- Example: "The surgeon warned the patient that she needed more rest." → "she" = patient.
+- **Tip:** The recipient of the warning/advice is usually the antecedent.
+
+---
+
+### 17. **Pronouns Referring to the Person Who Is the Logical Subject of a Reason Clause**
+- Example: "The sheriff protected the writer because they uphold the peace." → "they" = sheriff (logical role).
+- **Tip:** Assign pronoun to the person whose role fits the reason clause.
+
+---
+
+### 18. **Pronouns Referring to the Person Who Is the Logical Subject of a Causal Clause**
+- Example: "The nurse stayed away from the laborer because she was very busy." → ambiguous if both could be busy.
+- **Tip:** If both possible, answer is ambiguous.
+
+---
+
+### 19. **Pronouns Referring to the Person Who Is the Logical Subject of a Result Clause**
+- Example: "The janitor warned the child not to step on the wet floor, otherwise she would have to mop it all over again." → "she" = janitor.
+- **Tip:** The person responsible for the result is the antecedent.
+
+---
+
+### 20. **Pronouns Referring to the Person Who Is the Logical Subject of a Motivational Clause**
+- Example: "The cook is always teaching the assistant new techniques because they like to teach others." → "they" = cook.
+- **Tip:** The person whose motivation is described is the antecedent.
+
+---
+
+### **General Tips:**
+
+- **Check verb roles:** Who is doing the action? Who is receiving it?
+- **Consider logical roles:** Who would logically have the attribute or perform the action?
+- **Look for number and gender agreement:** Pronouns must agree with their antecedents.
+- **If both interpretations are equally plausible and no context favors one, choose ambiguous.**
+- **In reporting or informing sentences, pronouns often refer to the subject if the content is about the subject’s actions, or to the object if the content is about the object’s state or attributes.**
+- **In requests or commands, pronouns usually refer to the person being asked or commanded.**
+- **Possessive pronouns usually refer to the closest preceding noun that matches in gender and number.**
+
+---
+
+This cheat sheet focuses on the **challenging cases** where pronoun antecedents are ambiguous or require careful logical reasoning beyond simple grammatical agreement. Use it to analyze pronoun references step-by-step during the test.
+
+Follow the format of the examples below in your response.
+
+Question: In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The technician told the customer that they could pay with cash.
+Options:
+(A) The technician could pay
+(B) The customer could pay
+(C) Ambiguous
+Reasoning: Let's think step by step.  
+Here we need to determine who the pronoun "they" refers to. There are two possible referents: the technician and the customer. The verb "told" and the phrase "could pay with cash" might help us decide. Let X be the technician and Y the customer. The sentence is of the form "X told Y that (X or Y) could pay with cash."
+
+Let's consider Y first: "X told Y that Y could pay with cash." This makes sense, because the technician is likely informing the customer about their payment options.
+
+Now, consider X: "X told Y that X could pay with cash." This is less likely, because it would be odd for the technician to tell the customer about the technician's own ability to pay.
+
+Therefore, the pronoun "they" most likely refers to the customer. So the answer is (B).
+Answer: (B)
+###
+Question: In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: Alex did not know Taylor until she sent a letter.
+Options:
+(A) Alex sent the letter
+(B) Taylor sent the letter
+(C) Ambiguous
+Reasoning: Let's think step by step.  
+Here we need to determine who the pronoun "she" refers to. There are two possible referents for "she": Alex and Taylor. The sentence is of the form "X did not know Y until she sent a letter."  
+Let's consider Y first: "X did not know Y until Y sent a letter." This makes sense, as Y could have initiated contact by sending a letter, leading to X knowing Y.  
+Now, consider X: "X did not know Y until X sent a letter." This also makes sense, as X could have sent a letter to Y, which could have led to them getting to know each other.  
+Because both interpretations are possible and the sentence does not provide enough information to determine which one is correct, the antecedent of "she" is ambiguous. So the answer is (C).
+Answer: (C)

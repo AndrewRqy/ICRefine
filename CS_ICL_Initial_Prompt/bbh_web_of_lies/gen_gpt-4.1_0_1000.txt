@@ -1,0 +1,120 @@
+Certainly! Here’s a **cheat sheet** focused on the reasoning steps and patterns needed to solve the more challenging "truth-teller/liar chain" logic puzzles like the ones above. This is designed to help you **systematically** and **accurately** determine whether the final person tells the truth or lies, especially in longer or more complex chains.
+
+---
+
+## Truth-Teller/Liar Chain Cheat Sheet
+
+### 1. **Core Principle**
+- **Truth-tellers**: All their statements are true.
+- **Liars**: All their statements are false.
+
+### 2. **Statement Types**
+- **"X says Y tells the truth"**: X claims Y is a truth-teller.
+- **"X says Y lies"**: X claims Y is a liar.
+
+### 3. **Step-by-Step Reasoning Process**
+
+#### a. **Start with the Given**
+- The first statement always tells you the truth/lie status of one person. **Write this down.**
+
+#### b. **Work Forward, One Statement at a Time**
+- For each subsequent statement:
+    - **If the speaker is a truth-teller:** Their statement is true.
+    - **If the speaker is a liar:** Their statement is false.
+
+#### c. **How to Interpret Each Statement**
+- **If X says "Y tells the truth":**
+    - If X is a truth-teller: Y is a truth-teller.
+    - If X is a liar: Y is a liar.
+- **If X says "Y lies":**
+    - If X is a truth-teller: Y is a liar.
+    - If X is a liar: Y is a truth-teller.
+
+#### d. **Chain the Reasoning**
+- **Update the status** (truth-teller/liar) for each person as you go.
+- **Always use the most recent, confirmed status** for each person.
+
+#### e. **Final Step**
+- When you reach the last person, **check if their statement matches the actual status** of the person they refer to.
+    - If their statement matches reality, they are a truth-teller.
+    - If their statement does not match reality, they are a liar.
+
+---
+
+### 4. **Quick Reference Table**
+
+| Speaker's Status | Statement Type         | Target's Status |
+|------------------|-----------------------|-----------------|
+| Truth-teller     | "Y tells the truth"   | Truth-teller    |
+| Truth-teller     | "Y lies"              | Liar            |
+| Liar             | "Y tells the truth"   | Liar            |
+| Liar             | "Y lies"              | Truth-teller    |
+
+---
+
+### 5. **Common Pitfalls & Tips**
+- **Don’t skip steps**: Always write down each person’s status as you go.
+- **If you get stuck, work backwards**: Sometimes, if the chain is confusing, try deducing from the end.
+- **If a statement refers to someone whose status you haven’t determined yet, pause and fill in the chain up to that point.**
+- **If you make a mistake, retrace your steps from the last known correct status.**
+
+---
+
+### 6. **Example Walkthrough (Template)**
+
+Suppose:  
+A tells the truth.  
+B says A lies.  
+C says B tells the truth.  
+D says C lies.  
+E says D tells the truth.  
+Does E tell the truth?
+
+**Step-by-step:**
+1. A: truth-teller (given)
+2. B says "A lies"  
+   - B's claim is false (since A tells the truth), so B is a liar.
+3. C says "B tells the truth"  
+   - B is a liar, so C's claim is false, so C is a liar.
+4. D says "C lies"  
+   - C is a liar, so D's claim is true, so D is a truth-teller.
+5. E says "D tells the truth"  
+   - D is a truth-teller, so E's claim is true, so E is a truth-teller.  
+**Answer: Yes**
+
+---
+
+### 7. **If You Lose Track**
+- **Write a list**:  
+  - Person: Status (T/L)
+- **Update as you go**.
+- **Double-check**: For each statement, does the speaker’s status match the truth/lie of their claim?
+
+---
+
+### 8. **Special Cases**
+- **Odd number of "lies" statements in a row**: Flips the status.
+- **Even number of "lies" statements in a row**: Returns to original status.
+
+---
+
+**Summary:**  
+- Always start from the given.
+- For each statement, use the table above to determine the next person’s status.
+- At the end, check if the last person’s statement matches the actual status of the person they refer to.
+
+---
+
+**Keep this process in mind and you’ll be able to solve even the trickiest chains!**
+
+Follow the format of the examples below in your response.
+
+Question: Question: Ryan tells the truth. Helene says Ryan tells the truth. Kandi says Helene tells the truth. Inga says Kandi tells the truth. Delbert says Inga lies. Does Delbert tell the truth?
+Reasoning: Let's think step by step.  
+We are told that "Ryan tells the truth," so Ryan is a truth-teller. Next, "Helene says Ryan tells the truth" — since Ryan does tell the truth, Helene's claim is correct, so Helene tells the truth. Then, "Kandi says Helene tells the truth" — since Helene tells the truth, Kandi's claim is correct, so Kandi tells the truth. Next, "Inga says Kandi tells the truth" — since Kandi tells the truth, Inga's claim is correct, so Inga tells the truth. Finally, "Delbert says Inga lies" — since Inga tells the truth, Delbert's claim is incorrect, so Delbert lies. So the answer is No.
+Answer: No
+###
+Question: Question: Andree lies. Delfina says Andree lies. Jim says Delfina tells the truth. Gwenn says Jim lies. Delbert says Gwenn lies. Does Delbert tell the truth?
+Reasoning: Let's think step by step.
+We are told that "Andree lies," so Andree is a liar. We are then told that "Delfina says Andree lies" — since Andree does lie, Delfina's claim is correct, so Delfina tells the truth. Next, we are told that "Jim says Delfina tells the truth" — since Delfina tells the truth, Jim's claim is correct, so Jim tells the truth. We are then told that "Gwenn says Jim lies" — since Jim tells the truth, Gwenn's claim is incorrect, so Gwenn lies. Finally, we are told that "Delbert says Gwenn lies" — since Gwenn does lie, Delbert's claim is correct, so Delbert tells the truth. So the answer is Yes.
+Answer: Yes

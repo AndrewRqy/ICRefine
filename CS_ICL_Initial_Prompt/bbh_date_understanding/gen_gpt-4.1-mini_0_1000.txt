@@ -1,0 +1,151 @@
+**Date Calculation Cheat Sheet for Challenging Cases**
+
+---
+
+### 1. **Date Format Conventions**
+
+- **US format:** MM/DD/YYYY  
+- **UK format:** DD/MM/YYYY  
+  - When given a UK-style date (e.g., 02/01/1987), interpret as DD/MM/YYYY → Jan 2, 1987.  
+  - Convert to US format for answers (MM/DD/YYYY → 01/02/1987).
+
+---
+
+### 2. **Basic Date Arithmetic**
+
+- **Adding/Subtracting Days:**  
+  - Add or subtract days carefully, considering month lengths.  
+  - Months have varying days:  
+    - Jan (31), Feb (28 or 29 leap), Mar (31), Apr (30), May (31), Jun (30), Jul (31), Aug (31), Sep (30), Oct (31), Nov (30), Dec (31).  
+  - Leap year rule:  
+    - Year divisible by 4 → leap year, except if divisible by 100 but not 400.  
+    - Feb has 29 days in leap years.
+
+- **Adding/Subtracting Weeks:**  
+  - 1 week = 7 days. Add or subtract 7 days accordingly.
+
+- **Adding/Subtracting Months:**  
+  - When subtracting a month, reduce the month by 1; if month = 1 (Jan), then month = 12 and year -= 1.  
+  - If the day does not exist in the new month (e.g., 31 in April), adjust to last day of that month.
+
+- **Adding/Subtracting Years:**  
+  - Simply add or subtract the year number.  
+  - For Feb 29 birthdays, if the resulting year is not leap, birthday is considered Feb 28 or Mar 1 depending on context (usually Mar 1 for age counting).
+
+---
+
+### 3. **Special Cases**
+
+#### A. **Last Day of Month**
+
+- If the date is the last day of a month (e.g., Jan 31), adding one day → first day of next month.  
+- Subtracting days from the first day of a month → last day of previous month.
+
+#### B. **Leap Year Birthdays**
+
+- Born on Feb 29 (leap day):  
+  - 16th birthday in a non-leap year → Mar 1 of that year.  
+  - When calculating anniversary or age, adjust accordingly.
+
+#### C. **Palindrome Dates**
+
+- Palindrome date example: MMDDYYYY reads the same backward and forward.  
+- When asked for a month ago or tomorrow, adjust month/year carefully, keeping palindrome property in mind.
+
+#### D. **"Today is X-year anniversary"**
+
+- If married on Jan 2, 1958, and today is 5-year anniversary → today is Jan 2, 1963 (1958 + 5).  
+- Use this to find related dates (yesterday, tomorrow, one week later).
+
+#### E. **"Jane bought X items on date Y and used one per day"**
+
+- If Jane bought 40 eggs on May 9, 2017, and today she ran out, then today = May 9 + 39 days (since first egg eaten on May 9).  
+- To find tomorrow, add 1 day to today.
+
+---
+
+### 4. **Handling Relative Dates Given Indirectly**
+
+- **"Tomorrow is MM/DD/YYYY" → Today is one day before that date.**  
+- **"Yesterday was MM/DD/YYYY" → Today is one day after that date.**  
+- **"It was X days/weeks/months/years ago" → Add X to that date to get today.**  
+- **"Today is the Nth visit starting from month/year" →**  
+  - Visits occur monthly on the same day.  
+  - Nth visit date = start date + (N-1) months.
+
+---
+
+### 5. **Examples of Difficult Calculations**
+
+| Scenario | How to Calculate |
+|---|---|
+| **Date a month ago from UK date 02/01/1987 (DD/MM/YYYY)** | Convert to Jan 2, 1987 (US: 01/02/1987). Subtract 1 month → Dec 2, 1986 (12/02/1986). |
+| **Date one week ago from last day of Jan 2012 (01/31/2012)** | Subtract 7 days → 01/24/2012. |
+| **Date 176 days after Mar 20, 2020** | Add 176 days to 03/20/2020 → Sep 12, 2020 (09/12/2020). |
+| **Date one year ago from Feb 29, 2016 (leap year birthday)** | Since 2015 is not leap, birthday is Mar 1, 2015 (03/01/2015). |
+| **Date 10 days ago from Mar 12, 2002 (today is actually Mar 12, 2002)** | Subtract 10 days → Mar 2, 2002 (03/02/2002). |
+| **Date one week from first Monday of 2019** | First day of 2019 is Tuesday (01/01/2019). First Monday is 01/07/2019. One week later → 01/14/2019. |
+| **Date one week ago from Sept 1, 2021** | One week ago from 09/01/2021 → 08/25/2021. |
+
+---
+
+### 6. **Quick Reference for Month Lengths**
+
+| Month | Days |
+|---|---|
+| Jan | 31 |
+| Feb | 28 (29 if leap) |
+| Mar | 31 |
+| Apr | 30 |
+| May | 31 |
+| Jun | 30 |
+| Jul | 31 |
+| Aug | 31 |
+| Sep | 30 |
+| Oct | 31 |
+| Nov | 30 |
+| Dec | 31 |
+
+---
+
+### 7. **Leap Year Check**
+
+- Year divisible by 400 → leap year  
+- Year divisible by 100 but not 400 → not leap year  
+- Year divisible by 4 but not 100 → leap year  
+- Otherwise → not leap year
+
+---
+
+### 8. **Step-by-Step Approach to Solve**
+
+1. **Identify the base date** (today, tomorrow, yesterday, anniversary, etc.).  
+2. **Convert date formats if needed** (UK to US).  
+3. **Apply the time difference** (days, weeks, months, years).  
+4. **Adjust for month length and leap years**.  
+5. **Check for special cases** (end of month, leap day birthdays).  
+6. **Format the final answer as MM/DD/YYYY**.  
+7. **Match with the closest option**.
+
+---
+
+### 9. **Common Pitfalls to Avoid**
+
+- Confusing day and month in UK vs US formats.  
+- Forgetting to adjust year when subtracting a month from January.  
+- Ignoring leap years when calculating Feb 29 birthdays or adding days in Feb.  
+- Not adjusting day when the target month has fewer days.  
+- Miscounting days when adding/subtracting weeks or days.  
+- Overlooking that "today is anniversary" means base date is anniversary date, not original date.
+
+---
+
+This cheat sheet focuses on the tricky parts of date calculations encountered in the examples, especially:
+
+- UK vs US date format conversions.  
+- Leap year and Feb 29 birthday handling.  
+- Calculations involving months and years with varying days.  
+- Interpreting relative dates given indirectly (e.g., "tomorrow is X", "yesterday was Y").  
+- Handling last day of month and month-end transitions.
+
+Use this as a quick guide to reason through date problems without referring back to examples.

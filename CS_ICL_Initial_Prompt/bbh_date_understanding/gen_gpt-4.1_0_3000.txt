@@ -1,0 +1,153 @@
+Certainly! Here is a **cheat sheet** focused on the most challenging aspects from the examples above. This is designed to help you answer similar date calculation questions **without referring to the examples**.
+
+---
+
+# Date Calculation Cheat Sheet
+
+## 1. **Interpreting "Today", "Yesterday", "Tomorrow", etc.**
+- **Yesterday** = 1 day before today.
+- **Tomorrow** = 1 day after today.
+- **One week ago from today** = 7 days before today.
+- **One week from today** = 7 days after today.
+- **10 days ago** = 10 days before today.
+- **24 hours later** = 1 day after today.
+- **A month ago** = Same day, previous month (watch for months with fewer days).
+- **A year ago** = Same month and day, previous year (watch for leap years).
+
+---
+
+## 2. **Figuring Out "Today" When Given Relative Dates**
+- If told "Tomorrow is MM/DD/YYYY", then **today** is one day before that date.
+- If told "Yesterday was MM/DD/YYYY", then **today** is one day after that date.
+- If told "The day before yesterday was MM/DD/YYYY", then **today** is two days after that date.
+- If told "The deadline is MM/DD/YYYY, which is N days away from now", then **today** is N days before that date.
+
+---
+
+## 3. **Special Phrases and Conventions**
+- **Anniversaries**: If someone started on MM/DD/YYYY and today is their N-year anniversary, then today is MM/DD/(YYYY+N).
+- **Nth visit/event**: If an event happens on the same day each month, the Nth event is N-1 months after the first.
+- **"Last day of [month/year]"**: Know the last day of each month (see below).
+- **"First day of the year"**: Always January 1st.
+- **"Last day of the first quarter"**: March 31st.
+
+---
+
+## 4. **Month Lengths and Leap Years**
+- **Month lengths**:
+  - Jan: 31, Feb: 28 (29 in leap years), Mar: 31, Apr: 30, May: 31, Jun: 30, Jul: 31, Aug: 31, Sep: 30, Oct: 31, Nov: 30, Dec: 31
+- **Leap year rule**: Year is leap if divisible by 4, except years divisible by 100 unless also by 400.
+  - E.g., 2000 is leap, 1900 is not, 2016 is leap, 2017 is not.
+
+---
+
+## 5. **Date Format Conventions**
+- **MM/DD/YYYY**: Month first, then day, then year (US standard).
+- **UK format**: DD/MM/YYYY. If told "today is 02/01/1987 in the UK", in MM/DD/YYYY it's 01/02/1987 (Jan 2, 1987).
+
+---
+
+## 6. **Counting Days Across Months**
+- When adding/subtracting days across months:
+  - Subtract days from current day; if result < 1, go to previous month and add days in that month.
+  - When adding days, if result > days in month, subtract days in month and move to next month.
+
+**Example**:  
+- Today: 04/10/1985. 10 days ago: 04/10 - 10 = 0 → Go to March. March has 31 days, so 31 - (10 - 10) = 31. So, 03/31/1985.
+
+---
+
+## 7. **Handling "Nth day after/before"**
+- **"N days after MM/DD/YYYY"**: Add N days, accounting for month/year changes.
+- **"N days before MM/DD/YYYY"**: Subtract N days, accounting for month/year changes.
+
+---
+
+## 8. **Special Holidays**
+- **US Thanksgiving**: 4th Thursday in November.
+  - Find the first Thursday, then add 21 days.
+- **Christmas Eve**: December 24th.
+- **Palindrome day 2020**: 02/02/2020.
+
+---
+
+## 9. **Egg/Eating Problems**
+- If someone buys N items and eats one per day, and "runs out today", then today is the Nth day after the purchase date (purchase date counts as day 1).
+  - To find the date: Add (N-1) days to the purchase date.
+
+---
+
+## 10. **Tricky Phrasing**
+- **"Today is the last day of [month/year]"**: Use the last day of that month/year.
+- **"Today is the second day of the third month of 1966"**: 03/02/1966.
+- **"Today is Christmas Eve of 1937"**: 12/24/1937.
+
+---
+
+## 11. **When Options Have Year Typos**
+- If the correct date is not in the options, pick the closest matching date (usually the same MM/DD, even if the year is off).
+
+---
+
+## 12. **Step-by-Step Approach**
+1. **Identify "today"** based on the problem statement.
+2. **Apply the required operation** (add/subtract days, weeks, months, years).
+3. **Adjust for month/year boundaries** (see month lengths and leap years).
+4. **Convert to MM/DD/YYYY format**.
+5. **Check options for the closest match**.
+
+---
+
+## 13. **Quick Reference Table: Last Day of Each Month**
+| Month | Last Day |
+|-------|----------|
+| Jan   | 31       |
+| Feb   | 28/29    |
+| Mar   | 31       |
+| Apr   | 30       |
+| May   | 31       |
+| Jun   | 30       |
+| Jul   | 31       |
+| Aug   | 31       |
+| Sep   | 30       |
+| Oct   | 31       |
+| Nov   | 30       |
+| Dec   | 31       |
+
+---
+
+## 14. **Examples of Calculations**
+- **Subtracting days**: If today is 03/05/1973, 7 days ago is 02/26/1973.
+- **Adding days**: If today is 01/31/2012, 7 days later is 02/07/2012.
+- **Subtracting a month**: If today is 03/05/1973, a month ago is 02/05/1973.
+- **Adding a year**: If today is 01/02/1958, 50 years later is 01/02/2008.
+
+---
+
+**Use this cheat sheet to break down each problem step by step, especially when the date is not given directly or when you need to count days across months or years.**
+
+Follow the format of the examples below in your response.
+
+Question: Today is Apr 10, 1985. Jane's appointment will be 3 days later. What is the date yesterday in MM/DD/YYYY?
+Options:
+(A) 03/10/1986
+(B) 04/10/1985
+(C) 04/09/1985
+(D) 04/07/1985
+(E) 04/11/1986
+(F) 05/13/1985
+Reasoning: Let's think step by step.  
+We are told that "Today is Apr 10, 1985." Yesterday is one day before today, so we subtract one day from 04/10/1985, which gives us 04/09/1985. In MM/DD/YYYY format this is 04/09/1985. So the answer is (C).
+Answer: (C)
+###
+Question: Today's meeting is rescheduled to 11 am tomorrow, 10/16/1924. What is the date tomorrow in MM/DD/YYYY?
+Options:
+(A) 10/16/1924
+(B) 07/16/1925
+(C) 10/17/1924
+(D) 10/15/1924
+(E) 10/16/1922
+(F) 10/16/2010
+Reasoning: Let's think step by step.  
+We are told that "Today's meeting is rescheduled to 11 am tomorrow, 10/16/1924." This means that tomorrow is 10/16/1924. The question asks for the date tomorrow, which is 10/16/1924. In MM/DD/YYYY format this is 10/16/1924. So the answer is (A).
+Answer: (A)

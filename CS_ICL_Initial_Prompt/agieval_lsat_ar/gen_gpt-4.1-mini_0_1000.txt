@@ -1,0 +1,132 @@
+**LSAT Analytical Reasoning Cheat Sheet**
+
+---
+
+### 1. Core Reasoning Strategies
+
+- **Diagram and Organize Information Visually**  
+  Use timelines, grids, or charts to map entities, positions, or assignments. Visual layouts help track relationships and constraints clearly.
+
+- **Identify and Apply Conditional Logic Early**  
+  Translate “if-then” statements into direct implications. Chain conditions to infer forced placements or exclusions.
+
+- **Focus on Extremes and Boundaries**  
+  Check earliest/latest positions, highest/lowest ranks, or maximum/minimum counts to limit possibilities.
+
+- **Use Process of Elimination**  
+  Test answer choices against all constraints. Eliminate options causing direct contradictions or impossible sequences.
+
+- **Track Mutual Exclusivity and Dependencies**  
+  Note pairs or groups that must or cannot be together. Use “either/or but not both” and “if one, then another” rules to narrow options.
+
+- **Respect Ordering and Adjacency Rules**  
+  When order matters, carefully place entities respecting “before,” “immediately before,” or “not consecutive” conditions.
+
+- **Account for Quantity Constraints**  
+  When limits on counts (e.g., number of items per category) exist, use them to restrict assignments and verify consistency.
+
+- **Look for Fixed or Forced Assignments**  
+  Some elements may be fixed by conditions (e.g., “must be fourth,” “must be on the same shelf”). Use these as anchors.
+
+- **Consider Topic or Category Restrictions**  
+  When items belong to categories (topics, photographers, breeds), ensure no violation of category-based rules (e.g., no consecutive same-topic items).
+
+- **Check for Symmetry and Balance Conditions**  
+  When equal numbers or matching counts are required across groups, use these to deduce placements.
+
+---
+
+### 2. Common Mistakes to Avoid
+
+- **Ignoring the Implications of “If” Statements**  
+  Failing to apply the contrapositive or chaining multiple conditionals can miss forced placements.
+
+- **Overlooking “Only” or “Exactly” Clauses**  
+  Misreading “only Louis or Tiffany can be assigned” as “at least one” leads to invalid assumptions.
+
+- **Assuming Independence When Variables Are Linked**  
+  Treating entities as independent when conditions link their assignments causes contradictions.
+
+- **Forgetting to Apply All Constraints Simultaneously**  
+  Testing options against only some conditions can lead to accepting invalid answers.
+
+- **Misplacing Entities at Boundaries**  
+  Assigning an entity to the first or last position without checking adjacency or “immediately before” rules.
+
+- **Failing to Track “Not Together” or “Not Consecutive” Rules**  
+  Placing items consecutively or on the same day when prohibited.
+
+- **Ignoring Quantity Limits Across Categories**  
+  Exceeding maximum or minimum counts for categories or groups.
+
+- **Neglecting to Consider the Full Scope of the Problem**  
+  Focusing on one part of the puzzle without integrating all parts can cause errors.
+
+- **Assuming “Could Be True” Means “Must Be True”**  
+  Distinguish between what is possible and what is guaranteed.
+
+- **Overcomplicating Simple Constraints**  
+  Sometimes straightforward deductions solve the problem; avoid unnecessary complexity.
+
+---
+
+### 3. Quick Decision Rules (If X → Do Y)
+
+- **If an entity must be immediately before another → Place them consecutively with correct order.**
+
+- **If a condition says “If A is assigned, then B must be assigned” → Whenever A appears, include B.**
+
+- **If “Only X or Y can be assigned to position Z” → Exclude all others from Z immediately.**
+
+- **If “No two consecutive items can share the same category” → Alternate categories when placing items.**
+
+- **If “A must be earlier than B” and B is fixed → Place A in any earlier slot, never after B.**
+
+- **If “Exactly N items must be assigned per category” → Track counts as you assign to avoid exceeding limits.**
+
+- **If “If both X and Y are selected, then Z cannot be selected” → Avoid selecting all three simultaneously.**
+
+- **If “A and B must be on the same day/section/shelf” → Assign them together or exclude options where they are separated.**
+
+- **If “A must be assigned a higher number than B” → Assign B to a lower number than A; exclude options violating this.**
+
+- **If “No item can have a website target longer than voicemail target” → Website target ≤ voicemail target for each client.**
+
+- **If “Two items cannot be on the same screen/day/slot” → Ensure they are assigned to different locations.**
+
+- **If “Exactly two items testify on Tuesday” and total is fixed → Use this to deduce who can or cannot testify that day.**
+
+- **If “The first soloist also performs the second solo, and second soloist does not perform fifth” → The fifth soloist must be different from the first two.**
+
+- **If “At least one photograph in section A must be by a photographer who also has a photograph in section B” → Ensure overlap in photographers across sections.**
+
+- **If “No two batches of the same kind are made on the same day” → Distribute batches across different days.**
+
+- **If “Entity A must be placed on a higher shelf than entity B” → Assign A to a shelf above B’s shelf.**
+
+---
+
+**Use this cheat sheet to systematically analyze and solve LSAT Analytical Reasoning problems by organizing information, applying conditions precisely, and avoiding common pitfalls.**
+
+Follow the format of the examples below in your response.
+
+Four students will be assigned to a history project in which they will search archives from the years 1921, 1922, 1923, and 1924. Each of the four years will have exactly one student assigned to it. Six students—Louis, Mollie, Onyx, Ryan, Tiffany, and Yoshio—are available for this project. The following conditions apply: Only Louis or Tiffany can be assigned to 1923. If Mollie is assigned to the project, then she must be assigned to either 1921 or 1922. If Tiffany is assigned to the project, then Ryan must be assigned to the project. If Ryan is assigned to the project, then Onyx must be assigned to the year immediately prior to Ryan's.
+
+How many of the students are there who could be the one assigned to 1921?
+(A)six
+(B)five
+(C)four
+(D)three
+(E)two
+Answer: (D)
+
+###
+Four art historians—Farley, Garcia, Holden, and Jiang—will give a series of four public lectures, each lecture on a different topic—lithographs, oil paintings, sculptures, and watercolors. The lectures will be given one at a time, with each art historian giving a lecture on a different one of the topics. The schedule of the lectures is subject to the following constraints: The oil paintings lecture and the watercolors lecture must both be earlier than the lithographs lecture. Farley's lecture must be earlier than the oil paintings lecture. Holden's lecture must be earlier than both Garcia's lecture and Jiang's lecture.
+
+Which one of the following CANNOT be true?
+(A)Farley gives the lithographs lecture.
+(B)Garcia gives the sculptures lecture.
+(C)Garcia gives the watercolors lecture.
+(D)Holden gives the oil paintings lecture.
+(E)Jiang gives the watercolors lecture.
+Answer: (A)

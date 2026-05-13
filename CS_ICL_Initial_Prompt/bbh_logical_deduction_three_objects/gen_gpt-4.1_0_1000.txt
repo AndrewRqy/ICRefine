@@ -1,0 +1,150 @@
+Certainly! Here’s a **cheat sheet** focused on the most challenging aspects of these ordering/logic problems, especially those involving:
+
+- **Relative ordering with "older/newer", "more/less expensive", "above/below", "left/right"**
+- **Identifying "second from the left/right", "second-most expensive", "second-newest", etc.**
+- **Translating statements into a concrete order**
+
+---
+
+## 1. **Translating Statements into Order**
+
+### A. **Left/Right Positioning**
+- "A is to the left of B" → A ... B
+- "A is to the right of B" → B ... A
+
+#### Example:
+- "Quail is to the left of Owl. Owl is to the left of Hummingbird."
+  - Quail ... Owl ... Hummingbird
+
+### B. **Above/Below (Rankings/Finishing Order)**
+- "A finished above B" → A is better (higher rank) than B
+- "A finished below B" → A is worse (lower rank) than B
+
+#### Example:
+- "Rob finished below Mel. Mel finished below Eve."
+  - Eve ... Mel ... Rob (Eve is best, Rob is worst)
+
+### C. **Older/Newer (Age/Year)**
+- "A is older than B" → A ... B (A is earlier)
+- "A is newer than B" → B ... A (A is later)
+
+#### Example:
+- "Limousine is older than Bus. Bus is older than Convertible."
+  - Limousine ... Bus ... Convertible (Limousine is oldest)
+
+### D. **More/Less Expensive**
+- "A is more expensive than B" → A ... B (A is higher price)
+- "A is less expensive than B" → B ... A (A is lower price)
+
+#### Example:
+- "Pears are more expensive than Loquats. Pears are less expensive than Apples."
+  - Apples ... Pears ... Loquats (Apples most expensive)
+
+---
+
+## 2. **Finding "Second from the Left/Right", "Second-most Expensive", etc.**
+
+- Once you have the order (Left → Right, Most → Least, etc.), the **middle item** is the "second from the left", "second-most expensive", "second-newest", etc.
+
+#### Example:
+- Order: A, B, C
+  - Leftmost/Most Expensive/Oldest: **A**
+  - Second from left/Second-most expensive/Second-oldest: **B**
+  - Rightmost/Least Expensive/Newest: **C**
+
+---
+
+## 3. **Step-by-Step Approach**
+
+1. **Write down all items:** List the three objects.
+2. **Apply each statement:** Use arrows or placeholders to show relationships.
+3. **Combine statements:** Build the full order.
+4. **Answer the question:** Identify which item matches the position asked (leftmost, rightmost, second, etc.).
+
+---
+
+## 4. **Special Phrases**
+
+- **"Second from the left/right":** The middle item in the order.
+- **"Second-most expensive":** The middle item in descending price order.
+- **"Second-newest":** The middle item in ascending age order (newest to oldest).
+- **"Second from the top/bottom":** The middle item in ranking.
+
+---
+
+## 5. **Common Pitfalls**
+
+- **Don’t reverse the order:** "A is to the left of B" is NOT the same as "B is to the left of A".
+- **Pay attention to "above/below":** "Above" means better/higher rank; "below" means worse/lower rank.
+- **"Older" vs. "Newer":** "Older" means earlier, "newer" means later.
+- **"More expensive" vs. "Less expensive":** "More expensive" is higher price, "less expensive" is lower price.
+
+---
+
+## 6. **Practice Example**
+
+**Question:**  
+Three cars: Sedan, Tractor, Bus.  
+- Sedan is older than Tractor.  
+- Bus is older than Sedan.
+
+**Step-by-step:**
+- Sedan ... Tractor (Sedan is older)
+- Bus ... Sedan (Bus is older)
+- Combine: Bus ... Sedan ... Tractor
+
+**Oldest:** Bus  
+**Second-newest:** Sedan  
+**Newest:** Tractor
+
+---
+
+## 7. **Quick Reference Table**
+
+| Phrase                        | Order Direction         | Example (A, B, C)         |
+|-------------------------------|------------------------|---------------------------|
+| "A is to the left of B"       | A ... B                | A left, B right           |
+| "A is to the right of B"      | B ... A                | B left, A right           |
+| "A finished above B"          | A ... B                | A better, B worse         |
+| "A finished below B"          | B ... A                | B better, A worse         |
+| "A is older than B"           | A ... B                | A earlier, B later        |
+| "A is newer than B"           | B ... A                | B earlier, A later        |
+| "A is more expensive than B"  | A ... B                | A higher price, B lower   |
+| "A is less expensive than B"  | B ... A                | B higher price, A lower   |
+
+---
+
+**Summary:**  
+- Always translate statements into a linear order.
+- The "second" item is always the middle one.
+- Double-check the direction of each relationship.
+- Use placeholders if needed: (? left ? middle ? right ?)
+
+---
+
+**If stuck:**  
+- Draw the order as you go.
+- Check each statement against your order.
+- Confirm the question is asking for leftmost, rightmost, second, etc.
+
+---
+
+**End of Cheat Sheet**
+
+Follow the format of the examples below in your response.
+
+Question: The following paragraphs each describe a set of three objects arranged in a fixed order. The statements are logically consistent within each paragraph. On a branch, there are three birds: a quail, an owl, and a hummingbird. The quail is to the left of the owl. The owl is to the left of the hummingbird.
+Options:
+(A) The quail is the leftmost
+(B) The owl is the leftmost
+(C) The hummingbird is the leftmost
+Reasoning: Let's think step by step. (1) The white book is to the left of the gray book: "(left) ? white ? gray ? (right)". (2) The red book is the second from the left: "(left) ? white red gray ? (right)". (3) Combining (1) and (2) we get the following ordering: "(left) white red gray (right)". According to this ordering, the leftmost book is the white book. The white book is the leftmost. So the answer is (C).
+Answer: (A)
+###
+Question: The following paragraphs each describe a set of three objects arranged in a fixed order. The statements are logically consistent within each paragraph. In an antique car show, there are three vehicles: a convertible, a limousine, and a bus. The limousine is older than the bus. The bus is older than the convertible.
+Options:
+(A) The convertible is the oldest
+(B) The limousine is the oldest
+(C) The bus is the oldest
+Reasoning: Let's think step by step. (1) The white book is to the left of the gray book: "(left) ? white ? gray ? (right)". (2) The red book is the second from the left: "(left) ? white red gray ? (right)". (3) Combining (1) and (2) we get the following ordering: "(left) white red gray (right)". According to this ordering, the leftmost book is the white book. The white book is the leftmost. So the answer is (C).
+Answer: (B)

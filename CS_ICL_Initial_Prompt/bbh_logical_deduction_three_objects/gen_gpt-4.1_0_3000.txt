@@ -1,0 +1,145 @@
+Certainly! Here’s a **cheat sheet** focused on the most challenging types of examples from the above set. This guide is designed to help you quickly and accurately solve 3-object ordering problems involving relative positions, rankings, and comparative attributes (like price, age, etc.).
+
+---
+
+## CHEAT SHEET: 3-Object Ordering Problems
+
+### 1. **General Approach**
+- **List the objects:** Write down the three items (A, B, C).
+- **Extract clues:** For each statement, write the relationship as an inequality or position.
+- **Build the order:** Combine the clues to form a complete sequence.
+- **Answer the question:** Map the sequence to the options.
+
+---
+
+### 2. **Common Relationship Types & How to Write Them**
+
+#### **A. Left/Right/Above/Below/Newer/Older/More Expensive/Less Expensive**
+- **A is to the left of B:** A _<_ B (A comes before B)
+- **A is to the right of B:** A _>_ B (A comes after B)
+- **A is above B:** A _<_ B (A is better than B)
+- **A is below B:** A _>_ B (A is worse than B)
+- **A is newer than B:** A _>_ B (A is more recent)
+- **A is older than B:** A _<_ B (A is less recent)
+- **A is more expensive than B:** A _>_ B (A costs more)
+- **A is less expensive than B:** A _<_ B (A costs less)
+
+#### **B. "Second from the left"/"Second-most expensive"/"Second-newest"**
+- The "second" item is the **middle** one in the order.
+
+---
+
+### 3. **Step-by-Step Example**
+
+#### **Example Statement:**
+- "The orange book is to the left of the blue book."
+- "The yellow book is to the right of the blue book."
+
+#### **Step 1: Write inequalities**
+- Orange < Blue
+- Blue < Yellow
+
+#### **Step 2: Combine**
+- Orange < Blue < Yellow
+
+#### **Step 3: Map to positions**
+- Leftmost: Orange
+- Middle: Blue
+- Rightmost: Yellow
+
+---
+
+### 4. **Special Cases**
+
+#### **A. "A is the second from the left"**
+- The order is: ? A ?
+- Use other clues to fill in the rest.
+
+#### **B. "A is the most expensive"**
+- A > B, A > C
+- Use other clues to order B and C.
+
+#### **C. "A is the cheapest"**
+- A < B, A < C
+
+#### **D. "A finished above B" (in a competition)**
+- A < B (A did better than B; 1st is best)
+
+#### **E. "A finished last"**
+- A is in the last position (3rd place)
+
+---
+
+### 5. **Combining Multiple Clues**
+
+- **Write all clues as inequalities.**
+- **Chain them together.**
+    - If A < B and B < C, then A < B < C.
+    - If A > B and B > C, then A > B > C.
+- **If a clue gives a fixed position (e.g., "A is second"), place A in the middle and use other clues to fill in left/right.**
+
+---
+
+### 6. **Quick Reference Table**
+
+| Clue Type                | Inequality/Order         | Example (A, B, C)         | Final Order         |
+|--------------------------|--------------------------|---------------------------|---------------------|
+| A is to the left of B    | A < B                    | A < B, B < C              | A B C               |
+| A is to the right of B   | A > B                    | C < B, A > B              | C B A               |
+| A is more expensive      | A > B                    | A > B, B > C              | A B C               |
+| A is less expensive      | A < B                    | C > B, B > A              | C B A               |
+| A is older than B        | A < B                    | A < B, B < C              | A B C               |
+| A is newer than B        | A > B                    | C < B, A > B              | C B A               |
+| A finished above B       | A < B                    | A < B, B < C              | A B C               |
+| A finished below B       | A > B                    | C < B, A > B              | C B A               |
+| A is the second          | Place A in the middle    | ? A ? + other clues       | Use other clues     |
+
+---
+
+### 7. **Tips for Tricky Cases**
+
+- **If you get stuck, write all possible orders and eliminate those that contradict any clue.**
+- **If two clues seem to conflict, double-check your direction (left/right, above/below, etc.).**
+- **For "second-most expensive," "second-newest," etc., always look for the middle item in your final order.**
+
+---
+
+### 8. **Practice: Fill in the Blanks**
+
+Given:  
+- A is to the left of B  
+- C is to the right of B  
+
+Order: A < B < C
+
+Positions:  
+- Leftmost: A  
+- Middle: B  
+- Rightmost: C
+
+---
+
+**Use this cheat sheet to quickly translate clues into inequalities, chain them, and map to positions or rankings.**  
+**Always double-check the direction of the comparison!**
+
+---
+
+**End of Cheat Sheet**
+
+Follow the format of the examples below in your response.
+
+Question: The following paragraphs each describe a set of three objects arranged in a fixed order. The statements are logically consistent within each paragraph. On a shelf, there are three books: an orange book, a blue book, and a yellow book. The orange book is to the left of the blue book. The yellow book is to the right of the blue book.
+Options:
+(A) The orange book is the second from the left
+(B) The blue book is the second from the left
+(C) The yellow book is the second from the left
+Reasoning: Let's think step by step. (1) The white book is to the left of the gray book: "(left) ? white ? gray ? (right)". (2) The red book is the second from the left: "(left) ? white red gray ? (right)". (3) Combining (1) and (2) we get the following ordering: "(left) white red gray (right)". According to this ordering, the leftmost book is the white book. The white book is the leftmost. So the answer is (C).
+Answer: (B)
+###
+Question: The following paragraphs each describe a set of three objects arranged in a fixed order. The statements are logically consistent within each paragraph. In a golf tournament, there were three golfers: Eve, Rob, and Mel. Rob finished below Mel. Mel finished below Eve.
+Options:
+(A) Eve finished last
+(B) Rob finished last
+(C) Mel finished last
+Reasoning: Let's think step by step. (1) The white book is to the left of the gray book: "(left) ? white ? gray ? (right)". (2) The red book is the second from the left: "(left) ? white red gray ? (right)". (3) Combining (1) and (2) we get the following ordering: "(left) white red gray (right)". According to this ordering, the leftmost book is the white book. The white book is the leftmost. So the answer is (C).
+Answer: (B)

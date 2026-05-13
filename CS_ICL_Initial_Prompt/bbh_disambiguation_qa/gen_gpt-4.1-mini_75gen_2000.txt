@@ -1,0 +1,154 @@
+**Pronoun Antecedent Determination Cheat Sheet for Difficult Cases**
+
+---
+
+### 1. **Ambiguity arises when both possible antecedents are plausible and no clear contextual clues exist.**
+
+- **Typical ambiguous structures:**
+  - Sentences of the form:  
+    - "X disliked Y because he/she is arrogant."  
+    - "X greets Y because he/she was in a good mood."  
+    - "X met with Y because they made a mistake."  
+    - "X and Y discussed his/her/their favorite dishes."  
+    - "X planned to meet Y at her/their office."  
+    - "X was running from Y because he/she smelled awful."  
+    - "X was unable to communicate with Y because he/she/they used big words."  
+    - "X told Y that he/she did something."  
+    - "X told Y that he/she/they could do something."  
+    - "X asked Y if he/she/they could borrow money."  
+    - "X and Y will discuss his/her/their favorite dishes."
+
+- **Key sign of ambiguity:**  
+  Both antecedents fit logically and grammatically, and the sentence provides no additional context to favor one over the other.
+
+- **How to handle:**  
+  - State **Ambiguous** if no contextual or semantic clues favor one antecedent.  
+  - Avoid guessing based on stereotypes unless strongly supported by context.
+
+---
+
+### 2. **Use semantic and real-world knowledge to resolve ambiguity when possible.**
+
+- **Examples of semantic clues:**
+
+  | Sentence Type | Clue | Interpretation |
+  |---------------|------|----------------|
+  | Referral or expertise (e.g., "The patient was referred to the specialist because she is an expert") | Expertise usually belongs to the specialist | Pronoun refers to specialist |
+  | Payment or responsibility (e.g., "X informed Y that she would need to make payments") | Client usually pays, not engineer | Pronoun refers to client |
+  | Job roles and typical actions (e.g., "The janitor warned the child... he would have to mop") | Janitor is responsible for mopping | Pronoun refers to janitor |
+  | Physical actions or abilities (e.g., "The worker told the pedestrian that he should avoid...") | Advice usually directed to the listener | Pronoun refers to pedestrian |
+  | Professional knowledge (e.g., "The customer and the chef discuss her culinary training") | Culinary training belongs to chef | Pronoun refers to chef |
+  | Logical cause-effect (e.g., "The developer was unable to communicate with the writer because he focuses on code") | Developers focus on code, writers on writing | Pronoun refers to developer |
+  | Gender and number agreement (e.g., "After meeting with the producers, Sam goes to her office") | "Her" singular feminine → Sam (if producers plural) | Pronoun refers to Sam |
+
+- **How to apply:**  
+  - Identify roles and typical behaviors of entities.  
+  - Use real-world knowledge to eliminate unlikely antecedents.  
+  - Check pronoun number and gender agreement with antecedents.
+
+---
+
+### 3. **Pronouns referring to plural antecedents or groups**
+
+- **Plural pronouns ("they," "their") can refer to:**
+  - One of the individuals (if singular antecedents are possible)  
+  - Both/all individuals collectively (if multiple antecedents mentioned)
+
+- **If sentence structure or pronoun number conflicts with singular antecedents, consider plural or group reference.**
+
+- **Example:**  
+  - "The scientist collaborates with the artist, and they share a story."  
+    - "They" likely refers to both together (plural).  
+    - If options do not include "both," answer is ambiguous.
+
+---
+
+### 4. **Pronouns in sentences with multiple people of the same gender**
+
+- When two people of the same gender are mentioned, and the pronoun is singular (he/she/her/his), ambiguity is common unless context clarifies.
+
+- **Example:**  
+  - "The mechanic disliked the cashier because he is arrogant."  
+    - Both male; "he" could refer to either.  
+    - Without context, answer is ambiguous.
+
+---
+
+### 5. **Pronouns in sentences with possessive pronouns referring to offices, belongings, or abstract concepts**
+
+- When the pronoun refers to possession (e.g., "her office," "their blueprints"), ambiguity arises if both parties could logically own or be associated with the object.
+
+- **Example:**  
+  - "Bailey planned to meet the director at her office."  
+    - Could be Bailey's or director's office.  
+    - Without further context, answer is ambiguous.
+
+---
+
+### 6. **Pronouns referring to people in indirect speech or reported speech**
+
+- When someone tells or asks another person about "he/she/they," consider who would logically be the subject of the reported action.
+
+- **Example:**  
+  - "The assistant asked the physician if he could borrow some money."  
+    - More likely the assistant is asking if the assistant can borrow money.  
+    - If context supports, choose the more logical antecedent.
+
+---
+
+### 7. **Pronouns referring to people in cause-effect or reason clauses**
+
+- When the pronoun is in a clause explaining a cause or reason ("because he/she/they..."), consider who the cause or reason most logically applies to.
+
+- **Example:**  
+  - "The developer was unable to communicate with the writer because they focus on code."  
+    - Developers focus on code, so "they" likely refers to developer.
+
+- If both could logically be the cause, answer is ambiguous.
+
+---
+
+### 8. **Pronouns referring to people in sentences with verbs of communication or action**
+
+- When the pronoun is the object or subject of verbs like "told," "asked," "warned," "helped," consider who is likely performing or receiving the action.
+
+- **Example:**  
+  - "The guard called the cleaner and asked her to open the door."  
+    - "Her" likely refers to the cleaner (the one being asked).
+
+---
+
+### 9. **Gender and number agreement is crucial**
+
+- Pronouns must agree in number and gender with their antecedents.
+
+- **Example:**  
+  - "After meeting with the producers, Sam goes to her office."  
+    - "Her" is singular feminine, "producers" is plural, so "her" refers to Sam.
+
+- If pronoun number/gender does not match any antecedent, answer is ambiguous.
+
+---
+
+### 10. **When in doubt, choose "Ambiguous"**
+
+- If after applying all above reasoning, no clear antecedent emerges, or both are equally plausible, select **Ambiguous**.
+
+---
+
+# Summary Table for Difficult Cases
+
+| Situation | How to Decide | Example |
+|-----------|---------------|---------|
+| Both antecedents plausible, no context | Ambiguous | "X disliked Y because he is arrogant." |
+| Semantic knowledge favors one | Choose logical antecedent | "Patient referred to specialist because she is expert." → Specialist |
+| Pronoun number/gender mismatch | Eliminate mismatches | "Sam goes to her office" → "her" = Sam |
+| Plural pronouns with multiple people | Could be group or ambiguous | "Scientist and artist, and they share a story." |
+| Possessive pronouns with possible multiple owners | Ambiguous unless context | "Meet at her office." |
+| Reported speech with logical speaker/listener | Choose logical speaker/listener | "Assistant asked physician if he could borrow money." → Assistant |
+| Cause-effect clauses | Choose who logically causes effect | "Unable to communicate because they focus on code." → Developer |
+| Communication/action verbs | Pronoun likely refers to person receiving action | "Guard called cleaner and asked her to open door." → Cleaner |
+
+---
+
+**Use this cheat sheet to analyze pronoun antecedents carefully, applying semantic knowledge, grammatical agreement, and logical reasoning to resolve ambiguity where possible. When no clear resolution exists, mark the pronoun as ambiguous.**

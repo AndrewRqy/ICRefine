@@ -1,0 +1,219 @@
+**Pronoun Antecedent Resolution Cheat Sheet for Difficult Cases**
+
+---
+
+### 1. **Ambiguous Pronouns: When Both Referents Are Plausible**
+
+- **Key Insight:** If the sentence structure and context allow the pronoun to logically refer to either of the two possible antecedents, and no additional clues clarify which one, the pronoun is **ambiguous**.
+
+- **Common Patterns:**
+  - Both subjects could logically perform the action or possess the attribute described by the pronoun.
+  - The pronoun matches both antecedents in number and gender.
+  - No contextual or semantic clues favor one antecedent over the other.
+
+- **Examples:**
+  - *"Alex did not know Taylor until he sent a letter."*  
+    Both Alex and Taylor could have sent the letter → **Ambiguous**
+  - *"The nurse stayed away from the laborer because they were very busy."*  
+    Both nurse and laborer could be busy → **Ambiguous**
+  - *"The developer met with the secretary because they made a mistake."*  
+    Both could have made a mistake → **Ambiguous**
+  - *"The mechanic greets the receptionist because she was in a good mood."*  
+    Both could be in a good mood → **Ambiguous**
+  - *"The scientist collaborated with the artist, and he shared a story."*  
+    Both could have shared the story → **Ambiguous**
+
+- **How to Identify:**
+  - Check if the pronoun’s number and gender fit both antecedents.
+  - Consider if the action or attribute can logically apply to both.
+  - Look for contextual clues; if none exist, mark as ambiguous.
+
+---
+
+### 2. **Pronouns Referring to the Subject Doing the Action vs. Object**
+
+- When the sentence involves an action directed from subject (X) to object (Y), and the pronoun could refer to either:
+
+  - **If the pronoun is the object of a verb or preposition, it usually refers to the object (Y).**
+  - **If the pronoun is the subject of a clause explaining the subject’s state or action, it usually refers to the subject (X).**
+
+- **Examples:**
+  - *"The designer showed the cook a blueprint and asked him for feedback."*  
+    "Asked him" → likely the cook (object) → **Cook**
+  - *"The carpenter collaborated with the designer and gave him a prototype."*  
+    "Gave him" → likely the designer (object) → **Designer**
+  - *"The cleaner called the guard and asked her to open the door."*  
+    "Asked her" → likely the guard (object) → **Guard**
+
+- **Exceptions:**  
+  When the pronoun is ambiguous due to lack of context or both roles fit, mark as ambiguous.
+
+---
+
+### 3. **Pronouns in Causal Clauses ("because", "since", "as")**
+
+- When the pronoun appears in a causal clause explaining a reason, consider:
+
+  - **Who logically would have the reason or attribute?**
+  - **Is the reason more naturally associated with the subject or the object?**
+
+- **Examples:**
+  - *"The surgeon warned the nurse that she needed more time to prepare."*  
+    Both surgeon and nurse could need more time → **Ambiguous**
+  - *"The lawyer looked into accusations against the cashier because he needed to understand the case."*  
+    The lawyer is the one investigating → **Lawyer**
+  - *"The sheriff protected the writer because they uphold the peace."*  
+    "Upholding the peace" fits sheriff’s role → **Sheriff**
+  - *"The cook is always teaching the assistant new techniques because they like to teach others."*  
+    Teaching is the cook’s role → **Cook**
+
+- **Tip:**  
+  Use real-world knowledge about roles and responsibilities to guide interpretation.
+
+---
+
+### 4. **Possessive Pronouns with Multiple Possible Owners**
+
+- When a possessive pronoun (his, her, their) could refer to either of two antecedents:
+
+  - **Check which antecedent logically owns or is associated with the possessed noun.**
+  - **If both are plausible and no context clarifies, mark as ambiguous.**
+
+- **Examples:**
+  - *"The customer and the chef discuss her culinary training."*  
+    Culinary training is associated with the chef → **Chef**
+  - *"The reporter and the chef will discuss their favorite dishes."*  
+    Could be both or either → **Ambiguous**
+  - *"The supervisor gave the employee feedback on his/her/their stellar performance."*  
+    Feedback is about employee’s performance → **Employee**
+
+- **Tip:**  
+  Use semantic knowledge about typical ownership or association.
+
+---
+
+### 5. **Pronouns Referring to Groups vs. Individuals**
+
+- Plural pronouns (they, their) can refer to:
+
+  - **Either a group (both individuals together)**
+  - **Or one individual if singular they is used**
+
+- **If the sentence involves two people and "they/their" is used:**
+
+  - **If the pronoun logically refers to both together, accept plural group reference.**
+  - **If it could refer to either individual alone and no context clarifies, mark as ambiguous.**
+
+- **Example:**
+  - *"The scientist collaborates with the artist, and they share a story."*  
+    Could mean both together → **Ambiguous** (if options do not include "both")
+
+---
+
+### 6. **Pronouns Referring to People vs. Inanimate Objects**
+
+- Pronouns like "he", "she", "they" usually refer to people or animals.
+
+- **If one antecedent is a person and the other is an object or abstract noun, pronoun usually refers to the person.**
+
+- **Example:**
+  - *"The pathologist obtained tissue samples from the victim to look at under her microscope."*  
+    Microscope belongs to pathologist (person), not victim → **Pathologist**
+
+---
+
+### 7. **Pronouns with Gender Mismatch**
+
+- Pronouns must agree in gender and number with their antecedents.
+
+- **If a pronoun is singular feminine ("she", "her") and one antecedent is plural or masculine, the pronoun likely refers to the singular feminine antecedent.**
+
+- **Example:**
+  - *"After meeting with the producers, Sam goes to her office."*  
+    "Her" is singular feminine → likely Sam (if Sam is female), not producers (plural) → **Sam**
+
+---
+
+### 8. **Pronouns Referring to the Speaker or Listener**
+
+- In sentences involving communication verbs ("told", "asked", "disclosed"):
+
+  - The pronoun in the reported clause usually refers to the speaker (subject of main clause), not the listener (object).
+
+- **Example:**
+  - *"Alex tells us that he could not meet."*  
+    "He" refers to Alex (speaker), not "us" (listeners) → **Alex**
+
+---
+
+### 9. **When Pronouns Refer to the Person Being Addressed**
+
+- In requests or commands involving calling and asking:
+
+  - The pronoun usually refers to the person being called (object), not the caller (subject).
+
+- **Example:**
+  - *"The guard called the cleaner and asked her to open the door."*  
+    "Her" refers to the cleaner (object), not the guard (subject) → **Cleaner**
+
+---
+
+### 10. **When Pronouns Refer to the Subject’s Own Possessions or Relations**
+
+- Phrases like "my parent and his/her secretary" usually mean the secretary belongs to the parent, not the secretary’s own secretary.
+
+- **Example:**
+  - *"My parent called his secretary for more information."*  
+    "His" refers to "my parent" → **Parent**
+
+---
+
+### Summary Table for Quick Reference
+
+| Situation                                    | Likely Antecedent(s)                         | Notes                                  |
+|----------------------------------------------|---------------------------------------------|----------------------------------------|
+| Both antecedents fit logically                | Ambiguous                                   | No context to disambiguate             |
+| Pronoun is object of verb/preposition         | Usually object                              | E.g., "asked him" → object              |
+| Causal clause ("because")                      | Person logically responsible for reason    | Use real-world roles                    |
+| Possessive pronoun with multiple owners       | Owner logically associated with noun       | Use semantic knowledge                  |
+| Plural pronouns with two individuals           | Both or ambiguous                           | Depends on context                      |
+| Person vs. object antecedents                   | Person                                     | Pronouns usually refer to people        |
+| Gender mismatch                                 | Antecedent matching pronoun gender         |                                        |
+| Communication verbs ("told", "asked")          | Speaker (subject)                           |                                        |
+| Requests after calling                          | Person called (object)                      |                                        |
+| Possessive pronouns in "X and his/her Y"       | X (first person)                            |                                        |
+
+---
+
+**Use this cheat sheet to analyze pronoun antecedents carefully, focusing on grammatical agreement, semantic plausibility, and real-world knowledge. When in doubt and no clear clues exist, mark the pronoun as ambiguous.**
+
+Follow the format of the examples below in your response.
+
+Question: In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The nurse stayed away from the laborer because they were very busy.
+Options:
+(A) The nurse was busy
+(B) The laborer was busy
+(C) Ambiguous
+Reasoning: Let's think step by step.  
+Here we need to determine who the pronoun "they" might be referring to. There are two possible referents for "they": the nurse and the laborer. The sentence is of the form "X stayed away from Y because (X or Y) were very busy."  
+Let's consider Y first: "X stayed away from Y because Y was very busy." This makes sense, as X might avoid Y if Y is busy.  
+Now, consider X: "X stayed away from Y because X was very busy." This also makes sense, as X might avoid Y if X is busy.  
+Because both interpretations are possible and the sentence does not provide enough context to choose between them, the antecedent of "they" is ambiguous. So the answer is (C).
+Answer: (C)
+###
+Question: In the following sentences, explain the antecedent of the pronoun (which thing the pronoun refers to), or state that it is ambiguous.
+Sentence: The patient disclosed to the counselor that they had a history of substance abuse.
+Options:
+(A) The patient had a history
+(B) The counselor had a history
+(C) Ambiguous
+Reasoning: Let's think step by step.  
+Here we need to determine who the pronoun "they" refers to. There are two possible referents: the patient and the counselor. The verb "disclosed" and the phrase "had a history of substance abuse" might help us decide. Let X be the patient and Y the counselor. The sentence is of the form "X disclosed to Y that (X or Y) had a history of substance abuse."
+
+Let's consider Y first: "X disclosed to Y that Y had a history of substance abuse." This would mean the patient is telling the counselor about the counselor's own history, which is unlikely, since the counselor would already know their own history.
+
+Now, consider X: "X disclosed to Y that X had a history of substance abuse." This makes sense, because the patient is sharing personal information with the counselor.
+
+Because in this context, X is the patient and Y is the counselor, the answer should be the patient. So the answer is (A).
+Answer: (A)

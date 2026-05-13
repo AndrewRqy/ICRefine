@@ -1,0 +1,118 @@
+**Cheat Sheet for Solving Truth/Lie Chain Logic Problems**
+
+---
+
+### Core Concepts
+
+1. **Truth-tellers always tell the truth.**  
+2. **Liars always lie.**  
+3. When a person *A* says "*B* tells the truth,"  
+   - If *A* is truthful, then *B* is truthful.  
+   - If *A* is lying, then *B* is lying.  
+4. When a person *A* says "*B* lies,"  
+   - If *A* is truthful, then *B* is lying.  
+   - If *A* is lying, then *B* is truthful.
+
+---
+
+### Common Patterns in Difficult Examples
+
+#### 1. **Long Chains of Statements About Truthfulness or Lying**
+
+- When multiple people say things about each other in a chain (e.g., A says B tells the truth, B says C lies, C says D tells the truth, etc.), **work step-by-step from the known fact or the initial assumption** (e.g., "X tells the truth" or "Y lies").  
+- **Track each person's status (truth or lie) carefully** by applying the rules above at each step.  
+- Use a table or list to keep track of each person’s assumed status as you move along the chain.
+
+---
+
+#### 2. **Statements About Statements (Meta-Statements)**
+
+- When a person says another person *tells the truth* or *lies* about a third person, **unpack the layers carefully**:  
+  - Example: "Michaela says Alexis tells the truth."  
+    - If Michaela is truthful → Alexis is truthful.  
+    - If Michaela is lying → Alexis is lying.  
+- If Alexis then says something about someone else, apply the same logic recursively.
+
+---
+
+#### 3. **Contradictory Statements and Cross-Checking**
+
+- When two or more people make contradictory claims about the same person, use **contradiction to eliminate impossible assumptions**.  
+- Example:  
+  - Person A says Person B tells the truth.  
+  - Person C says Person B lies.  
+  - If A is truthful, B is truthful → C must be lying.  
+  - If A is lying, B is lying → C must be truthful.  
+- Use this to deduce who must be lying or telling the truth.
+
+---
+
+#### 4. **Statements About the Initial Fact**
+
+- The problem often starts with a statement like "X tells the truth" or "Y lies."  
+- This is your **starting assumption**.  
+- Use this as the anchor to deduce the truthfulness of others.
+
+---
+
+#### 5. **When the Final Question Asks About a Person Who Is Several Steps Down the Chain**
+
+- Trace the chain **backwards** from the person in question to the initial fact.  
+- Confirm each link in the chain is consistent with the initial assumption.  
+- If any contradiction arises, reconsider assumptions or check for misinterpretation.
+
+---
+
+### Step-by-Step Approach for Difficult Problems
+
+1. **Identify the initial fact** (e.g., "Sherrie tells the truth" or "Kristian lies").  
+2. **List all statements in order**, noting who says what about whom.  
+3. **Assign truth values starting from the initial fact.**  
+4. **Apply the rules for "tells the truth" and "lies" statements** to assign truth/lie status to each person in the chain.  
+5. **Check for contradictions.** If found, re-examine assumptions or the chain.  
+6. **Answer the final question based on the deduced truthfulness of the person asked about.**
+
+---
+
+### Tips for Avoiding Common Mistakes
+
+- **Do not confuse "Person A says Person B tells the truth" with "Person A says Person B lies."** They have opposite implications depending on whether A is truthful or lying.  
+- **Keep track of who is the subject and who is the object in each statement.**  
+- **Be consistent:** If you find a contradiction, backtrack and check your logic.  
+- **Use shorthand:**  
+  - T = tells truth  
+  - L = lies  
+  - "A says B is T" means:  
+    - If A = T → B = T  
+    - If A = L → B = L  
+  - "A says B is L" means:  
+    - If A = T → B = L  
+    - If A = L → B = T  
+
+---
+
+### Example of Applying the Cheat Sheet (Simplified)
+
+**Given:** "Sherrie tells the truth."  
+- Sherrie = T  
+- Vernell says Sherrie tells the truth → Vernell = T (because Sherrie is T)  
+- Alexis says Vernell lies → Alexis says Vernell = L  
+  - Vernell = T, so Alexis must be lying → Alexis = L  
+- Michaela says Alexis tells the truth → Michaela says Alexis = T  
+  - Alexis = L, so Michaela must be lying → Michaela = L  
+- Elanor says Michaela tells the truth → Elanor says Michaela = T  
+  - Michaela = L, so Elanor must be lying → Elanor = L  
+- **Does Elanor tell the truth?** No.
+
+---
+
+### Summary Table for Quick Reference
+
+| Statement Type                 | If Speaker is Truthful | If Speaker is Lying |
+|-------------------------------|-----------------------|---------------------|
+| "Person X tells the truth"    | X is Truthful         | X is Lying          |
+| "Person X lies"                | X is Lying            | X is Truthful       |
+
+---
+
+Use this cheat sheet to carefully analyze each problem step-by-step, especially when the chain of statements is long or involves multiple layers of claims about truthfulness or lying.

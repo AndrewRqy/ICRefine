@@ -1,0 +1,172 @@
+**Sarcasm Identification Cheat Sheet: Key Strategies for Difficult Examples**
+
+---
+
+### 1. **Look for Contradictions Between Statement and Context**
+
+- Sarcasm often involves saying the opposite of what is true or expected.
+- Example cues:
+  - Positive words describing negative situations (e.g., "great" for a bad event).
+  - Negative words describing positive situations.
+  - Praise or compliments that clearly don’t fit the context.
+
+**Examples:**
+- Calling a disastrous event "a great way to start the year."
+- Saying "Such profits being made" when describing a loss.
+- Praising someone as "a brilliant person" for doing something harmful.
+
+---
+
+### 2. **Detect Exaggeration or Absurdity**
+
+- Sarcasm frequently uses hyperbole to mock or ridicule.
+- Look for statements that exaggerate beyond reasonable limits or propose absurd ideas.
+- Statements that suggest impossible or ridiculous scenarios are likely sarcastic.
+
+**Examples:**
+- Suggesting banning breathing.
+- Claiming "only rich people can afford healthy food" as an absolute.
+- Saying "Have you tried not being poor? It is much easier."
+
+---
+
+### 3. **Identify Irony in Praise or Criticism**
+
+- Sarcasm often uses praise ironically to criticize, or criticism ironically to praise.
+- Check if the compliment or insult fits logically with the described behavior or situation.
+
+**Examples:**
+- Calling lazy employees "the best."
+- Saying "He's such great relationship material when he's drunk" when drunk behavior is negative.
+- "Amazing display of individual skill" when the team did most of the work.
+
+---
+
+### 4. **Watch for Rhetorical Questions or Statements That Mock**
+
+- Sarcasm can be hidden in rhetorical questions or statements that pretend ignorance.
+- These often highlight the absurdity or obviousness of a situation.
+
+**Examples:**
+- "Why would they have weapons drawn when called to a shooting?"
+- "Oh, it’s not happened before? I guess it must not be against the lawbooks then."
+- "You didn’t realize bikes are stationary objects?"
+
+---
+
+### 5. **Check for Mismatched Cause and Effect or Logic**
+
+- Sarcasm may present illogical cause-effect relationships to mock a viewpoint.
+- Look for statements where the conclusion does not follow from the premise.
+
+**Examples:**
+- "He should put it all on bitcoin" when he doesn’t want high-risk investments.
+- "The best way to defeat a stronger force is by fighting on their terms."
+- "Removing tax breaks for students will be helpful" when students have low income.
+
+---
+
+### 6. **Spot Use of Overly Formal or Emphatic Language in Trivial or Negative Contexts**
+
+- Sarcasm sometimes uses exaggerated formality or enthusiasm to highlight triviality or negativity.
+- Phrases like "Such a smart move!" or "Rock-solid source if you ask me" after describing something obviously bad.
+
+**Examples:**
+- Calling a website known for falsehoods a "rock-solid source."
+- Saying "Blocking the river is such a smart move!" when it causes harm.
+- "Pay-to-win gated content is much more fun and accessible to everyone."
+
+---
+
+### 7. **Recognize When Sarcasm Mocks Stereotypes or Social Issues**
+
+- Sarcasm can exaggerate stereotypes or social misconceptions to highlight their absurdity.
+- Look for statements that overstate or invert common beliefs.
+
+**Examples:**
+- "Because women are totally incapable of doing everyday tasks."
+- "Muslims love celebrating Christmas."
+- "Only rich people can afford healthy food."
+
+---
+
+### 8. **Distinguish Between Literal and Figurative Use of Words**
+
+- Sarcasm often plays on literal vs. figurative meanings.
+- Statements that take figurative expressions literally or vice versa can be sarcastic.
+
+**Examples:**
+- "His eyes were on the ball, shouldn’t be a red" used to mock weak excuses.
+- "You mean Knuth up arrow notation isn’t normal for you?" implying it’s obscure.
+
+---
+
+### 9. **Identify Sarcasm in Responses to Obvious or Common Knowledge**
+
+- Sarcasm may pretend surprise or ignorance about something well-known.
+- Look for statements that contradict common sense or facts.
+
+**Examples:**
+- "Impossible, as there’s no one on the internet."
+- "We all know diamonds are worthless."
+- "Yeah, anarchism is taught as a prime example of a governing system."
+
+---
+
+### 10. **Look for Sarcastic Use of “Positive” Phrases in Negative Contexts**
+
+- Phrases like "What a poor guy," "Such a great transformation," or "Perfectly reasonable" used ironically.
+- The positive phrase contrasts sharply with the negative facts.
+
+**Examples:**
+- "$10 per mile for fuel, perfectly reasonable."
+- "Years of work and only got a $50,000 scholarship, what a poor guy."
+- "He’s been drinking every day recently, what a great transformation."
+
+---
+
+### Summary Table of Common Sarcasm Markers
+
+| Marker Type                      | Examples/Indicators                                  |
+|---------------------------------|-----------------------------------------------------|
+| Contradiction                   | Positive word + negative context, or vice versa     |
+| Exaggeration/Absurdity          | Impossible or ridiculous claims                      |
+| Ironic Praise/Criticism         | Compliment used to criticize, insult to praise      |
+| Rhetorical Questions            | Pretending ignorance to mock                         |
+| Illogical Cause-Effect          | Conclusions that don’t follow premises               |
+| Overly Formal/Emphatic Language | Excessive praise for trivial or bad things          |
+| Mocking Stereotypes             | Exaggerated social stereotypes                       |
+| Literal vs. Figurative          | Taking figurative expressions literally             |
+| Mocking Common Knowledge        | Denying obvious facts                                |
+| Positive Phrases in Negative Contexts | "Great job" for failure, "perfectly reasonable" for absurd costs |
+
+---
+
+**Use this cheat sheet to:**
+
+- Analyze the **context** and **logical consistency** of statements.
+- Detect **tone** through word choice and phrasing.
+- Identify **incongruities** between what is said and what is meant.
+- Recognize **common sarcastic devices** like exaggeration, irony, and rhetorical questions.
+
+---
+
+**Practice applying these points step-by-step to new questions to confidently identify sarcasm without referring back to examples.**
+
+Follow the format of the examples below in your response.
+
+Question: Which statement is sarcastic?
+Options:
+(A) It's easy to get into politics, all you have to do to is be outrageous
+(B) It's easy to get into politics, all you have to do to is be outrageous
+Reasoning: Let's think step by step.  
+We need to identify which statement is sarcastic. Both options are worded identically: "It's easy to get into politics, all you have to do is be outrageous." Since the wording is the same, the sarcasm would depend on the context or tone, but typically, this statement is sarcastic because it reduces the complex process of entering politics to simply "being outrageous," which is an oversimplification meant to mock the current state of politics. Since option (A) is selected as the answer, it is being interpreted as sarcastic for trivializing a serious subject. So the answer is (A).
+Answer: (A)
+###
+Question: Which statement is sarcastic?
+Options:
+(A) It's cultural celebration at its finest!
+(B) It's cultural appropriation at its finest!
+Reasoning: Let's think step by step.  
+We need to identify which statement is sarcastic. Option (A) says "It's cultural celebration at its finest!" — this is a positive statement that sincerely praises the event as a great example of celebrating culture. Option (B) says "It's cultural appropriation at its finest!" — calling something "appropriation at its finest" uses a negative term ("appropriation") in a way that mimics praise, which is ironic and sarcastic, since appropriation is generally criticized, not celebrated. So the answer is (B).
+Answer: (B)

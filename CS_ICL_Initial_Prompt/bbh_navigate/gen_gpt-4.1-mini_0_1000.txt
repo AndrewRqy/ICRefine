@@ -1,0 +1,150 @@
+**Cheat Sheet for Determining if You Return to the Starting Point**
+
+---
+
+### 1. **Basic Setup**
+
+- Start at origin: **(0, 0)**
+- Initial facing direction: **Positive Y-axis (North)**
+- Directions relative to facing:
+  - **Forward:** +Y
+  - **Backward:** -Y
+  - **Right:** +X
+  - **Left:** -X
+
+---
+
+### 2. **Movement Commands**
+
+- **"Take N steps [direction]"** means move N units in that direction relative to current facing or absolute if "Always face forward" is specified.
+- Directions can be:
+  - **forward, backward, left, right**
+  - If no direction specified (just "Take N steps"), assume **forward**.
+- **"Always face forward"** means you do **not** change facing direction during the entire sequence.
+- If turns are present (turn left/right/around), update facing accordingly.
+
+---
+
+### 3. **Turning Commands**
+
+- **Turn left:** rotate facing 90° counterclockwise.
+- **Turn right:** rotate facing 90° clockwise.
+- **Turn around:** rotate facing 180°.
+- Multiple turns compound accordingly.
+- After turns, movement directions are relative to new facing.
+
+---
+
+### 4. **Key Points for Difficult Cases**
+
+#### A. **When "Always face forward" is present:**
+
+- Ignore any turn commands (usually none).
+- All movements are relative to the original facing (positive Y).
+- Movements left/right/backward/forward are absolute directions on the coordinate plane.
+- Sum all movements in X and Y directions separately.
+- If final position is (0,0), answer is **Yes**; else **No**.
+
+#### B. **When turns are present:**
+
+- Track facing direction after each turn.
+- For each movement, translate steps into X and Y based on current facing.
+- Update position accordingly.
+- At the end, check if position is (0,0).
+
+---
+
+### 5. **How to Track Position**
+
+- Maintain variables: `x = 0`, `y = 0`
+- Maintain facing direction as one of: N (0°), E (90°), S (180°), W (270°)
+- Facing starts at N (0°)
+- Turning changes facing:
+  - Left: facing = (facing - 90) mod 360
+  - Right: facing = (facing + 90) mod 360
+  - Around: facing = (facing + 180) mod 360
+- Movement vectors relative to facing:
+  - Forward: +Y in facing direction
+  - Backward: -Y in facing direction
+  - Right: +X in facing direction
+  - Left: -X in facing direction
+
+---
+
+### 6. **Movement Vector Calculation**
+
+| Facing | Forward (dx, dy) | Backward (dx, dy) | Right (dx, dy) | Left (dx, dy) |
+|--------|------------------|-------------------|----------------|---------------|
+| N (0°) | (0, +1)          | (0, -1)           | (+1, 0)        | (-1, 0)       |
+| E (90°)| (+1, 0)          | (-1, 0)           | (0, -1)        | (0, +1)       |
+| S (180°)| (0, -1)         | (0, +1)           | (-1, 0)        | (+1, 0)       |
+| W (270°)| (-1, 0)         | (+1, 0)           | (0, +1)        | (0, -1)       |
+
+- Multiply the vector by the number of steps and add to current position.
+
+---
+
+### 7. **Special Cases**
+
+- **"Take N steps" without direction:** assume forward.
+- **"Always face forward" overrides turns:** ignore turns if any.
+- **Multiple turns in a row:** combine angles before moving.
+- **"Turn around" twice = no change in facing.**
+- **If instructions include contradictory or unclear directions, default to above rules.**
+
+---
+
+### 8. **Step-by-Step Approach**
+
+1. Initialize position `(x, y) = (0, 0)` and facing = N (0°).
+2. If "Always face forward" is present:
+   - Ignore turns.
+   - For each movement, add/subtract steps in absolute directions:
+     - forward/backward affect Y
+     - left/right affect X
+3. Else:
+   - For each command:
+     - If turn, update facing.
+     - If move, calculate vector based on facing and direction, update position.
+4. After all commands, check if `(x, y) == (0, 0)`.
+5. If yes, answer **Yes**; else **No**.
+
+---
+
+### 9. **Common Pitfalls**
+
+- Confusing relative and absolute directions.
+- Ignoring "Always face forward" and applying turns.
+- Forgetting to update facing after turns.
+- Not summing all movements correctly.
+- Assuming "Take N steps" means right or left instead of forward.
+
+---
+
+### 10. **Example**
+
+Instructions:  
+"Turn right. Take 3 steps. Turn around. Take 3 steps. Turn left."
+
+- Start facing N (0°), position (0,0)
+- Turn right → facing E (90°)
+- Take 3 steps forward → move +3 in X → position (3,0)
+- Turn around → facing W (270°)
+- Take 3 steps forward → move -3 in X → position (0,0)
+- Turn left → facing S (180°)
+- Final position (0,0) → **Yes**
+
+---
+
+### 11. **Summary**
+
+| Scenario                      | How to Calculate                      | Return to Start? |
+|-------------------------------|-------------------------------------|------------------|
+| Always face forward + moves   | Sum absolute X and Y moves           | Check if (0,0)   |
+| Turns + moves                 | Update facing, move relative to facing | Check if (0,0)   |
+| Turns only                   | No movement, position unchanged      | Yes              |
+| Moves only (no turns)         | Move forward by default               | Check if (0,0)   |
+
+---
+
+Use this cheat sheet to carefully track position and facing step-by-step, and determine if the final position is the origin.
