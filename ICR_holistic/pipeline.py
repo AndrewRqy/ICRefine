@@ -150,7 +150,7 @@ def main() -> None:
     ap.add_argument("--min-pool-for-net-gate", type=int, default=4,
                     help="Skip net-score gate for bins whose correct pool is smaller than this")
     ap.add_argument("--beam-size",          type=int,   default=2,
-                    help="Holistic rewrite beam size: 1=A only, 2=A+B (default), 3+=A+B+warm-A…")
+                    help="Holistic rewrite beam size: 1=A only, 2=A+A2(t=0.3), 3=A+A2+A3(t=0.5)…")
     ap.add_argument("--val-split",          type=float, default=0.0,
                     help="Fraction of training items held out for val acceptance gating (0=disabled)")
     ap.add_argument("--val-seed",           type=int,   default=42,
@@ -163,6 +163,28 @@ def main() -> None:
                     help="Amount added to bin-threshold each iteration")
     ap.add_argument("--early-stop-patience", type=int, default=0,
                     help="Stop after N consecutive iterations with no new best (0 = disabled)")
+    ap.add_argument("--bin-max-tokens",      type=int, default=900,
+                    help="Max tokens for per-bin rule/example generation")
+    ap.add_argument("--rewriter-max-tokens", type=int, default=3000,
+                    help="Max tokens for holistic cheatsheet rewrite")
+    ap.add_argument("--rewriter-cs-max-chars", type=int, default=4000,
+                    help="Max chars of current cheatsheet fed into the rewriter prompt")
+    ap.add_argument("--secondary-model",     default=None,
+                    help="If set, apply paired delta gate using this model at bin evaluation")
+    ap.add_argument("--secondary-tolerance", type=int, default=1,
+                    help="Max allowed accuracy drop (items) on secondary model per bin (default 1)")
+    ap.add_argument("--slowandsteady",        action="store_true", default=False,
+                    help="Rewriter selects at most 3 candidates per iteration; rest deferred to next iter")
+    ap.add_argument("--rewrite-min-fix",     type=int, default=3,
+                    help="Min wrong items the rewrite must fix to pass gate; retries if below (0=disabled)")
+    ap.add_argument("--rewrite-gate-retries",type=int, default=3,
+                    help="Max rewrite attempts before accepting best seen (used when rewrite-min-fix > 0)")
+    ap.add_argument("--rewrite-max-broken",   type=int, default=-1,
+                    help="Max correct items rewrite may break; triggers retry + feeds broken cases as caution (-1=disabled)")
+    ap.add_argument("--rewrite-min-net-gain", type=int, default=-999,
+                    help="Min (n_fixed - n_broken) required to pass gate; triggers retry with caution (-999=disabled)")
+    ap.add_argument("--no-oracle-injection", action="store_true", default=False,
+                    help="Disable injection of correct reasoning into the bin generator context")
     args = ap.parse_args()
 
     api_key    = get_api_key()
@@ -277,6 +299,17 @@ def main() -> None:
         val_split=args.val_split,
         val_seed=args.val_seed,
         val_gate_threshold=args.val_gate_threshold,
+        bin_max_tokens=args.bin_max_tokens,
+        rewriter_max_tokens=args.rewriter_max_tokens,
+        rewriter_cs_max_chars=args.rewriter_cs_max_chars,
+        no_oracle_injection=args.no_oracle_injection,
+        secondary_model=args.secondary_model,
+        secondary_tolerance=args.secondary_tolerance,
+        slowandsteady=args.slowandsteady,
+        rewrite_min_fix=args.rewrite_min_fix,
+        rewrite_gate_retries=args.rewrite_gate_retries,
+        rewrite_max_broken=args.rewrite_max_broken,
+        rewrite_min_net_gain=args.rewrite_min_net_gain,
     )
 
     result = run_holistic_loop(
