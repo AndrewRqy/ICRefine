@@ -74,8 +74,8 @@ class HolisticLoopConfig:
     rewriter_max_tokens: int  = 3000 # max tokens for holistic cheatsheet rewrite
     rewriter_cs_max_chars: int = 4000 # max chars of current cheatsheet fed to rewriter
     no_oracle_injection: bool = False # if True, skip injecting correct reasoning into bin generator
-    secondary_model:    str | None = None  # if set, apply delta gate using this model
-    secondary_tolerance: int = 1           # max allowed accuracy drop on secondary (items)
+    rewrite_secondary_model: str | None = None   # if set, gate holistic rewrite on this model's accuracy
+    rewrite_secondary_tolerance: float = 0.02   # max accuracy drop allowed on secondary model (e.g. 0.02 = 2%)
     slowandsteady:      bool = False       # merge ≤3 candidates per iter; carry rest as pending
     rewrite_min_fix:    int  = 3          # min wrong items a rewrite must fix to pass gate (0 = disabled)
     rewrite_gate_retries: int = 3         # max rewrite attempts before accepting best seen
@@ -142,6 +142,7 @@ def run_holistic_loop(
     best_acc = -1.0
     best_iter_idx = 0
     best_update_count = 0
+    _sec_best = [-1.0]    # [0] secondary model best accuracy (cell for closure mutation)
     consecutive_no_bins = 0
     iters_without_improvement = 0
     pending_pool: list = []  # carries deferred bin candidates across iterations (slowandsteady)
@@ -192,18 +193,39 @@ def run_holistic_loop(
                 progress_label=f"[{_iter_tag}:val]",
             )
 
-        if val_items_held:
-            with ThreadPoolExecutor(max_workers=2) as _s1_pool:
-                _fut_opt = _s1_pool.submit(_score_opt)
-                _fut_val = _s1_pool.submit(_score_val)
-                correct_items, wrong_items = _fut_opt.result()
+        def _score_secondary():
+            return score_batch(
+                items=loop_items, cheatsheet_text=current_cs,
+                model=cfg.rewrite_secondary_model, api_key=cfg.api_key,
+                concurrency=cfg.score_concurrency, temperature=0.0,
+                task_spec=_ts, cot_first=True,
+                progress_label=f"[{_iter_tag}:sec]",
+            )
+
+        _n_score_workers = 1 + bool(val_items_held) + bool(cfg.rewrite_secondary_model)
+        with ThreadPoolExecutor(max_workers=_n_score_workers) as _s1_pool:
+            _fut_opt = _s1_pool.submit(_score_opt)
+            _fut_val = _s1_pool.submit(_score_val) if val_items_held else None
+            _fut_sec = _s1_pool.submit(_score_secondary) if cfg.rewrite_secondary_model else None
+            correct_items, wrong_items = _fut_opt.result()
+            if _fut_val:
                 _val_correct_curr, _ = _fut_val.result()
-            val_acc_curr = len(_val_correct_curr) / len(val_items_held)
-            print(f"[holistic] Val accuracy (current): "
-                  f"{len(_val_correct_curr)}/{len(val_items_held)} ({val_acc_curr:.1%})")
-        else:
-            val_acc_curr = 0.0
-            correct_items, wrong_items = _score_opt()
+                val_acc_curr = len(_val_correct_curr) / len(val_items_held)
+                print(f"[holistic] Val accuracy (current): "
+                      f"{len(_val_correct_curr)}/{len(val_items_held)} ({val_acc_curr:.1%})")
+            else:
+                val_acc_curr = 0.0
+            if _fut_sec:
+                _sec_correct_curr, _ = _fut_sec.result()
+                _sec_n_curr = len(_sec_correct_curr)
+                _sec_correct_ids_curr = {it["id"] for it in _sec_correct_curr}
+                _sec_acc_curr = _sec_n_curr / len(loop_items)
+                print(f"[holistic] Secondary accuracy (current): "
+                      f"{_sec_n_curr}/{len(loop_items)} ({_sec_acc_curr:.1%})")
+            else:
+                _sec_n_curr = 0
+                _sec_correct_ids_curr = set()
+                _sec_acc_curr = 0.0
 
         acc = len(correct_items) / len(loop_items)
         print(f"[holistic] Accuracy: {len(correct_items)}/{len(loop_items)} ({acc:.1%})  "
@@ -295,7 +317,7 @@ def run_holistic_loop(
         accepted_outputs: list[tuple[str, BinGeneratorOutput]] = []
         all_regressed:    list[dict] = []
 
-        def _solve_bin(bin_key, pb, _veto_acc: list) -> Optional[tuple]:
+        def _solve_bin(bin_key, pb) -> Optional[tuple]:
             label = partition_label(bin_key)
             n_fail = len(pb.failures)
             n_pool = len(pb.correct_pool)
@@ -391,93 +413,32 @@ def run_holistic_loop(
                     }
                     continue
 
-                # ── Secondary model delta gate ─────────────────────────────
-                # Score correct_sample with secondary model before and after
-                # adding bin content; reject if accuracy drops more than
-                # secondary_tolerance items (no prior baseline needed — the
-                # paired comparison is self-contained per bin attempt).
-                if cfg.secondary_model and correct_sample:
-                    def _sec_score(cs_text, lbl):
-                        c, _ = score_batch(
-                            items=correct_sample,
-                            cheatsheet_text=cs_text,
-                            model=cfg.secondary_model,
-                            api_key=cfg.api_key,
-                            concurrency=min(cfg.score_concurrency,
-                                            len(correct_sample)),
-                            temperature=0.0,
-                            task_spec=_ts,
-                            cot_first=True,
-                            progress_label=lbl,
-                        )
-                        return len(c)
-
-                    _sec_lbl = f"[bin:{label[:10]}:sec"
-                    with ThreadPoolExecutor(max_workers=2) as _sec_pool:
-                        _f_before = _sec_pool.submit(_sec_score, current_cs,
-                                                     _sec_lbl + "-before]")
-                        _f_after  = _sec_pool.submit(_sec_score, test_cs,
-                                                     _sec_lbl + "-after]")
-                        _sec_before = _f_before.result()
-                        _sec_after  = _f_after.result()
-
-                    sec_delta = _sec_after - _sec_before
-                    print(f"  [bin] {label} — secondary delta: "
-                          f"{_sec_before}→{_sec_after} ({sec_delta:+d}, "
-                          f"tol={cfg.secondary_tolerance})")
-
-                    if sec_delta < -cfg.secondary_tolerance:
-                        rejection_reason = (
-                            f"secondary model regression: delta={sec_delta:+d} "
-                            f"< -{cfg.secondary_tolerance}"
-                        )
-                        _veto_acc.append(1)
-                        print(f"  [bin] {label} — SECONDARY VETO, retrying...")
-                        prev_attempt = {
-                            "content":          out.content,
-                            "content_type":     out.content_type,
-                            "fix_rate":         fix_rate,
-                            "net_score":        net_score,
-                            "n_fixed":          len(fixed),
-                            "n_fail":           n_fail,
-                            "n_regressed":      len(regressed),
-                            "rejection_reason": rejection_reason,
-                        }
-                        continue
-                else:
-                    sec_delta = None
-
                 if net_score <= 0 and pool_too_small:
                     print(f"  [bin] {label} — net gate skipped (pool={len(correct_sample)} "
                           f"< {cfg.min_pool_for_net_gate}), accepting on fix rate alone")
 
                 for r in regressed:
                     r["_regression_source_bin"] = label
-                sec_info = (f"  sec_delta={sec_delta:+d}"
-                            if sec_delta is not None else "")
                 print(f"  [bin] {label} — ACCEPTED  "
                       f"fix={fix_rate:.1%}  net={net_score:+d}"
-                      f"  regressions={len(regressed)}{sec_info}")
-                return label, out, regressed, sec_delta
+                      f"  regressions={len(regressed)}")
+                return label, out, regressed
 
             print(f"  [bin] {label} — all {cfg.bin_retry} attempts failed, discarding")
             return None
 
-        _secondary_vetoes: list[int] = []  # thread-safe accumulator
         with ThreadPoolExecutor(max_workers=cfg.bin_concurrency) as pool:
-            futures = {pool.submit(_solve_bin, k, pb, _secondary_vetoes): k
+            futures = {pool.submit(_solve_bin, k, pb): k
                        for k, pb in active_bins.items()}
             for future in as_completed(futures):
                 result = future.result()
                 if result is not None:
-                    label, out, regressed, sec_delta = result
+                    label, out, regressed = result
                     accepted_outputs.append((label, out))
                     all_regressed.extend(regressed)
 
         iter_log["bins_accepted"] = len(accepted_outputs)
         iter_log["n_regressed"]   = len(all_regressed)
-        if cfg.secondary_model:
-            iter_log["n_secondary_vetoes"] = sum(_secondary_vetoes)
         print(f"\n[holistic] {len(accepted_outputs)} bins accepted, "
               f"{len(all_regressed)} regressions recorded")
 
@@ -507,7 +468,8 @@ def run_holistic_loop(
         _warm_temps = [0.3, 0.5, 0.7]
 
         def _run_rewrite(label: str, prompt_template: Optional[str], temperature: float,
-                         caution_cases: list | None = None):
+                         caution_cases: list | None = None,
+                         failed_cheatsheet: str | None = None):
             r = rewrite_cheatsheet(
                 current_cheatsheet=current_cs,
                 accepted_bin_outputs=accepted_outputs,
@@ -520,6 +482,7 @@ def run_holistic_loop(
                 rewriter_max_tokens=cfg.rewriter_max_tokens,
                 pending_pool=pending_pool if cfg.slowandsteady else None,
                 caution_cases=caution_cases or [],
+                failed_cheatsheet=failed_cheatsheet,
             )
             if r is None and _last_failed_raw[0]:
                 (output_dir / f"rewrite_raw_{iter_tag}_{label}_FAILED.txt").write_text(
@@ -550,6 +513,7 @@ def run_holistic_loop(
         # (chosen_tag, rewrite_obj, n_fixed, n_broken, beam_scores_dict)
         _best_attempt: tuple | None = None
         _rw_caution_cases: list[dict] = []   # grows across retries
+        _rw_failed_cs: str | None = None     # most recent rejected cheatsheet
 
         for _rw_try in range(_rewrite_max_tries):
             _try_lbl = (f"attempt {_rw_try + 1}/{_rewrite_max_tries}"
@@ -567,7 +531,9 @@ def run_holistic_loop(
 
             with ThreadPoolExecutor(max_workers=beam_size) as rw_pool:
                 _rw_futures = {
-                    rw_pool.submit(_run_rewrite, *spec, _rw_caution_cases): spec[0]
+                    rw_pool.submit(
+                        _run_rewrite, *spec, _rw_caution_cases, _rw_failed_cs
+                    ): spec[0]
                     for spec in beam_specs
                 }
                 _beam_results: dict[str, object] = {}
@@ -645,10 +611,11 @@ def run_holistic_loop(
                     reasons.append(f"broke {n_broken} > max {cfg.rewrite_max_broken}")
                 if gain_fail:
                     reasons.append(f"net_gain {net_gain:+d} < min {cfg.rewrite_min_net_gain:+d}")
-                # Accumulate newly broken cases as caution for the next attempt
+                # Accumulate newly broken cases and save failed cheatsheet for next attempt
                 for item in newly_broken:
                     if item not in _rw_caution_cases:
                         _rw_caution_cases.append(item)
+                _rw_failed_cs = chosen_rw.cheatsheet
                 print(f"[holistic] Rewrite gate FAILED ({'; '.join(reasons)}) — retrying "
                       f"with {len(_rw_caution_cases)} caution case(s)...")
                 continue
@@ -667,6 +634,57 @@ def run_holistic_loop(
                     _reasons.append(f"net={net_gain:+d}>={cfg.rewrite_min_net_gain:+d}")
                 if _reasons:
                     print(f"[holistic] Rewrite gate PASSED ({', '.join(_reasons)})")
+
+            # ── Secondary model rewrite gate ───────────────────────────────
+            # Score ALL training items with secondary model under new cheatsheet.
+            # If secondary accuracy drops more than tolerance, retry the rewrite
+            # with regressed secondary items injected as caution.
+            if not gate_failed and cfg.rewrite_secondary_model and _sec_n_curr > 0:
+                _sec_new_correct, _sec_new_wrong = score_batch(
+                    items=loop_items,
+                    cheatsheet_text=chosen_rw.cheatsheet,
+                    model=cfg.rewrite_secondary_model,
+                    api_key=cfg.api_key,
+                    concurrency=cfg.score_concurrency,
+                    temperature=0.0,
+                    task_spec=_ts,
+                    cot_first=True,
+                    progress_label=f"[{_iter_tag}:sec-rw-gate]",
+                )
+                _sec_new_n = len(_sec_new_correct)
+                _sec_new_acc = _sec_new_n / len(loop_items)
+                _sec_drop_pct = _sec_acc_curr - _sec_new_acc
+                _sec_floor = _sec_acc_curr - cfg.rewrite_secondary_tolerance
+                print(f"[holistic] Secondary rewrite gate: "
+                      f"{_sec_acc_curr:.1%}→{_sec_new_acc:.1%} ({-_sec_drop_pct:+.1%})  "
+                      f"floor={_sec_floor:.1%}  tol={cfg.rewrite_secondary_tolerance:.1%}")
+
+                # Track secondary best
+                if _sec_new_acc >= _sec_best[0]:
+                    _sec_best[0] = _sec_new_acc
+                    (output_dir / "cheatsheet_sec_best.txt").write_text(
+                        chosen_rw.cheatsheet, encoding="utf-8")
+                    print(f"[holistic] New secondary best: {_sec_new_acc:.1%}")
+
+                if (_sec_new_acc < _sec_floor and _rw_try < _rewrite_max_tries - 1):
+                    # Find items secondary model regressed on
+                    _sec_new_wrong_ids = {it["id"] for it in _sec_new_wrong}
+                    _sec_regressed = [
+                        it for it in loop_items
+                        if it["id"] in _sec_correct_ids_curr
+                        and it["id"] in _sec_new_wrong_ids
+                    ]
+                    for _it in _sec_regressed[:10]:
+                        if _it not in _rw_caution_cases:
+                            _rw_caution_cases.append(_it)
+                    _rw_failed_cs = chosen_rw.cheatsheet
+                    print(f"[holistic] Secondary gate FAILED "
+                          f"({_sec_new_acc:.1%} < floor {_sec_floor:.1%}) — "
+                          f"retrying with {len(_sec_regressed)} secondary regressed cases...")
+                    continue
+                elif _sec_new_acc < _sec_floor:
+                    print(f"[holistic] Secondary gate FAILED but no retries left — accepting anyway")
+
             break
 
         if _best_attempt is None:

@@ -16,7 +16,9 @@ from __future__ import annotations
 
 import json
 import re
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 
 from utils.llm_client import call_llm
 from utils.task_spec import TaskSpec
@@ -109,19 +111,20 @@ def _format_block_boundary(
 # ---------------------------------------------------------------------------
 
 _LABEL_PATTERN = re.compile(
-    r"(?:^|\n)(RULE|USE WHEN|DO NOT USE WHEN|CHECK)\s*:(.*?)(?=\n(?:RULE|USE WHEN|DO NOT USE WHEN|CHECK)\s*:|$)",
+    r"(?:^|\n)(RULE|USE WHEN|DO NOT USE WHEN|CHECK|MICRO-EXAMPLE|MICRO EXAMPLE)\s*:(.*?)"
+    r"(?=\n(?:RULE|USE WHEN|DO NOT USE WHEN|CHECK|MICRO-EXAMPLE|MICRO EXAMPLE)\s*:|$)",
     re.DOTALL | re.IGNORECASE,
 )
 
 
 def parse_rule_text(raw: str) -> dict | None:
     """
-    Parse structured RULE / USE WHEN / DO NOT USE WHEN / CHECK output.
+    Parse structured RULE / USE WHEN / DO NOT USE WHEN / CHECK / MICRO-EXAMPLE output.
     Returns None if RULE section is missing or empty.
     """
     sections: dict[str, str] = {}
     for m in _LABEL_PATTERN.finditer(raw):
-        key = m.group(1).upper().strip()
+        key = re.sub(r"\s+", " ", m.group(1).upper().strip())
         val = m.group(2).strip()
         sections[key] = val
 
@@ -134,7 +137,151 @@ def parse_rule_text(raw: str) -> dict | None:
         "use_when":         sections.get("USE WHEN", "").strip(),
         "do_not_use_when":  sections.get("DO NOT USE WHEN", "").strip(),
         "check":            sections.get("CHECK", "").strip(),
+        "micro_example":    sections.get("MICRO-EXAMPLE",
+                            sections.get("MICRO EXAMPLE", "")).strip(),
     }
+
+
+def load_manual_rules(path: str | Path, task: str | None = None) -> list[dict]:
+    """
+    Load manual SF-CR rules from JSON or the small YAML subset used by
+    experiments/manual_rules_sfcr.yaml.
+
+    The project intentionally avoids adding PyYAML as a runtime dependency.
+    Supported YAML shape:
+
+        rules:
+          - id: ...
+            task: ...
+            rule: "..."
+            use_when: "..."
+            do_not_use_when: "..."
+            check: "..."
+    """
+    path = Path(path)
+    text = path.read_text(encoding="utf-8")
+
+    if path.suffix.lower() == ".json":
+        data = json.loads(text)
+        raw_rules = data.get("rules", data if isinstance(data, list) else [])
+    else:
+        raw_rules = _parse_manual_rules_yaml_subset(text)
+
+    rules: list[dict] = []
+    for idx, entry in enumerate(raw_rules):
+        if task and entry.get("task") and entry.get("task") != task:
+            continue
+
+        def _tags(val) -> list[str]:
+            if not val:
+                return []
+            if isinstance(val, list):
+                return [str(t).strip() for t in val if str(t).strip()]
+            return [t.strip() for t in str(val).split(",") if t.strip()]
+
+        rule = {
+            "id":                  entry.get("id", f"manual_{idx}"),
+            "task":                entry.get("task", task or ""),
+            "rule":                entry.get("rule", "").strip(),
+            "use_when":            entry.get("use_when", "").strip(),
+            "do_not_use_when":     entry.get("do_not_use_when", "").strip(),
+            "check":               entry.get("check", "").strip(),
+            "micro_example":       entry.get("micro_example", "").strip(),
+            "positive_tags":       _tags(entry.get("positive_tags")),
+            "negative_tags":       _tags(entry.get("negative_tags")),
+            "source_of_candidate": "manual",
+        }
+        if rule["rule"]:
+            rules.append(rule)
+    return rules
+
+
+def _parse_manual_rules_yaml_subset(text: str) -> list[dict]:
+    """Minimal YAML parser that handles scalar fields AND YAML inline lists.
+
+    Supported list field syntax:
+        positive_tags: [joint_and, necessary_not_sufficient]
+        negative_tags:
+          - overdetermination
+          - preemption
+    """
+    rules: list[dict] = []
+    current: dict | None = None
+    current_key: str | None = None
+    in_list: bool = False
+    rule_indent: int | None = None  # indent of the first '- ' that starts a rule
+
+    _LIST_FIELD_KEYS = {"positive_tags", "negative_tags"}
+
+    def _clean(value: str) -> str:
+        value = value.strip()
+        if (value.startswith('"') and value.endswith('"')) or (
+            value.startswith("'") and value.endswith("'")
+        ):
+            return value[1:-1]
+        return value
+
+    def _parse_inline_list(value: str) -> list[str]:
+        value = value.strip().lstrip("[").rstrip("]")
+        return [_clean(t) for t in value.split(",") if _clean(t)]
+
+    for raw_line in text.splitlines():
+        if not raw_line.strip() or raw_line.lstrip().startswith("#"):
+            continue
+        stripped = raw_line.strip()
+        indent   = len(raw_line) - len(raw_line.lstrip())
+
+        if stripped in ("rules:", "rules: []"):
+            continue
+
+        # Detect rule-level list item: '- ' at the rule_indent level
+        if stripped.startswith("- "):
+            # First time we see a list item, record its indent as rule_indent
+            if rule_indent is None:
+                rule_indent = indent
+            if indent == rule_indent:
+                # New rule entry
+                if current:
+                    rules.append(current)
+                current = {}
+                current_key = None
+                in_list = False
+                stripped = stripped[2:].strip()
+                if not stripped:
+                    continue
+            elif in_list and current_key in _LIST_FIELD_KEYS:
+                # Sub-list item for a list field
+                item_val = _clean(stripped[2:].strip())
+                if item_val:
+                    if not isinstance(current.get(current_key), list):
+                        current[current_key] = []
+                    current[current_key].append(item_val)
+                continue
+
+        if current is None:
+            continue
+
+        if ":" in stripped and not stripped.startswith(("|", ">")):
+            key, value = stripped.split(":", 1)
+            current_key = key.strip()
+            value = value.strip()
+
+            if current_key in _LIST_FIELD_KEYS:
+                in_list = True
+                if value:  # inline list: positive_tags: [a, b]
+                    current[current_key] = _parse_inline_list(value)
+                    in_list = False
+                else:
+                    current[current_key] = []
+            else:
+                in_list = False
+                current[current_key] = _clean(value)
+        elif current_key and not in_list:
+            current[current_key] = (current.get(current_key, "") + "\n" + stripped).strip()
+
+    if current:
+        rules.append(current)
+    return rules
 
 
 def _normalise(text: str) -> str:
@@ -235,6 +382,8 @@ def generate_candidates(
     max_rule_chars: int = _MAX_RULE_CHARS,
     use_subtypes: bool = True,
     candidates_per_subtype: int = 3,
+    memory_format: str = "rule",
+    quick_validate_fn: Callable | None = None,
 ) -> list[dict]:
     """
     Generate up to `n_candidates` structured rule candidates from V_shared.
@@ -260,10 +409,13 @@ def generate_candidates(
     seen: set[str] = set()
     candidates: list[dict] = []
 
+    flat_prompt_tmpl   = RULE_GENERATION_PROMPT
+    subtype_prompt_tmpl = RULE_GENERATION_PROMPT_SUBTYPE
+
     if not use_subtypes:
         # ── Original flat-pool mode ────────────────────────────────────────
         v_shared_block = _format_block(V_shared, oracle_mode, model, api_key)
-        prompt = RULE_GENERATION_PROMPT.format(
+        prompt = flat_prompt_tmpl.format(
             anchor_cheatsheet=anchor_cheatsheet,
             v_shared_block=v_shared_block,
             v_private_block=private_block,
@@ -272,6 +424,7 @@ def generate_candidates(
             prompt, model, api_key, n_candidates, temperatures,
             max_rule_chars, seen,
             subtype_idx=0, subtype_items=None,
+            quick_validate_fn=quick_validate_fn,
         )
         return candidates
 
@@ -289,7 +442,7 @@ def generate_candidates(
         other_block   = _format_block(other_items, "label_only", model, api_key,
                                       max_items=_ITEM_DISPLAY_LIMIT // 2)
 
-        prompt = RULE_GENERATION_PROMPT_SUBTYPE.format(
+        prompt = subtype_prompt_tmpl.format(
             anchor_cheatsheet=anchor_cheatsheet,
             subtype_description=st_desc,
             v_subtype_block=subtype_block,
@@ -302,6 +455,7 @@ def generate_candidates(
             prompt, model, api_key, candidates_per_subtype, temperatures,
             max_rule_chars, seen,
             subtype_idx=st_idx, subtype_items=subtype_item_ids,
+            quick_validate_fn=quick_validate_fn,
         )
         candidates.extend(new_cands)
         print(f"[gen] subtype {st_idx+1}/{len(subtypes)} "
@@ -323,6 +477,7 @@ def _generate_from_prompt(
     seen: set[str],
     subtype_idx: int,
     subtype_items: list[str] | None,
+    quick_validate_fn: Callable | None = None,
 ) -> list[dict]:
     """Repeatedly call the LLM until n_target unique candidates are collected."""
     candidates: list[dict] = []
@@ -353,6 +508,11 @@ def _generate_from_prompt(
         parsed["temperature"]   = temp
         parsed["subtype_idx"]   = subtype_idx
         parsed["subtype_items"] = subtype_items
+
+        if quick_validate_fn is not None and not quick_validate_fn(parsed):
+            print(f"[gen] quick-validate: 0 fixed on subtype items — discarding, retrying")
+            continue
+
         candidates.append(parsed)
         print(
             f"[gen] candidate {len(candidates)}/{n_target}  "
@@ -423,8 +583,6 @@ def repair_candidate(
     prompt = RULE_REPAIR_PROMPT.format(
         rule=rule.get("rule", ""),
         use_when=rule.get("use_when", ""),
-        do_not_use_when=rule.get("do_not_use_when", ""),
-        check=rule.get("check", ""),
         reject_reason=reject_reason,
         mis_triggered_section=mis_triggered_section,
         no_gain_section=no_gain_section,
