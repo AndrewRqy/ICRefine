@@ -1,0 +1,47 @@
+[
+  {
+    "candidate_id": "cj_norm_violation_v1",
+    "source_of_candidate": "manual",
+    "generator_model": "",
+    "mean_rule_length": 108,
+    "mean_use_when_length": 124,
+    "mean_do_not_use_when_length": 105,
+    "activation_precision": 0.2,
+    "activated_shared_count": 2,
+    "private_activation_count": 0,
+    "easy_activation_count": 5,
+    "fixed_shared_count": 0,
+    "reg_easy_count": 0,
+    "reg_private_count": 0
+  },
+  {
+    "candidate_id": "cj_preemption_v1",
+    "source_of_candidate": "manual",
+    "generator_model": "",
+    "mean_rule_length": 126,
+    "mean_use_when_length": 130,
+    "mean_do_not_use_when_length": 119,
+    "activation_precision": 0.2,
+    "activated_shared_count": 1,
+    "private_activation_count": 0,
+    "easy_activation_count": 2,
+    "fixed_shared_count": 0,
+    "reg_easy_count": 0,
+    "reg_private_count": 0
+  },
+  {
+    "candidate_id": "cj_joint_and_v2",
+    "source_of_candidate": "manual",
+    "generator_model": "",
+    "mean_rule_length": 126,
+    "mean_use_when_length": 102,
+    "mean_do_not_use_when_length": 160,
+    "activation_precision": 0.4375,
+    "activated_shared_count": 7,
+    "private_activation_count": 1,
+    "easy_activation_count": 6,
+    "fixed_shared_count": 1,
+    "reg_easy_count": 0,
+    "reg_private_count": 1
+  }
+]

@@ -1,0 +1,210 @@
+[
+  {
+    "rule_id": "b500c42d",
+    "rule": "When multiple sufficient conditions exist, typical causation judgments depend on whether the questioned cause is perceiv",
+    "accepted": false,
+    "u_lcb": -1.702391,
+    "reject_reason": "U_LCB=-1.7024 \u2264 0",
+    "private_activation_rate": 0.5,
+    "reg_easy_worst": 0.2576,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0162,
+        "reg_private": 0.6576,
+        "reg_easy": 0.1759
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0179,
+        "reg_private": 0.6576,
+        "reg_easy": 0.2576
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0127,
+        "reg_private": 0.6576,
+        "reg_easy": 0.1759
+      }
+    }
+  },
+  {
+    "rule_id": "c1a54c73",
+    "rule": "When multiple sufficient conditions exist, typical causation judgments focus on whether the questioned action actively c",
+    "accepted": false,
+    "u_lcb": -1.719073,
+    "reject_reason": "U_LCB=-1.7191 \u2264 0",
+    "private_activation_rate": 0.0,
+    "reg_easy_worst": 0.2576,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0162,
+        "reg_private": 0.6576,
+        "reg_easy": 0.1759
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0,
+        "reg_private": 0.6576,
+        "reg_easy": 0.2576
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0127,
+        "reg_private": 0.6576,
+        "reg_easy": 0.1759
+      }
+    }
+  },
+  {
+    "rule_id": "13400852",
+    "rule": "When multiple sufficient conditions exist, typical causation judgments depend on whether the questioned action was neces",
+    "accepted": false,
+    "u_lcb": -1.806828,
+    "reject_reason": "U_LCB=-1.8068 \u2264 0",
+    "private_activation_rate": 0.0,
+    "reg_easy_worst": 0.328,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0162,
+        "reg_private": 0.6576,
+        "reg_easy": 0.1759
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0179,
+        "reg_private": 0.6576,
+        "reg_easy": 0.328
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0127,
+        "reg_private": 0.6576,
+        "reg_easy": 0.1759
+      }
+    }
+  },
+  {
+    "rule_id": "d58f5ae0",
+    "rule": "When multiple sufficient conditions exist, typical causation judgments depend on whether the questioned action is percei",
+    "accepted": false,
+    "u_lcb": -1.807178,
+    "reject_reason": "U_LCB=-1.8072 \u2264 0",
+    "private_activation_rate": 0.0,
+    "reg_easy_worst": 0.328,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0162,
+        "reg_private": 0.6576,
+        "reg_easy": 0.2576
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0179,
+        "reg_private": 0.6576,
+        "reg_easy": 0.328
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.1172,
+        "reg_private": 0.6576,
+        "reg_easy": 0.2576
+      }
+    }
+  },
+  {
+    "rule_id": "bcc3b2ed",
+    "rule": "When multiple sufficient conditions exist, typical causation judgments focus on whether the questioned action actively c",
+    "accepted": false,
+    "u_lcb": -1.82046,
+    "reject_reason": "U_LCB=-1.8205 \u2264 0",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.328,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0162,
+        "reg_private": 0.6576,
+        "reg_easy": 0.1759
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0,
+        "reg_private": 0.6576,
+        "reg_easy": 0.328
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.1172,
+        "reg_private": 0.6576,
+        "reg_easy": 0.2576
+      }
+    }
+  },
+  {
+    "rule_id": "613eb179",
+    "rule": "When multiple sufficient conditions exist, typical causation judgments focus on whether the questioned action actively c",
+    "accepted": false,
+    "u_lcb": -1.82401,
+    "reject_reason": "U_LCB=-1.8240 \u2264 0",
+    "private_activation_rate": 0.0,
+    "reg_easy_worst": 0.328,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0162,
+        "reg_private": 0.6576,
+        "reg_easy": 0.2576
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0,
+        "reg_private": 0.6576,
+        "reg_easy": 0.328
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0127,
+        "reg_private": 0.6576,
+        "reg_easy": 0.2576
+      }
+    }
+  },
+  {
+    "rule_id": "2c179057",
+    "rule": "When multiple sufficient conditions exist, if the outcome depends on at least one condition being present and no other c",
+    "accepted": false,
+    "u_lcb": -1.911362,
+    "reject_reason": "U_LCB=-1.9114 \u2264 0",
+    "private_activation_rate": 0.5,
+    "reg_easy_worst": 0.3922,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0162,
+        "reg_private": 0.6576,
+        "reg_easy": 0.2576
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0567,
+        "reg_private": 0.6576,
+        "reg_easy": 0.3922
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0401,
+        "reg_private": 0.6576,
+        "reg_easy": 0.2576
+      }
+    }
+  },
+  {
+    "rule_id": "9962d4a8",
+    "rule": "When multiple conditions or actions together produce an outcome, attribute cause only to those actions or inactions that",
+    "accepted": false,
+    "u_lcb": -2.21436,
+    "reject_reason": "U_LCB=-2.2144 \u2264 0",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.2576,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0,
+        "reg_private": 0.6576,
+        "reg_easy": 0.2576
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0179,
+        "reg_private": 0.9055,
+        "reg_easy": 0.1759
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0127,
+        "reg_private": 0.6576,
+        "reg_easy": 0.2576
+      }
+    }
+  }
+]

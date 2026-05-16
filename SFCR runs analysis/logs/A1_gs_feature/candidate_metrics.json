@@ -1,0 +1,32 @@
+[
+  {
+    "candidate_id": "gs_arc_circle_v1",
+    "source_of_candidate": "manual",
+    "generator_model": "",
+    "mean_rule_length": 165,
+    "mean_use_when_length": 47,
+    "mean_do_not_use_when_length": 69,
+    "activation_precision": 0.0,
+    "activated_shared_count": 0,
+    "private_activation_count": 0,
+    "easy_activation_count": 0,
+    "fixed_shared_count": 0,
+    "reg_easy_count": 0,
+    "reg_private_count": 0
+  },
+  {
+    "candidate_id": "gs_quadrilateral_v2",
+    "source_of_candidate": "manual",
+    "generator_model": "",
+    "mean_rule_length": 211,
+    "mean_use_when_length": 127,
+    "mean_do_not_use_when_length": 110,
+    "activation_precision": 0.0,
+    "activated_shared_count": 0,
+    "private_activation_count": 0,
+    "easy_activation_count": 0,
+    "fixed_shared_count": 0,
+    "reg_easy_count": 0,
+    "reg_private_count": 0
+  }
+]

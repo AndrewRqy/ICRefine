@@ -59,6 +59,16 @@ def _format_item(item: dict, oracle_mode: str, model: str, api_key: str) -> str:
         return f"Question: {text}\nAnswer: {answer}\nKey insight: {summary}"
     if oracle_mode == "full_cot" and reason:
         return f"Question: {text}\nAnswer: {answer}\nReasoning: {reason}"
+    if oracle_mode == "contrastive":
+        wrong_ans = item.get("predicted", "?")
+        parts = [
+            f"Question: {text}",
+            f"Model output: {wrong_ans}",
+            f"Correct answer: {answer}",
+        ]
+        if reason:
+            parts.append(f"Correct reasoning: {reason}")
+        return "\n".join(parts)
     return f"Question: {text}\nAnswer: {answer}"
 
 

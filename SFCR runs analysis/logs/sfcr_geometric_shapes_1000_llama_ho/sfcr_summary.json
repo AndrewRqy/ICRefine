@@ -1,0 +1,24 @@
+{
+  "task": "geometric_shapes",
+  "seed": 1000,
+  "oracle_mode": "label_only",
+  "routing_mode": "routed",
+  "model_source": "openai/gpt-4.1-mini",
+  "models_proxy": "openai/gpt-4.1,google/gemini-2.0-flash-001,meta-llama/llama-3.3-70b-instruct",
+  "held_out_target": "llama",
+  "skipped": false,
+  "skip_reason": null,
+  "source_accuracy": 0.92,
+  "v_shared_size": 5,
+  "v_private_size": 1,
+  "v_easy_size": 61,
+  "jaccard_matrix": {
+    "gpt-4.1-mini\u2194gpt-4.1": 0.7143,
+    "gpt-4.1-mini\u2194gemini-2.0-flash-001": 0.375,
+    "gpt-4.1-mini\u2194llama-3.3-70b-instruct": 0.2727
+  },
+  "n_accepted": 0,
+  "accepted_rules": [],
+  "n_candidates": 8,
+  "n_rejected": 8
+}

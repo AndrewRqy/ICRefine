@@ -1,0 +1,289 @@
+[
+  {
+    "rule_id": "256b4d62",
+    "rule": "Norm violations are typically judged as causes even when a background enabling condition was also necessary.",
+    "subtype_idx": null,
+    "repaired": false,
+    "accepted": false,
+    "candidate_status": "unsafe_private",
+    "u_lcb": -0.209289,
+    "reject_reason": "count-gate: fixed_shared_count=0 < 1; count-gate: private_activation_count=1 > 0",
+    "reject_reasons": [
+      "count-gate: fixed_shared_count=0 < 1",
+      "count-gate: private_activation_count=1 > 0"
+    ],
+    "count_gate_used": true,
+    "validation_routing_mode": "routed",
+    "gate_mode": "count_aware",
+    "source_of_candidate": "manual",
+    "generator_model": "",
+    "benefit_models": [
+      "openai/gpt-4.1"
+    ],
+    "safety_models": [
+      "openai/gpt-4.1",
+      "google/gemini-2.0-flash-001"
+    ],
+    "activation_debug": {
+      "use_when_terms": [],
+      "do_not_use_when_terms": [],
+      "use_when_phrases": [],
+      "do_not_use_when_phrases": [],
+      "matched_terms_per_item": {},
+      "vetoed_by_boundary_count": 24
+    },
+    "private_activation_rate": 0.3333,
+    "reg_easy_worst": 0.2039,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.2039,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 1,
+        "easy_activation_count": 4,
+        "activated_shared_count": 1,
+        "n_shared_before_subtype_filter": 12,
+        "n_shared_after_subtype_filter": 12,
+        "subtype_filter_mode": "none",
+        "activation_count": 10,
+        "n_shared": 12,
+        "n_private": 3,
+        "n_easy": 15
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.2039,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 1,
+        "easy_activation_count": 4,
+        "activated_shared_count": 0,
+        "n_shared_before_subtype_filter": 10,
+        "n_shared_after_subtype_filter": 10,
+        "subtype_filter_mode": "none",
+        "activation_count": 10,
+        "n_shared": 10,
+        "n_private": 3,
+        "n_easy": 15
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.2039,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 1,
+        "easy_activation_count": 4,
+        "activated_shared_count": 2,
+        "n_shared_before_subtype_filter": 13,
+        "n_shared_after_subtype_filter": 13,
+        "subtype_filter_mode": "none",
+        "activation_count": 10,
+        "n_shared": 13,
+        "n_private": 3,
+        "n_easy": 15
+      }
+    }
+  },
+  {
+    "rule_id": "113fd61a",
+    "rule": "When event A prevents event B from completing its causal chain, A is the cause even if B would have produced the same ou",
+    "subtype_idx": null,
+    "repaired": false,
+    "accepted": false,
+    "candidate_status": "unsafe_private",
+    "u_lcb": -0.210189,
+    "reject_reason": "count-gate: fixed_shared_count=0 < 1; count-gate: private_activation_count=1 > 0",
+    "reject_reasons": [
+      "count-gate: fixed_shared_count=0 < 1",
+      "count-gate: private_activation_count=1 > 0"
+    ],
+    "count_gate_used": true,
+    "validation_routing_mode": "routed",
+    "gate_mode": "count_aware",
+    "source_of_candidate": "manual",
+    "generator_model": "",
+    "benefit_models": [
+      "openai/gpt-4.1",
+      "google/gemini-2.0-flash-001"
+    ],
+    "safety_models": [
+      "openai/gpt-4.1",
+      "google/gemini-2.0-flash-001"
+    ],
+    "activation_debug": {
+      "use_when_terms": [],
+      "do_not_use_when_terms": [],
+      "use_when_phrases": [],
+      "do_not_use_when_phrases": [],
+      "matched_terms_per_item": {},
+      "vetoed_by_boundary_count": 23
+    },
+    "private_activation_rate": 0.3333,
+    "reg_easy_worst": 0.2039,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.2039,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 1,
+        "easy_activation_count": 1,
+        "activated_shared_count": 0,
+        "n_shared_before_subtype_filter": 12,
+        "n_shared_after_subtype_filter": 12,
+        "subtype_filter_mode": "none",
+        "activation_count": 5,
+        "n_shared": 12,
+        "n_private": 3,
+        "n_easy": 15
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.2039,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 1,
+        "easy_activation_count": 1,
+        "activated_shared_count": 0,
+        "n_shared_before_subtype_filter": 10,
+        "n_shared_after_subtype_filter": 10,
+        "subtype_filter_mode": "none",
+        "activation_count": 5,
+        "n_shared": 10,
+        "n_private": 3,
+        "n_easy": 15
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.2039,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 1,
+        "easy_activation_count": 1,
+        "activated_shared_count": 1,
+        "n_shared_before_subtype_filter": 13,
+        "n_shared_after_subtype_filter": 13,
+        "subtype_filter_mode": "none",
+        "activation_count": 5,
+        "n_shared": 13,
+        "n_private": 3,
+        "n_easy": 15
+      }
+    }
+  },
+  {
+    "rule_id": "fae67958",
+    "rule": "When the outcome requires two actions jointly, do not label either single action as the cause merely because it was nece",
+    "subtype_idx": null,
+    "repaired": false,
+    "accepted": false,
+    "candidate_status": "unsafe_private",
+    "u_lcb": -0.543523,
+    "reject_reason": "count-gate: reg_private_count=1 > 0; count-gate: private_activation_count=2 > 0",
+    "reject_reasons": [
+      "count-gate: reg_private_count=1 > 0",
+      "count-gate: private_activation_count=2 > 0"
+    ],
+    "count_gate_used": true,
+    "validation_routing_mode": "routed",
+    "gate_mode": "count_aware",
+    "source_of_candidate": "manual",
+    "generator_model": "",
+    "benefit_models": [
+      "openai/gpt-4.1",
+      "google/gemini-2.0-flash-001"
+    ],
+    "safety_models": [
+      "openai/gpt-4.1",
+      "google/gemini-2.0-flash-001"
+    ],
+    "activation_debug": {
+      "use_when_terms": [],
+      "do_not_use_when_terms": [],
+      "use_when_phrases": [],
+      "do_not_use_when_phrases": [],
+      "matched_terms_per_item": {},
+      "vetoed_by_boundary_count": 8
+    },
+    "private_activation_rate": 0.6667,
+    "reg_easy_worst": 0.2039,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.047,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.2039,
+        "fixed_shared_count": 2,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 2,
+        "easy_activation_count": 5,
+        "activated_shared_count": 7,
+        "n_shared_before_subtype_filter": 12,
+        "n_shared_after_subtype_filter": 12,
+        "subtype_filter_mode": "none",
+        "activation_count": 16,
+        "n_shared": 12,
+        "n_private": 3,
+        "n_easy": 15
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.3333,
+        "reg_easy": 0.2039,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 1,
+        "private_activation_count": 2,
+        "easy_activation_count": 5,
+        "activated_shared_count": 6,
+        "n_shared_before_subtype_filter": 10,
+        "n_shared_after_subtype_filter": 10,
+        "subtype_filter_mode": "none",
+        "activation_count": 16,
+        "n_shared": 10,
+        "n_private": 3,
+        "n_easy": 15
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0433,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.2039,
+        "fixed_shared_count": 2,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 2,
+        "easy_activation_count": 5,
+        "activated_shared_count": 7,
+        "n_shared_before_subtype_filter": 13,
+        "n_shared_after_subtype_filter": 13,
+        "subtype_filter_mode": "none",
+        "activation_count": 16,
+        "n_shared": 13,
+        "n_private": 3,
+        "n_easy": 15
+      }
+    }
+  }
+]

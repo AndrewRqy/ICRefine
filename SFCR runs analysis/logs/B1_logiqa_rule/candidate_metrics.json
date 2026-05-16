@@ -1,0 +1,32 @@
+[
+  {
+    "candidate_id": "logiqa_conditional_v1",
+    "source_of_candidate": "manual",
+    "generator_model": "",
+    "mean_rule_length": 139,
+    "mean_use_when_length": 114,
+    "mean_do_not_use_when_length": 106,
+    "activation_precision": 0.625,
+    "activated_shared_count": 5,
+    "private_activation_count": 0,
+    "easy_activation_count": 2,
+    "fixed_shared_count": 0,
+    "reg_easy_count": 0,
+    "reg_private_count": 0
+  },
+  {
+    "candidate_id": "logiqa_comparative_v2",
+    "source_of_candidate": "manual",
+    "generator_model": "",
+    "mean_rule_length": 159,
+    "mean_use_when_length": 123,
+    "mean_do_not_use_when_length": 130,
+    "activation_precision": 0.39285714285714285,
+    "activated_shared_count": 11,
+    "private_activation_count": 2,
+    "easy_activation_count": 11,
+    "fixed_shared_count": 1,
+    "reg_easy_count": 0,
+    "reg_private_count": 1
+  }
+]

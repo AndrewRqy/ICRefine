@@ -627,6 +627,7 @@ def _validate_one_v2(
     router_type: str = "keyword",
     task: str = "",
     gate_profile: str = "auto",
+    semantic_label_to_gate_ids: dict[str, set[str]] | None = None,
 ) -> ValidationResult:
     """Validate one candidate with explicit global or routed exposure."""
     if len(rule["rule"]) > max_rule_chars:
@@ -639,8 +640,8 @@ def _validate_one_v2(
             reject_reasons=[f"rule too long ({len(rule['rule'])} > {max_rule_chars} chars)"],
         )
 
-    if validation_routing_mode not in {"global", "routed"}:
-        raise ValueError("validation_routing_mode must be 'global' or 'routed'")
+    if validation_routing_mode not in {"global", "routed", "subtype"}:
+        raise ValueError("validation_routing_mode must be 'global', 'routed', or 'subtype'")
     if gate_mode not in {"ulcb", "count_aware", "hybrid"}:
         raise ValueError("gate_mode must be 'ulcb', 'count_aware', or 'hybrid'")
     if subtype_filter_mode not in {"none", "id_intersection"}:
@@ -671,7 +672,22 @@ def _validate_one_v2(
             for it in gate_items
         }
     routed_active_ids = {iid for iid, detail in route_details.items() if detail.active}
-    exposed_ids = all_gate_ids if validation_routing_mode == "global" else routed_active_ids
+    if validation_routing_mode == "global":
+        exposed_ids = all_gate_ids
+    elif validation_routing_mode == "subtype":
+        F_s = gate_region_ids["F_s"]
+        subtype_labels = set(rule.get("subtype_labels") or [])
+        if subtype_labels and semantic_label_to_gate_ids:
+            subtype_gate_ids: set[str] = set()
+            for label in subtype_labels:
+                subtype_gate_ids |= semantic_label_to_gate_ids.get(label, set())
+            exposed_ids = subtype_gate_ids & F_s
+            if not exposed_ids:
+                exposed_ids = F_s  # fallback: all source failures
+        else:
+            exposed_ids = F_s  # fallback
+    else:  # routed
+        exposed_ids = routed_active_ids
     exposed_items = [it for it in gate_items if it["_sfcr_id"] in exposed_ids]
     first_detail = next(iter(route_details.values()), None)
     activation_debug = {
@@ -852,7 +868,7 @@ def _validate_one_v2(
         count_reasons.append("count-gate: no benefit model with shared failures")
     if max_reg_private_count > 0:
         count_reasons.append(f"count-gate: reg_private_count={max_reg_private_count} > 0")
-    if max_private_activation_count > 0:
+    if validation_routing_mode == "routed" and max_private_activation_count > 0:
         count_reasons.append(
             f"count-gate: private_activation_count={max_private_activation_count} > 0"
         )
@@ -870,7 +886,7 @@ def _validate_one_v2(
     ulcb_reasons: list[str] = []
     if u_lcb <= 0:
         ulcb_reasons.append(f"U_LCB={u_lcb:.4f} <= 0")
-    if private_act_rate > private_activation_ceiling:
+    if validation_routing_mode == "routed" and private_act_rate > private_activation_ceiling:
         ulcb_reasons.append(
             f"private_activation_rate={private_act_rate:.2%} "
             f"> {private_activation_ceiling:.0%}"
@@ -1020,6 +1036,7 @@ def validate_candidates(
     router_type: str = "keyword",
     task: str = "",
     gate_profile: str = "auto",
+    semantic_label_to_gate_ids: dict[str, set[str]] | None = None,
 ) -> list[ValidationResult]:
     """
     Validate all candidates and return results sorted by U_LCB descending.
@@ -1080,6 +1097,7 @@ def validate_candidates(
         router_type=router_type,
         task=task,
         gate_profile=gate_profile,
+        semantic_label_to_gate_ids=semantic_label_to_gate_ids,
     )
 
     results: list[ValidationResult] = []
@@ -1286,6 +1304,7 @@ def validate_candidates_multiseed(
                 router_min_matches=router_min_matches,
                 router_min_veto_matches=router_min_veto_matches,
                 allow_empty_use_when_global=allow_empty_use_when_global,
+                semantic_label_to_gate_ids=None,
             )
 
         seed_results = [_validate_on_seed(s) for s in range(n_seeds)]

@@ -1,0 +1,210 @@
+[
+  {
+    "rule_id": "0d6a49b2",
+    "rule": "When a closed quadrilateral has all four sides equal or nearly equal but does not have right angles or axis-aligned edge",
+    "accepted": false,
+    "u_lcb": -0.144717,
+    "reject_reason": "U_LCB=-0.1447 \u2264 0",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.1288,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.2307,
+        "reg_private": 0.0,
+        "reg_easy": 0.0876
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.3006,
+        "reg_private": 0.5,
+        "reg_easy": 0.165
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.1288
+      }
+    }
+  },
+  {
+    "rule_id": "4bbe135c",
+    "rule": "When a closed quadrilateral has all four sides equal or nearly equal but does not have all right angles, classify it as ",
+    "accepted": false,
+    "u_lcb": -0.144767,
+    "reject_reason": "U_LCB=-0.1448 \u2264 0",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.1288,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.1176,
+        "reg_private": 0.0,
+        "reg_easy": 0.0876
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.3006,
+        "reg_private": 0.5,
+        "reg_easy": 0.165
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.1288
+      }
+    }
+  },
+  {
+    "rule_id": "ff579288",
+    "rule": "When a closed four-sided shape has two pairs of opposite sides equal in length and parallel but does not have all right ",
+    "accepted": false,
+    "u_lcb": -0.173992,
+    "reject_reason": "U_LCB=-0.1740 \u2264 0",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.165,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.0876
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.15,
+        "reg_private": 0.5,
+        "reg_easy": 0.1986
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.165
+      }
+    }
+  },
+  {
+    "rule_id": "6ad1b314",
+    "rule": "When a closed quadrilateral has all four sides equal or nearly equal but does not have all right angles, classify it as ",
+    "accepted": false,
+    "u_lcb": -0.182242,
+    "reject_reason": "U_LCB=-0.1822 \u2264 0",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.165,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.1176,
+        "reg_private": 0.0,
+        "reg_easy": 0.0876
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.3006,
+        "reg_private": 0.0,
+        "reg_easy": 0.2305
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.165
+      }
+    }
+  },
+  {
+    "rule_id": "e3faf45f",
+    "rule": "When a closed path uses two elliptical arc commands with equal radii and zero rotation that form a full closed curve, cl",
+    "accepted": false,
+    "u_lcb": -0.186292,
+    "reject_reason": "U_LCB=-0.1863 \u2264 0",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.165,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.2307,
+        "reg_private": 0.0,
+        "reg_easy": 0.0876
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.3006,
+        "reg_private": 0.5,
+        "reg_easy": 0.165
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.165
+      }
+    }
+  },
+  {
+    "rule_id": "343d43da",
+    "rule": "When a closed polygon has four sides and all angles are right but the shape is not perfectly axis-aligned, or when a clo",
+    "accepted": false,
+    "u_lcb": -0.223345,
+    "reject_reason": "U_LCB=-0.2233 \u2264 0",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.1986,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0362,
+        "reg_private": 0.0,
+        "reg_easy": 0.0876
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0456,
+        "reg_private": 0.5,
+        "reg_easy": 0.2305
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.1986
+      }
+    }
+  },
+  {
+    "rule_id": "6cd93774",
+    "rule": "When a closed polygon has four sides and all angles are right but the answer choices include both \"rectangle\" and \"trape",
+    "accepted": false,
+    "u_lcb": -0.600531,
+    "reject_reason": "U_LCB=-0.6005 \u2264 0",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.1288,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.3755,
+        "reg_private": 0.0,
+        "reg_easy": 0.1288
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.5101,
+        "reg_private": 0.5,
+        "reg_easy": 0.2305
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0456,
+        "reg_private": 0.5,
+        "reg_easy": 0.1288
+      }
+    }
+  },
+  {
+    "rule_id": "8e533a83",
+    "rule": "When a closed polygon has four sides and all angles are right but the shape is not axis-aligned, or when the shape is cl",
+    "accepted": false,
+    "u_lcb": -0.684492,
+    "reject_reason": "U_LCB=-0.6845 \u2264 0",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.165,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.2307,
+        "reg_private": 0.5,
+        "reg_easy": 0.1288
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.15,
+        "reg_private": 0.5,
+        "reg_easy": 0.2907
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "reg_private": 0.5,
+        "reg_easy": 0.165
+      }
+    }
+  }
+]

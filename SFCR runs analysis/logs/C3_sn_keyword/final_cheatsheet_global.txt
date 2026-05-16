@@ -1,0 +1,92 @@
+Certainly! Here’s a **cheat sheet** focused on the most challenging aspects of identifying sarcasm in statements, based on the examples above. This is designed to help you quickly and accurately spot sarcasm during your test.
+
+---
+
+## Sarcasm Identification Cheat Sheet
+
+### 1. **Contradiction Between Statement and Reality**
+- If a statement describes something as positive when it is obviously negative (or vice versa), it is likely sarcastic.
+  - *Example*: "A wave of hypothermia and drownings will be a great way to start the year."
+- If the praise or criticism does not match the described situation, suspect sarcasm.
+
+### 2. **Exaggeration or Absurdity**
+- Sarcasm often uses exaggeration to highlight the absurdity of a situation.
+  - *Example*: "We should start a petition to ban breathing."
+- If a suggestion or description is so extreme it cannot be taken literally, it is probably sarcastic.
+
+### 3. **Irony: Saying the Opposite of What is Meant**
+- If the literal meaning is the opposite of what would be expected or reasonable, it’s likely sarcastic.
+  - *Example*: "Calling a whole electorate 'morons' is a great way to win them over."
+- Look for statements that invert common sense or social norms.
+
+### 4. **Mocking or Trivializing Serious Issues**
+- Sarcasm can trivialize complex or serious issues by offering an oversimplified or dismissive solution.
+  - *Example*: "Have you tried not being poor? It is much easier."
+- If a statement makes a serious problem sound easy to solve, it’s probably sarcastic.
+
+### 5. **Rhetorical Questions with Obvious Answers**
+- Sarcastic statements often use rhetorical questions where the answer is obvious and the question is meant to mock.
+  - *Example*: "How could Government control of the internet be bad?"
+
+### 6. **Mismatch Between Cause and Effect**
+- If the cause and effect in a statement don’t logically connect, it’s likely sarcastic.
+  - *Example*: "He's over six feet, so he must be wonderful."
+- Watch for statements that attribute unrelated positive or negative qualities.
+
+### 7. **Praising Negative Behavior or Outcomes**
+- If someone is praised for something that is clearly bad, it’s sarcasm.
+  - *Example*: "He's such great relationship material when he's drunk."
+- Similarly, if negative outcomes are described as "great," "fun," or "the best," it’s sarcasm.
+
+### 8. **Obvious Falsehoods or Impossible Scenarios**
+- If a statement describes something that is obviously false or impossible, it’s likely sarcastic.
+  - *Example*: "Impossible, as there's no one on the internet."
+- If the statement is factually absurd, suspect sarcasm.
+
+### 9. **Use of "Of Course," "Obviously," "Clearly," etc.**
+- These words can signal sarcasm when used to introduce an obviously false or exaggerated claim.
+  - *Example*: "Of course there's no security cameras in the White House in the game, they said it's just like real life!"
+
+### 10. **Contextual Clues**
+- Consider the context: If the first part of a statement describes something negative, but the conclusion is positive (or vice versa), it’s likely sarcastic.
+  - *Example*: "Every package I get from Amazon is late and busted up. So happy I pay for free shipping with Prime."
+
+---
+
+### **Quick Steps for the Test**
+1. **Check for Contradiction:** Does the statement contradict reality or common sense?
+2. **Look for Exaggeration:** Is the statement absurd or extreme?
+3. **Assess Tone:** Is the praise or criticism mismatched with the context?
+4. **Spot Rhetorical Questions:** Is the question mocking or has an obvious answer?
+5. **Evaluate Cause and Effect:** Are unrelated things being linked?
+6. **Watch for Mocking Solutions:** Is a complex issue being trivialized?
+7. **Notice Impossible Claims:** Is the statement factually impossible?
+8. **Check for Sarcastic Markers:** Words like "of course," "obviously," "clearly," etc.
+
+---
+
+**Remember:**  
+- Sarcasm often says the opposite of what is meant, especially to mock, criticize, or highlight absurdity.
+- If a statement makes you think, "No one would sincerely say that," it’s probably sarcastic.
+
+---
+
+**Use this cheat sheet to quickly analyze options and pick the sarcastic statement!**
+
+Follow the format of the examples below in your response.
+
+Question: Which statement is sarcastic?
+Options:
+(A) Armed revolutionaries have not been making a lot of change for middle class Americans lately
+(B) Armed revolutionaries have been making a lot of change for middle class Americans lately
+Reasoning: Let's think step by step.  
+We need to identify which statement is sarcastic. Option (A) says "Armed revolutionaries have not been making a lot of change for middle class Americans lately," which is a straightforward, factual statement suggesting that armed revolutionaries have not impacted the middle class. Option (B) says "Armed revolutionaries have been making a lot of change for middle class Americans lately," which is likely sarcastic because, in reality, armed revolutionaries are not known for positively impacting the middle class in recent times. The statement exaggerates or inverts reality, which is a hallmark of sarcasm. So the answer is (B).
+Answer: (B)
+###
+Question: Which statement is sarcastic?
+Options:
+(A) When you're at halfcourt and have a wide open pass, the obvious choice is to pass
+(B) When you're at halfcourt and have a wide open pass, the obvious choice is to shoot
+Reasoning: Let's think step by step.  
+We need to identify which statement is sarcastic. Option (A) says "the obvious choice is to pass" when you have a wide open pass at halfcourt, which is a logical and sincere suggestion. Option (B) says "the obvious choice is to shoot" in the same situation, which contradicts the context because shooting from halfcourt when you have an easy pass is not the obvious or sensible choice. This contradiction is a hallmark of sarcasm. So the answer is (B).
+Answer: (B)

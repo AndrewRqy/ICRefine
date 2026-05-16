@@ -101,13 +101,13 @@ def _parse_args() -> argparse.Namespace:
     ap.add_argument("--held-out-target",    default="",
                     help="Family substring to exclude from U_LCB acceptance (leave-one-out)")
     ap.add_argument("--oracle-mode",        default="label_only",
-                    choices=["none", "label_only", "compressed", "full_cot"],
+                    choices=["none", "label_only", "compressed", "full_cot", "contrastive"],
                     help="Information provided to the rule generator")
     ap.add_argument("--routing-mode",       default="routed",
                     choices=["global", "routed"],
                     help="How accepted rules are applied at inference")
     ap.add_argument("--validation-routing-mode", default="routed",
-                    choices=["global", "routed", "both"],
+                    choices=["global", "routed", "subtype", "both"],
                     help="How candidate rules are validated; 'both' writes side-by-side metrics.")
     ap.add_argument("--gate-mode",          default="hybrid",
                     choices=["ulcb", "count_aware", "hybrid"],
@@ -311,6 +311,26 @@ def main() -> None:
             c.setdefault("source_of_candidate", "generator")
             c.setdefault("generator_model", gen_model)
 
+    # Build sfcr_id → semantic_label for rule_gen items
+    _sfcr_id_to_label = {
+        it["_sfcr_id"]: it.get("semantic_label", "")
+        for it in splits.rule_gen
+        if it.get("semantic_label")
+    }
+    # Annotate candidates with their subtype's semantic labels
+    for c in candidates:
+        ids = c.get("subtype_items") or []
+        labels = {_sfcr_id_to_label[sid] for sid in ids if sid in _sfcr_id_to_label}
+        labels.discard("")
+        c["subtype_labels"] = sorted(labels)
+
+    # Build semantic_label → gate item ids map (for subtype routing mode)
+    semantic_label_to_gate_ids: dict[str, set] = {}
+    for it in splits.gate:
+        label = it.get("semantic_label", "")
+        if label:
+            semantic_label_to_gate_ids.setdefault(label, set()).add(it["_sfcr_id"])
+
     if not candidates:
         print("[pipeline] No valid candidates generated — writing anchor unchanged.")
         for mode in ("global", "routed"):
@@ -379,6 +399,7 @@ def main() -> None:
             router_type=args.router_type,
             task=args.task,
             gate_profile=args.gate_profile,
+            semantic_label_to_gate_ids=semantic_label_to_gate_ids if mode == "subtype" else None,
         )
 
     if args.validation_routing_mode == "both":
@@ -393,9 +414,17 @@ def main() -> None:
         val_results = _run_validation(args.validation_routing_mode)
         comparison_rows = []
 
-    # ── 9. Collect accepted rules ─────────────────────────────────────────
-    accepted_rules = [r.rule for r in val_results if r.accepted]
-    print(f"\n[pipeline] Accepted {len(accepted_rules)} rule(s).")
+    # ── 9. Collect accepted rules (deduplicated) ──────────────────────────
+    accepted_val_results = _deduplicate_accepted_rules(
+        [r for r in val_results if r.accepted]
+    )
+    accepted_rules = [r.rule for r in accepted_val_results]
+    n_before_dedup = sum(1 for r in val_results if r.accepted)
+    if len(accepted_rules) < n_before_dedup:
+        print(f"\n[pipeline] Accepted {n_before_dedup} rule(s), "
+              f"deduplicated to {len(accepted_rules)}.")
+    else:
+        print(f"\n[pipeline] Accepted {len(accepted_rules)} rule(s).")
 
     # ── 10. Write outputs ─────────────────────────────────────────────────
     # accepted_rules.json
@@ -416,7 +445,7 @@ def main() -> None:
                     "safety_models":          r.safety_models,
                     "repaired":               r.rule.get("repaired", False),
                 }
-                for r in val_results if r.accepted
+                for r in accepted_val_results
             ],
             indent=2,
         ),
@@ -555,6 +584,32 @@ def main() -> None:
 # ---------------------------------------------------------------------------
 # Summary file
 # ---------------------------------------------------------------------------
+
+def _deduplicate_accepted_rules(accepted: list) -> list:
+    """Keep only the highest-U_LCB accepted candidate per subtype_idx.
+
+    Candidates without a subtype_idx are passed through unchanged.
+    Preserves the insertion order of the first occurrence of each subtype.
+    """
+    best_by_subtype: dict = {}
+    for r in accepted:
+        idx = r.rule.get("subtype_idx")
+        if idx is None:
+            continue
+        if idx not in best_by_subtype or r.u_lcb > best_by_subtype[idx].u_lcb:
+            best_by_subtype[idx] = r
+
+    seen: set = set()
+    survivors: list = []
+    for r in accepted:
+        idx = r.rule.get("subtype_idx")
+        if idx is None:
+            survivors.append(r)
+        elif idx not in seen and best_by_subtype.get(idx) is r:
+            survivors.append(r)
+            seen.add(idx)
+    return survivors
+
 
 def _write_global_routed_comparison(output_dir: Path, rows: list[dict]) -> None:
     (output_dir / "validation_global_vs_routed.json").write_text(

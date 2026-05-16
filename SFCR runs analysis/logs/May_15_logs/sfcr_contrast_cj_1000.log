@@ -1,0 +1,393 @@
+/Users/renqy/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+  [rule_gen] llama-3.3-70b-instruct 1/60
+  [rule_gen] gpt-4.1-mini 1/60
+  [rule_gen] gpt-4.1 1/60
+  [rule_gen] gpt-4.1 2/60
+  [rule_gen] gpt-4.1 3/60
+  [rule_gen] gpt-4.1-mini 2/60
+  [rule_gen] gpt-4.1-mini 3/60
+  [rule_gen] gpt-4.1 4/60
+  [rule_gen] gpt-4.1 5/60
+  [rule_gen] gpt-4.1 6/60
+  [rule_gen] gpt-4.1 7/60
+  [rule_gen] gpt-4.1-mini 4/60
+  [rule_gen] gpt-4.1-mini 5/60
+  [rule_gen] gpt-4.1-mini 6/60
+  [rule_gen] gpt-4.1-mini 7/60
+  [rule_gen] gpt-4.1-mini 8/60
+  [rule_gen] gpt-4.1-mini 9/60
+  [rule_gen] gpt-4.1 8/60
+  [rule_gen] gpt-4.1 9/60
+  [rule_gen] gpt-4.1-mini 10/60
+  [rule_gen] gpt-4.1 10/60
+  [rule_gen] gpt-4.1 11/60
+  [rule_gen] gpt-4.1 12/60
+  [rule_gen] gpt-4.1 13/60
+  [rule_gen] gpt-4.1-mini 11/60
+  [rule_gen] gpt-4.1 14/60
+  [rule_gen] gpt-4.1 15/60
+  [rule_gen] gpt-4.1 16/60
+  [rule_gen] gpt-4.1-mini 12/60
+  [rule_gen] gpt-4.1 17/60
+  [rule_gen] gpt-4.1 18/60
+  [rule_gen] gpt-4.1-mini 13/60
+  [rule_gen] gpt-4.1 19/60
+  [rule_gen] gpt-4.1 20/60
+  [rule_gen] gpt-4.1-mini 14/60
+  [rule_gen] gpt-4.1 21/60
+  [rule_gen] gpt-4.1 22/60
+  [rule_gen] gpt-4.1-mini 15/60
+  [rule_gen] gpt-4.1-mini 16/60
+  [rule_gen] gpt-4.1 23/60
+  [rule_gen] gpt-4.1 24/60
+  [rule_gen] gpt-4.1-mini 17/60
+  [rule_gen] gpt-4.1 25/60
+  [rule_gen] gpt-4.1 26/60
+  [rule_gen] gpt-4.1 27/60
+  [rule_gen] gpt-4.1-mini 18/60
+  [rule_gen] gpt-4.1 28/60
+  [rule_gen] gpt-4.1-mini 19/60
+  [rule_gen] gpt-4.1 29/60
+  [rule_gen] gpt-4.1-mini 20/60
+  [rule_gen] gpt-4.1-mini 21/60
+  [rule_gen] gpt-4.1-mini 22/60
+  [rule_gen] gpt-4.1 30/60
+  [rule_gen] gpt-4.1 31/60
+  [rule_gen] gpt-4.1 32/60
+  [rule_gen] gpt-4.1-mini 23/60
+  [rule_gen] gpt-4.1 33/60
+  [rule_gen] gpt-4.1 34/60
+  [rule_gen] gpt-4.1 35/60
+  [rule_gen] gpt-4.1 36/60
+  [rule_gen] gpt-4.1 37/60
+  [rule_gen] gpt-4.1 38/60
+  [rule_gen] gpt-4.1-mini 24/60
+  [rule_gen] gpt-4.1-mini 25/60
+  [rule_gen] gpt-4.1-mini 26/60
+  [rule_gen] gpt-4.1 39/60
+  [rule_gen] llama-3.3-70b-instruct 2/60
+  [rule_gen] gpt-4.1 40/60
+  [rule_gen] llama-3.3-70b-instruct 3/60
+  [rule_gen] llama-3.3-70b-instruct 4/60
+  [rule_gen] gpt-4.1 41/60
+  [rule_gen] gpt-4.1-mini 27/60
+  [rule_gen] gpt-4.1 42/60
+  [rule_gen] gpt-4.1-mini 28/60
+  [rule_gen] llama-3.3-70b-instruct 5/60
+  [rule_gen] gpt-4.1 43/60
+  [rule_gen] gpt-4.1-mini 29/60
+  [rule_gen] gpt-4.1 44/60
+  [rule_gen] gpt-4.1-mini 30/60
+  [rule_gen] gpt-4.1 45/60
+  [rule_gen] gpt-4.1-mini 31/60
+  [rule_gen] gpt-4.1-mini 32/60
+  [rule_gen] gpt-4.1-mini 33/60
+  [rule_gen] gpt-4.1 46/60
+  [rule_gen] gpt-4.1-mini 34/60
+  [rule_gen] gpt-4.1-mini 35/60
+  [rule_gen] gpt-4.1 47/60
+  [rule_gen] gpt-4.1 48/60
+  [rule_gen] gpt-4.1-mini 36/60
+  [rule_gen] gpt-4.1 49/60
+  [rule_gen] gpt-4.1-mini 37/60
+  [rule_gen] gpt-4.1 50/60
+  [rule_gen] gpt-4.1-mini 38/60
+  [rule_gen] gpt-4.1-mini 39/60
+  [rule_gen] gpt-4.1 51/60
+  [rule_gen] gpt-4.1 52/60
+  [rule_gen] gpt-4.1 53/60
+  [rule_gen] gpt-4.1 54/60
+  [rule_gen] gpt-4.1 55/60
+  [rule_gen] gpt-4.1 56/60
+  [rule_gen] gpt-4.1-mini 40/60
+  [rule_gen] llama-3.3-70b-instruct 6/60
+  [rule_gen] gpt-4.1-mini 41/60
+  [rule_gen] llama-3.3-70b-instruct 7/60
+  [rule_gen] gpt-4.1 57/60
+  [rule_gen] gpt-4.1 58/60
+  [rule_gen] gpt-4.1-mini 42/60
+  [rule_gen] gpt-4.1-mini 43/60
+  [rule_gen] llama-3.3-70b-instruct 8/60
+  [rule_gen] gpt-4.1-mini 44/60
+  [rule_gen] llama-3.3-70b-instruct 9/60
+  [rule_gen] gpt-4.1-mini 45/60
+  [rule_gen] llama-3.3-70b-instruct 10/60
+  [rule_gen] gpt-4.1-mini 46/60
+  [rule_gen] gpt-4.1-mini 47/60
+  [rule_gen] gpt-4.1 59/60
+  [rule_gen] gpt-4.1-mini 48/60
+  [rule_gen] gpt-4.1-mini 49/60
+  [rule_gen] gpt-4.1-mini 50/60
+  [rule_gen] gpt-4.1-mini 51/60
+  [rule_gen] gpt-4.1-mini 52/60
+  [rule_gen] llama-3.3-70b-instruct 11/60
+  [rule_gen] gpt-4.1 60/60
+  [rule_gen] gpt-4.1-mini 53/60
+  [rule_gen] gpt-4.1-mini 54/60
+  [rule_gen] gpt-4.1-mini 55/60
+  [rule_gen] llama-3.3-70b-instruct 12/60
+  [rule_gen] llama-3.3-70b-instruct 13/60
+  [rule_gen] gpt-4.1-mini 56/60
+  [rule_gen] llama-3.3-70b-instruct 14/60
+  [rule_gen] gpt-4.1-mini 57/60
+  [rule_gen] llama-3.3-70b-instruct 15/60
+  [rule_gen] llama-3.3-70b-instruct 16/60
+  [rule_gen] llama-3.3-70b-instruct 17/60
+  [rule_gen] llama-3.3-70b-instruct 18/60
+  [rule_gen] gpt-4.1-mini 58/60
+  [rule_gen] gpt-4.1-mini 59/60
+  [rule_gen] llama-3.3-70b-instruct 19/60
+  [rule_gen] llama-3.3-70b-instruct 20/60
+  [rule_gen] llama-3.3-70b-instruct 21/60
+  [rule_gen] llama-3.3-70b-instruct 22/60
+  [rule_gen] gpt-4.1-mini 60/60
+  [rule_gen] llama-3.3-70b-instruct 23/60
+  [rule_gen] llama-3.3-70b-instruct 24/60
+  [rule_gen] llama-3.3-70b-instruct 25/60
+  [rule_gen] llama-3.3-70b-instruct 26/60
+  [rule_gen] llama-3.3-70b-instruct 27/60
+  [rule_gen] llama-3.3-70b-instruct 28/60
+  [rule_gen] llama-3.3-70b-instruct 29/60
+  [rule_gen] llama-3.3-70b-instruct 30/60
+  [rule_gen] llama-3.3-70b-instruct 31/60
+  [rule_gen] llama-3.3-70b-instruct 32/60
+  [rule_gen] llama-3.3-70b-instruct 33/60
+  [rule_gen] llama-3.3-70b-instruct 34/60
+  [rule_gen] llama-3.3-70b-instruct 35/60
+  [rule_gen] llama-3.3-70b-instruct 36/60
+  [rule_gen] llama-3.3-70b-instruct 37/60
+  [rule_gen] llama-3.3-70b-instruct 38/60
+  [rule_gen] llama-3.3-70b-instruct 39/60
+  [rule_gen] llama-3.3-70b-instruct 40/60
+  [rule_gen] llama-3.3-70b-instruct 41/60
+  [rule_gen] llama-3.3-70b-instruct 42/60
+  [rule_gen] llama-3.3-70b-instruct 43/60
+  [rule_gen] llama-3.3-70b-instruct 44/60
+  [rule_gen] llama-3.3-70b-instruct 45/60
+  [rule_gen] llama-3.3-70b-instruct 46/60
+  [rule_gen] llama-3.3-70b-instruct 47/60
+  [rule_gen] llama-3.3-70b-instruct 48/60
+  [rule_gen] llama-3.3-70b-instruct 49/60
+  [rule_gen] llama-3.3-70b-instruct 50/60
+  [rule_gen] llama-3.3-70b-instruct 51/60
+  [rule_gen] llama-3.3-70b-instruct 52/60
+  [rule_gen] llama-3.3-70b-instruct 53/60
+  [rule_gen] llama-3.3-70b-instruct 54/60
+  [rule_gen] llama-3.3-70b-instruct 55/60
+  [rule_gen] llama-3.3-70b-instruct 56/60
+  [rule_gen] llama-3.3-70b-instruct 57/60
+  [rule_gen] llama-3.3-70b-instruct 58/60
+  [rule_gen] llama-3.3-70b-instruct 59/60
+  [rule_gen] llama-3.3-70b-instruct 60/60
+  scoring 1/5
+  scoring 2/5
+  scoring 3/5
+  scoring 4/5
+  scoring 5/5
+  [gate-baseline] gpt-4.1-mini 1/40
+  [gate-baseline] gpt-4.1 1/40
+  [gate-baseline] gpt-4.1 2/40
+  [gate-baseline] gpt-4.1 3/40
+  [gate-baseline] gpt-4.1 4/40
+  [gate-baseline] gpt-4.1 5/40
+  [gate-baseline] gpt-4.1 6/40
+  [gate-baseline] gpt-4.1 7/40
+  [gate-baseline] gpt-4.1-mini 2/40
+  [gate-baseline] gpt-4.1-mini 3/40
+  [gate-baseline] gpt-4.1-mini 4/40
+  [gate-baseline] gpt-4.1 8/40
+  [gate-baseline] gpt-4.1-mini 5/40
+  [gate-baseline] gpt-4.1-mini 6/40
+  [gate-baseline] gpt-4.1-mini 7/40
+  [gate-baseline] gpt-4.1 9/40
+  [gate-baseline] gpt-4.1 10/40
+  [gate-baseline] gpt-4.1 11/40
+  [gate-baseline] gpt-4.1 12/40
+  [gate-baseline] gpt-4.1 13/40
+  [gate-baseline] gpt-4.1 14/40
+  [gate-baseline] gpt-4.1 15/40
+  [gate-baseline] gpt-4.1-mini 8/40
+  [gate-baseline] gpt-4.1 16/40
+  [gate-baseline] gpt-4.1 17/40
+  [gate-baseline] gpt-4.1 18/40
+  [gate-baseline] gpt-4.1-mini 9/40
+  [gate-baseline] gpt-4.1 19/40
+  [gate-baseline] gpt-4.1 20/40
+  [gate-baseline] gpt-4.1 21/40
+  [gate-baseline] gpt-4.1-mini 10/40
+  [gate-baseline] gpt-4.1-mini 11/40
+  [gate-baseline] gpt-4.1 22/40
+  [gate-baseline] gpt-4.1 23/40
+  [gate-baseline] gpt-4.1-mini 12/40
+  [gate-baseline] gpt-4.1-mini 13/40
+  [gate-baseline] gpt-4.1 24/40
+  [gate-baseline] gpt-4.1 25/40
+  [gate-baseline] gpt-4.1 26/40
+  [gate-baseline] gpt-4.1-mini 14/40
+  [gate-baseline] gpt-4.1-mini 15/40
+  [gate-baseline] gpt-4.1-mini 16/40
+  [gate-baseline] gpt-4.1-mini 17/40
+  [gate-baseline] gpt-4.1-mini 18/40
+  [gate-baseline] gpt-4.1-mini 19/40
+  [gate-baseline] gpt-4.1-mini 20/40
+  [gate-baseline] gpt-4.1 27/40
+  [gate-baseline] gpt-4.1-mini 21/40
+  [gate-baseline] gpt-4.1 28/40
+  [gate-baseline] gpt-4.1 29/40
+  [gate-baseline] gpt-4.1 30/40
+  [gate-baseline] gpt-4.1-mini 22/40
+  [gate-baseline] gpt-4.1 31/40
+  [gate-baseline] gpt-4.1-mini 23/40
+  [gate-baseline] gpt-4.1-mini 24/40
+  [gate-baseline] gpt-4.1-mini 25/40
+  [gate-baseline] gpt-4.1-mini 26/40
+  [gate-baseline] gpt-4.1 32/40
+  [gate-baseline] gpt-4.1 33/40
+  [gate-baseline] gpt-4.1-mini 27/40
+  [gate-baseline] gpt-4.1-mini 28/40
+  [gate-baseline] gpt-4.1-mini 29/40
+  [gate-baseline] gpt-4.1-mini 30/40
+  [gate-baseline] gpt-4.1-mini 31/40
+  [gate-baseline] gpt-4.1 34/40
+  [gate-baseline] gpt-4.1-mini 32/40
+  [gate-baseline] gpt-4.1-mini 33/40
+  [gate-baseline] gpt-4.1-mini 34/40
+  [gate-baseline] gpt-4.1-mini 35/40
+  [gate-baseline] gpt-4.1 35/40
+  [gate-baseline] gpt-4.1 36/40
+  [gate-baseline] gpt-4.1 37/40
+  [gate-baseline] gpt-4.1-mini 36/40
+  [gate-baseline] gpt-4.1-mini 37/40
+  [gate-baseline] gpt-4.1-mini 38/40
+  [gate-baseline] gpt-4.1-mini 39/40
+  [gate-baseline] gpt-4.1 38/40
+  [gate-baseline] gpt-4.1 39/40
+  [gate-baseline] gpt-4.1 40/40
+  [gate-baseline] llama-3.3-70b-instruct 1/40
+  [gate-baseline] gpt-4.1-mini 40/40
+  [gate-baseline] llama-3.3-70b-instruct 2/40
+  [gate-baseline] llama-3.3-70b-instruct 3/40
+  [gate-baseline] llama-3.3-70b-instruct 4/40
+  [gate-baseline] llama-3.3-70b-instruct 5/40
+  [gate-baseline] llama-3.3-70b-instruct 6/40
+  [gate-baseline] llama-3.3-70b-instruct 7/40
+  [gate-baseline] llama-3.3-70b-instruct 8/40
+  [gate-baseline] llama-3.3-70b-instruct 9/40
+  [gate-baseline] llama-3.3-70b-instruct 10/40
+  [gate-baseline] llama-3.3-70b-instruct 11/40
+  [gate-baseline] llama-3.3-70b-instruct 12/40
+  [gate-baseline] llama-3.3-70b-instruct 13/40
+  [gate-baseline] llama-3.3-70b-instruct 14/40
+  [gate-baseline] llama-3.3-70b-instruct 15/40
+  [gate-baseline] llama-3.3-70b-instruct 16/40
+  [gate-baseline] llama-3.3-70b-instruct 17/40
+  [gate-baseline] llama-3.3-70b-instruct 18/40
+  [gate-baseline] llama-3.3-70b-instruct 19/40
+  [gate-baseline] llama-3.3-70b-instruct 20/40
+  [gate-baseline] llama-3.3-70b-instruct 21/40
+  [gate-baseline] llama-3.3-70b-instruct 22/40
+  [gate-baseline] llama-3.3-70b-instruct 23/40
+  [gate-baseline] llama-3.3-70b-instruct 24/40
+  [gate-baseline] llama-3.3-70b-instruct 25/40
+  [gate-baseline] llama-3.3-70b-instruct 26/40
+  [gate-baseline] llama-3.3-70b-instruct 27/40
+  [gate-baseline] llama-3.3-70b-instruct 28/40
+  [gate-baseline] llama-3.3-70b-instruct 29/40
+  [gate-baseline] llama-3.3-70b-instruct 30/40
+  [gate-baseline] llama-3.3-70b-instruct 31/40
+  [gate-baseline] llama-3.3-70b-instruct 32/40
+  [gate-baseline] llama-3.3-70b-instruct 33/40
+  [gate-baseline] llama-3.3-70b-instruct 34/40
+  [gate-baseline] llama-3.3-70b-instruct 35/40
+  [gate-baseline] llama-3.3-70b-instruct 36/40
+  [gate-baseline] llama-3.3-70b-instruct 37/40
+  [gate-baseline] llama-3.3-70b-instruct 38/40
+  [gate-baseline] llama-3.3-70b-instruct 39/40
+  [gate-baseline] llama-3.3-70b-instruct 40/40
+  [validate:subtype] gpt-4.1-mini 1/13
+  [validate:subtype] gpt-4.1 1/13
+  [validate:subtype] gpt-4.1-mini 2/13
+  [validate:subtype] gpt-4.1 2/13
+  [validate:subtype] gpt-4.1-mini 3/13
+  [validate:subtype] gpt-4.1 3/13
+  [validate:subtype] gpt-4.1 4/13
+  [validate:subtype] gpt-4.1-mini 4/13
+  [validate:subtype] gpt-4.1 5/13
+  [validate:subtype] gpt-4.1 6/13
+  [validate:subtype] gpt-4.1 7/13
+  [validate:subtype] gpt-4.1-mini 5/13
+  [validate:subtype] gpt-4.1-mini 6/13
+  [validate:subtype] gpt-4.1 8/13
+  [validate:subtype] gpt-4.1-mini 7/13
+  [validate:subtype] gpt-4.1-mini 8/13
+  [validate:subtype] gpt-4.1 9/13
+  [validate:subtype] gpt-4.1 10/13
+  [validate:subtype] gpt-4.1 11/13
+  [validate:subtype] gpt-4.1-mini 9/13
+  [validate:subtype] gpt-4.1-mini 10/13
+  [validate:subtype] gpt-4.1 12/13
+  [validate:subtype] gpt-4.1-mini 11/13
+  [validate:subtype] gpt-4.1-mini 12/13
+  [validate:subtype] gpt-4.1 13/13
+  [validate:subtype] gpt-4.1-mini 13/13
+  [validate:subtype] llama-3.3-70b-instruct 1/13
+  [validate:subtype] llama-3.3-70b-instruct 2/13
+  [validate:subtype] llama-3.3-70b-instruct 3/13
+  [validate:subtype] llama-3.3-70b-instruct 4/13
+  [validate:subtype] llama-3.3-70b-instruct 5/13
+  [validate:subtype] llama-3.3-70b-instruct 6/13
+  [validate:subtype] llama-3.3-70b-instruct 7/13
+  [validate:subtype] llama-3.3-70b-instruct 8/13
+  [validate:subtype] llama-3.3-70b-instruct 9/13
+  [validate:subtype] llama-3.3-70b-instruct 10/13
+  [validate:subtype] llama-3.3-70b-instruct 11/13
+  [validate:subtype] llama-3.3-70b-instruct 12/13
+  [validate:subtype] llama-3.3-70b-instruct 13/13
+
+============================================================
+ SFCR  task=causal_judgement  seed=1000
+ source=openai/gpt-4.1-mini
+ proxies=['gpt-4.1', 'llama-3.3-70b-instruct']
+ oracle_mode=contrastive  routing_mode=global  validation=subtype  gate=hybrid
+ router_type=keyword  memory_format=rule  gate_profile=medium
+ n_eval_seeds=1  use_subtypes=True
+ repair_attempts=2
+============================================================
+
+[splits] rule_gen=60  gate=40  unused=0  seed=1000
+[pipeline] Computing failure regions on rule_gen split...
+[rule_gen] hard-binary  source_acc=73.3%  |F_s|=16  |V_shared|=14  |V_private|=2  |V_easy|=44
+[rule_gen] Jaccard(gpt-4.1-mini↔gpt-4.1) = 0.625
+[rule_gen] Jaccard(gpt-4.1-mini↔llama-3.3-70b-instruct) = 0.812
+
+[pipeline] Generating candidates (use_subtypes=True, n_candidates=8, quick_validate=True)...
+[cluster] 4 subtypes: "Redundant or unnecessary cause"(5), "Omission as cause"(4), "Causation denied due to indirectness or intervening events"(4), "Intentionality vs. causation distinction"(1)
+[gen] quick-validate: 2/5 subtype items fixed
+[gen] candidate 1/3  temp=0.8  len=277 chars
+[gen] WARNING: only generated 1/3 unique candidates after 18 attempts
+[gen] subtype 1/4 "Redundant or unnecessary cause": 1 candidate(s)
+[gen] WARNING: only generated 0/3 unique candidates after 18 attempts
+[gen] subtype 2/4 "Omission as cause": 0 candidate(s)
+[gen] WARNING: only generated 0/3 unique candidates after 18 attempts
+[gen] subtype 3/4 "Causation denied due to indirectness or intervening events": 0 candidate(s)
+[gen] WARNING: only generated 0/3 unique candidates after 18 attempts
+[gen] subtype 4/4 "Intentionality vs. causation distinction": 0 candidate(s)
+
+[pipeline] Pre-computing gate baseline...
+
+[pipeline] Validating 1 candidates (repair_attempts=2)...
+[validate] gate regions: |V_shared_per_proxy|=[10, 13]  |V_private|=2  |V_easy|=16
+
+[validate] candidate 1/1: **When multiple sufficient causes independently bring about ...
+[validate] ACCEPTED [count-gate]  U_LCB=-0.2075  prv_act=50.00%  reg_easy=19.36%
+
+[validate] done: 1/1 candidates accepted (max_accepted=3)
+
+[pipeline] Accepted 1 rule(s).
+
+============================================================
+ SFCR complete — 1 rule(s) accepted
+ Output dir: runs/sfcr_contrast_cj_1000
+============================================================
+

@@ -1,0 +1,210 @@
+[
+  {
+    "rule_id": "ee2fe4ad",
+    "rule": "In cases where an outcome results from multiple independently sufficient causes present simultaneously (disjunctive suff",
+    "accepted": false,
+    "u_lcb": -0.18821,
+    "reject_reason": "U_LCB=-0.1882 \u2264 0",
+    "private_activation_rate": 0.0,
+    "reg_easy_worst": 0.2153,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0433,
+        "reg_private": 0.0,
+        "reg_easy": 0.2153
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.1018,
+        "reg_private": 0.0,
+        "reg_easy": 0.2153
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.3147
+      }
+    }
+  },
+  {
+    "rule_id": "7a0cc50a",
+    "rule": "In cases where an outcome results from multiple independent sufficient causes present simultaneously, typical causation ",
+    "accepted": false,
+    "u_lcb": -0.237117,
+    "reject_reason": "U_LCB=-0.2371 \u2264 0",
+    "private_activation_rate": 0.0,
+    "reg_easy_worst": 0.2153,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.2153
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.035,
+        "reg_private": 0.0,
+        "reg_easy": 0.2153
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.3147
+      }
+    }
+  },
+  {
+    "rule_id": "6017b7eb",
+    "rule": "In cases where an outcome results from multiple independent sufficient causes present simultaneously, typical causation ",
+    "accepted": false,
+    "u_lcb": -0.719107,
+    "reject_reason": "U_LCB=-0.7191 \u2264 0",
+    "private_activation_rate": 0.0,
+    "reg_easy_worst": 0.2153,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0137,
+        "reg_private": 0.5,
+        "reg_easy": 0.2153
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.035,
+        "reg_private": 0.5,
+        "reg_easy": 0.2153
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0162,
+        "reg_private": 0.0,
+        "reg_easy": 0.3147
+      }
+    }
+  },
+  {
+    "rule_id": "d4b7131d",
+    "rule": "In cases where an outcome results from multiple independent sufficient causes present simultaneously, typical causation ",
+    "accepted": false,
+    "u_lcb": -0.721107,
+    "reject_reason": "U_LCB=-0.7211 \u2264 0",
+    "private_activation_rate": 0.5,
+    "reg_easy_worst": 0.2153,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0137,
+        "reg_private": 0.5,
+        "reg_easy": 0.2153
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.035,
+        "reg_private": 0.0,
+        "reg_easy": 0.2153
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.3147
+      }
+    }
+  },
+  {
+    "rule_id": "49d3bd7a",
+    "rule": "In cases where an outcome results from multiple independent sufficient causes (disjunctive conditions), typical people a",
+    "accepted": false,
+    "u_lcb": -0.723657,
+    "reject_reason": "U_LCB=-0.7237 \u2264 0",
+    "private_activation_rate": 0.0,
+    "reg_easy_worst": 0.2153,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0137,
+        "reg_private": 0.5,
+        "reg_easy": 0.2153
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.035,
+        "reg_private": 0.0,
+        "reg_easy": 0.2153
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0162,
+        "reg_private": 0.0,
+        "reg_easy": 0.3147
+      }
+    }
+  },
+  {
+    "rule_id": "a6838dd5",
+    "rule": "In cases where an outcome results from multiple independently sufficient causes present simultaneously (disjunctive caus",
+    "accepted": false,
+    "u_lcb": -0.730998,
+    "reject_reason": "U_LCB=-0.7310 \u2264 0",
+    "private_activation_rate": 0.0,
+    "reg_easy_worst": 0.2153,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0137,
+        "reg_private": 0.5,
+        "reg_easy": 0.2153
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0111,
+        "reg_private": 0.5,
+        "reg_easy": 0.2153
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.2153
+      }
+    }
+  },
+  {
+    "rule_id": "bde1f07c",
+    "rule": "In cases where an outcome results from multiple independent sufficient causes present simultaneously, typical causal att",
+    "accepted": false,
+    "u_lcb": -0.816833,
+    "reject_reason": "U_LCB=-0.8168 \u2264 0",
+    "private_activation_rate": 0.5,
+    "reg_easy_worst": 0.3147,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0137,
+        "reg_private": 0.5,
+        "reg_easy": 0.3147
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.1018,
+        "reg_private": 0.0,
+        "reg_easy": 0.2153
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.3147
+      }
+    }
+  },
+  {
+    "rule_id": "d705067f",
+    "rule": "In cases where an outcome results from multiple independent sufficient causes or disjunctive conditions, omission or fai",
+    "accepted": false,
+    "u_lcb": -0.830193,
+    "reject_reason": "U_LCB=-0.8302 \u2264 0",
+    "private_activation_rate": 0.0,
+    "reg_easy_worst": 0.3147,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0,
+        "reg_private": 0.5,
+        "reg_easy": 0.3147
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0659,
+        "reg_private": 0.0,
+        "reg_easy": 0.2153
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.2153
+      }
+    }
+  }
+]

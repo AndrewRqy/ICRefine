@@ -1,0 +1,241 @@
+rule_id,item_id,task,region,input_snippet,activated,vetoed,router_type,matched_terms,boundary_matched_terms,candidate_status,accepted
+cj_norm_violation_v1,causal_judgement_0064,causal_judgement,other,"How would a typical person answer each of the following questions about causation?
+Imagine that there is a man out in the woods who is participating in a hunting competition. After spending hours wait",False,True,keyword,['expected'],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0000,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+A machine is set up in such a way that it will short circuit if both the black wire and the red wire touch the batter",False,True,keyword,[],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0077,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+A lieutenant was talking with a sergeant. The lieutenant gave the order: 'Send your squad to the top of Thompson Hill",False,True,keyword,['expected'],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0036,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+A bear and a hedgehog were shown a box full of colored pencils. Only bears were allowed to take pencils, whereas hedg",False,True,keyword,[],"['causation', 'norm']",no_activation,False
+cj_norm_violation_v1,causal_judgement_0020,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+Alice and Zoe work for the same company. They work in different rooms, and both of them sometimes need to access the ",False,True,keyword,[],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0032,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+A machine is set up in such a way that it will short circuit if both the black wire and the red wire touch the batter",False,True,keyword,[],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0013,causal_judgement,other,"How would a typical person answer each of the following questions about causation?
+Joe was about to go pick up his child from a school in the suburbs. In the parking lot, he stopped to help a person w",False,True,keyword,[],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0022,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+Janet is an employee in a factory. Since she works in the maintenance department, she knows how to grease and oil all",False,True,keyword,[],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0027,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Jim, Carol, Bob, and Nancy are researchers in a remote area, and they have a limited supply of electricity. Because o",False,True,keyword,[],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0074,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+Tom has a huge garden and loves flowers. He employed two gardeners who take care of the plants on his 30 flower beds:",False,True,keyword,[],"['causation', 'without']",no_activation,False
+cj_norm_violation_v1,causal_judgement_0090,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+Drew, Kylie, Oliver, and Jen are regular customers at a small, local coffee shop. Given the selling price of the coff",False,True,keyword,[],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0002,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Long ago, when John was only 17 years old, he got a job working for a large manufacturing company. He started out wor",False,True,keyword,[],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0082,causal_judgement,other,"How would a typical person answer each of the following questions about causation?
+Karen was an assistant editor for a small publishing firm. She had a rare hereditary disease called Karpinson's hemot",False,True,keyword,['someone'],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0053,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Mark wants to detonate a bomb to kill some innocent people. He knows that only one button will detonate the bomb and ",False,True,keyword,[],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0092,causal_judgement,other,"How would a typical person answer each of the following questions about causation?
+Jake desperately wants to have more money. He knows that he will inherit a lot of money when his aunt dies. One day, ",False,True,keyword,[],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0018,causal_judgement,other,"How would a typical person answer each of the following questions about causation?
+Long ago, when John was only 17 years old, he got a job working for a large manufacturing company. He started out wor",False,True,keyword,[],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0083,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Imagine that there is a man out in the woods who is participating in a hunting competition. After spending hours wait",False,True,keyword,[],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0005,causal_judgement,private,"How would a typical person answer each of the following questions about causation?
+Suzy and Billy are working on a project that is very important for our nation's security. The boss tells Suzy: ""Be su",False,True,keyword,[],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0023,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Representatives from the research and development department of a company reported to the board and said, ""We are thi",False,True,keyword,[],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0058,causal_judgement,other,"How would a typical person answer each of the following questions about causation?
+Tom works for a demolition company, and today he is demolishing a building by implosion. The building will implode au",False,True,keyword,[],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0029,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+Wayne has a new high-tech watch that tracks his heart rate while he exercises. He must charge the device before he us",False,True,keyword,[],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0084,causal_judgement,other,"How would a typical person answer each of the following questions about causation?
+Representatives from the research and development department of a company reported to the board and said, ""We are thi",False,True,keyword,[],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0025,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Janet is an employee in the factory. She works in the maintenance department where she monitors the stability of all ",False,True,keyword,[],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0062,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Jim, Carol, Bob, and Nancy are researchers in a remote area, and they have a limited supply of electricity. Because o",False,True,keyword,[],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0046,causal_judgement,other,"How would a typical person answer each of the following questions about causation?
+Prof. Smith works at a large university. At this university, in order to get new computers from the university, facul",False,True,keyword,[],"['causation', 'without']",no_activation,False
+cj_norm_violation_v1,causal_judgement_0030,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+Tom has a huge garden and loves flowers. He employed two gardeners who take care of the plants on his 30 flower beds:",False,True,keyword,[],"['causation', 'without']",no_activation,False
+cj_norm_violation_v1,causal_judgement_0097,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Alice and Zoe work for the same company. They work in different rooms and both of them sometimes need to access the c",False,True,keyword,[],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0028,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Tom has a huge garden and loves flowers. He employed two gardeners who take care of the plants on his 30 flower beds:",False,True,keyword,[],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0016,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+Representatives from the research and development department of a company reported to the board and said, ""We are thi",False,True,keyword,[],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0055,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+A group of students who lived on the same floor of a dormitory obtained a copy of the final exam for their biology cl",False,True,keyword,[],"['causation', 'norm']",no_activation,False
+cj_norm_violation_v1,causal_judgement_0068,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Claire's parents bought her an old computer. Claire uses it for schoolwork, but her brother Daniel sometimes logs on ",False,True,keyword,[],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0021,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+In Nazi Germany, there was a law called the 'racial identification law.' The purpose of the law was to help identify ",False,True,keyword,[],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0059,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+A bear and a hedgehog were shown a box full of colored pencils. Only bears were allowed to take pencils, whereas hedg",False,True,keyword,[],"['causation', 'norm']",no_activation,False
+cj_norm_violation_v1,causal_judgement_0008,causal_judgement,private,"How would a typical person answer each of the following questions about causation?
+Imagine that there is a man out in the woods who is participating in a hunting competition. After spending hours wait",False,True,keyword,['expected'],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0045,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+Laurie likes GC brand coffee. GC is doing a new promotion for their new coffee flavor where customers can receive a f",False,True,keyword,[],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0050,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Janet is an employee in a factory. Since she works in the maintenance department, she knows how to grease and oil all",False,True,keyword,[],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0012,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Ned has a new motorboat. When Ned turns the key, the motorboat starts if either the gear is in neutral or the motor i",False,True,keyword,[],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0085,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+Tom works for a demolition company, and today he is demolishing a building by implosion. The building will implode au",False,True,keyword,[],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0054,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+In a particular building there are two businesses, a travel agency and a graphic design studio. The building's climat",False,True,keyword,[],['causation'],no_activation,False
+cj_norm_violation_v1,causal_judgement_0099,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+Alex will only win the game if the total of his dice roll is greater than 11 AND the coin comes up heads. It is very ",False,True,keyword,[],['causation'],no_activation,False
+cj_joint_and_v2,causal_judgement_0064,causal_judgement,other,"How would a typical person answer each of the following questions about causation?
+Imagine that there is a man out in the woods who is participating in a hunting competition. After spending hours wait",False,True,keyword,[],['cause'],no_activation,False
+cj_joint_and_v2,causal_judgement_0000,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+A machine is set up in such a way that it will short circuit if both the black wire and the red wire touch the batter",False,True,keyword,[],['cause'],no_activation,False
+cj_joint_and_v2,causal_judgement_0077,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+A lieutenant was talking with a sergeant. The lieutenant gave the order: 'Send your squad to the top of Thompson Hill",False,False,keyword,[],[],no_activation,False
+cj_joint_and_v2,causal_judgement_0036,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+A bear and a hedgehog were shown a box full of colored pencils. Only bears were allowed to take pencils, whereas hedg",False,True,keyword,[],"['cause', 'norm']",no_activation,False
+cj_joint_and_v2,causal_judgement_0020,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+Alice and Zoe work for the same company. They work in different rooms, and both of them sometimes need to access the ",False,True,keyword,['two'],['cause'],no_activation,False
+cj_joint_and_v2,causal_judgement_0032,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+A machine is set up in such a way that it will short circuit if both the black wire and the red wire touch the batter",False,True,keyword,[],['cause'],no_activation,False
+cj_joint_and_v2,causal_judgement_0013,causal_judgement,other,"How would a typical person answer each of the following questions about causation?
+Joe was about to go pick up his child from a school in the suburbs. In the parking lot, he stopped to help a person w",False,True,keyword,[],['cause'],no_activation,False
+cj_joint_and_v2,causal_judgement_0022,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+Janet is an employee in a factory. Since she works in the maintenance department, she knows how to grease and oil all",False,True,keyword,[],['cause'],no_activation,False
+cj_joint_and_v2,causal_judgement_0027,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Jim, Carol, Bob, and Nancy are researchers in a remote area, and they have a limited supply of electricity. Because o",False,True,keyword,[],['cause'],no_activation,False
+cj_joint_and_v2,causal_judgement_0074,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+Tom has a huge garden and loves flowers. He employed two gardeners who take care of the plants on his 30 flower beds:",False,True,keyword,['two'],"['independently', 'cause']",no_activation,False
+cj_joint_and_v2,causal_judgement_0090,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+Drew, Kylie, Oliver, and Jen are regular customers at a small, local coffee shop. Given the selling price of the coff",False,True,keyword,[],['cause'],no_activation,False
+cj_joint_and_v2,causal_judgement_0002,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Long ago, when John was only 17 years old, he got a job working for a large manufacturing company. He started out wor",False,True,keyword,['two'],['cause'],no_activation,False
+cj_joint_and_v2,causal_judgement_0082,causal_judgement,other,"How would a typical person answer each of the following questions about causation?
+Karen was an assistant editor for a small publishing firm. She had a rare hereditary disease called Karpinson's hemot",False,True,keyword,[],['cause'],no_activation,False
+cj_joint_and_v2,causal_judgement_0053,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Mark wants to detonate a bomb to kill some innocent people. He knows that only one button will detonate the bomb and ",False,False,keyword,[],[],no_activation,False
+cj_joint_and_v2,causal_judgement_0092,causal_judgement,other,"How would a typical person answer each of the following questions about causation?
+Jake desperately wants to have more money. He knows that he will inherit a lot of money when his aunt dies. One day, ",False,False,keyword,[],[],no_activation,False
+cj_joint_and_v2,causal_judgement_0018,causal_judgement,other,"How would a typical person answer each of the following questions about causation?
+Long ago, when John was only 17 years old, he got a job working for a large manufacturing company. He started out wor",False,True,keyword,['two'],['cause'],no_activation,False
+cj_joint_and_v2,causal_judgement_0083,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Imagine that there is a man out in the woods who is participating in a hunting competition. After spending hours wait",False,False,keyword,[],[],no_activation,False
+cj_joint_and_v2,causal_judgement_0005,causal_judgement,private,"How would a typical person answer each of the following questions about causation?
+Suzy and Billy are working on a project that is very important for our nation's security. The boss tells Suzy: ""Be su",False,True,keyword,[],['cause'],no_activation,False
+cj_joint_and_v2,causal_judgement_0023,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Representatives from the research and development department of a company reported to the board and said, ""We are thi",False,False,keyword,[],[],no_activation,False
+cj_joint_and_v2,causal_judgement_0058,causal_judgement,other,"How would a typical person answer each of the following questions about causation?
+Tom works for a demolition company, and today he is demolishing a building by implosion. The building will implode au",False,False,keyword,[],[],no_activation,False
+cj_joint_and_v2,causal_judgement_0029,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+Wayne has a new high-tech watch that tracks his heart rate while he exercises. He must charge the device before he us",False,False,keyword,[],[],no_activation,False
+cj_joint_and_v2,causal_judgement_0084,causal_judgement,other,"How would a typical person answer each of the following questions about causation?
+Representatives from the research and development department of a company reported to the board and said, ""We are thi",False,False,keyword,[],[],no_activation,False
+cj_joint_and_v2,causal_judgement_0025,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Janet is an employee in the factory. She works in the maintenance department where she monitors the stability of all ",False,False,keyword,[],[],no_activation,False
+cj_joint_and_v2,causal_judgement_0062,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Jim, Carol, Bob, and Nancy are researchers in a remote area, and they have a limited supply of electricity. Because o",False,True,keyword,[],['cause'],no_activation,False
+cj_joint_and_v2,causal_judgement_0046,causal_judgement,other,"How would a typical person answer each of the following questions about causation?
+Prof. Smith works at a large university. At this university, in order to get new computers from the university, facul",False,True,keyword,['two'],"['independently', 'cause']",no_activation,False
+cj_joint_and_v2,causal_judgement_0030,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+Tom has a huge garden and loves flowers. He employed two gardeners who take care of the plants on his 30 flower beds:",False,True,keyword,['two'],"['independently', 'cause']",no_activation,False
+cj_joint_and_v2,causal_judgement_0097,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Alice and Zoe work for the same company. They work in different rooms and both of them sometimes need to access the c",False,True,keyword,['two'],['cause'],no_activation,False
+cj_joint_and_v2,causal_judgement_0028,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Tom has a huge garden and loves flowers. He employed two gardeners who take care of the plants on his 30 flower beds:",False,True,keyword,['two'],"['independently', 'cause']",no_activation,False
+cj_joint_and_v2,causal_judgement_0016,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+Representatives from the research and development department of a company reported to the board and said, ""We are thi",False,False,keyword,['actions'],[],no_activation,False
+cj_joint_and_v2,causal_judgement_0055,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+A group of students who lived on the same floor of a dormitory obtained a copy of the final exam for their biology cl",False,True,keyword,[],"['cause', 'norm']",no_activation,False
+cj_joint_and_v2,causal_judgement_0068,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Claire's parents bought her an old computer. Claire uses it for schoolwork, but her brother Daniel sometimes logs on ",False,True,keyword,['two'],['cause'],no_activation,False
+cj_joint_and_v2,causal_judgement_0021,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+In Nazi Germany, there was a law called the 'racial identification law.' The purpose of the law was to help identify ",False,False,keyword,[],[],no_activation,False
+cj_joint_and_v2,causal_judgement_0059,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+A bear and a hedgehog were shown a box full of colored pencils. Only bears were allowed to take pencils, whereas hedg",False,True,keyword,[],"['cause', 'norm']",no_activation,False
+cj_joint_and_v2,causal_judgement_0008,causal_judgement,private,"How would a typical person answer each of the following questions about causation?
+Imagine that there is a man out in the woods who is participating in a hunting competition. After spending hours wait",False,False,keyword,[],[],no_activation,False
+cj_joint_and_v2,causal_judgement_0045,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+Laurie likes GC brand coffee. GC is doing a new promotion for their new coffee flavor where customers can receive a f",False,False,keyword,[],[],no_activation,False
+cj_joint_and_v2,causal_judgement_0050,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Janet is an employee in a factory. Since she works in the maintenance department, she knows how to grease and oil all",False,True,keyword,[],['cause'],no_activation,False
+cj_joint_and_v2,causal_judgement_0012,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Ned has a new motorboat. When Ned turns the key, the motorboat starts if either the gear is in neutral or the motor i",False,False,keyword,[],[],no_activation,False
+cj_joint_and_v2,causal_judgement_0085,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+Tom works for a demolition company, and today he is demolishing a building by implosion. The building will implode au",False,False,keyword,[],[],no_activation,False
+cj_joint_and_v2,causal_judgement_0054,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+In a particular building there are two businesses, a travel agency and a graphic design studio. The building's climat",False,True,keyword,['two'],['cause'],no_activation,False
+cj_joint_and_v2,causal_judgement_0099,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+Alex will only win the game if the total of his dice roll is greater than 11 AND the coin comes up heads. It is very ",False,False,keyword,[],[],no_activation,False
+cj_preemption_v1,causal_judgement_0064,causal_judgement,other,"How would a typical person answer each of the following questions about causation?
+Imagine that there is a man out in the woods who is participating in a hunting competition. After spending hours wait",False,False,keyword,['second'],[],unsafe_private,False
+cj_preemption_v1,causal_judgement_0000,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+A machine is set up in such a way that it will short circuit if both the black wire and the red wire touch the batter",False,False,keyword,['one'],[],unsafe_private,False
+cj_preemption_v1,causal_judgement_0077,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+A lieutenant was talking with a sergeant. The lieutenant gave the order: 'Send your squad to the top of Thompson Hill",False,False,keyword,[],[],unsafe_private,False
+cj_preemption_v1,causal_judgement_0036,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+A bear and a hedgehog were shown a box full of colored pencils. Only bears were allowed to take pencils, whereas hedg",False,True,keyword,"['another', 'take']",['norm'],unsafe_private,False
+cj_preemption_v1,causal_judgement_0020,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+Alice and Zoe work for the same company. They work in different rooms, and both of them sometimes need to access the ",False,False,keyword,['one'],[],unsafe_private,False
+cj_preemption_v1,causal_judgement_0032,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+A machine is set up in such a way that it will short circuit if both the black wire and the red wire touch the batter",False,False,keyword,['one'],[],unsafe_private,False
+cj_preemption_v1,causal_judgement_0013,causal_judgement,other,"How would a typical person answer each of the following questions about causation?
+Joe was about to go pick up his child from a school in the suburbs. In the parking lot, he stopped to help a person w",False,False,keyword,[],[],unsafe_private,False
+cj_preemption_v1,causal_judgement_0022,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+Janet is an employee in a factory. Since she works in the maintenance department, she knows how to grease and oil all",False,False,keyword,['one'],[],unsafe_private,False
+cj_preemption_v1,causal_judgement_0027,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Jim, Carol, Bob, and Nancy are researchers in a remote area, and they have a limited supply of electricity. Because o",False,False,keyword,[],[],unsafe_private,False
+cj_preemption_v1,causal_judgement_0074,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+Tom has a huge garden and loves flowers. He employed two gardeners who take care of the plants on his 30 flower beds:",False,True,keyword,"['one', 'before', 'take']",['independently'],unsafe_private,False
+cj_preemption_v1,causal_judgement_0090,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+Drew, Kylie, Oliver, and Jen are regular customers at a small, local coffee shop. Given the selling price of the coff",False,False,keyword,['one'],[],unsafe_private,False
+cj_preemption_v1,causal_judgement_0002,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Long ago, when John was only 17 years old, he got a job working for a large manufacturing company. He started out wor",False,False,keyword,[],[],unsafe_private,False
+cj_preemption_v1,causal_judgement_0082,causal_judgement,other,"How would a typical person answer each of the following questions about causation?
+Karen was an assistant editor for a small publishing firm. She had a rare hereditary disease called Karpinson's hemot",False,False,keyword,[],[],unsafe_private,False
+cj_preemption_v1,causal_judgement_0053,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Mark wants to detonate a bomb to kill some innocent people. He knows that only one button will detonate the bomb and ",False,False,keyword,['one'],[],unsafe_private,False
+cj_preemption_v1,causal_judgement_0092,causal_judgement,other,"How would a typical person answer each of the following questions about causation?
+Jake desperately wants to have more money. He knows that he will inherit a lot of money when his aunt dies. One day, ",False,False,keyword,['one'],[],unsafe_private,False
+cj_preemption_v1,causal_judgement_0018,causal_judgement,other,"How would a typical person answer each of the following questions about causation?
+Long ago, when John was only 17 years old, he got a job working for a large manufacturing company. He started out wor",False,False,keyword,[],[],unsafe_private,False
+cj_preemption_v1,causal_judgement_0083,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Imagine that there is a man out in the woods who is participating in a hunting competition. After spending hours wait",False,False,keyword,[],[],unsafe_private,False
+cj_preemption_v1,causal_judgement_0005,causal_judgement,private,"How would a typical person answer each of the following questions about causation?
+Suzy and Billy are working on a project that is very important for our nation's security. The boss tells Suzy: ""Be su",False,False,keyword,['one'],[],unsafe_private,False
+cj_preemption_v1,causal_judgement_0023,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Representatives from the research and development department of a company reported to the board and said, ""We are thi",False,False,keyword,[],[],unsafe_private,False
+cj_preemption_v1,causal_judgement_0058,causal_judgement,other,"How would a typical person answer each of the following questions about causation?
+Tom works for a demolition company, and today he is demolishing a building by implosion. The building will implode au",False,False,keyword,[],[],unsafe_private,False
+cj_preemption_v1,causal_judgement_0029,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+Wayne has a new high-tech watch that tracks his heart rate while he exercises. He must charge the device before he us",True,False,keyword,"['one', 'before']",[],unsafe_private,False
+cj_preemption_v1,causal_judgement_0084,causal_judgement,other,"How would a typical person answer each of the following questions about causation?
+Representatives from the research and development department of a company reported to the board and said, ""We are thi",False,False,keyword,[],[],unsafe_private,False
+cj_preemption_v1,causal_judgement_0025,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Janet is an employee in the factory. She works in the maintenance department where she monitors the stability of all ",False,False,keyword,[],[],unsafe_private,False
+cj_preemption_v1,causal_judgement_0062,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Jim, Carol, Bob, and Nancy are researchers in a remote area, and they have a limited supply of electricity. Because o",False,False,keyword,[],[],unsafe_private,False
+cj_preemption_v1,causal_judgement_0046,causal_judgement,other,"How would a typical person answer each of the following questions about causation?
+Prof. Smith works at a large university. At this university, in order to get new computers from the university, facul",False,True,keyword,['one'],['independently'],unsafe_private,False
+cj_preemption_v1,causal_judgement_0030,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+Tom has a huge garden and loves flowers. He employed two gardeners who take care of the plants on his 30 flower beds:",False,True,keyword,"['one', 'before', 'take']",['independently'],unsafe_private,False
+cj_preemption_v1,causal_judgement_0097,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Alice and Zoe work for the same company. They work in different rooms and both of them sometimes need to access the c",False,False,keyword,['one'],[],unsafe_private,False
+cj_preemption_v1,causal_judgement_0028,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Tom has a huge garden and loves flowers. He employed two gardeners who take care of the plants on his 30 flower beds:",False,True,keyword,"['one', 'before', 'take']",['independently'],unsafe_private,False
+cj_preemption_v1,causal_judgement_0016,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+Representatives from the research and development department of a company reported to the board and said, ""We are thi",False,False,keyword,[],[],unsafe_private,False
+cj_preemption_v1,causal_judgement_0055,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+A group of students who lived on the same floor of a dormitory obtained a copy of the final exam for their biology cl",False,True,keyword,['one'],['norm'],unsafe_private,False
+cj_preemption_v1,causal_judgement_0068,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Claire's parents bought her an old computer. Claire uses it for schoolwork, but her brother Daniel sometimes logs on ",False,False,keyword,['one'],[],unsafe_private,False
+cj_preemption_v1,causal_judgement_0021,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+In Nazi Germany, there was a law called the 'racial identification law.' The purpose of the law was to help identify ",False,True,keyword,['one'],['requirements'],unsafe_private,False
+cj_preemption_v1,causal_judgement_0059,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+A bear and a hedgehog were shown a box full of colored pencils. Only bears were allowed to take pencils, whereas hedg",False,True,keyword,"['another', 'take']",['norm'],unsafe_private,False
+cj_preemption_v1,causal_judgement_0008,causal_judgement,private,"How would a typical person answer each of the following questions about causation?
+Imagine that there is a man out in the woods who is participating in a hunting competition. After spending hours wait",True,False,keyword,"['one', 'second']",[],unsafe_private,False
+cj_preemption_v1,causal_judgement_0045,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+Laurie likes GC brand coffee. GC is doing a new promotion for their new coffee flavor where customers can receive a f",False,False,keyword,[],[],unsafe_private,False
+cj_preemption_v1,causal_judgement_0050,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Janet is an employee in a factory. Since she works in the maintenance department, she knows how to grease and oil all",False,False,keyword,['one'],[],unsafe_private,False
+cj_preemption_v1,causal_judgement_0012,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+Ned has a new motorboat. When Ned turns the key, the motorboat starts if either the gear is in neutral or the motor i",False,False,keyword,[],[],unsafe_private,False
+cj_preemption_v1,causal_judgement_0085,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+Tom works for a demolition company, and today he is demolishing a building by implosion. The building will implode au",False,False,keyword,[],[],unsafe_private,False
+cj_preemption_v1,causal_judgement_0054,causal_judgement,easy,"How would a typical person answer each of the following questions about causation?
+In a particular building there are two businesses, a travel agency and a graphic design studio. The building's climat",False,False,keyword,[],[],unsafe_private,False
+cj_preemption_v1,causal_judgement_0099,causal_judgement,shared,"How would a typical person answer each of the following questions about causation?
+Alex will only win the game if the total of his dice roll is greater than 11 AND the coin comes up heads. It is very ",False,False,keyword,[],[],unsafe_private,False
