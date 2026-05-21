@@ -1,0 +1,4 @@
+candidate_id,task,source_of_candidate,validation_routing_mode,gate_mode,accepted,u_lcb,reject_reason,benefit_models,safety_models,fixed_shared_count,reg_easy_count,reg_private_count,private_activation_count
+cj_norm_violation_v1,causal_judgement,manual,routed,count_aware,False,-0.20928926630434783,count-gate: fixed_shared_count=0 < 1; count-gate: private_activation_count=1 > 0,openai/gpt-4.1,"openai/gpt-4.1,google/gemini-2.0-flash-001",0,0,0,1
+cj_preemption_v1,causal_judgement,manual,routed,count_aware,False,-0.21018926630434784,count-gate: fixed_shared_count=0 < 1; count-gate: private_activation_count=1 > 0,"openai/gpt-4.1,google/gemini-2.0-flash-001","openai/gpt-4.1,google/gemini-2.0-flash-001",0,0,0,1
+cj_joint_and_v2,causal_judgement,manual,routed,count_aware,False,-0.5435225996376811,count-gate: reg_private_count=1 > 0; count-gate: private_activation_count=2 > 0,"openai/gpt-4.1,google/gemini-2.0-flash-001","openai/gpt-4.1,google/gemini-2.0-flash-001",2,0,1,2

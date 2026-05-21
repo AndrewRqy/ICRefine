@@ -1,0 +1,210 @@
+[
+  {
+    "rule_id": "a8b841ad",
+    "rule": "Explicitly verify that all relevant quantitative or qualitative comparisons are logically consistent and that all stated",
+    "accepted": false,
+    "u_lcb": -0.605747,
+    "reject_reason": "U_LCB=-0.6057 \u2264 0",
+    "private_activation_rate": 0.7,
+    "reg_easy_worst": 0.0994,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0142,
+        "reg_private": 0.5098,
+        "reg_easy": 0.0994
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0812,
+        "reg_private": 0.5098,
+        "reg_easy": 0.1275
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0591,
+        "reg_private": 0.2775,
+        "reg_easy": 0.0994
+      }
+    }
+  },
+  {
+    "rule_id": "be88f010",
+    "rule": "Explicitly verify that comparisons or conclusions about quantities, qualities, or causal effects consider relevant diffe",
+    "accepted": false,
+    "u_lcb": -0.701581,
+    "reject_reason": "U_LCB=-0.7016 \u2264 0",
+    "private_activation_rate": 0.2,
+    "reg_easy_worst": 0.0994,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0142,
+        "reg_private": 0.6032,
+        "reg_easy": 0.0994
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0812,
+        "reg_private": 0.4042,
+        "reg_easy": 0.1275
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0948,
+        "reg_private": 0.2775,
+        "reg_easy": 0.0994
+      }
+    }
+  },
+  {
+    "rule_id": "f9dcdd2d",
+    "rule": "Explicitly verify that all relevant conditions and constraints are fully integrated into the reasoning, especially when ",
+    "accepted": false,
+    "u_lcb": -0.814598,
+    "reject_reason": "U_LCB=-0.8146 \u2264 0",
+    "private_activation_rate": 0.5,
+    "reg_easy_worst": 0.1275,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0142,
+        "reg_private": 0.6873,
+        "reg_easy": 0.0994
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.1142,
+        "reg_private": 0.6032,
+        "reg_easy": 0.1537
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.1139,
+        "reg_private": 0.4042,
+        "reg_easy": 0.1275
+      }
+    }
+  },
+  {
+    "rule_id": "a1f27c16",
+    "rule": "Explicitly verify that all conditionals and logical equivalences are correctly interpreted, including bidirectional (\"if",
+    "accepted": false,
+    "u_lcb": -0.817898,
+    "reject_reason": "U_LCB=-0.8179 \u2264 0",
+    "private_activation_rate": 0.6,
+    "reg_easy_worst": 0.1275,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0142,
+        "reg_private": 0.6873,
+        "reg_easy": 0.0994
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0812,
+        "reg_private": 0.5098,
+        "reg_easy": 0.1537
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.1139,
+        "reg_private": 0.4042,
+        "reg_easy": 0.1275
+      }
+    }
+  },
+  {
+    "rule_id": "e232eefa",
+    "rule": "Explicitly verify that all relevant quantitative or qualitative comparisons are logically consistent and that premises d",
+    "accepted": false,
+    "u_lcb": -0.843957,
+    "reject_reason": "U_LCB=-0.8440 \u2264 0",
+    "private_activation_rate": 0.2,
+    "reg_easy_worst": 0.1537,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0142,
+        "reg_private": 0.6873,
+        "reg_easy": 0.1537
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0812,
+        "reg_private": 0.4042,
+        "reg_easy": 0.1275
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0948,
+        "reg_private": 0.4042,
+        "reg_easy": 0.0994
+      }
+    }
+  },
+  {
+    "rule_id": "99c0e158",
+    "rule": "Explicitly verify that all relevant quantitative or qualitative comparisons are logically consistent and that all stated",
+    "accepted": false,
+    "u_lcb": -0.875249,
+    "reject_reason": "U_LCB=-0.8752 \u2264 0",
+    "private_activation_rate": 0.2,
+    "reg_easy_worst": 0.1275,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0265,
+        "reg_private": 0.7634,
+        "reg_easy": 0.1275
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.1142,
+        "reg_private": 0.6032,
+        "reg_easy": 0.0994
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.154,
+        "reg_private": 0.2775,
+        "reg_easy": 0.0994
+      }
+    }
+  },
+  {
+    "rule_id": "a072cdd0",
+    "rule": "Explicitly verify that all conditionals and logical equivalences in the argument are correctly interpreted, including bi",
+    "accepted": false,
+    "u_lcb": -0.935855,
+    "reject_reason": "U_LCB=-0.9359 \u2264 0",
+    "private_activation_rate": 0.5,
+    "reg_easy_worst": 0.1275,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0406,
+        "reg_private": 0.8318,
+        "reg_easy": 0.1275
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0812,
+        "reg_private": 0.4042,
+        "reg_easy": 0.1275
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0948,
+        "reg_private": 0.6032,
+        "reg_easy": 0.0994
+      }
+    }
+  },
+  {
+    "rule_id": "8de21914",
+    "rule": "Explicitly verify that all conditionals and logical constraints are fully integrated when drawing conclusions, especiall",
+    "accepted": false,
+    "u_lcb": -0.948711,
+    "reject_reason": "U_LCB=-0.9487 \u2264 0",
+    "private_activation_rate": 0.4,
+    "reg_easy_worst": 0.1275,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0265,
+        "reg_private": 0.8318,
+        "reg_easy": 0.1275
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.1142,
+        "reg_private": 0.5098,
+        "reg_easy": 0.1275
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.1139,
+        "reg_private": 0.2775,
+        "reg_easy": 0.1275
+      }
+    }
+  }
+]

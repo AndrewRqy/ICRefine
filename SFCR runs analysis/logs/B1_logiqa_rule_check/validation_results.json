@@ -1,0 +1,193 @@
+[
+  {
+    "rule_id": "18857496",
+    "rule": "For conditional chain questions, trace each if-then link in order and do not assume the converse or inverse holds unless",
+    "subtype_idx": null,
+    "repaired": false,
+    "accepted": false,
+    "candidate_status": "activated_no_effect",
+    "u_lcb": -0.0783,
+    "reject_reason": "count-gate: fixed_shared_count=0 < 1",
+    "reject_reasons": [
+      "count-gate: fixed_shared_count=0 < 1"
+    ],
+    "count_gate_used": true,
+    "validation_routing_mode": "routed",
+    "gate_mode": "count_aware",
+    "source_of_candidate": "manual",
+    "generator_model": "",
+    "benefit_models": [
+      "openai/gpt-4.1",
+      "google/gemini-2.0-flash-001"
+    ],
+    "safety_models": [
+      "openai/gpt-4.1",
+      "google/gemini-2.0-flash-001"
+    ],
+    "activation_debug": {
+      "use_when_terms": [],
+      "do_not_use_when_terms": [],
+      "use_when_phrases": [],
+      "do_not_use_when_phrases": [],
+      "matched_terms_per_item": {},
+      "vetoed_by_boundary_count": 50
+    },
+    "private_activation_rate": 0.0,
+    "reg_easy_worst": 0.0714,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.0714,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 0,
+        "easy_activation_count": 2,
+        "activated_shared_count": 4,
+        "n_shared_before_subtype_filter": 28,
+        "n_shared_after_subtype_filter": 28,
+        "subtype_filter_mode": "none",
+        "activation_count": 8,
+        "n_shared": 28,
+        "n_private": 2,
+        "n_easy": 50
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.0714,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 0,
+        "easy_activation_count": 2,
+        "activated_shared_count": 5,
+        "n_shared_before_subtype_filter": 26,
+        "n_shared_after_subtype_filter": 26,
+        "subtype_filter_mode": "none",
+        "activation_count": 8,
+        "n_shared": 26,
+        "n_private": 2,
+        "n_easy": 50
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.0714,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 0,
+        "easy_activation_count": 2,
+        "activated_shared_count": 5,
+        "n_shared_before_subtype_filter": 34,
+        "n_shared_after_subtype_filter": 34,
+        "subtype_filter_mode": "none",
+        "activation_count": 8,
+        "n_shared": 34,
+        "n_private": 2,
+        "n_easy": 50
+      }
+    }
+  },
+  {
+    "rule_id": "05b0fdbf",
+    "rule": "In logic questions with comparisons or rankings, preserve the direction of every inequality and avoid converting relativ",
+    "subtype_idx": null,
+    "repaired": false,
+    "accepted": false,
+    "candidate_status": "unsafe_private",
+    "u_lcb": -0.612907,
+    "reject_reason": "count-gate: reg_private_count=1 > 0; count-gate: private_activation_count=1 > 0",
+    "reject_reasons": [
+      "count-gate: reg_private_count=1 > 0",
+      "count-gate: private_activation_count=1 > 0"
+    ],
+    "count_gate_used": true,
+    "validation_routing_mode": "routed",
+    "gate_mode": "count_aware",
+    "source_of_candidate": "manual",
+    "generator_model": "",
+    "benefit_models": [
+      "openai/gpt-4.1",
+      "google/gemini-2.0-flash-001"
+    ],
+    "safety_models": [
+      "openai/gpt-4.1",
+      "google/gemini-2.0-flash-001"
+    ],
+    "activation_debug": {
+      "use_when_terms": [],
+      "do_not_use_when_terms": [],
+      "use_when_phrases": [],
+      "do_not_use_when_phrases": [],
+      "matched_terms_per_item": {},
+      "vetoed_by_boundary_count": 29
+    },
+    "private_activation_rate": 0.5,
+    "reg_easy_worst": 0.105,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.0714,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 1,
+        "easy_activation_count": 12,
+        "activated_shared_count": 10,
+        "n_shared_before_subtype_filter": 28,
+        "n_shared_after_subtype_filter": 28,
+        "subtype_filter_mode": "none",
+        "activation_count": 28,
+        "n_shared": 28,
+        "n_private": 2,
+        "n_easy": 50
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0068,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.5,
+        "reg_easy": 0.105,
+        "fixed_shared_count": 1,
+        "reg_easy_count": 1,
+        "reg_private_count": 1,
+        "private_activation_count": 1,
+        "easy_activation_count": 12,
+        "activated_shared_count": 9,
+        "n_shared_before_subtype_filter": 26,
+        "n_shared_after_subtype_filter": 26,
+        "subtype_filter_mode": "none",
+        "activation_count": 28,
+        "n_shared": 26,
+        "n_private": 2,
+        "n_easy": 50
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0052,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.0714,
+        "fixed_shared_count": 1,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 1,
+        "easy_activation_count": 12,
+        "activated_shared_count": 11,
+        "n_shared_before_subtype_filter": 34,
+        "n_shared_after_subtype_filter": 34,
+        "subtype_filter_mode": "none",
+        "activation_count": 28,
+        "n_shared": 34,
+        "n_private": 2,
+        "n_easy": 50
+      }
+    }
+  }
+]

@@ -1,0 +1,166 @@
+Certainly! Here is a **cheat sheet** focused on the most challenging types of deductive validity problems from the examples above. This sheet is designed to help you quickly analyze and answer similar questions on your test.
+
+---
+
+# Deductive Validity Cheat Sheet
+
+## 1. **Implication Direction: "If A, then B" vs. "If B, then A"**
+- **Premise:** "If A, then B" (A ⇒ B)
+- **Contrapositive:** "If not B, then not A" (¬B ⇒ ¬A) — **VALID**
+- **Converse:** "If B, then A" (B ⇒ A) — **NOT VALID** (unless explicitly stated)
+- **Inverse:** "If not A, then not B" (¬A ⇒ ¬B) — **NOT VALID**
+
+**Tip:** You can only infer the contrapositive, not the converse or inverse.
+
+---
+
+## 2. **Sufficiency vs. Necessity**
+- **Sufficient:** "Being X is sufficient for being Y" = If X, then Y (X ⇒ Y)
+- **Necessary:** "Being X is necessary for being Y" = If Y, then X (Y ⇒ X)
+- **Watch for reversal errors:** Don't swap necessity and sufficiency.
+
+---
+
+## 3. **"No X is Y" and Contraposition**
+- **"No X is Y"** = If X, then not Y (X ⇒ ¬Y)
+- **Contrapositive:** If Y, then not X (Y ⇒ ¬X)
+- **You CANNOT infer:** If not Y, then X (¬Y ⇒ X) — **INVALID**
+
+---
+
+## 4. **"Every X is Y or Z"**
+- **Means:** For any X, at least one of Y or Z is true.
+- **If you know X is not Y, then X must be Z.**
+- **If you know X is not Z, then X must be Y.**
+- **If you know X is neither Y nor Z, contradiction.**
+
+---
+
+## 5. **"Nobody is neither X nor Y"**
+- **Means:** For every person, at least one of X or Y is true.
+- **If not X, then Y. If not Y, then X.**
+- **If both not X and not Y, contradiction.**
+
+---
+
+## 6. **"Some X is Y"**
+- **Means:** There exists at least one X that is Y.
+- **If you have a restriction on all Y, you can apply it to this X.**
+- **But you cannot infer that all X are Y.**
+
+---
+
+## 7. **"Not both" / "Not all"**
+- **"Not both A and B"** = At least one of A or B is false.
+- **"Not all X are Y"** = There exists at least one X that is not Y.
+
+---
+
+## 8. **Transitivity**
+- If A ⇒ B and B ⇒ C, then A ⇒ C.
+- Use this to chain implications.
+
+---
+
+## 9. **Disjunctions ("or")**
+- **"A or B"** is true if at least one is true.
+- If you know one is false, the other must be true (if the "or" is exclusive or the context requires it).
+
+---
+
+## 10. **Existential vs. Universal Statements**
+- **Universal:** "Every X is Y" — applies to all X.
+- **Existential:** "Some X is Y" — applies to at least one X.
+- **Don't confuse the two!**
+
+---
+
+## 11. **Common Invalid Inferences**
+- **Affirming the Consequent:** If A ⇒ B, B is true, so A is true (**INVALID**)
+- **Denying the Antecedent:** If A ⇒ B, A is false, so B is false (**INVALID**)
+
+---
+
+## 12. **Set Inclusion**
+- If "All A are B" and "All B are C", then "All A are C".
+- If "All A are B" and "All C are B", you CANNOT infer any relation between A and C.
+
+---
+
+## 13. **Negation of "Every" and "Some"**
+- **Negation of "Every X is Y"**: "Some X is not Y"
+- **Negation of "Some X is Y"**: "No X is Y"
+
+---
+
+## 14. **"At least one" and "Not all"**
+- "Not all X are Y" = "At least one X is not Y"
+- "At least one X is Y" = "Some X is Y"
+
+---
+
+## 15. **How to Analyze a Problem Step-by-Step**
+1. **Translate each premise into logic.**
+2. **Identify the type of statement (universal, existential, necessary, sufficient, etc.).**
+3. **Check if the conclusion is a valid logical consequence (use transitivity, contraposition, etc.).**
+4. **Look for invalid inference patterns (see #11).**
+5. **If the conclusion reverses the direction of implication, it's likely invalid.**
+6. **If the conclusion is a contrapositive, it's valid.**
+7. **If the conclusion requires information not given in the premises, it's invalid.**
+
+---
+
+## 16. **Quick Reference Table**
+
+| Premise Type | Valid Conclusion | Invalid Conclusion |
+|--------------|-----------------|-------------------|
+| If A ⇒ B     | If ¬B ⇒ ¬A      | If B ⇒ A; If ¬A ⇒ ¬B |
+| All A are B  | All A are B     | All B are A       |
+| No A is B    | If A ⇒ ¬B       | If ¬B ⇒ A         |
+| Some A is B  | ∃A: B           | All A are B       |
+| A or B       | If ¬A ⇒ B       | If A ⇒ ¬B         |
+
+---
+
+## 17. **Special Patterns**
+- **"Whoever is not X is Y"**: If not X, then Y.
+- **"Being X is necessary for being Y"**: If Y, then X.
+- **"Being X is sufficient for being Y"**: If X, then Y.
+
+---
+
+**Practice:** When in doubt, write out the logical form and check if the conclusion is a valid consequence using the rules above.
+
+---
+
+**Remember:**  
+- **Contrapositive is always valid.**
+- **Converse and inverse are not valid unless explicitly stated.**
+- **Universal statements do not imply their converse.**
+- **Existential statements do not imply universality.**
+- **If the conclusion is stronger than the premises, it's likely invalid.**
+
+---
+
+**Use this sheet to check each argument step by step!**
+
+Follow the format of the examples below in your response.
+
+Question: "Is Fred a cousin of Robert? Is Joe related to Bob? In large families, it is sometimes difficult to keep track of all one's relatives. The following argument seeks to clarify some such relations: To start with, Darwin is a grandson of Dewayne. Now, whoever is not both a half-brother of Alvin and a grandson of Dewayne is an ancestor of Leslie. It follows that it is false that Darwin is an ancestor of Leslie."
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid
+Reasoning: Let's think step by step.  
+The first premise tells us "Darwin is a grandson of Dewayne." The second premise says "whoever is not both a half-brother of Alvin and a grandson of Dewayne is an ancestor of Leslie." This means: if someone is not both a half-brother of Alvin and a grandson of Dewayne, then that person is an ancestor of Leslie. The conclusion is "it is false that Darwin is an ancestor of Leslie," i.e., Darwin is not an ancestor of Leslie.
+
+But from the premises, we do not know whether Darwin is a half-brother of Alvin or not. If Darwin is a half-brother of Alvin, then he is both a half-brother of Alvin and a grandson of Dewayne, so the second premise does not apply to him, and we cannot conclude anything about whether he is an ancestor of Leslie. If Darwin is not a half-brother of Alvin, then he is not both a half-brother of Alvin and a grandson of Dewayne, so by the second premise, he is an ancestor of Leslie, which contradicts the conclusion. In either case, the conclusion does not necessarily follow from the premises. So the answer is invalid.
+Answer: invalid
+###
+Question: "It is not always easy to see who is related to whom -- and in which ways. The following argument pertains to this question: First of all, everyone who is a son of Andres is a son of Bruce, too. Next, Jeffrey is not a son of Bruce. In consequence, it is false that Jeffrey is a son of Andres."
+Is the argument, given the explicitly stated premises, deductively valid or invalid?
+Options:
+- valid 
+- invalid
+Reasoning: Let's think step by step. (1) Whoever is not a great-grandfather of Clyde is a stepbrother of Brian: If X = NOT (great-grandfather(Clyde)), then X = stepbrother(Brian). (2): Being an ancestor of Dana is sufficient for not being a great-grandfather of Clyde: If X = ancestor(Dana), X = NOT (great-grandfather(Clyde)). Hypothesis: Does it follow that everyone who is an ancestor of Dana is a stepbrother of Brian, too: If X = ancestor(Dana), then X = stepbrother(Brian)? Let’s see whether the Hypothesis can be deduced from the arguments (1) and (2) by logical reasoning? By (2), we have if X = ancestor(Dana), X = NOT (great-grandfather(Clyde)). Furthermore, by (1), we have if X = NOT (great-grandfather(Clyde)), then X = stepbrother(Brian). By the transitive relation rule in first-order logic, we then have: if X = ancestor(Dana), then X = stepbrother(Brian). So, it is true that everyone who is an ancestor of Dana is a stepbrother of Brian. So the answer is valid.
+Answer: valid

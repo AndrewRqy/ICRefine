@@ -1,0 +1,192 @@
+[
+  {
+    "rule_id": "79c1b3b0",
+    "rule": "When an arc command has equal x-radius and y-radius and zero rotation, the shape is a circle or circular arc; unequal ra",
+    "subtype_idx": null,
+    "repaired": false,
+    "accepted": false,
+    "candidate_status": "no_activation",
+    "u_lcb": -0.176434,
+    "reject_reason": "count-gate: fixed_shared_count=0 < 1",
+    "reject_reasons": [
+      "count-gate: fixed_shared_count=0 < 1"
+    ],
+    "count_gate_used": true,
+    "validation_routing_mode": "routed",
+    "gate_mode": "count_aware",
+    "source_of_candidate": "manual",
+    "generator_model": "",
+    "benefit_models": [
+      "openai/gpt-4.1",
+      "google/gemini-2.0-flash-001"
+    ],
+    "safety_models": [
+      "openai/gpt-4.1",
+      "google/gemini-2.0-flash-001"
+    ],
+    "activation_debug": {
+      "use_when_terms": [],
+      "do_not_use_when_terms": [],
+      "use_when_phrases": [],
+      "do_not_use_when_phrases": [],
+      "matched_terms_per_item": {},
+      "vetoed_by_boundary_count": 51
+    },
+    "private_activation_rate": 0.0,
+    "reg_easy_worst": 0.1682,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.1682,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 0,
+        "easy_activation_count": 0,
+        "activated_shared_count": 0,
+        "n_shared_before_subtype_filter": 7,
+        "n_shared_after_subtype_filter": 7,
+        "subtype_filter_mode": "none",
+        "activation_count": 0,
+        "n_shared": 7,
+        "n_private": 1,
+        "n_easy": 19
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.1682,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 0,
+        "easy_activation_count": 0,
+        "activated_shared_count": 0,
+        "n_shared_before_subtype_filter": 4,
+        "n_shared_after_subtype_filter": 4,
+        "subtype_filter_mode": "none",
+        "activation_count": 0,
+        "n_shared": 4,
+        "n_private": 1,
+        "n_easy": 19
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.1682,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 0,
+        "easy_activation_count": 0,
+        "activated_shared_count": 0,
+        "n_shared_before_subtype_filter": 6,
+        "n_shared_after_subtype_filter": 6,
+        "subtype_filter_mode": "none",
+        "activation_count": 0,
+        "n_shared": 6,
+        "n_private": 1,
+        "n_easy": 19
+      }
+    }
+  },
+  {
+    "rule_id": "a663b42a",
+    "rule": "For a closed four-sided path, classify quadrilaterals by angle and side constraints: check right angles first, then side",
+    "subtype_idx": null,
+    "repaired": false,
+    "accepted": false,
+    "candidate_status": "no_activation",
+    "u_lcb": -0.178734,
+    "reject_reason": "count-gate: fixed_shared_count=0 < 1",
+    "reject_reasons": [
+      "count-gate: fixed_shared_count=0 < 1"
+    ],
+    "count_gate_used": true,
+    "validation_routing_mode": "routed",
+    "gate_mode": "count_aware",
+    "source_of_candidate": "manual",
+    "generator_model": "",
+    "benefit_models": [
+      "openai/gpt-4.1",
+      "google/gemini-2.0-flash-001"
+    ],
+    "safety_models": [
+      "openai/gpt-4.1",
+      "google/gemini-2.0-flash-001"
+    ],
+    "activation_debug": {
+      "use_when_terms": [],
+      "do_not_use_when_terms": [],
+      "use_when_phrases": [],
+      "do_not_use_when_phrases": [],
+      "matched_terms_per_item": {},
+      "vetoed_by_boundary_count": 60
+    },
+    "private_activation_rate": 0.0,
+    "reg_easy_worst": 0.1682,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.1682,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 0,
+        "easy_activation_count": 0,
+        "activated_shared_count": 0,
+        "n_shared_before_subtype_filter": 7,
+        "n_shared_after_subtype_filter": 7,
+        "subtype_filter_mode": "none",
+        "activation_count": 0,
+        "n_shared": 7,
+        "n_private": 1,
+        "n_easy": 19
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.1682,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 0,
+        "easy_activation_count": 0,
+        "activated_shared_count": 0,
+        "n_shared_before_subtype_filter": 4,
+        "n_shared_after_subtype_filter": 4,
+        "subtype_filter_mode": "none",
+        "activation_count": 0,
+        "n_shared": 4,
+        "n_private": 1,
+        "n_easy": 19
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.1682,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 0,
+        "easy_activation_count": 0,
+        "activated_shared_count": 0,
+        "n_shared_before_subtype_filter": 6,
+        "n_shared_after_subtype_filter": 6,
+        "subtype_filter_mode": "none",
+        "activation_count": 0,
+        "n_shared": 6,
+        "n_private": 1,
+        "n_easy": 19
+      }
+    }
+  }
+]

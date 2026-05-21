@@ -1,0 +1,376 @@
+[
+  {
+    "rule_id": "05b0fdbf",
+    "rule": "In logic questions with comparisons or rankings, preserve the direction of every inequality and avoid converting relativ",
+    "subtype_idx": null,
+    "repaired": false,
+    "accepted": false,
+    "candidate_status": "no_activation",
+    "u_lcb": -0.08351,
+    "reject_reason": "count-gate: fixed_shared_count=0 < 1",
+    "reject_reasons": [
+      "count-gate: fixed_shared_count=0 < 1"
+    ],
+    "count_gate_used": true,
+    "validation_routing_mode": "routed",
+    "gate_mode": "count_aware",
+    "source_of_candidate": "manual",
+    "generator_model": "",
+    "benefit_models": [
+      "openai/gpt-4.1",
+      "google/gemini-2.0-flash-001"
+    ],
+    "safety_models": [
+      "openai/gpt-4.1",
+      "google/gemini-2.0-flash-001"
+    ],
+    "activation_debug": {
+      "use_when_terms": [
+        "explicit",
+        "comparative",
+        "relations",
+        "rankings",
+        "quantities",
+        "relative",
+        "constraints",
+        "named",
+        "entities"
+      ],
+      "do_not_use_when_terms": [
+        "mainly",
+        "causal",
+        "definitional",
+        "rhetorical",
+        "asks",
+        "general",
+        "principle",
+        "without",
+        "concrete",
+        "comparative",
+        "constraints"
+      ],
+      "use_when_phrases": [
+        "the question contains explicit comparative relations",
+        "or relative constraints between named entities."
+      ],
+      "do_not_use_when_phrases": [
+        "or asks for a general principle without concrete comparative constraints."
+      ],
+      "matched_terms_per_item": {
+        "agieval_logiqa_en_0218": [
+          "rankings"
+        ]
+      },
+      "vetoed_by_boundary_count": 15
+    },
+    "private_activation_rate": 0.0,
+    "reg_easy_worst": 0.0756,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.0756,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 0,
+        "easy_activation_count": 0,
+        "activated_shared_count": 0,
+        "n_shared_before_subtype_filter": 26,
+        "n_shared_after_subtype_filter": 26,
+        "subtype_filter_mode": "none",
+        "activation_count": 0,
+        "n_shared": 26,
+        "n_private": 2,
+        "n_easy": 47
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.0756,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 0,
+        "easy_activation_count": 0,
+        "activated_shared_count": 0,
+        "n_shared_before_subtype_filter": 25,
+        "n_shared_after_subtype_filter": 25,
+        "subtype_filter_mode": "none",
+        "activation_count": 0,
+        "n_shared": 25,
+        "n_private": 2,
+        "n_easy": 47
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.0756,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 0,
+        "easy_activation_count": 0,
+        "activated_shared_count": 0,
+        "n_shared_before_subtype_filter": 32,
+        "n_shared_after_subtype_filter": 32,
+        "subtype_filter_mode": "none",
+        "activation_count": 0,
+        "n_shared": 32,
+        "n_private": 2,
+        "n_easy": 47
+      }
+    }
+  },
+  {
+    "rule_id": "18857496",
+    "rule": "For conditional chain questions, trace each if-then link in order and do not assume the converse or inverse holds unless",
+    "subtype_idx": null,
+    "repaired": false,
+    "accepted": false,
+    "candidate_status": "activated_no_effect",
+    "u_lcb": -0.118082,
+    "reject_reason": "count-gate: fixed_shared_count=0 < 1",
+    "reject_reasons": [
+      "count-gate: fixed_shared_count=0 < 1"
+    ],
+    "count_gate_used": true,
+    "validation_routing_mode": "routed",
+    "gate_mode": "count_aware",
+    "source_of_candidate": "manual",
+    "generator_model": "",
+    "benefit_models": [
+      "google/gemini-2.0-flash-001"
+    ],
+    "safety_models": [
+      "openai/gpt-4.1",
+      "google/gemini-2.0-flash-001"
+    ],
+    "activation_debug": {
+      "use_when_terms": [
+        "passage",
+        "statements",
+        "conditions",
+        "necessary",
+        "sufficient",
+        "relationships",
+        "events"
+      ],
+      "do_not_use_when_terms": [
+        "primarily",
+        "involves",
+        "rankings",
+        "analogies",
+        "causal",
+        "explanations",
+        "without",
+        "explicit",
+        "conditionals"
+      ],
+      "use_when_phrases": [
+        "or necessary/sufficient relationships between events."
+      ],
+      "do_not_use_when_phrases": [
+        "the question primarily involves rankings",
+        "or causal explanations without explicit conditionals."
+      ],
+      "matched_terms_per_item": {
+        "agieval_logiqa_en_0399": [
+          "statements",
+          "conditions"
+        ],
+        "agieval_logiqa_en_0598": [
+          "conditions"
+        ],
+        "agieval_logiqa_en_0437": [
+          "statements"
+        ],
+        "agieval_logiqa_en_0531": [
+          "statements"
+        ],
+        "agieval_logiqa_en_0242": [
+          "conditions"
+        ],
+        "agieval_logiqa_en_0184": [
+          "conditions"
+        ],
+        "agieval_logiqa_en_0638": [
+          "conditions"
+        ],
+        "agieval_logiqa_en_0537": [
+          "sufficient"
+        ],
+        "agieval_logiqa_en_0408": [
+          "statements"
+        ],
+        "agieval_logiqa_en_0141": [
+          "conditions",
+          "necessary"
+        ],
+        "agieval_logiqa_en_0547": [
+          "conditions"
+        ],
+        "agieval_logiqa_en_0032": [
+          "conditions"
+        ],
+        "agieval_logiqa_en_0382": [
+          "statements"
+        ],
+        "agieval_logiqa_en_0599": [
+          "conditions"
+        ],
+        "agieval_logiqa_en_0629": [
+          "statements"
+        ],
+        "agieval_logiqa_en_0346": [
+          "statements",
+          "conditions"
+        ],
+        "agieval_logiqa_en_0350": [
+          "statements"
+        ],
+        "agieval_logiqa_en_0591": [
+          "conditions",
+          "necessary"
+        ],
+        "agieval_logiqa_en_0385": [
+          "statements"
+        ],
+        "agieval_logiqa_en_0457": [
+          "necessary"
+        ],
+        "agieval_logiqa_en_0649": [
+          "conditions"
+        ],
+        "agieval_logiqa_en_0375": [
+          "statements"
+        ],
+        "agieval_logiqa_en_0444": [
+          "conditions"
+        ],
+        "agieval_logiqa_en_0637": [
+          "statements"
+        ],
+        "agieval_logiqa_en_0373": [
+          "statements"
+        ],
+        "agieval_logiqa_en_0456": [
+          "statements"
+        ],
+        "agieval_logiqa_en_0604": [
+          "statements"
+        ],
+        "agieval_logiqa_en_0334": [
+          "statements"
+        ],
+        "agieval_logiqa_en_0482": [
+          "statements"
+        ],
+        "agieval_logiqa_en_0270": [
+          "statements"
+        ],
+        "agieval_logiqa_en_0631": [
+          "statements"
+        ],
+        "agieval_logiqa_en_0616": [
+          "statements"
+        ],
+        "agieval_logiqa_en_0612": [
+          "statements"
+        ],
+        "agieval_logiqa_en_0381": [
+          "statements"
+        ],
+        "agieval_logiqa_en_0362": [
+          "statements"
+        ],
+        "agieval_logiqa_en_0386": [
+          "statements"
+        ],
+        "agieval_logiqa_en_0241": [
+          "statements"
+        ],
+        "agieval_logiqa_en_0314": [
+          "statements"
+        ],
+        "agieval_logiqa_en_0002": [
+          "conditions"
+        ],
+        "agieval_logiqa_en_0273": [
+          "statements"
+        ],
+        "agieval_logiqa_en_0202": [
+          "necessary"
+        ],
+        "agieval_logiqa_en_0553": [
+          "statements"
+        ]
+      },
+      "vetoed_by_boundary_count": 12
+    },
+    "private_activation_rate": 0.0,
+    "reg_easy_worst": 0.1111,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.1111,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 1,
+        "reg_private_count": 0,
+        "private_activation_count": 0,
+        "easy_activation_count": 2,
+        "activated_shared_count": 0,
+        "n_shared_before_subtype_filter": 26,
+        "n_shared_after_subtype_filter": 26,
+        "subtype_filter_mode": "none",
+        "activation_count": 4,
+        "n_shared": 26,
+        "n_private": 2,
+        "n_easy": 47
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.1111,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 1,
+        "reg_private_count": 0,
+        "private_activation_count": 0,
+        "easy_activation_count": 2,
+        "activated_shared_count": 1,
+        "n_shared_before_subtype_filter": 25,
+        "n_shared_after_subtype_filter": 25,
+        "subtype_filter_mode": "none",
+        "activation_count": 4,
+        "n_shared": 25,
+        "n_private": 2,
+        "n_easy": 47
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.0756,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 0,
+        "easy_activation_count": 2,
+        "activated_shared_count": 1,
+        "n_shared_before_subtype_filter": 32,
+        "n_shared_after_subtype_filter": 32,
+        "subtype_filter_mode": "none",
+        "activation_count": 4,
+        "n_shared": 32,
+        "n_private": 2,
+        "n_easy": 47
+      }
+    }
+  }
+]

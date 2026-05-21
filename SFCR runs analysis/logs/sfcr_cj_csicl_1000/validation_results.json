@@ -1,0 +1,210 @@
+[
+  {
+    "rule_id": "9bd930c1",
+    "rule": "When multiple agents or actions contribute to a harmful joint outcome but only some acted contrary to explicit instructi",
+    "accepted": false,
+    "u_lcb": -0.265622,
+    "reject_reason": "U_LCB=-0.2656 \u2264 0",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.301,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0514,
+        "reg_private": 0.0,
+        "reg_easy": 0.2361
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.1517,
+        "reg_private": 0.0,
+        "reg_easy": 0.1611
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.1268,
+        "reg_private": 0.0,
+        "reg_easy": 0.301
+      }
+    }
+  },
+  {
+    "rule_id": "252ac138",
+    "rule": "When multiple agents' independent actions combine to produce a harmful outcome only if both occur, and one agent acts co",
+    "accepted": false,
+    "u_lcb": -0.300406,
+    "reject_reason": "U_LCB=-0.3004 \u2264 0",
+    "private_activation_rate": 0.0,
+    "reg_easy_worst": 0.301,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0162,
+        "reg_private": 0.0,
+        "reg_easy": 0.2361
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0514,
+        "reg_private": 0.0,
+        "reg_easy": 0.1611
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0433,
+        "reg_private": 0.0,
+        "reg_easy": 0.301
+      }
+    }
+  },
+  {
+    "rule_id": "567dc8dc",
+    "rule": "When multiple agents independently act but only one intentionally or knowingly violates instructions or introduces an ab",
+    "accepted": false,
+    "u_lcb": -0.300706,
+    "reject_reason": "U_LCB=-0.3007 \u2264 0",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.301,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0162,
+        "reg_private": 0.0,
+        "reg_easy": 0.2361
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0514,
+        "reg_private": 0.0,
+        "reg_easy": 0.1611
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0818,
+        "reg_private": 0.0,
+        "reg_easy": 0.301
+      }
+    }
+  },
+  {
+    "rule_id": "c28c4457",
+    "rule": "When multiple agents' independent actions combine to produce a harmful outcome only if both act, and neither alone cause",
+    "accepted": false,
+    "u_lcb": -0.300856,
+    "reject_reason": "U_LCB=-0.3009 \u2264 0",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.301,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0162,
+        "reg_private": 0.0,
+        "reg_easy": 0.2361
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0162,
+        "reg_private": 0.0,
+        "reg_easy": 0.1611
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0818,
+        "reg_private": 0.0,
+        "reg_easy": 0.301
+      }
+    }
+  },
+  {
+    "rule_id": "b8910209",
+    "rule": "When multiple agents or actions contribute to a joint outcome through independent, non-overlapping inputs or separate ca",
+    "accepted": false,
+    "u_lcb": -0.303228,
+    "reject_reason": "U_LCB=-0.3032 \u2264 0",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.301,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0162,
+        "reg_private": 0.0,
+        "reg_easy": 0.301
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0514,
+        "reg_private": 0.0,
+        "reg_easy": 0.2361
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0137,
+        "reg_private": 0.0,
+        "reg_easy": 0.301
+      }
+    }
+  },
+  {
+    "rule_id": "89466f9c",
+    "rule": "When multiple agents independently act but only one follows the correct instruction or intended plan while the other act",
+    "accepted": false,
+    "u_lcb": -0.330957,
+    "reject_reason": "U_LCB=-0.3310 \u2264 0",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.3604,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0514,
+        "reg_private": 0.0,
+        "reg_easy": 0.3604
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0975,
+        "reg_private": 1.0,
+        "reg_easy": 0.3604
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0818,
+        "reg_private": 0.0,
+        "reg_easy": 0.2361
+      }
+    }
+  },
+  {
+    "rule_id": "d062afa4",
+    "rule": "When multiple agents or actions contribute to a harmful or undesired joint outcome that only occurs if both act, typical",
+    "accepted": false,
+    "u_lcb": -0.361692,
+    "reject_reason": "U_LCB=-0.3617 \u2264 0",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.3604,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0162,
+        "reg_private": 0.0,
+        "reg_easy": 0.2361
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0514,
+        "reg_private": 0.0,
+        "reg_easy": 0.2361
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0433,
+        "reg_private": 0.0,
+        "reg_easy": 0.3604
+      }
+    }
+  },
+  {
+    "rule_id": "1b8de5de",
+    "rule": "When multiple agents independently perform actions that combine to cause harm, but only one agent intentionally or knowi",
+    "accepted": false,
+    "u_lcb": -0.361963,
+    "reject_reason": "U_LCB=-0.3620 \u2264 0",
+    "private_activation_rate": 0.0,
+    "reg_easy_worst": 0.3604,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0514,
+        "reg_private": 0.0,
+        "reg_easy": 0.2361
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0162,
+        "reg_private": 0.0,
+        "reg_easy": 0.1611
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0137,
+        "reg_private": 0.0,
+        "reg_easy": 0.3604
+      }
+    }
+  }
+]

@@ -1,0 +1,504 @@
+[
+  {
+    "rule_id": "256b4d62",
+    "rule": "Norm violations are typically judged as causes even when a background enabling condition was also necessary.",
+    "subtype_idx": null,
+    "repaired": false,
+    "accepted": false,
+    "candidate_status": "no_activation",
+    "u_lcb": -0.199013,
+    "reject_reason": "count-gate: fixed_shared_count=0 < 1",
+    "reject_reasons": [
+      "count-gate: fixed_shared_count=0 < 1"
+    ],
+    "count_gate_used": true,
+    "validation_routing_mode": "routed",
+    "gate_mode": "count_aware",
+    "source_of_candidate": "manual",
+    "generator_model": "",
+    "benefit_models": [
+      "openai/gpt-4.1",
+      "google/gemini-2.0-flash-001"
+    ],
+    "safety_models": [
+      "openai/gpt-4.1",
+      "google/gemini-2.0-flash-001"
+    ],
+    "activation_debug": {
+      "use_when_terms": [
+        "scenario",
+        "involves",
+        "someone",
+        "acting",
+        "against",
+        "duty",
+        "expected",
+        "behaviour",
+        "violation",
+        "causal",
+        "chain"
+      ],
+      "do_not_use_when_terms": [
+        "scenario",
+        "involves",
+        "joint",
+        "causation",
+        "preemption",
+        "independent",
+        "sufficiency",
+        "without",
+        "norm",
+        "violation"
+      ],
+      "use_when_phrases": [
+        "the scenario involves someone acting against a rule",
+        "and that violation is in the causal chain."
+      ],
+      "do_not_use_when_phrases": [
+        "the scenario involves joint causation",
+        "or independent sufficiency without any norm violation."
+      ],
+      "matched_terms_per_item": {
+        "causal_judgement_0064": [
+          "expected"
+        ],
+        "causal_judgement_0077": [
+          "expected"
+        ],
+        "causal_judgement_0082": [
+          "someone"
+        ],
+        "causal_judgement_0008": [
+          "expected"
+        ]
+      },
+      "vetoed_by_boundary_count": 40
+    },
+    "private_activation_rate": 0.0,
+    "reg_easy_worst": 0.1936,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.1936,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 0,
+        "easy_activation_count": 0,
+        "activated_shared_count": 0,
+        "n_shared_before_subtype_filter": 11,
+        "n_shared_after_subtype_filter": 11,
+        "subtype_filter_mode": "none",
+        "activation_count": 0,
+        "n_shared": 11,
+        "n_private": 2,
+        "n_easy": 16
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.1936,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 0,
+        "easy_activation_count": 0,
+        "activated_shared_count": 0,
+        "n_shared_before_subtype_filter": 10,
+        "n_shared_after_subtype_filter": 10,
+        "subtype_filter_mode": "none",
+        "activation_count": 0,
+        "n_shared": 10,
+        "n_private": 2,
+        "n_easy": 16
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.1936,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 0,
+        "easy_activation_count": 0,
+        "activated_shared_count": 0,
+        "n_shared_before_subtype_filter": 14,
+        "n_shared_after_subtype_filter": 14,
+        "subtype_filter_mode": "none",
+        "activation_count": 0,
+        "n_shared": 14,
+        "n_private": 2,
+        "n_easy": 16
+      }
+    }
+  },
+  {
+    "rule_id": "fae67958",
+    "rule": "When the outcome requires two actions jointly, do not label either single action as the cause merely because it was nece",
+    "subtype_idx": null,
+    "repaired": false,
+    "accepted": false,
+    "candidate_status": "no_activation",
+    "u_lcb": -0.199913,
+    "reject_reason": "count-gate: fixed_shared_count=0 < 1",
+    "reject_reasons": [
+      "count-gate: fixed_shared_count=0 < 1"
+    ],
+    "count_gate_used": true,
+    "validation_routing_mode": "routed",
+    "gate_mode": "count_aware",
+    "source_of_candidate": "manual",
+    "generator_model": "",
+    "benefit_models": [
+      "openai/gpt-4.1",
+      "google/gemini-2.0-flash-001"
+    ],
+    "safety_models": [
+      "openai/gpt-4.1",
+      "google/gemini-2.0-flash-001"
+    ],
+    "activation_debug": {
+      "use_when_terms": [
+        "scenario",
+        "states",
+        "outcome",
+        "occurs",
+        "two",
+        "conditions",
+        "actions",
+        "happen",
+        "together"
+      ],
+      "do_not_use_when_terms": [
+        "scenario",
+        "describes",
+        "overdetermination",
+        "preemption",
+        "independently",
+        "sufficient",
+        "cause",
+        "norm",
+        "violation",
+        "intentional",
+        "action",
+        "background",
+        "enabling",
+        "condition"
+      ],
+      "use_when_phrases": [
+        "the scenario states that the outcome occurs only if two or more conditions or actions happen together."
+      ],
+      "do_not_use_when_phrases": [
+        "the scenario describes overdetermination",
+        "an independently sufficient cause",
+        "or a background enabling condition."
+      ],
+      "matched_terms_per_item": {
+        "causal_judgement_0020": [
+          "two"
+        ],
+        "causal_judgement_0074": [
+          "two"
+        ],
+        "causal_judgement_0002": [
+          "two"
+        ],
+        "causal_judgement_0018": [
+          "two"
+        ],
+        "causal_judgement_0046": [
+          "two"
+        ],
+        "causal_judgement_0030": [
+          "two"
+        ],
+        "causal_judgement_0097": [
+          "two"
+        ],
+        "causal_judgement_0028": [
+          "two"
+        ],
+        "causal_judgement_0016": [
+          "actions"
+        ],
+        "causal_judgement_0068": [
+          "two"
+        ],
+        "causal_judgement_0054": [
+          "two"
+        ]
+      },
+      "vetoed_by_boundary_count": 24
+    },
+    "private_activation_rate": 0.0,
+    "reg_easy_worst": 0.1936,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.1936,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 0,
+        "easy_activation_count": 0,
+        "activated_shared_count": 0,
+        "n_shared_before_subtype_filter": 11,
+        "n_shared_after_subtype_filter": 11,
+        "subtype_filter_mode": "none",
+        "activation_count": 0,
+        "n_shared": 11,
+        "n_private": 2,
+        "n_easy": 16
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.1936,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 0,
+        "easy_activation_count": 0,
+        "activated_shared_count": 0,
+        "n_shared_before_subtype_filter": 10,
+        "n_shared_after_subtype_filter": 10,
+        "subtype_filter_mode": "none",
+        "activation_count": 0,
+        "n_shared": 10,
+        "n_private": 2,
+        "n_easy": 16
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.1936,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 0,
+        "easy_activation_count": 0,
+        "activated_shared_count": 0,
+        "n_shared_before_subtype_filter": 14,
+        "n_shared_after_subtype_filter": 14,
+        "subtype_filter_mode": "none",
+        "activation_count": 0,
+        "n_shared": 14,
+        "n_private": 2,
+        "n_easy": 16
+      }
+    }
+  },
+  {
+    "rule_id": "113fd61a",
+    "rule": "When event A prevents event B from completing its causal chain, A is the cause even if B would have produced the same ou",
+    "subtype_idx": null,
+    "repaired": false,
+    "accepted": false,
+    "candidate_status": "unsafe_private",
+    "u_lcb": -0.199913,
+    "reject_reason": "count-gate: fixed_shared_count=0 < 1; count-gate: private_activation_count=1 > 0",
+    "reject_reasons": [
+      "count-gate: fixed_shared_count=0 < 1",
+      "count-gate: private_activation_count=1 > 0"
+    ],
+    "count_gate_used": true,
+    "validation_routing_mode": "routed",
+    "gate_mode": "count_aware",
+    "source_of_candidate": "manual",
+    "generator_model": "",
+    "benefit_models": [
+      "openai/gpt-4.1",
+      "google/gemini-2.0-flash-001"
+    ],
+    "safety_models": [
+      "openai/gpt-4.1",
+      "google/gemini-2.0-flash-001"
+    ],
+    "activation_debug": {
+      "use_when_terms": [
+        "scenario",
+        "involves",
+        "one",
+        "event",
+        "occurring",
+        "before",
+        "another",
+        "take",
+        "effect",
+        "stopping",
+        "bypassing",
+        "second",
+        "contribution"
+      ],
+      "do_not_use_when_terms": [
+        "events",
+        "complete",
+        "causal",
+        "chains",
+        "independently",
+        "scenario",
+        "involves",
+        "joint",
+        "requirements",
+        "norm",
+        "violations"
+      ],
+      "use_when_phrases": [
+        "the scenario involves one event occurring before another could take effect",
+        "stopping or bypassing the second event's contribution."
+      ],
+      "do_not_use_when_phrases": [
+        "both events complete their causal chains independently",
+        "or the scenario involves joint requirements or norm violations."
+      ],
+      "matched_terms_per_item": {
+        "causal_judgement_0064": [
+          "second"
+        ],
+        "causal_judgement_0000": [
+          "one"
+        ],
+        "causal_judgement_0036": [
+          "another",
+          "take"
+        ],
+        "causal_judgement_0020": [
+          "one"
+        ],
+        "causal_judgement_0032": [
+          "one"
+        ],
+        "causal_judgement_0022": [
+          "one"
+        ],
+        "causal_judgement_0074": [
+          "one",
+          "before",
+          "take"
+        ],
+        "causal_judgement_0090": [
+          "one"
+        ],
+        "causal_judgement_0053": [
+          "one"
+        ],
+        "causal_judgement_0092": [
+          "one"
+        ],
+        "causal_judgement_0005": [
+          "one"
+        ],
+        "causal_judgement_0029": [
+          "one",
+          "before"
+        ],
+        "causal_judgement_0046": [
+          "one"
+        ],
+        "causal_judgement_0030": [
+          "one",
+          "before",
+          "take"
+        ],
+        "causal_judgement_0097": [
+          "one"
+        ],
+        "causal_judgement_0028": [
+          "one",
+          "before",
+          "take"
+        ],
+        "causal_judgement_0055": [
+          "one"
+        ],
+        "causal_judgement_0068": [
+          "one"
+        ],
+        "causal_judgement_0021": [
+          "one"
+        ],
+        "causal_judgement_0059": [
+          "another",
+          "take"
+        ],
+        "causal_judgement_0008": [
+          "one",
+          "second"
+        ],
+        "causal_judgement_0050": [
+          "one"
+        ]
+      },
+      "vetoed_by_boundary_count": 8
+    },
+    "private_activation_rate": 0.5,
+    "reg_easy_worst": 0.1936,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.1936,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 1,
+        "easy_activation_count": 0,
+        "activated_shared_count": 1,
+        "n_shared_before_subtype_filter": 11,
+        "n_shared_after_subtype_filter": 11,
+        "subtype_filter_mode": "none",
+        "activation_count": 2,
+        "n_shared": 11,
+        "n_private": 2,
+        "n_easy": 16
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.1936,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 1,
+        "easy_activation_count": 0,
+        "activated_shared_count": 1,
+        "n_shared_before_subtype_filter": 10,
+        "n_shared_after_subtype_filter": 10,
+        "subtype_filter_mode": "none",
+        "activation_count": 2,
+        "n_shared": 10,
+        "n_private": 2,
+        "n_easy": 16
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.1936,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 1,
+        "easy_activation_count": 0,
+        "activated_shared_count": 1,
+        "n_shared_before_subtype_filter": 14,
+        "n_shared_after_subtype_filter": 14,
+        "subtype_filter_mode": "none",
+        "activation_count": 2,
+        "n_shared": 14,
+        "n_private": 2,
+        "n_easy": 16
+      }
+    }
+  }
+]

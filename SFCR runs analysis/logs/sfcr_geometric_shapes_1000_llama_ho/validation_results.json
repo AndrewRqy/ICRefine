@@ -1,0 +1,210 @@
+[
+  {
+    "rule_id": "fdd11388",
+    "rule": "If a closed quadrilateral does not have all right angles and does not meet kite conditions, but has at least one pair of",
+    "accepted": false,
+    "u_lcb": 0.02656,
+    "reject_reason": "private_activation_rate=100.00% > 10%",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.1514,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.1876,
+        "reg_private": 0.0,
+        "reg_easy": 0.1181
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.2307,
+        "reg_private": 0.0,
+        "reg_easy": 0.1514
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.2398
+      }
+    }
+  },
+  {
+    "rule_id": "6e3dd754",
+    "rule": "When a closed quadrilateral does not have all right angles or two pairs of equal opposite sides, and the shape has only ",
+    "accepted": false,
+    "u_lcb": -0.098784,
+    "reject_reason": "U_LCB=-0.0988 \u2264 0",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.1823,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0968,
+        "reg_private": 0.0,
+        "reg_easy": 0.1181
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.1176,
+        "reg_private": 0.0,
+        "reg_easy": 0.1823
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.1514
+      }
+    }
+  },
+  {
+    "rule_id": "ae2b7f86",
+    "rule": "If a closed quadrilateral does not have all right angles and does not meet kite criteria, but has at least one pair of p",
+    "accepted": false,
+    "u_lcb": -0.249394,
+    "reject_reason": "U_LCB=-0.2494 \u2264 0",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.2398,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.1181
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.3755,
+        "reg_private": 0.0,
+        "reg_easy": 0.2398
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.2671
+      }
+    }
+  },
+  {
+    "rule_id": "77688d9c",
+    "rule": "If a closed quadrilateral does not have all right angles and does not meet the strict criteria for a kite or rectangle, ",
+    "accepted": false,
+    "u_lcb": -0.252644,
+    "reject_reason": "U_LCB=-0.2526 \u2264 0",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.2398,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.1514
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.1176,
+        "reg_private": 0.0,
+        "reg_easy": 0.2398
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.3196
+      }
+    }
+  },
+  {
+    "rule_id": "76c896b4",
+    "rule": "If a closed quadrilateral does not have all right angles and does not meet kite criteria, check for at least one pair of",
+    "accepted": false,
+    "u_lcb": -0.330008,
+    "reject_reason": "U_LCB=-0.3300 \u2264 0",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.3196,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.1181
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0362,
+        "reg_private": 0.0,
+        "reg_easy": 0.3196
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.2116
+      }
+    }
+  },
+  {
+    "rule_id": "700a4fce",
+    "rule": "When a closed quadrilateral does not have all right angles or two pairs of equal opposite sides, and two pairs of adjace",
+    "accepted": false,
+    "u_lcb": -0.434611,
+    "reject_reason": "U_LCB=-0.4346 \u2264 0",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.1181,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0301,
+        "reg_private": 0.3333,
+        "reg_easy": 0.0803
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.1176,
+        "reg_private": 0.0,
+        "reg_easy": 0.1181
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.2116
+      }
+    }
+  },
+  {
+    "rule_id": "11ede173",
+    "rule": "If a closed quadrilateral does not have all right angles and does not meet the rectangle or kite conditions but has at l",
+    "accepted": false,
+    "u_lcb": -0.496834,
+    "reject_reason": "U_LCB=-0.4968 \u2264 0",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.1823,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0301,
+        "reg_private": 0.3333,
+        "reg_easy": 0.0803
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0362,
+        "reg_private": 0.0,
+        "reg_easy": 0.1823
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.1181
+      }
+    }
+  },
+  {
+    "rule_id": "c1784dd7",
+    "rule": "When a closed quadrilateral does not have all right angles or two pairs of equal adjacent sides, and at least one pair o",
+    "accepted": false,
+    "u_lcb": -0.580728,
+    "reject_reason": "U_LCB=-0.5807 \u2264 0",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.2671,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0301,
+        "reg_private": 0.3333,
+        "reg_easy": 0.1181
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.2307,
+        "reg_private": 0.0,
+        "reg_easy": 0.2671
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.2116
+      }
+    }
+  }
+]

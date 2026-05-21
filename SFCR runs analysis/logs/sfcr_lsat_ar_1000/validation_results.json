@@ -1,0 +1,210 @@
+[
+  {
+    "rule_id": "1580ac39",
+    "rule": "Explicitly incorporate the interplay of multiple conditional chains and compound constraints by verifying all linked dep",
+    "accepted": false,
+    "u_lcb": -0.481045,
+    "reject_reason": "U_LCB=-0.4810 \u2264 0",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.4709,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.1176,
+        "reg_private": 0.0,
+        "reg_easy": 0.3244
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0,
+        "reg_private": 1.0,
+        "reg_easy": 0.6943
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.4709
+      }
+    }
+  },
+  {
+    "rule_id": "b38c18e9",
+    "rule": "Explicitly incorporate the indirect and chained consequences of conditional statements by fully propagating all linked a",
+    "accepted": false,
+    "u_lcb": -0.481045,
+    "reject_reason": "U_LCB=-0.4810 \u2264 0",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.4709,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.1176,
+        "reg_private": 0.0,
+        "reg_easy": 0.4709
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.5907
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.4709
+      }
+    }
+  },
+  {
+    "rule_id": "860b736b",
+    "rule": "Explicitly consider the indirect and chained consequences of conditional statements, including necessary presence or abs",
+    "accepted": false,
+    "u_lcb": -0.576101,
+    "reject_reason": "U_LCB=-0.5761 \u2264 0",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.5907,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.1176,
+        "reg_private": 0.0,
+        "reg_easy": 0.3244
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.6943
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0257,
+        "reg_private": 0.0,
+        "reg_easy": 0.5907
+      }
+    }
+  },
+  {
+    "rule_id": "1474e5d1",
+    "rule": "Explicitly incorporate the logical consequences of conditional chains and mutual exclusivity by systematically testing t",
+    "accepted": false,
+    "u_lcb": -0.580701,
+    "reject_reason": "U_LCB=-0.5807 \u2264 0",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.5907,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.1176,
+        "reg_private": 0.0,
+        "reg_easy": 0.4709
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0,
+        "reg_private": 1.0,
+        "reg_easy": 0.5907
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0257,
+        "reg_private": 0.0,
+        "reg_easy": 0.5907
+      }
+    }
+  },
+  {
+    "rule_id": "36f28322",
+    "rule": "Explicitly incorporate the indirect and chained consequences of conditional statements, including contrapositive reasoni",
+    "accepted": false,
+    "u_lcb": -0.60298,
+    "reject_reason": "U_LCB=-0.6030 \u2264 0",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.5907,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.3244
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0257,
+        "reg_private": 0.0,
+        "reg_easy": 0.5907
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.5907
+      }
+    }
+  },
+  {
+    "rule_id": "d855d5d0",
+    "rule": "Explicitly incorporate the contrapositive and biconditional reasoning for all conditional statements, and systematically",
+    "accepted": false,
+    "u_lcb": -0.60338,
+    "reject_reason": "U_LCB=-0.6034 \u2264 0",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.5907,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.1176,
+        "reg_private": 0.0,
+        "reg_easy": 0.3244
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0257,
+        "reg_private": 1.0,
+        "reg_easy": 0.4709
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.5907
+      }
+    }
+  },
+  {
+    "rule_id": "12f3ecb6",
+    "rule": "Explicitly incorporate the contrapositive and biconditional reasoning for all conditional statements, and systematically",
+    "accepted": false,
+    "u_lcb": -0.60358,
+    "reject_reason": "U_LCB=-0.6036 \u2264 0",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.5907,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.1176,
+        "reg_private": 0.0,
+        "reg_easy": 0.3244
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.5907
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.5907
+      }
+    }
+  },
+  {
+    "rule_id": "0c16f925",
+    "rule": "Explicitly incorporate the interplay of multiple conditional chains and compound constraints by systematically testing l",
+    "accepted": false,
+    "u_lcb": -0.705312,
+    "reject_reason": "U_LCB=-0.7053 \u2264 0",
+    "private_activation_rate": 1.0,
+    "reg_easy_worst": 0.6943,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0362,
+        "reg_private": 0.0,
+        "reg_easy": 0.4709
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0,
+        "reg_private": 1.0,
+        "reg_easy": 0.6943
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "reg_private": 0.0,
+        "reg_easy": 0.6943
+      }
+    }
+  }
+]

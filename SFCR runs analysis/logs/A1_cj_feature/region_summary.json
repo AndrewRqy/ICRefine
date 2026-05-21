@@ -1,0 +1,20 @@
+{
+  "source_accuracy": 0.7333333333333333,
+  "F_s": 16,
+  "V_shared": 13,
+  "V_private": 3,
+  "V_easy": 40,
+  "skip_reason": null,
+  "per_model_correct": {
+    "openai/gpt-4.1-mini": 44,
+    "openai/gpt-4.1": 51,
+    "google/gemini-2.0-flash-001": 46,
+    "meta-llama/llama-3.3-70b-instruct": 47
+  },
+  "per_model_wrong": {
+    "openai/gpt-4.1-mini": 16,
+    "openai/gpt-4.1": 9,
+    "google/gemini-2.0-flash-001": 14,
+    "meta-llama/llama-3.3-70b-instruct": 13
+  }
+}

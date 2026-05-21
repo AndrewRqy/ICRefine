@@ -1,0 +1,33 @@
+{
+  "task": "agieval_logiqa_en",
+  "seed": 1000,
+  "oracle_mode": "label_only",
+  "routing_mode": "routed",
+  "router_type": "keyword",
+  "memory_format": "rule_check_example",
+  "gate_profile": "diagnostic",
+  "model_source": "openai/gpt-4.1-mini",
+  "models_proxy": "openai/gpt-4.1,google/gemini-2.0-flash-001,meta-llama/llama-3.3-70b-instruct",
+  "held_out_target": "llama",
+  "n_eval_seeds": 1,
+  "use_subtypes": true,
+  "repair_attempts": 0,
+  "skipped": false,
+  "skip_reason": null,
+  "source_accuracy": 0.59,
+  "v_shared_size": 71,
+  "v_private_size": 11,
+  "v_easy_size": 77,
+  "f_s_size": 82,
+  "jaccard_matrix": {
+    "gpt-4.1-mini\u2194gpt-4.1": 0.52,
+    "gpt-4.1-mini\u2194gemini-2.0-flash-001": 0.5,
+    "gpt-4.1-mini\u2194llama-3.3-70b-instruct": 0.6176
+  },
+  "n_accepted": 0,
+  "accepted_rules": [],
+  "n_candidates": 2,
+  "n_rejected": 2,
+  "n_count_gate": 2,
+  "n_repaired": 0
+}

@@ -47,6 +47,7 @@ from typing import Callable
 from utils.scorer import score_batch
 from utils.task_spec import TaskSpec
 
+from .activation import activation_details, activation_details_feature
 from .failure_regions import FailureRegions
 
 _RULE_SECTION = "\n\n--- ADDITIONAL RULE ---\n"
@@ -122,6 +123,15 @@ class ProxyStats:
     reg_private_count:       int = 0  # items in V_private: correct → wrong under candidate
     private_activation_count: int = 0 # items in V_private matching USE WHEN
     activation_count:        int = 0  # total gate items matching USE WHEN
+    activated_shared_count:  int = 0
+    activated_private_count: int = 0
+    activated_easy_count:    int = 0
+    easy_activation_count:   int = 0
+    routed_activation_rate:  float = 0.0
+    shared_gain_mode:        str = "failure_only_fix_rate"
+    n_shared_before_subtype_filter: int = 0
+    n_shared_after_subtype_filter:  int = 0
+    subtype_filter_mode:     str = "none"
 
 
 @dataclass
@@ -137,6 +147,14 @@ class ValidationResult:
     count_gate_used:         bool           = False  # True when count-aware gate was applied
     # Repair loop data
     failure_profile:         dict | None    = None
+    validation_routing_mode: str            = "global"
+    gate_mode:               str            = "ulcb"
+    benefit_models:          list[str]      = field(default_factory=list)
+    safety_models:           list[str]      = field(default_factory=list)
+    activation_debug:        dict           = field(default_factory=dict)
+    reject_reasons:          list[str]      = field(default_factory=list)
+    candidate_status:        str            = ""
+    per_item_routing:        list[dict]     = field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------
@@ -283,6 +301,55 @@ def _benefit_panel(
     panel = [pm for pm in proxy_models
              if V_shared_per_proxy.get(pm, set()) & subtype_ids]
     return panel if panel else proxy_models  # guard: at least one proxy
+
+
+# ---------------------------------------------------------------------------
+# Gate profile helpers (Line C)
+# ---------------------------------------------------------------------------
+
+_GATE_PROFILE_PARAMS: dict[str, dict] = {
+    "small":      {"min_fixed": 0, "diagnostic_only": True},
+    "diagnostic": {"min_fixed": 0, "diagnostic_only": True},
+    "medium":     {"min_fixed": 0, "diagnostic_only": False},
+    "large":      {"min_fixed": 0, "diagnostic_only": False},
+}
+
+
+def _resolve_gate_profile(gate_profile: str, n_shared: int) -> str:
+    """Select effective gate profile from an explicit choice or |V_shared| size."""
+    if gate_profile != "auto":
+        return gate_profile
+    if n_shared < 10:
+        return "small"
+    if n_shared < 30:
+        return "medium"
+    return "large"
+
+
+def _compute_candidate_status(
+    accepted: bool,
+    diagnostic_only: bool,
+    max_fixed_shared: int,
+    max_activated_shared: int,
+    max_private_activation_count: int,
+    max_reg_easy_count: int,
+    max_reg_easy_raw: float,
+    reg_easy_ceiling: float,
+) -> str:
+    """Assign a diagnostic label independent of the acceptance decision."""
+    if accepted:
+        return "accepted"
+    if max_private_activation_count > 0:
+        return "unsafe_private"
+    if max_reg_easy_count > 1 and max_reg_easy_raw > reg_easy_ceiling:
+        return "unsafe_easy"
+    if max_activated_shared == 0:
+        return "no_activation"
+    if max_fixed_shared >= 1:
+        return "near_hit_fix1"
+    if max_activated_shared > 0:
+        return "activated_no_effect"
+    return "safe_noop"
 
 
 # ---------------------------------------------------------------------------
@@ -454,12 +521,7 @@ def _validate_one(
 
     if use_count_gate:
         # Count-aware pilot gate
-        if max_fixed_shared < 2:
-            reject_reason = (
-                f"count-gate: fixed_shared_count={max_fixed_shared} < 2 "
-                f"(|V_private|={n_prv}, |V_easy|={n_esy})"
-            )
-        elif total_reg_private_cnt > 0:
+        if total_reg_private_cnt > 0:
             reject_reason = (
                 f"count-gate: reg_private_count={total_reg_private_cnt} > 0"
             )
@@ -535,6 +597,410 @@ def _validate_one(
     )
 
 
+def _validate_one_v2(
+    rule: dict,
+    gate_items: list[dict],
+    gate_baseline: GateBaseline,
+    gate_region_ids: dict,
+    anchor_cheatsheet: str,
+    source_model: str,
+    proxy_models: list[str],
+    acceptance_proxies: list[str],
+    api_key: str,
+    task_spec: TaskSpec,
+    concurrency: int,
+    lambda_w: float,
+    mu_w: float,
+    nu_w: float,
+    private_activation_ceiling: float,
+    reg_easy_ceiling: float,
+    max_rule_chars: int,
+    validation_routing_mode: str = "routed",
+    gate_mode: str = "hybrid",
+    subtype_filter_mode: str = "none",
+    router_min_matches: int = 2,
+    router_min_veto_matches: int = 1,
+    allow_empty_use_when_global: bool = False,
+    max_routed_activation_rate: float = 0.5,
+    noncatastrophic_ulcb_floor: float = -0.25,
+    score_fn: Callable | None = None,
+    router_type: str = "keyword",
+    task: str = "",
+    gate_profile: str = "auto",
+    semantic_label_to_gate_ids: dict[str, set[str]] | None = None,
+) -> ValidationResult:
+    """Validate one candidate with explicit global or routed exposure."""
+    if len(rule["rule"]) > max_rule_chars:
+        return ValidationResult(
+            rule=rule, accepted=False, u_lcb=-999.0,
+            private_activation_rate=0.0, reg_easy_worst=0.0,
+            reject_reason=f"rule too long ({len(rule['rule'])} > {max_rule_chars} chars)",
+            validation_routing_mode=validation_routing_mode,
+            gate_mode=gate_mode,
+            reject_reasons=[f"rule too long ({len(rule['rule'])} > {max_rule_chars} chars)"],
+        )
+
+    if validation_routing_mode not in {"global", "routed", "subtype"}:
+        raise ValueError("validation_routing_mode must be 'global', 'routed', or 'subtype'")
+    if gate_mode not in {"ulcb", "count_aware", "hybrid"}:
+        raise ValueError("gate_mode must be 'ulcb', 'count_aware', or 'hybrid'")
+    if subtype_filter_mode not in {"none", "id_intersection"}:
+        raise ValueError("subtype_filter_mode must be 'none' or 'id_intersection'")
+
+    score_fn = score_fn or score_batch
+    cs_with_rule = build_cheatsheet_with_rule(anchor_cheatsheet, rule)
+    all_gate_ids = {it["_sfcr_id"] for it in gate_items}
+
+    if router_type == "feature" and task:
+        route_details = {
+            it["_sfcr_id"]: activation_details_feature(
+                rule, it, task,
+                min_tag_matches=1,
+                min_veto_matches=router_min_veto_matches,
+                allow_empty_use_when_global=allow_empty_use_when_global,
+            )
+            for it in gate_items
+        }
+    else:
+        route_details = {
+            it["_sfcr_id"]: activation_details(
+                rule, it,
+                min_matches=router_min_matches,
+                min_veto_matches=router_min_veto_matches,
+                allow_empty_use_when_global=allow_empty_use_when_global,
+            )
+            for it in gate_items
+        }
+    routed_active_ids = {iid for iid, detail in route_details.items() if detail.active}
+    if validation_routing_mode == "global":
+        exposed_ids = all_gate_ids
+    elif validation_routing_mode == "subtype":
+        F_s = gate_region_ids["F_s"]
+        subtype_labels = set(rule.get("subtype_labels") or [])
+        if subtype_labels and semantic_label_to_gate_ids:
+            subtype_gate_ids: set[str] = set()
+            for label in subtype_labels:
+                subtype_gate_ids |= semantic_label_to_gate_ids.get(label, set())
+            exposed_ids = subtype_gate_ids & F_s
+            if not exposed_ids:
+                exposed_ids = F_s  # fallback: all source failures
+        else:
+            exposed_ids = F_s  # fallback
+    else:  # routed
+        exposed_ids = routed_active_ids
+    exposed_items = [it for it in gate_items if it["_sfcr_id"] in exposed_ids]
+    first_detail = next(iter(route_details.values()), None)
+    activation_debug = {
+        "use_when_terms": first_detail.use_when_terms if first_detail else [],
+        "do_not_use_when_terms": first_detail.do_not_use_when_terms if first_detail else [],
+        "use_when_phrases": first_detail.use_when_phrases if first_detail else [],
+        "do_not_use_when_phrases": first_detail.do_not_use_when_phrases if first_detail else [],
+        "matched_terms_per_item": {
+            iid: detail.matched_terms for iid, detail in route_details.items()
+            if detail.matched_terms
+        },
+        "vetoed_by_boundary_count": sum(
+            1 for detail in route_details.values() if detail.vetoed_by_boundary
+        ),
+    }
+
+    def _score_proxy(model: str):
+        # Routed mode keeps baseline correctness for non-activated items.
+        candidate_correct = dict(gate_baseline.correct_by_model[model])
+        if exposed_items:
+            short = model.split("/")[-1]
+            c, w = score_fn(
+                exposed_items, cs_with_rule, model, api_key,
+                concurrency=concurrency, temperature=0.0,
+                progress_label=f"[validate:{validation_routing_mode}] {short}",
+                reasoning_effort=None, cot_first=True, task_spec=task_spec,
+            )
+            candidate_correct.update({it["_sfcr_id"]: True for it in c})
+            candidate_correct.update({it["_sfcr_id"]: False for it in w})
+        return model, candidate_correct
+
+    all_eval = [source_model] + proxy_models
+    with ThreadPoolExecutor(max_workers=len(all_eval)) as pool:
+        cand_results = {model: cb for model, cb in pool.map(_score_proxy, all_eval)}
+
+    V_private = gate_region_ids["V_private"]
+    V_easy = gate_region_ids["V_easy"]
+    V_shared_pp = gate_region_ids["V_shared_per_proxy"]
+    baseline_cb = gate_baseline.correct_by_model
+    subtype_ids = set(rule["subtype_items"]) if rule.get("subtype_items") else None
+
+    per_proxy_stats: dict[str, ProxyStats] = {}
+    for pm in proxy_models:
+        pm_baseline = baseline_cb[pm]
+        pm_cand = cand_results[pm]
+        v_shared_full = V_shared_pp.get(pm, set())
+        if subtype_filter_mode == "id_intersection" and subtype_ids:
+            v_shared = v_shared_full & subtype_ids
+        else:
+            v_shared = v_shared_full
+
+        n_shared = len(v_shared)
+        fixed = 0
+        if n_shared:
+            base_correct = sum(1 for iid in v_shared if pm_baseline.get(iid, False))
+            cand_correct = sum(1 for iid in v_shared if pm_cand.get(iid, False))
+            fixed = sum(
+                1 for iid in v_shared
+                if not pm_baseline.get(iid, True) and pm_cand.get(iid, False)
+            )
+            if base_correct == 0:
+                shared_gain_mode = "failure_only_fix_rate"
+                delta_shared = _lcb(fixed, n_shared)
+            else:
+                shared_gain_mode = "paired_accuracy_delta"
+                delta_shared = cand_correct / n_shared - base_correct / n_shared
+        else:
+            shared_gain_mode = "failure_only_fix_rate"
+            delta_shared = 0.0
+
+        n_private = len(V_private)
+        reg_private_count = sum(
+            1 for iid in V_private
+            if pm_baseline.get(iid, False) and not pm_cand.get(iid, False)
+        )
+        if n_private >= MIN_PRIVATE:
+            reg_private = _ucb(reg_private_count, n_private)
+        elif n_private:
+            reg_private = reg_private_count / n_private
+        else:
+            reg_private = 0.0
+
+        n_easy = len(V_easy)
+        reg_easy_count = sum(
+            1 for iid in V_easy
+            if pm_baseline.get(iid, False) and not pm_cand.get(iid, False)
+        )
+        reg_easy = _ucb(reg_easy_count, n_easy) if n_easy else 0.0
+
+        activation_count = len(exposed_ids)
+        activation_rate = activation_count / len(all_gate_ids) if all_gate_ids else 0.0
+        private_activation_count = len(V_private & exposed_ids)
+        private_activation_rate = private_activation_count / n_private if n_private else 0.0
+        easy_activation_count = len(V_easy & exposed_ids)
+        activated_shared_count = len(v_shared & exposed_ids)
+
+        per_proxy_stats[pm] = ProxyStats(
+            delta_shared=delta_shared,
+            reg_private=reg_private,
+            reg_easy=reg_easy,
+            activation_rate=activation_rate,
+            private_activation_rate=private_activation_rate,
+            n_shared=n_shared,
+            n_private=n_private,
+            n_easy=n_easy,
+            fixed_shared_count=fixed,
+            reg_easy_count=reg_easy_count,
+            reg_private_count=reg_private_count,
+            private_activation_count=private_activation_count,
+            activation_count=activation_count,
+            activated_shared_count=activated_shared_count,
+            activated_private_count=private_activation_count,
+            activated_easy_count=easy_activation_count,
+            easy_activation_count=easy_activation_count,
+            routed_activation_rate=activation_rate,
+            shared_gain_mode=shared_gain_mode,
+            n_shared_before_subtype_filter=len(v_shared_full),
+            n_shared_after_subtype_filter=n_shared,
+            subtype_filter_mode=subtype_filter_mode,
+        )
+
+    benefit_panel = [
+        pm for pm in acceptance_proxies
+        if per_proxy_stats.get(pm) and per_proxy_stats[pm].activated_shared_count > 0
+    ]
+    if not benefit_panel:
+        benefit_panel = [
+            pm for pm in acceptance_proxies
+            if per_proxy_stats.get(pm) and per_proxy_stats[pm].n_shared > 0
+        ]
+    safety_panel = acceptance_proxies
+
+    ap_stats = [per_proxy_stats[pm] for pm in safety_panel if pm in per_proxy_stats]
+    bp_stats = [per_proxy_stats[pm] for pm in benefit_panel if pm in per_proxy_stats]
+    if not ap_stats:
+        return ValidationResult(
+            rule=rule, accepted=False, u_lcb=-999.0,
+            private_activation_rate=0.0, reg_easy_worst=0.0,
+            reject_reason="no acceptance proxy stats available",
+            validation_routing_mode=validation_routing_mode,
+            gate_mode=gate_mode,
+            reject_reasons=["no acceptance proxy stats available"],
+        )
+
+    max_reg_private = max((s.reg_private for s in ap_stats), default=0.0)
+    max_reg_easy = max((s.reg_easy for s in ap_stats), default=0.0)
+    private_act_rate = max((s.private_activation_rate for s in ap_stats), default=0.0)
+    reg_easy_worst = max_reg_easy
+    min_delta_benefit = min((s.delta_shared for s in bp_stats), default=0.0)
+    length_cost = len(rule["rule"]) / 1000.0
+    u_lcb = (
+        min_delta_benefit
+        - lambda_w * max_reg_private
+        - mu_w * max_reg_easy
+        - nu_w * length_cost
+    )
+
+    max_fixed_shared = max((s.fixed_shared_count for s in bp_stats), default=0)
+    max_reg_private_count = max((s.reg_private_count for s in ap_stats), default=0)
+    max_reg_easy_count = max((s.reg_easy_count for s in ap_stats), default=0)
+    max_private_activation_count = max((s.private_activation_count for s in ap_stats), default=0)
+    max_activation_rate = max((s.routed_activation_rate for s in ap_stats), default=0.0)
+    max_reg_easy_raw = max(
+        (s.reg_easy_count / s.n_easy for s in ap_stats if s.n_easy),
+        default=0.0,
+    )
+    max_activated_shared = max((s.activated_shared_count for s in bp_stats), default=0)
+
+    # Resolve gate profile thresholds (Line C)
+    avg_n_shared = sum(s.n_shared for s in ap_stats) / max(len(ap_stats), 1)
+    effective_profile = _resolve_gate_profile(gate_profile, int(avg_n_shared))
+    profile_params = _GATE_PROFILE_PARAMS.get(effective_profile, _GATE_PROFILE_PARAMS["large"])
+    min_fixed_threshold = profile_params["min_fixed"]
+    diagnostic_only = profile_params["diagnostic_only"]
+
+    count_reasons: list[str] = []
+    if not bp_stats:
+        count_reasons.append("count-gate: no benefit model with shared failures")
+    if max_reg_private_count > 0:
+        count_reasons.append(f"count-gate: reg_private_count={max_reg_private_count} > 0")
+    if validation_routing_mode == "routed" and max_private_activation_count > 0:
+        count_reasons.append(
+            f"count-gate: private_activation_count={max_private_activation_count} > 0"
+        )
+    if max_reg_easy_count > 1 and max_reg_easy_raw > reg_easy_ceiling:
+        count_reasons.append(
+            f"count-gate: reg_easy_count={max_reg_easy_count} > 1 "
+            f"and reg_easy_rate={max_reg_easy_raw:.2%} > {reg_easy_ceiling:.0%}"
+        )
+    if validation_routing_mode == "routed" and max_activation_rate >= max_routed_activation_rate:
+        count_reasons.append(
+            f"count-gate: routed_activation_rate={max_activation_rate:.2%} "
+            f">= {max_routed_activation_rate:.0%}"
+        )
+
+    ulcb_reasons: list[str] = []
+    if u_lcb <= 0:
+        ulcb_reasons.append(f"U_LCB={u_lcb:.4f} <= 0")
+    if validation_routing_mode == "routed" and private_act_rate > private_activation_ceiling:
+        ulcb_reasons.append(
+            f"private_activation_rate={private_act_rate:.2%} "
+            f"> {private_activation_ceiling:.0%}"
+        )
+    if reg_easy_worst > reg_easy_ceiling:
+        ulcb_reasons.append(
+            f"reg_easy_worst={reg_easy_worst:.2%} > {reg_easy_ceiling:.0%}"
+        )
+
+    if gate_mode == "count_aware":
+        reject_reasons = count_reasons
+        count_gate_used = True
+    elif gate_mode == "ulcb":
+        reject_reasons = ulcb_reasons
+        count_gate_used = False
+    else:
+        reject_reasons = list(count_reasons)
+        if u_lcb <= noncatastrophic_ulcb_floor:
+            reject_reasons.append(
+                f"hybrid: U_LCB={u_lcb:.4f} <= {noncatastrophic_ulcb_floor:.2f}"
+            )
+        count_gate_used = True
+
+    accepted = not reject_reasons
+    reject_reason = "; ".join(reject_reasons) if reject_reasons else None
+
+    # Diagnostic-only profiles prevent auto-acceptance; demote to near_hit
+    if accepted and diagnostic_only:
+        accepted = False
+        reject_reasons = [
+            f"diagnostic-only: profile={effective_profile} prevents auto-acceptance"
+        ]
+        reject_reason = reject_reasons[0]
+
+    candidate_status = _compute_candidate_status(
+        accepted=accepted,
+        diagnostic_only=diagnostic_only,
+        max_fixed_shared=max_fixed_shared,
+        max_activated_shared=max_activated_shared,
+        max_private_activation_count=max_private_activation_count,
+        max_reg_easy_count=max_reg_easy_count,
+        max_reg_easy_raw=max_reg_easy_raw,
+        reg_easy_ceiling=reg_easy_ceiling,
+    )
+
+    # Per-item routing audit (Line A)
+    per_item_routing: list[dict] = []
+    for it in gate_items:
+        iid = it["_sfcr_id"]
+        d = route_details[iid]
+        if iid in V_private:
+            region = "private"
+        elif iid in V_easy:
+            region = "easy"
+        elif any(iid in v for v in V_shared_pp.values()):
+            region = "shared"
+        else:
+            region = "other"
+        entry: dict = {
+            "rule_id":       rule.get("id", ""),
+            "item_id":       iid,
+            "task":          task,
+            "region":        region,
+            "input_snippet": str(it.get("input", ""))[:200],
+            "activated":     d.active,
+            "vetoed":        d.vetoed_by_boundary,
+            "router_type":   d.router_type,
+        }
+        if d.router_type == "feature":
+            entry.update({
+                "item_features":    sorted(d.item_features),
+                "matched_pos_tags": d.matched_pos_tags,
+                "matched_neg_tags": d.matched_neg_tags,
+            })
+        else:
+            entry.update({
+                "matched_terms":          d.matched_terms,
+                "boundary_matched_terms": d.boundary_matched_terms,
+            })
+        per_item_routing.append(entry)
+
+    failure_profile: dict | None = None
+    if not accepted:
+        failure_profile = {
+            "reject_reason": reject_reason,
+            "no_gain_proxies": [
+                pm.split("/")[-1]
+                for pm, s in per_proxy_stats.items()
+                if s.fixed_shared_count == 0
+            ],
+            "activation_debug": activation_debug,
+        }
+
+    return ValidationResult(
+        rule=rule,
+        accepted=accepted,
+        u_lcb=u_lcb,
+        private_activation_rate=private_act_rate,
+        reg_easy_worst=reg_easy_worst,
+        reject_reason=reject_reason,
+        per_proxy_stats=per_proxy_stats,
+        count_gate_used=count_gate_used,
+        failure_profile=failure_profile,
+        validation_routing_mode=validation_routing_mode,
+        gate_mode=gate_mode,
+        benefit_models=benefit_panel,
+        safety_models=safety_panel,
+        activation_debug=activation_debug,
+        reject_reasons=reject_reasons,
+        candidate_status=candidate_status,
+        per_item_routing=per_item_routing,
+    )
+
+
 # ---------------------------------------------------------------------------
 # Validate all candidates
 # ---------------------------------------------------------------------------
@@ -559,6 +1025,18 @@ def validate_candidates(
     max_rule_chars: int = 800,
     repair_fn: Callable | None = None,
     repair_attempts: int = 1,
+    validation_routing_mode: str = "routed",
+    gate_mode: str = "hybrid",
+    subtype_filter_mode: str = "none",
+    router_min_matches: int = 2,
+    router_min_veto_matches: int = 1,
+    allow_empty_use_when_global: bool = False,
+    max_routed_activation_rate: float = 0.5,
+    score_fn: Callable | None = None,
+    router_type: str = "keyword",
+    task: str = "",
+    gate_profile: str = "auto",
+    semantic_label_to_gate_ids: dict[str, set[str]] | None = None,
 ) -> list[ValidationResult]:
     """
     Validate all candidates and return results sorted by U_LCB descending.
@@ -608,6 +1086,18 @@ def validate_candidates(
         private_activation_ceiling=private_activation_ceiling,
         reg_easy_ceiling=reg_easy_ceiling,
         max_rule_chars=max_rule_chars,
+        validation_routing_mode=validation_routing_mode,
+        gate_mode=gate_mode,
+        subtype_filter_mode=subtype_filter_mode,
+        router_min_matches=router_min_matches,
+        router_min_veto_matches=router_min_veto_matches,
+        allow_empty_use_when_global=allow_empty_use_when_global,
+        max_routed_activation_rate=max_routed_activation_rate,
+        score_fn=score_fn,
+        router_type=router_type,
+        task=task,
+        gate_profile=gate_profile,
+        semantic_label_to_gate_ids=semantic_label_to_gate_ids,
     )
 
     results: list[ValidationResult] = []
@@ -626,7 +1116,7 @@ def validate_candidates(
             ))
             continue
 
-        result = _validate_one(rule=rule, **common_kwargs)
+        result = _validate_one_v2(rule=rule, **common_kwargs)
 
         # ── Repair loop ────────────────────────────────────────────────────
         if not result.accepted and repair_fn is not None and result.failure_profile is not None:
@@ -635,7 +1125,7 @@ def validate_candidates(
                 if repaired_rule is None:
                     break
                 print(f"[validate] repair attempt {rep+1}: re-validating repaired candidate...")
-                result = _validate_one(rule=repaired_rule, **common_kwargs)
+                result = _validate_one_v2(rule=repaired_rule, **common_kwargs)
                 if result.accepted:
                     print(f"[validate] repaired candidate ACCEPTED after {rep+1} repair(s)")
                     break
@@ -662,6 +1152,47 @@ def validate_candidates(
     return results
 
 
+def compare_global_routed_results(
+    global_results: list[ValidationResult],
+    routed_results: list[ValidationResult],
+) -> list[dict]:
+    """Return side-by-side global/routed validation metrics."""
+    routed_by_rule = {
+        (r.rule.get("id") or r.rule.get("rule", "")): r for r in routed_results
+    }
+    rows: list[dict] = []
+    for g in global_results:
+        key = g.rule.get("id") or g.rule.get("rule", "")
+        r = routed_by_rule.get(key)
+        if r is None:
+            continue
+
+        def _sum(result: ValidationResult, attr: str) -> int:
+            return max((getattr(s, attr) for s in result.per_proxy_stats.values()), default=0)
+
+        global_reg_easy = _sum(g, "reg_easy_count")
+        routed_reg_easy = _sum(r, "reg_easy_count")
+        rows.append({
+            "candidate_id": g.rule.get("id") or key[:40],
+            "task": g.rule.get("task", ""),
+            "rule_text": g.rule.get("rule", ""),
+            "global_fixed_shared_count": _sum(g, "fixed_shared_count"),
+            "routed_fixed_shared_count": _sum(r, "fixed_shared_count"),
+            "global_reg_easy_count": global_reg_easy,
+            "routed_reg_easy_count": routed_reg_easy,
+            "global_reg_private_count": _sum(g, "reg_private_count"),
+            "routed_reg_private_count": _sum(r, "reg_private_count"),
+            "global_private_activation_count": _sum(g, "private_activation_count"),
+            "routed_private_activation_count": _sum(r, "private_activation_count"),
+            "global_U_LCB": g.u_lcb,
+            "routed_U_LCB": r.u_lcb,
+            "decision_global": "accepted" if g.accepted else "rejected",
+            "decision_routed": "accepted" if r.accepted else "rejected",
+            "global_vs_routed_reg_easy_delta": global_reg_easy - routed_reg_easy,
+        })
+    return rows
+
+
 # ---------------------------------------------------------------------------
 # Multi-seed validation
 # ---------------------------------------------------------------------------
@@ -685,6 +1216,12 @@ def validate_candidates_multiseed(
     max_rule_chars: int = 800,
     repair_fn: Callable | None = None,
     repair_attempts: int = 1,
+    validation_routing_mode: str = "routed",
+    gate_mode: str = "hybrid",
+    subtype_filter_mode: str = "none",
+    router_min_matches: int = 2,
+    router_min_veto_matches: int = 1,
+    allow_empty_use_when_global: bool = False,
 ) -> list[ValidationResult]:
     """
     Validate candidates across multiple gate splits and average U_LCB.
@@ -743,7 +1280,7 @@ def validate_candidates_multiseed(
 
         def _validate_on_seed(s_idx: int) -> ValidationResult:
             gate_items, gate_baseline = gate_splits[s_idx]
-            return _validate_one(
+            return _validate_one_v2(
                 rule=rule,
                 gate_items=gate_items,
                 gate_baseline=gate_baseline,
@@ -761,6 +1298,13 @@ def validate_candidates_multiseed(
                 private_activation_ceiling=1.0,  # applied at aggregate level below
                 reg_easy_ceiling=1.0,
                 max_rule_chars=max_rule_chars + 1,
+                validation_routing_mode=validation_routing_mode,
+                gate_mode=gate_mode,
+                subtype_filter_mode=subtype_filter_mode,
+                router_min_matches=router_min_matches,
+                router_min_veto_matches=router_min_veto_matches,
+                allow_empty_use_when_global=allow_empty_use_when_global,
+                semantic_label_to_gate_ids=None,
             )
 
         seed_results = [_validate_on_seed(s) for s in range(n_seeds)]
@@ -812,9 +1356,7 @@ def validate_candidates_multiseed(
         # Apply aggregated acceptance decision
         reject_reason = None
         if any_count_gate:
-            if max_fixed < 2:
-                reject_reason = f"count-gate: max fixed_shared={max_fixed} < 2 across seeds"
-            elif max_reg_prv > 0:
+            if max_reg_prv > 0:
                 reject_reason = f"count-gate: reg_private_count={max_reg_prv} > 0"
             elif max_reg_esy > 1 and max_reg_easy > reg_easy_ceiling:
                 reject_reason = (

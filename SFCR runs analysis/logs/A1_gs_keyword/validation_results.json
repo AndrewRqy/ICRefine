@@ -1,0 +1,600 @@
+[
+  {
+    "rule_id": "79c1b3b0",
+    "rule": "When an arc command has equal x-radius and y-radius and zero rotation, the shape is a circle or circular arc; unequal ra",
+    "subtype_idx": null,
+    "repaired": false,
+    "accepted": false,
+    "candidate_status": "no_activation",
+    "u_lcb": -0.15691,
+    "reject_reason": "count-gate: fixed_shared_count=0 < 1",
+    "reject_reasons": [
+      "count-gate: fixed_shared_count=0 < 1"
+    ],
+    "count_gate_used": true,
+    "validation_routing_mode": "routed",
+    "gate_mode": "count_aware",
+    "source_of_candidate": "manual",
+    "generator_model": "",
+    "benefit_models": [
+      "openai/gpt-4.1",
+      "google/gemini-2.0-flash-001"
+    ],
+    "safety_models": [
+      "openai/gpt-4.1",
+      "google/gemini-2.0-flash-001"
+    ],
+    "activation_debug": {
+      "use_when_terms": [
+        "path",
+        "least",
+        "one",
+        "arc",
+        "command"
+      ],
+      "do_not_use_when_terms": [
+        "path",
+        "arc",
+        "commands",
+        "consists",
+        "line",
+        "segments"
+      ],
+      "use_when_phrases": [
+        "the path contains at least one arc (a) command."
+      ],
+      "do_not_use_when_phrases": [
+        "the path contains no arc commands and consists only of line segments."
+      ],
+      "matched_terms_per_item": {
+        "geometric_shapes_0048": [
+          "path"
+        ],
+        "geometric_shapes_0096": [
+          "path"
+        ],
+        "geometric_shapes_0024": [
+          "path"
+        ],
+        "geometric_shapes_0015": [
+          "path"
+        ],
+        "geometric_shapes_0070": [
+          "path"
+        ],
+        "geometric_shapes_0066": [
+          "path"
+        ],
+        "geometric_shapes_0037": [
+          "path"
+        ],
+        "geometric_shapes_0105": [
+          "path"
+        ],
+        "geometric_shapes_0081": [
+          "path"
+        ],
+        "geometric_shapes_0144": [
+          "path"
+        ],
+        "geometric_shapes_0040": [
+          "path"
+        ],
+        "geometric_shapes_0000": [
+          "path"
+        ],
+        "geometric_shapes_0011": [
+          "path"
+        ],
+        "geometric_shapes_0128": [
+          "path"
+        ],
+        "geometric_shapes_0020": [
+          "path"
+        ],
+        "geometric_shapes_0032": [
+          "path"
+        ],
+        "geometric_shapes_0013": [
+          "path"
+        ],
+        "geometric_shapes_0129": [
+          "path"
+        ],
+        "geometric_shapes_0089": [
+          "path"
+        ],
+        "geometric_shapes_0022": [
+          "path"
+        ],
+        "geometric_shapes_0069": [
+          "path"
+        ],
+        "geometric_shapes_0027": [
+          "path"
+        ],
+        "geometric_shapes_0098": [
+          "path"
+        ],
+        "geometric_shapes_0103": [
+          "path"
+        ],
+        "geometric_shapes_0142": [
+          "path"
+        ],
+        "geometric_shapes_0059": [
+          "path"
+        ],
+        "geometric_shapes_0068": [
+          "path"
+        ],
+        "geometric_shapes_0106": [
+          "path"
+        ],
+        "geometric_shapes_0097": [
+          "path"
+        ],
+        "geometric_shapes_0002": [
+          "path"
+        ],
+        "geometric_shapes_0148": [
+          "path"
+        ],
+        "geometric_shapes_0113": [
+          "path"
+        ],
+        "geometric_shapes_0088": [
+          "path"
+        ],
+        "geometric_shapes_0053": [
+          "path"
+        ],
+        "geometric_shapes_0146": [
+          "path"
+        ],
+        "geometric_shapes_0091": [
+          "path"
+        ],
+        "geometric_shapes_0126": [
+          "path"
+        ],
+        "geometric_shapes_0118": [
+          "path"
+        ],
+        "geometric_shapes_0036": [
+          "path"
+        ],
+        "geometric_shapes_0124": [
+          "path"
+        ],
+        "geometric_shapes_0010": [
+          "path"
+        ],
+        "geometric_shapes_0046": [
+          "path"
+        ],
+        "geometric_shapes_0117": [
+          "path"
+        ],
+        "geometric_shapes_0058": [
+          "path"
+        ],
+        "geometric_shapes_0137": [
+          "path"
+        ],
+        "geometric_shapes_0051": [
+          "path"
+        ],
+        "geometric_shapes_0125": [
+          "path"
+        ],
+        "geometric_shapes_0093": [
+          "path"
+        ],
+        "geometric_shapes_0061": [
+          "path"
+        ],
+        "geometric_shapes_0056": [
+          "path"
+        ],
+        "geometric_shapes_0033": [
+          "path"
+        ],
+        "geometric_shapes_0111": [
+          "path"
+        ],
+        "geometric_shapes_0136": [
+          "path"
+        ],
+        "geometric_shapes_0042": [
+          "path"
+        ],
+        "geometric_shapes_0119": [
+          "path"
+        ],
+        "geometric_shapes_0016": [
+          "path"
+        ],
+        "geometric_shapes_0090": [
+          "path"
+        ],
+        "geometric_shapes_0100": [
+          "path"
+        ],
+        "geometric_shapes_0025": [
+          "path"
+        ],
+        "geometric_shapes_0109": [
+          "path"
+        ]
+      },
+      "vetoed_by_boundary_count": 60
+    },
+    "private_activation_rate": 0.0,
+    "reg_easy_worst": 0.1487,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.1487,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 0,
+        "easy_activation_count": 0,
+        "activated_shared_count": 0,
+        "n_shared_before_subtype_filter": 6,
+        "n_shared_after_subtype_filter": 6,
+        "subtype_filter_mode": "none",
+        "activation_count": 0,
+        "n_shared": 6,
+        "n_private": 0,
+        "n_easy": 22
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.1487,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 0,
+        "easy_activation_count": 0,
+        "activated_shared_count": 0,
+        "n_shared_before_subtype_filter": 5,
+        "n_shared_after_subtype_filter": 5,
+        "subtype_filter_mode": "none",
+        "activation_count": 0,
+        "n_shared": 5,
+        "n_private": 0,
+        "n_easy": 22
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.1487,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 0,
+        "easy_activation_count": 0,
+        "activated_shared_count": 0,
+        "n_shared_before_subtype_filter": 7,
+        "n_shared_after_subtype_filter": 7,
+        "subtype_filter_mode": "none",
+        "activation_count": 0,
+        "n_shared": 7,
+        "n_private": 0,
+        "n_easy": 22
+      }
+    }
+  },
+  {
+    "rule_id": "a663b42a",
+    "rule": "For a closed four-sided path, classify quadrilaterals by angle and side constraints: check right angles first, then side",
+    "subtype_idx": null,
+    "repaired": false,
+    "accepted": false,
+    "candidate_status": "no_activation",
+    "u_lcb": -0.15921,
+    "reject_reason": "count-gate: fixed_shared_count=0 < 1",
+    "reject_reasons": [
+      "count-gate: fixed_shared_count=0 < 1"
+    ],
+    "count_gate_used": true,
+    "validation_routing_mode": "routed",
+    "gate_mode": "count_aware",
+    "source_of_candidate": "manual",
+    "generator_model": "",
+    "benefit_models": [
+      "openai/gpt-4.1",
+      "google/gemini-2.0-flash-001"
+    ],
+    "safety_models": [
+      "openai/gpt-4.1",
+      "google/gemini-2.0-flash-001"
+    ],
+    "activation_debug": {
+      "use_when_terms": [
+        "describes",
+        "encodes",
+        "closed",
+        "four",
+        "sided",
+        "polygon",
+        "path",
+        "choices",
+        "include",
+        "multiple",
+        "quadrilateral",
+        "types"
+      ],
+      "do_not_use_when_terms": [
+        "shape",
+        "arc",
+        "ellipse",
+        "circle",
+        "open",
+        "path",
+        "triangle",
+        "polygon",
+        "fewer",
+        "four",
+        "vertices"
+      ],
+      "use_when_phrases": [
+        "the input describes or encodes a closed four-sided polygon or path and the answer choices include multiple quadrilateral types."
+      ],
+      "do_not_use_when_phrases": [
+        "or a polygon with more or fewer than four vertices."
+      ],
+      "matched_terms_per_item": {
+        "geometric_shapes_0048": [
+          "path"
+        ],
+        "geometric_shapes_0096": [
+          "path"
+        ],
+        "geometric_shapes_0024": [
+          "path"
+        ],
+        "geometric_shapes_0015": [
+          "path"
+        ],
+        "geometric_shapes_0070": [
+          "path"
+        ],
+        "geometric_shapes_0066": [
+          "path"
+        ],
+        "geometric_shapes_0037": [
+          "path"
+        ],
+        "geometric_shapes_0105": [
+          "path"
+        ],
+        "geometric_shapes_0081": [
+          "path"
+        ],
+        "geometric_shapes_0144": [
+          "path"
+        ],
+        "geometric_shapes_0040": [
+          "path"
+        ],
+        "geometric_shapes_0000": [
+          "path"
+        ],
+        "geometric_shapes_0011": [
+          "path"
+        ],
+        "geometric_shapes_0128": [
+          "path"
+        ],
+        "geometric_shapes_0020": [
+          "path"
+        ],
+        "geometric_shapes_0032": [
+          "path"
+        ],
+        "geometric_shapes_0013": [
+          "path"
+        ],
+        "geometric_shapes_0129": [
+          "path"
+        ],
+        "geometric_shapes_0089": [
+          "path"
+        ],
+        "geometric_shapes_0022": [
+          "path"
+        ],
+        "geometric_shapes_0069": [
+          "path"
+        ],
+        "geometric_shapes_0027": [
+          "path"
+        ],
+        "geometric_shapes_0098": [
+          "path"
+        ],
+        "geometric_shapes_0103": [
+          "path"
+        ],
+        "geometric_shapes_0142": [
+          "path"
+        ],
+        "geometric_shapes_0059": [
+          "path"
+        ],
+        "geometric_shapes_0068": [
+          "path"
+        ],
+        "geometric_shapes_0106": [
+          "path"
+        ],
+        "geometric_shapes_0097": [
+          "path"
+        ],
+        "geometric_shapes_0002": [
+          "path"
+        ],
+        "geometric_shapes_0148": [
+          "path"
+        ],
+        "geometric_shapes_0113": [
+          "path"
+        ],
+        "geometric_shapes_0088": [
+          "path"
+        ],
+        "geometric_shapes_0053": [
+          "path"
+        ],
+        "geometric_shapes_0146": [
+          "path"
+        ],
+        "geometric_shapes_0091": [
+          "path"
+        ],
+        "geometric_shapes_0126": [
+          "path"
+        ],
+        "geometric_shapes_0118": [
+          "path"
+        ],
+        "geometric_shapes_0036": [
+          "path"
+        ],
+        "geometric_shapes_0124": [
+          "path"
+        ],
+        "geometric_shapes_0010": [
+          "path"
+        ],
+        "geometric_shapes_0046": [
+          "path"
+        ],
+        "geometric_shapes_0117": [
+          "path"
+        ],
+        "geometric_shapes_0058": [
+          "path"
+        ],
+        "geometric_shapes_0137": [
+          "path"
+        ],
+        "geometric_shapes_0051": [
+          "path"
+        ],
+        "geometric_shapes_0125": [
+          "path"
+        ],
+        "geometric_shapes_0093": [
+          "path"
+        ],
+        "geometric_shapes_0061": [
+          "path"
+        ],
+        "geometric_shapes_0056": [
+          "path"
+        ],
+        "geometric_shapes_0033": [
+          "path"
+        ],
+        "geometric_shapes_0111": [
+          "path"
+        ],
+        "geometric_shapes_0136": [
+          "path"
+        ],
+        "geometric_shapes_0042": [
+          "path"
+        ],
+        "geometric_shapes_0119": [
+          "path"
+        ],
+        "geometric_shapes_0016": [
+          "path"
+        ],
+        "geometric_shapes_0090": [
+          "path"
+        ],
+        "geometric_shapes_0100": [
+          "path"
+        ],
+        "geometric_shapes_0025": [
+          "path"
+        ],
+        "geometric_shapes_0109": [
+          "path"
+        ]
+      },
+      "vetoed_by_boundary_count": 60
+    },
+    "private_activation_rate": 0.0,
+    "reg_easy_worst": 0.1487,
+    "per_proxy": {
+      "gpt-4.1": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.1487,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 0,
+        "easy_activation_count": 0,
+        "activated_shared_count": 0,
+        "n_shared_before_subtype_filter": 6,
+        "n_shared_after_subtype_filter": 6,
+        "subtype_filter_mode": "none",
+        "activation_count": 0,
+        "n_shared": 6,
+        "n_private": 0,
+        "n_easy": 22
+      },
+      "gemini-2.0-flash-001": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.1487,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 0,
+        "easy_activation_count": 0,
+        "activated_shared_count": 0,
+        "n_shared_before_subtype_filter": 5,
+        "n_shared_after_subtype_filter": 5,
+        "subtype_filter_mode": "none",
+        "activation_count": 0,
+        "n_shared": 5,
+        "n_private": 0,
+        "n_easy": 22
+      },
+      "llama-3.3-70b-instruct": {
+        "delta_shared": 0.0,
+        "shared_gain_mode": "failure_only_fix_rate",
+        "reg_private": 0.0,
+        "reg_easy": 0.1487,
+        "fixed_shared_count": 0,
+        "reg_easy_count": 0,
+        "reg_private_count": 0,
+        "private_activation_count": 0,
+        "easy_activation_count": 0,
+        "activated_shared_count": 0,
+        "n_shared_before_subtype_filter": 7,
+        "n_shared_after_subtype_filter": 7,
+        "subtype_filter_mode": "none",
+        "activation_count": 0,
+        "n_shared": 7,
+        "n_private": 0,
+        "n_easy": 22
+      }
+    }
+  }
+]

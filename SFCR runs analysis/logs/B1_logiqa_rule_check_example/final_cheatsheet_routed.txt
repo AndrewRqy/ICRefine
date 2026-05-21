@@ -1,0 +1,129 @@
+**LogiQA Logical Reading Comprehension Cheat Sheet**
+
+---
+
+### 1. Core Reasoning Strategies
+
+- **Identify Logical Relationships:**  
+  - Look for cause-effect, condition-consequence, necessity, and sufficiency.  
+  - Translate conditional statements into “if-then” or contrapositives to clarify logic.  
+  - Check whether premises support or contradict conclusions.
+
+- **Distinguish Premises, Conclusions, and Assumptions:**  
+  - Premises provide evidence or facts.  
+  - Conclusions are claims drawn from premises.  
+  - Assumptions are unstated but necessary for the argument to hold.
+
+- **Spot Logical Flaws and Fallacies:**  
+  - Beware of *appeal to ignorance* (assuming truth from lack of disproof).  
+  - Watch for *false dilemmas* (ignoring alternatives).  
+  - Identify *confusing correlation with causation*.  
+  - Detect *ambiguity* or *equivocation* in terms.
+
+- **Use Contradiction and Counterexamples:**  
+  - Test statements by assuming the opposite to check consistency.  
+  - Consider alternative explanations or confounding factors.
+
+- **Analyze Quantifiers and Scope Carefully:**  
+  - Note words like “all,” “some,” “only,” “must,” “can,” “usually.”  
+  - Understand whether statements are universal, particular, or probabilistic.
+
+- **Apply Deductive Constraints in Logic Puzzles:**  
+  - Use given conditions to eliminate impossible assignments.  
+  - Track dependencies and exclusivity (e.g., “only one,” “if-then,” “not both”).  
+  - Use adjacency and order relations carefully.
+
+- **Evaluate Relevance and Strength of Evidence:**  
+  - Determine which facts directly support or weaken a conclusion.  
+  - Distinguish between evidence that questions validity vs. practical feasibility.
+
+- **Consider Temporal and Contextual Factors:**  
+  - Recognize how time affects judgments (e.g., subjective opinions becoming objective over time).  
+  - Understand context that might influence interpretation (e.g., cultural, scientific).
+
+---
+
+### 2. Common Mistakes to Avoid
+
+- **Confusing Cause and Effect:**  
+  - Don’t assume correlation implies causation without explicit support.
+
+- **Ignoring Alternative Explanations:**  
+  - Avoid accepting a single cause when multiple plausible causes exist.
+
+- **Overgeneralizing or Oversimplifying:**  
+  - Beware of conclusions that ignore exceptions or complexity (e.g., multiple religions, diverse populations).
+
+- **Misreading Conditional Statements:**  
+  - Don’t confuse “if” with “only if” or ignore the contrapositive.
+
+- **Assuming Truth of Premises Without Question:**  
+  - Always check if premises are supported or if assumptions are needed.
+
+- **Falling for False Dilemmas:**  
+  - Don’t accept arguments that limit options artificially.
+
+- **Neglecting the Role of Assumptions:**  
+  - Missing key assumptions can invalidate reasoning.
+
+- **Ignoring the Difference Between Absolute and Relative Measures:**  
+  - For example, total number vs. rate or proportion.
+
+- **Confusing Logical Equivalence with Similar Wording:**  
+  - Similar phrasing doesn’t guarantee identical meaning.
+
+- **Failing to Distinguish Between Evidence and Opinion:**  
+  - Recognize when statements are subjective or speculative.
+
+---
+
+### 3. Quick Decision Rules (If X → Do Y)
+
+- **If the argument relies on a cause-effect link → Identify and test the necessary assumptions that connect cause to effect.**
+
+- **If a conclusion seems contradicted by data → Look for missing premises or alternative explanations that reconcile the contradiction.**
+
+- **If multiple premises lead to an absurd conclusion → At least one premise must be false or the reasoning invalid; identify which.**
+
+- **If asked to find the statement “different in meaning” → Compare options for shifts in logical relations, focus, or implied assumptions.**
+
+- **If a question involves “must be true” or “must be assumed” → Select statements that are necessary conditions for the argument’s validity.**
+
+- **If a reasoning puzzle involves assignments or ordering → Use process of elimination and apply all given constraints step-by-step.**
+
+- **If an argument uses absence of disproof as proof → Recognize this as a logical fallacy (appeal to ignorance).**
+
+- **If an argument ignores alternative possibilities or pluralities → Identify this as a false dilemma or oversimplification.**
+
+- **If the question asks for the “weakest” or “least relevant” challenge → Choose options that do not directly undermine the core logic or evidence.**
+
+- **If the argument’s strength depends on practical adoption or acceptance → Assess economic, social, or psychological feasibility as key factors.**
+
+- **If the question involves statistical or experimental claims → Check for confounding variables, control conditions, and sample representativeness.**
+
+- **If the argument compares groups or conditions → Ensure comparability (e.g., same rank, mileage, or context) before inferring causality.**
+
+---
+
+**Use this cheat sheet to systematically dissect LogiQA questions, avoid common pitfalls, and apply precise logical reasoning for accurate answers.**
+
+Follow the format of the examples below in your response.
+
+Some people talked about the photos of the abuse of captives by the US military? "If you don't want to be caught on the spot when doing stupid things, don't do stupid things.
+
+Which of the following sentences is different from the above sentence?
+(A)If you do stupid things, be prepared to be caught on the spot while doing stupid things.
+(B)Only by not being stupid can we avoid being caught on the spot when doing stupid things.
+(C)Either you are caught on the spot when you are stupid, or you do n’t do stupid things.
+(D)If you are caught on the spot when doing stupid things, consider yourself unlucky.
+Answer: (D)
+
+###
+In the past, we had a lot of unrealistic high-profile in moral propaganda, so that a lot of the population said one thing and made one behind the other, and split personality.Through thinking about this phenomenon, some scholars have proposed that we should only ask ordinary people to abide by the "bottom line ethics".
+
+Based on your understanding, which of the following options is most appropriate as the definition of "bottom line ethics"?
+(A)The bottom line ethics is not to steal or kill.
+(B)The bottom line ethics are some of the most basic and basic codes of conduct and rules that should be observed by ordinary people in a society.
+(C)The bottom line ethics is not an ethics that requires selfless dedication.
+(D)If one compares human morality to a building, the bottom line ethics is the fundamental part of that building.
+Answer: (B)
